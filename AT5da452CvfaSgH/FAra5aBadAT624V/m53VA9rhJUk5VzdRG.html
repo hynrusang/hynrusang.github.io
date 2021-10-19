@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<title>Html Document</title>
+<meta charset="UTF-8">
+</head>
+<body>
+<style>
+h3, li, a {
+	transition : all 2s;
+}
+h3:hover, a:hover {
+	color : cyan;
+	background : turquoise;
+}
+a:link {
+	color : darkcyan;
+}
+li:active {
+	font-size : 160%;
+}
+input[type=text]:hover {
+	color : cyan;
+	background : orange;
+}	
+input[type=password]:hover {
+	color : white;
+	background : black;
+}
+</style>
+<h3>Style에 관하여(Css)</h3><hr>
+<ul>&lt;style&gt; &lt;/style&gt;
+	<li>문서의 html 태그 전체를 아우르는 style을 지정할 수 있습니다. html 태그:커멘드 { }로 구성됩니다.<br></li><hr>
+	<ul>html 태그 { }
+		<li>평상시 해당 html 태그에 이하 수식언이 작동합니다. 아래는 그 사용 예시입니다. 이 문서에도 적용되어 있으니 확인해보세요.</li>
+		<pre>
+h3, li, a {
+	transition : all 2s;
+}
+		</pre>
+	</ul><hr>
+	<ul>html 태그:hover { }
+		<li>해당 html 태그 위에 마우스를 올려놓을 때 작동합니다. :link :visited :active 등이 덮어 씌울 수 있기에, <br>하이퍼 링크 스타일에는 :link-:visited-:hover-:active 순으로 정의됩니다. 아래는 그 사용 예시입니다. 이 문서에도 적용되어 있으니 확인해보세요.</li>
+		<pre>
+h3:hover, a:hover {
+	color : cyan;
+	background : turquoise;
+}
+		</pre>
+	</ul><hr>
+	<ul>html 태그:link { }
+		<li>해당 링크가 아직 방문하지 않았거나, :link 이외에 다른 커멘드가 없을 시에 평상시 작동합니다. :visited는 그 반대로 작동합니다. <br>보통 html 태그에 a를 지정합니다. 아래는 그 사용 예시입니다. 이 문서에도 적용되어 있으니 확인해보세요.</li>
+		<pre>
+a:link {
+	color : darkcyan;
+}
+		</pre>
+	</ul><hr>
+	<ul>html 태그:active { }
+		<li>사용자가 해당 html 태그를 활성화했을 때 작동합니다. 예를 들어, 마우스인 경우 <br>마우스로 해당 html 태그를 클릭하고 때는 순간까지를 의미합니다. 아래는 그 사용 예시입니다. 이 문서에도 적용되어 있으니 확인해보세요.</li>
+		<pre>
+li:active {
+	font-size : 160%;
+}	
+		</pre>
+	</ul><hr>
+	<ul>html 태그[수식언=상태]:커멘드 { }
+		<li>html 태그가 해당 수식언과, 해당 상태를 갖고 있을 시, 작동합니다. 아래는 그 사용 예시입니다. 이 문서에도 적용되어 있으니 확인해보세요.</li>
+		<pre>
+input[type=text]:hover {
+	color : cyan;
+	background : orange;
+}
+input[type=password]:hover {
+	color : white;
+	background : black;
+}
+		</pre>
+		<input type="text" name="test" value="초기 값">
+		<input type="password" name="test2" value="초기 값">
+	</ul><hr>
+</ul>
+<ul>&lt;Html 태그명 style="수식언 : 값;"&gt;
+	<li>해당 Html 태그에&quot;만&quot 적용되는 style을 지정할 수 있습니다. 다수의 수식언을 지정하고 싶을 경우, &quot;수식언 : 값; 수식언 : 값;&quot;처럼 입력합니다.</li><hr>
+	<ul>&lt;Html 태그명 style=&quot;color : 글자 색;&quot;&gt;
+		<li>해당 Html 태그 내의 글자 색을 변경합니다. 아래는 그 사용 예시입니다.<br>
+&lt;p style=&quot;color : darkorange;&quot;&gt;color 사용 예시&lt;/p&gt;</li>
+		<p style="color : darkorange;">color 사용 예시</p>
+	</ul><hr>
+	<ul>&lt;Html 태그명 style=&quot;background : 배경색;&quot;&gt;
+		<li>해당 Html 태그 내의 배경 색을 변경합니다. 아래는 그 사용 예시입니다.<br>
+&lt;li style=&quot;background : cyan&quot;&gt;background 사용 예시&lt;/li&gt;</li>
+		<li style="background : cyan">background 사용 예시</li>
+</li>
+		
+	</ul><hr>
+	<ul>&lt;Html 태그명 style=&quot;font-size : 글자 크기&quot;&gt;
+		<li>해당 Html 태그 내의 글자 크기를 변경합니다. 아래는 그 사용 예시입니다.<br>
+&lt;li style=&quot;font-size : 150%; color : darkorange;&quot;&gt;font-size 사용 예시&lt;/li&gt;</li>
+		<li style="font-size : 150%; color : darkorange";>font-size 사용 예시</li>
+	</ul><hr>
+</ul>
+<p><a href="main.html">Html Document로 돌아가기.</a></p>
+</body>
