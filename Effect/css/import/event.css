@@ -1,0 +1,30 @@
+﻿/* html animation styleseet */
+
+@keyframes set {
+	from {
+		margin-left : 100%;
+	}
+	to {
+		margin-left : 0%;
+	}
+}
+fieldset, div, input, ul, ol, img ,h1, h2, h3, h4, h5, p, pre ,a {
+	animation-name : set;
+	animation-duration : 1s;
+	animation-iteration-count : 1;
+}
+
+/* html effect styleseet */
+
+img {
+	width : 90%;
+}
+img[small] {
+	width : 60% !important;
+}
+a {
+	transition : all 1s;
+}
+a:hover {
+	font-size : 150%;
+}
