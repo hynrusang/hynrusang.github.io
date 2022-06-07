@@ -1,4 +1,5 @@
 ﻿const $wid = [$("div", ["img", "span"]), $("td$onclick<<calculator(this)")]
+const $script = ["Effect/js/background.js", "Effect/js/calculater.js", "Effect/js/swip.js", "Effect/js/clock.js", "Effect/js/position.js", "Effect/js/hyperlink.js", "Effect/js/youtube.js", "Effect/js/special.js"]
 $("body", [
     $("main", [
         $("nav::top-1&&widget", $wid[0].$(5, [
@@ -75,8 +76,8 @@ $("body", [
         "input$button&&value<<배경 바꾸기&&onclick<<backgroundChange()",
         $("div$style<<cursor:pointer#position", ["img$Effect/img/icon-special.png", "span$lock"]).$()
     ]).$(),
-    $("script").$(8, [
-        ["Effect/js/background.js", "Effect/js/calculater.js", "Effect/js/swip.js", "Effect/js/clock.js", "Effect/js/position.js", "Effect/js/hyperlink.js", "Effect/js/youtube.js", "Effect/js/special.js"]
+    $("script").$($script.length, [
+        $script
     ]),
     "div::oss",
 ])
