@@ -1,0 +1,15 @@
+﻿/* 본문 레이아웃 */
+
+main {
+    height: calc(100vh - 40px);
+}
+article {
+    height: calc(100% - 40px);
+    overflow: hidden;
+    overflow-x: hidden;
+}
+section {
+    height: 100%;
+    overflow: scroll;
+    overflow-x: hidden;
+}

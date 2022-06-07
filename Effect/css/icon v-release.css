@@ -1,0 +1,8 @@
+﻿/* 아이콘 레이아웃 */
+
+img.icon {
+    cursor: pointer;
+    width: auto;
+    height: 100%;
+    transition: 1s;
+}

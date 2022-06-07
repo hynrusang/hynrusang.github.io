@@ -1,0 +1,27 @@
+﻿/* 기본적인 레이아웃 v-2 추가 적용 */
+
+html, body {
+    background: black !important;
+}
+body {
+    color: cyan !important;
+}
+input::placeholder, input {
+    color: cyan;
+}
+fieldset {
+    background: none;
+    border-color: cyan;
+}
+*::-webkit-scrollbar {
+    background: none;
+}
+*::-webkit-scrollbar-thumb {
+    background: cyan;
+    border: 1px solid black;
+}
+td:not(.active) {
+    background: black;
+    border-color: cyan;
+    color: cyan;
+}

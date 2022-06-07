@@ -1,0 +1,27 @@
+﻿/* 기본적인 레이아웃 v-1 추가 적용 */
+
+html, body {
+    background: none !important;
+}
+body {
+    color: black !important;
+}
+input::placeholder, input {
+    background: none;
+    color: black;
+}
+img {
+    display: none;
+}
+fieldset {
+    background: none;
+    border-color: black;
+}
+*::-webkit-scrollbar {
+    display: none;
+}
+td:not(.active) {
+    background: white;
+    border-color: black;
+    color: black;
+}

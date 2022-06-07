@@ -1,0 +1,36 @@
+﻿/* 메뉴 레이아웃 */
+
+nav {
+    display: flex;
+    background: linear-gradient(90deg, rgb(255, 102, 255, 0.5), rgba(128, 255, 255, 0.5), rgba(255, 102, 255, 0.5));
+    height: 40px;
+    background-size: cover;
+    overflow: hidden;
+    opacity: 0.8;
+}
+nav::-webkit-scrollbar {
+    display: none;
+}
+nav > div {
+    display: flex;
+    margin: 8px;
+    cursor: pointer;
+}
+nav > div > img {
+    width: 25px;
+    height: 100%;
+}
+nav > div > span {
+    flex-shrink: 0;
+}
+ul.option {
+    background: rgba(128, 128, 128, 0.5);
+}
+
+/* 메뉴 화면조정 레이아웃 */
+
+@media screen and (max-width: 800px) {
+    nav > div > span {
+        display: none;
+    }
+}

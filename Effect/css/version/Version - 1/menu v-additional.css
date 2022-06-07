@@ -1,0 +1,16 @@
+﻿/* 메뉴 v-1 추가 적용 */
+
+nav {
+    background: none;
+}
+nav > div > span {
+    color: darkorange;
+}
+
+/* 메뉴 화면조정 레이아웃 */
+
+@media screen and (max-width: 800px) {
+    nav > div > span {
+        display: inline-block;
+    }
+}

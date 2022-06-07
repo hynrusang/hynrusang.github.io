@@ -1,0 +1,7 @@
+﻿/* 배너 v-2 추가 적용 */
+
+header, footer {
+    background: none;
+    justify-content: flex-start;
+    border: 1px solid cyan;
+}

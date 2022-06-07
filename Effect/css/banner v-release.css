@@ -1,0 +1,8 @@
+﻿/* 배너 레이아웃 */
+
+header, footer {
+    background: linear-gradient(90deg, rgba(255, 102, 255, 0.5), rgba(255, 255, 128, 0.5), rgba(255, 102, 255, 0.5));
+    display: flex;
+    justify-content: space-between;
+    height: 40px;
+}

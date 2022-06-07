@@ -1,0 +1,14 @@
+﻿/* 에니메이션 적용 */
+
+header > *, footer > *, nav > *, form > input, fieldset > input, li {
+    transition: 0.5s;
+}
+header > *:hover, footer > *:hover, nav > *:hover, li:hover {
+    margin: 4px;
+}
+form > input:hover, fieldset > input:hover {
+    box-shadow: 10px 6px rgba(0, 0, 0, 0.8);
+}
+div.clock > div {
+    transition: 1s;
+}

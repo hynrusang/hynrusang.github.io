@@ -1,0 +1,14 @@
+﻿/* 애니메이션 v-2 추가 적용 */
+
+@keyframes set {
+    from {
+        margin-left: 100%;
+    }
+
+    to {
+        margin-left: 0%;
+    }
+}
+body {
+    animation: set 1s;
+}
