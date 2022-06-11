@@ -29,7 +29,8 @@ $("body", [
             ]).$(),
             $("section::hide", [
                 $("nav::top-2&&widget", $wid[0].$(2, [
-                    0, ["Effect/img/icon-save.png", "https://www.google.com/s2/favicons?domain=https://youtube.com/"]
+                    0, ["Effect/img/icon-save.png", "https://www.google.com/s2/favicons?domain=https://youtube.com/"],
+                    1, ["유튜브 재생목록 저장기", "유튜브 재생목록 플레이어"]
                 ])).$(),
                 $("article#top-2", [
                     $("section::top-2-nowselect", [
