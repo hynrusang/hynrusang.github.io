@@ -23,9 +23,6 @@ nav > div > img {
 nav > div > span {
     flex-shrink: 0;
 }
-ul.option {
-    background: rgba(128, 128, 128, 0.5);
-}
 
 /* 메뉴 화면조정 레이아웃 */
 

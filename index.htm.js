@@ -25,24 +25,24 @@ $("body", [
                     "input$number&&style<<background-image:url(favicon.ico)&&min<<0&&max<<2&&value<<0&&onchange<<versGet(this.value)"
                 ]).$(),
                 $("form#hyperlink-input", ["input$text&&style<<background-image:url(Effect/img/icon-favorite.png)&&placeholder<<메모 또는 링크&&required"]).$(),
-                "ul#hyperlink::option"
+                "ul#hyperlink"
             ]).$(),
             $("section::hide", [
-                $("nav::top-2&&widget", $wid[0].$(6, [
-                    0, ["Effect/img/icon-save.png", 0, 0, 0, 0, 0]
+                $("nav::top-2&&widget", $wid[0].$(2, [
+                    0, ["Effect/img/icon-save.png", "https://www.google.com/s2/favicons?domain=https://youtube.com/"]
                 ])).$(),
-                $("article#top-2", $("section", [
-                    $("form::youtube", [
-                        $("fieldset", [
-                            $("legend$유튜브 재생목록 링크").$(),
-                            "input$text&&style<<background-image:url(https://www.google.com/s2/favicons?domain=https://youtube.com/)&&placeholder<<Ex) https://www.youtube.com/watch?..."
+                $("article#top-2", [
+                    $("section::top-2-nowselect", [
+                        $("form#videosubmit", [$("fieldset", [
+                            "legend$저장하길 원하는 유튜브 재생목록의 링크를 입력해주세요.<br /><span style='color: violet;'>링크가 아닌 글</span>을 입력하면 재생목록을 구별할 설명을 작성합니다.",
+                            "input$text&&placeholder<<Ex) https://www.youtube.com/watch?... &&style<<background-image: url(https://www.google.com/s2/favicons?domain=https://youtube.com/)",
+                            "input$submit&&value<<재생목록 저장"
+                        ]).$(),
+                            "ul#videolist"
                         ]).$()
                     ]).$(),
-                    "iframe$&&allowfullscreen"
-                ]).$(6, [
-                    ["::top-2-nowselect", "::hide", 1, 1, 1, 1]
-                ])
-                ).$()
+                    $("section#video::hide", ["iframe$style<<width: 100%; height: 100%;"]).$()
+                ]).$()
             ]).$(),
             $("section::hide", [
                 $("table$border<<1", [
