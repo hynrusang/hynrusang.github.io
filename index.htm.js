@@ -41,7 +41,7 @@ $("body", [
                             "ul#videolist"
                         ]).$()
                     ]).$(),
-                    $("section#video::hide", ["iframe$style<<width: 100%; height: 100%;"]).$()
+                    $("section#video::hide", ["iframe$style<<width: 100%; height: 100%;&&allowfullscreen"]).$()
                 ]).$()
             ]).$(),
             $("section::hide", [
