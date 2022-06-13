@@ -41,13 +41,13 @@ function youtubeListLoad() {
     for (var i = 0; i < values.length; i++) {
         let target = $scan(`#youtubelinkList_${keys[i]}`);
         for (var j = 0; j < values[i].length; j++) {
-            let obj = $("li", [`span$${keys[i]} 중 ${[j + 1]}번 재생목록&&link<<${values[i][j]}&&style<<cursor:pointer`, "input$button&&value<< / 제거"]).$()
-            obj.children[0].onclick = (e => {
+            let obj = $("li", ["img$https://www.google.com/s2/favicons?domain=https://youtube.com/",`span$${keys[i]} 중 ${[j + 1]}번 재생목록&&link<<${values[i][j]}&&style<<cursor:pointer`, "input$button&&value<< / 제거"]).$()
+            obj.children[1].onclick = (e => {
                 $scan("#video").children[0].src = `${e.target.attributes[0].nodeValue.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1`;
                 $scan(".top-2-nowselect").classList.replace("top-2-nowselect", "hide")
                 $scan("#top-2").children[1].classList.replace("hide", "top-2-nowselect")
             })
-            obj.children[1].onclick = (e => {
+            obj.children[2].onclick = (e => {
                 let keys = e.target.parentElement.parentElement.parentElement.id.split("_")[1]
                 youtubelinkList[keys] = youtubelinkList[keys].filter(inner => {
                     return getIndex(youtubelinkList[keys], inner) !== getIndex(e.target.parentElement.parentElement, e.target.parentElement)

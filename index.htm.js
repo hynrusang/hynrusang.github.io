@@ -36,7 +36,7 @@ $("body", [
                     $("section::top-2-nowselect", [
                         $("form#videosubmit", [$("fieldset", [
                             "legend$유튜브 재생목록 모음으로 쓸 이름을 입력해주세요.",
-                            "input$text&&placeholder<<Ex) &&style<<background-image: url(https://www.google.com/s2/favicons?domain=https://youtube.com/)",
+                            "input$text&&placeholder<<재생목록 모음의 이름(뛰어쓰기 금지)&&style<<background-image: url(Effect/img/icon-save.png)",
                         ]).$(),
                             "div#videolist"
                         ]).$()
