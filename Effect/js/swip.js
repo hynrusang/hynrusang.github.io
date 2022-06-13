@@ -24,6 +24,7 @@ function getIndex(parent, child) {
 }
 function widgetChange(e) {
     const PARENT = e.target.parentElement.parentElement
+    if (PARENT.classList[0] == "top-1") localStorage.setItem("currenttop", getIndex(PARENT, e.target.parentElement))
     $scan(`.${PARENT.classList[0]}-nowselect`).classList.replace(`${PARENT.classList[0]}-nowselect`, "hide")
     $scan(`#${PARENT.classList[0]}`).children[getIndex(PARENT, e.target.parentElement)].classList.replace("hide", `${PARENT.classList[0]}-nowselect`)
 }
@@ -32,6 +33,10 @@ try {
     if (localStorage.getItem("vers") != null && localStorage.getItem("vers") != 0) {
         $scan("#versionChange input").value = localStorage.getItem("vers")
         versGet(localStorage.getItem("vers"))
+    }
+    if (localStorage.getItem("currenttop") != null && localStorage.getItem("currenttop") != 0) {
+        $scan(".top-1-nowselect").classList.replace("top-1-nowselect", "hide")
+        $scan("#top-1").children[localStorage.getItem("currenttop")].classList.replace("hide", "top-1-nowselect")
     }
 } catch { }
 for (i = 0; i < $scan([".widget div"]).length; i++) {
