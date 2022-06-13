@@ -35,10 +35,10 @@ $("body", [
                 $("article#top-2", [
                     $("section::top-2-nowselect", [
                         $("form#videosubmit", [$("fieldset", [
-                            "legend$저장하길 원하는 유튜브 재생목록의 링크를 입력해주세요.<br /><span style='color: violet;'>링크가 아닌 글</span>을 입력하면 재생목록을 구별할 설명을 작성합니다.",
-                            "input$text&&placeholder<<Ex) https://www.youtube.com/watch?... &&style<<background-image: url(https://www.google.com/s2/favicons?domain=https://youtube.com/)",
+                            "legend$유튜브 재생목록 모음으로 쓸 이름을 입력해주세요.",
+                            "input$text&&placeholder<<Ex) &&style<<background-image: url(https://www.google.com/s2/favicons?domain=https://youtube.com/)",
                         ]).$(),
-                            "ul#videolist"
+                            "div#videolist"
                         ]).$()
                     ]).$(),
                     $("section#video::hide", ["iframe$style<<width: 100%; height: 100%;&&allowfullscreen"]).$()
@@ -50,7 +50,7 @@ $("body", [
                     "input$text&&placeholder<<저장할 통계의 이름(뛰어쓰기 금지)&&style<<background-image: url(Effect/img/icon-save.png)"
                 ]).$()
                 ]).$(),
-                "div#statisticsList"
+                "div#statisticslist"
             ]).$(),
             $("section::hide", [
                 $("table$border<<1", [

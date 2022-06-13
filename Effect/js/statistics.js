@@ -3,7 +3,7 @@ function returnStatisticsData(want) {
     return statisticsList[want];
 }
 function reloadStatistics() {
-    $reload("#statisticsList", [])
+    $reload("#statisticslist", [])
     let keys = Object.keys(statisticsList);
     let values = Object.values(statisticsList);
     for (var i = 0; i < keys.length; i++) {
@@ -25,7 +25,7 @@ function reloadStatistics() {
             localStorage.setItem("statistics", JSON.stringify(statisticsList));
             reloadStatistics();
         })
-        $scan("#statisticsList").appendChild(obj)
+        $scan("#statisticslist").appendChild(obj)
     };
     for (var i = 0; i < values.length; i++) {
         let target = $scan(`#statistics_${keys[i]}`);
