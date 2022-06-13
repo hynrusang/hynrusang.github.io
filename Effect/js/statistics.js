@@ -9,7 +9,7 @@ function reloadStatistics() {
     for (var i = 0; i < keys.length; i++) {
         let obj = $(`fieldset#statistics_${keys[i]}`, [
             `legend$통계 ${keys[i]}`,
-            $("form", ["input$text&&placeholder<<저장할 통계량&&style<<background-image: url(Effect/img/icon-plus.png)"]).$(),
+            $("form", ["input$text&&placeholder<<저장할 통계량(실수만 입력)&&style<<background-image: url(Effect/img/icon-plus.png)"]).$(),
             "ul",
             "input$button&&value<<이 통계 지우기&&onclick<<deleteStatistics(this)"
         ]).$()

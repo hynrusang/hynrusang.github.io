@@ -132,7 +132,7 @@ function calcAver(array) {
     return [avarage, deviation];
 }
 function calcAll() {
-    let array = statisticsList[prompt("평균, 분산, 표준편차등을 추출할 통계를 입력해주세요.")]
+    let array = statisticsList[prompt("값을 추출할 통계를 입력해주세요.")]
     if (array == undefined) {
         alert("해당 통계는 잘못된 통계입니다.")
         return;
@@ -141,7 +141,7 @@ function calcAll() {
     }
 }
 function calcNext() {
-    let array = statisticsList[prompt("평균, 분산, 표준편차등을 추출할 통계를 입력해주세요.")]
+    let array = statisticsList[prompt("값을 추출할 통계를 입력해주세요.")]
     if (array == undefined) {
         alert("해당 통계는 잘못된 통계입니다.")
         return;
