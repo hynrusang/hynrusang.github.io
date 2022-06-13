@@ -42,6 +42,6 @@ try {
 for (i = 0; i < $scan([".widget div"]).length; i++) {
     $scan([".widget div", i]).onclick = widgetChange
 }
-$scan([".top-1.widget div"])[4].onclick = (function () {
+$scan([".top-1.widget div"])[5].onclick = (function () {
     window.open("https://github.com/hynrusang/hynrusang.github.io/tree/release#readme")
 })

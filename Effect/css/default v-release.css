@@ -67,19 +67,22 @@ p, pre {
     text-align: center;
 }
 table {
-    margin-top: 2vw;
-    width: 100%;
+    width: 50%;
+    height: 100%;
+    left: 25%;
+    background: black;
     position: relative;
 }
-td {
-    width: calc(100% / 7);
-    background: linear-gradient(90deg ,rgba(128, 102, 255, 0.5), rgba(0, 255, 255, 0.5), rgba(128, 102, 255, 0.5));
+tr {
     border-color: indigo;
-    color: indigo;
-    height: 6vw;
+    height: 30px;
+}
+td {
+    width: 100%;
+    color: gray;
     cursor: pointer;
     text-align: center;
-    font-size: 18px;
+    font-size: 16px;
 }
 
 /* 스크롤바 레이아웃 */
@@ -97,18 +100,17 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     display: none;
 }
 
-/* fieldset 화면 조정 레이아웃 */
+/* 화면 조정 레이아웃 */
 
+@media screen and (max-width: 440px) {
+    table {
+        left: 0px;
+        width: 100%;
+    }
+}
 @media screen and (min-width: 900px) {
     fieldset {
         left: calc(50% - 450px);
         width: 900px;
-    }
-    table {
-        left: calc(50% - 450px);
-        width: 900px;
-    }
-    td {
-        height: 54px;
     }
 }

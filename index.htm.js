@@ -1,14 +1,14 @@
-﻿const $wid = [$("div", ["img", "span"]), $("td$onclick<<calculator(this)")]
-const $script = ["Effect/js/background.js", "Effect/js/calculater.js", "Effect/js/swip.js", "Effect/js/clock.js", "Effect/js/position.js", "Effect/js/hyperlink.js", "Effect/js/youtube.js", "Effect/js/special.js"]
+﻿const $wid = $("div", ["img", "span"])
+const $script = ["Effect/js/background.js", "Effect/js/calculater.js", "Effect/js/statistics.js", "Effect/js/swip.js", "Effect/js/clock.js", "Effect/js/position.js", "Effect/js/hyperlink.js", "Effect/js/youtube.js", "Effect/js/special.js"]
 $("body", [
     $("main", [
-        $("nav::top-1&&widget", $wid[0].$(5, [
-            0, ["favicon.ico", "https://www.google.com/s2/favicons?domain=https://youtube.com/", "Effect/img/icon-igo.png", "Effect/img/icon-special.png", "Effect/img/icon-infor.png"],
-            1, ["사이트 메인", "유튜브 재생목록 플레이어", "스마트 계산기", "특수문서 열람하기", "도움말"]
+        $("nav::top-1&&widget", $wid.$(6, [
+            0, ["favicon.ico", "https://www.google.com/s2/favicons?domain=https://youtube.com/", "Effect/img/icon-save.png", "Effect/img/icon-igo.png", "Effect/img/icon-special.png", "Effect/img/icon-infor.png"],
+            1, ["사이트 메인", "유튜브 재생목록 플레이어", "통계량 저장기", "스마트 계산기", "특수문서 열람하기", "도움말"]
         ])).$(),
         $("article#top-1", [
             $("section::top-1-nowselect", [
-                $("nav", $wid[0].$(6, [
+                $("nav", $wid.$(6, [
                     ["onclick<<window.open('https://google.com/')", "onclick<<if(window.innerWidth>450){window.open('https://www.naver.com/')}else{window.open('https://m.naver.com')}", "onclick<<window.open('https://www.daum.net/')", "onclick<<window.open('https://duckduckgo.com/')", "onclick<<window.open('https://youtube.com/')", "onclick<<window.open('https://twitch.tv/')"],
                     0, ["https://www.google.com/s2/favicons?domain=https://google.com/", "https://www.google.com/s2/favicons?domain=https://www.naver.com/", "https://www.google.com/s2/favicons?domain=https://m.daum.net/", "https://www.google.com/s2/favicons?domain=https://duckduckgo.com/", "https://www.google.com/s2/favicons?domain=https://youtube.com/", "https://www.google.com/s2/favicons?domain=https://twitch.tv/"],
                 ])).$(),
@@ -28,7 +28,7 @@ $("body", [
                 "ul#hyperlink"
             ]).$(),
             $("section::hide", [
-                $("nav::top-2&&widget", $wid[0].$(2, [
+                $("nav::top-2&&widget", $wid.$(2, [
                     0, ["Effect/img/icon-save.png", "https://www.google.com/s2/favicons?domain=https://youtube.com/"],
                     1, ["유튜브 재생목록 저장기", "유튜브 재생목록 플레이어"]
                 ])).$(),
@@ -46,29 +46,22 @@ $("body", [
                 ]).$()
             ]).$(),
             $("section::hide", [
+                $("form#statisticssave", [$("fieldset", [
+                    "legend$저장할 통계량의 이름을 입력해주세요.<br />스마트계산기의 (statistics)가 붙은 계산에 쓰입니다.",
+                    "input$text&&placeholder<<저장할 통계량의 이름&&style<<background-image: url(Effect/img/icon-save.png)"
+                ]).$()
+                ]).$(),
+                "div#statisticsList"
+            ]).$(),
+            $("section::hide", [
                 $("table$border<<1", [
-                    $("tr", ["td$colspan<<7"]).$(),
-                    $("tr", $("td").$(2, [
-                        ["colspan<<5", "계산&&colspan<<2&&onclick<<calculate(this)"],
-                    ])).$(),
-                    $("tr", $wid[1].$(7, [
-                        ["7", "8", "9", "(", ")", "C", "AC"]
-                    ])).$(),
-                    $("tr", $wid[1].$(7, [
-                        ["4", "5", "6", "+", "-", "×", "/"]
-                    ])).$(),
-                    $("tr", $wid[1].$(7, [
-                        ["1", "2", "3", ".", "a<sup>x</sup>", "P(a,b)", "C(a,b)"]
-                    ])).$(),
-                    $("tr", $wid[1].$(7, [
-                        ["π", "0", "e", "Fac(x)", "Sin(x)", "Cos(x)", "Tan(x)"]
-                    ])).$(),
-                    $("tr", $wid[1].$(3, [
-                        ["Per/a/b/c<br />a번 중 b번 이상 c%인 확률이 걸릴 확률&&colspan<<3", "확률계산", "Con/c<br />c%인 확률을 95%로 확정짓는 횟수 n&&colspan<<3"],
-                    ])).$()
+                    $("tr$style<<height: 120px;", ["td$여기에 계산값이 출력됩니다.#calcout"]).$(),
+                    $("tr", ["td$onclick<<calculator(this)"]).$(4, [
+                        0, ["a번 중 b번 이상 c%인 확률이 뜰 확률", "a%인 확률이 b% 확률이 될 최소횟수", "(statistics)통계의 평균, 분산, 표준편차 구하기", "(statistics)통계의 다음 값이 a 이상이 될 확률"]
+                    ])
                 ]).$()
             ]).$(),
-            $("section::hide&&secret", [
+            $("section#secret::hide", [
                 $("form#osschecker", ["input$text&&style<<background-image:url('Effect/img/icon-setting.png');&&placeholder<<특수문서키 (띄어쓰기로 구분)"]).$()
             ]).$()
         ]).$()
