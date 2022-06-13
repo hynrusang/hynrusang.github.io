@@ -37,7 +37,6 @@ $("body", [
                         $("form#videosubmit", [$("fieldset", [
                             "legend$저장하길 원하는 유튜브 재생목록의 링크를 입력해주세요.<br /><span style='color: violet;'>링크가 아닌 글</span>을 입력하면 재생목록을 구별할 설명을 작성합니다.",
                             "input$text&&placeholder<<Ex) https://www.youtube.com/watch?... &&style<<background-image: url(https://www.google.com/s2/favicons?domain=https://youtube.com/)",
-                            "input$submit&&value<<재생목록 저장"
                         ]).$(),
                             "ul#videolist"
                         ]).$()
