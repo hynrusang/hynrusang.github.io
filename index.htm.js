@@ -12,13 +12,13 @@ $("body", [
                     ["onclick<<window.open('https://google.com/')", "onclick<<if(window.innerWidth>450){window.open('https://www.naver.com/')}else{window.open('https://m.naver.com')}", "onclick<<window.open('https://www.daum.net/')", "onclick<<window.open('https://duckduckgo.com/')", "onclick<<window.open('https://youtube.com/')", "onclick<<window.open('https://twitch.tv/')"],
                     0, ["https://www.google.com/s2/favicons?domain=https://google.com/", "https://www.google.com/s2/favicons?domain=https://www.naver.com/", "https://www.google.com/s2/favicons?domain=https://m.daum.net/", "https://www.google.com/s2/favicons?domain=https://duckduckgo.com/", "https://www.google.com/s2/favicons?domain=https://youtube.com/", "https://www.google.com/s2/favicons?domain=https://twitch.tv/"],
                 ])).$(),
+                "a$href<<https://hynrusang.github.io/ &&style<<display: block; width: 10vw; height: 10vw; background: url(Effect/img/icon-igo.png) 100% no-repeat; background-position: center center;",
                 $("div::clock", [
                     $("div").$(3, [
                         ["::hour_pin", "::minute_pin", "::second_pin"]
                     ]),
                 ]).$(),
                 "h1#time",
-                $("h1$title<<바탕화면에 드래그하시면 사이트 바로가기가 생성됩니다. (Microsoft Edge)", ["a$necronomicon&&href<<https://hynrusang.github.io/ &&style<<background-image: url('favicon.ico');background-size: 25px;background-position: left center;background-repeat: no-repeat;padding-left: 25px;color: cyan;"]).$(),
                 $("div$style<<position:relative;left:calc(50% - 44px);", ["img$https://jigsaw.w3.org/css-validator/images/vcss-blue &&style<<border:0;width:88px;height:31px;cursor:pointer&&onclick<<window.open('https://jigsaw.w3.org/css-validator/validator?uri=https%3A%2F%2Fhynrusang.github.io')"]).$(),
                 $("fieldset#versionChange", [
                     $("legend", ["img$favicon.ico&&style<<width:auto;height:25px", "span$css version"]).$(),

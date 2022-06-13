@@ -3,7 +3,7 @@
     try {
         $scan("head").removeChild($scan(".version"))
     } catch (e) { }
-    if (localStorage.getItem("vers") != "" && num != 0) $scan("head").appendChild($(`link$Effect/css/version/Version%20-%20${num}/all%20v-additional.css&&rel<<stylesheet&&type<<text/css::version`).$())
+    if (num != 0) $scan("head").appendChild($(`link$Effect/css/version/Version%20-%20${num}/all%20v-additional.css&&rel<<stylesheet&&type<<text/css::version`).$())
 }
 function getIndex(parent, child) {
     try {
@@ -30,10 +30,6 @@ function widgetChange(e) {
 }
 
 try {
-    if (localStorage.getItem("vers") != null && localStorage.getItem("vers") != 0) {
-        $scan("#versionChange input").value = localStorage.getItem("vers")
-        versGet(localStorage.getItem("vers"))
-    }
     if (localStorage.getItem("currenttop") != null && localStorage.getItem("currenttop") != 0) {
         $scan(".top-1-nowselect").classList.replace("top-1-nowselect", "hide")
         $scan("#top-1").children[localStorage.getItem("currenttop")].classList.replace("hide", "top-1-nowselect")
