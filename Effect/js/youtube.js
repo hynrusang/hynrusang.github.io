@@ -1,23 +1,35 @@
 ﻿let youtubelinkList = [];
-function setVideo(obj) {
-    $scan("#video").children[0].src = `${obj.title.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1`;
-    $scan(".top-2-nowselect").classList.replace("top-2-nowselect", "hide")
-    $scan("#top-2").children[1].classList.replace("hide", "top-2-nowselect")
-}
-function removeVideoList(obj) {
-    youtubelinkList = youtubelinkList.filter(inner => {
-        return getIndex(youtubelinkList, inner) !== getIndex(obj.parentElement.parentElement, obj.parentElement)
-    })
-    obj.parentElement.remove()
-    localStorage.setItem("youtube", JSON.stringify(youtubelinkList))
-    youtubeListLoad()
-}
 function youtubeListLoad() {
     $reload("#videolist", []);
     let start = 1;
     for (i = 0; i < youtubelinkList.length; i++) {
         let li;
-        (youtubelinkList[i].indexOf("https://") == -1) ? li = $("li", [`span$${youtubelinkList[i]}`, "input$button&&value<< / 제거&&onclick<<removeVideoList(this)"]).$() : li = $(`li$style<<cursor: pointer;`, ["img$Effect/img/icon-save.png&&style<<width: 20px; height: 20px;", `span$${String(start++).padStart(3, "0")}번 채널&&title<<${youtubelinkList[i]}&&onclick<<setVideo(this)`,"input$button&&value<< / 제거&&onclick<<removeVideoList(this)"]).$()
+        if (youtubelinkList[i].indexOf("https://") == -1) {
+            li = $("li", [`span$${youtubelinkList[i]}`, "input$button&&value<< / 제거"]).$()
+            li.children[1].onclick = (e => {
+                youtubelinkList = youtubelinkList.filter(inner => {
+                    return getIndex(youtubelinkList, inner) !== getIndex(e.target.parentElement.parentElement, e.target.parentElement)
+                })
+                e.target.parentElement.remove()
+                localStorage.setItem("youtube", JSON.stringify(youtubelinkList))
+                youtubeListLoad()
+            })
+        } else {
+            li = $(`li$style<<cursor: pointer;`, ["img$Effect/img/icon-save.png&&style<<width: 20px; height: 20px;", `span$${String(start++).padStart(3, "0")}번 채널&&title<<${youtubelinkList[i]}`, "input$button&&value<< / 제거"]).$()
+            li.children[1].onclick = (e => {
+                $scan("#video").children[0].src = `${e.target.title.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1`;
+                $scan(".top-2-nowselect").classList.replace("top-2-nowselect", "hide")
+                $scan("#top-2").children[1].classList.replace("hide", "top-2-nowselect")
+            })
+            li.children[2].onclick = (e => {
+                youtubelinkList = youtubelinkList.filter(inner => {
+                    return getIndex(youtubelinkList, inner) !== getIndex(e.target.parentElement.parentElement, e.target.parentElement)
+                })
+                e.target.parentElement.remove()
+                localStorage.setItem("youtube", JSON.stringify(youtubelinkList))
+                youtubeListLoad()
+            })
+        }
         $scan("#videolist").appendChild(li);
     }
 }

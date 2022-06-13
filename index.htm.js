@@ -47,8 +47,8 @@ $("body", [
             ]).$(),
             $("section::hide", [
                 $("form#statisticssave", [$("fieldset", [
-                    "legend$저장할 통계량의 이름을 입력해주세요.<br />스마트계산기의 (statistics)가 붙은 계산에 쓰입니다.",
-                    "input$text&&placeholder<<저장할 통계량의 이름&&style<<background-image: url(Effect/img/icon-save.png)"
+                    "legend$저장할 통계의 이름을 입력해주세요.<br />스마트계산기의 (statistics)가 붙은 계산에 쓰입니다.",
+                    "input$text&&placeholder<<저장할 통계의 이름(뛰어쓰기 금지)&&style<<background-image: url(Effect/img/icon-save.png)"
                 ]).$()
                 ]).$(),
                 "div#statisticsList"

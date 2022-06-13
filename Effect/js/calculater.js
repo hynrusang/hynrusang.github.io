@@ -115,8 +115,19 @@ function calcCount() {
         i++;
     }
 }
+function calcAver() {
+    let array = statisticsList[prompt("평균, 분산, 표준편차등을 추출할 통계를 입력해주세요.")]
+    if (array == undefined) {
+        alert("해당 통계는 잘못된 통계입니다.")
+        return;
+    } else {
+        if (array.length)
+        $scan("#calcout").innerHTML
+    }
+}
 function calculator(obj) {
     let num = getIndex(obj.parentElement.parentElement, obj.parentElement)
     if (num == 1) percentCalc();
     if (num == 2) calcCount();
+    if (num == 3) calcAver();
 }
