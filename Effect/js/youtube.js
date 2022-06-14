@@ -61,10 +61,8 @@ function youtubeListLoad() {
     }
 }
 try {
-    if (localStorage.getItem("youtube") != null) {
-        youtubelinkList = JSON.parse(localStorage.getItem("youtube"));
-        youtubeListLoad();
-    }
+    if (localStorage.getItem("youtube") != null) youtubelinkList = JSON.parse(localStorage.getItem("youtube"));
+    youtubeListLoad();
 } catch (e) {
     alert(e)
 }
