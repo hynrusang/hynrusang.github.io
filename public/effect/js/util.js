@@ -70,7 +70,7 @@ const reloadMList = () => {
  */
 const reloadYList = () => {
     snipe("#ylist").reset();
-    const keys = Object.keys(db.ylist);
+    const keys = Object.keys(db.ylist).sort();
     for (let i = 0; i < keys.length; i++) {
         let listcase = $("fieldset", `id<<youtubelinkList_${keys[i]}`).add(
             $("legend", `$<<${keys[i]}`),
@@ -135,7 +135,7 @@ const reloadYList = () => {
  */
 const reloadSList = () => {
     snipe("#slist").reset();
-    const keys = Object.keys(db.slist);
+    const keys = Object.keys(db.slist).sort();
     for (var i = 0; i < keys.length; i++) {
         let listcase = $("fieldset", `id<<statistics_${keys[i]}`).add(
             $("legend", `$<<통계 ${keys[i]}`),
