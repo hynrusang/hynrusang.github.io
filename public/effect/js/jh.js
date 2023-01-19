@@ -79,6 +79,13 @@ const $ = (nodeName, ...attributes) => { return new DomExpert(nodeName, ...attri
  */
 const wait = millisecond => { return new Promise(code => setTimeout(code, millisecond)); }
 /**
+ * @type {(array: Array) => boolean}
+ */
+const isEmpty = array => {
+    for (i = 0; i < array.length; i++) if (array[i] != "") return false;
+    return true;
+}
+/**
  * @type {{
  * (parent: any[], child: any) => number | null
  * (parent: HTMLElement, child: HTMLElement) => number | null
