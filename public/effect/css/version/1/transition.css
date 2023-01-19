@@ -1,0 +1,17 @@
+﻿* {
+    background: none !important;
+    color: black;
+}
+input::placeholder {
+    color: black;
+}
+section::-webkit-scrollbar {
+    width: 14px;
+    background: gainsboro;
+}
+section::-webkit-scrollbar-thumb {
+    background: rgb(180, 180, 180);
+}
+section::-webkit-scrollbar-thumb:hover {
+    background: rgb(150, 150, 150);
+}

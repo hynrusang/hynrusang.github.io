@@ -1,0 +1,38 @@
+﻿@keyframes set {
+    from { 
+        margin-left: 100%; 
+    }
+    to {
+        margin-left: 0%;
+    }
+}
+body {
+    animation: set 1s;
+}
+* {
+    background: black !important;
+    color: cyan;
+}
+hr {
+    background: cyan;
+    border: 1px solid cyan;
+}
+nav {
+    border: 1px solid cyan;
+}
+section {
+    border: 1px solid cyan;
+}
+fieldset {
+    border-color: cyan;
+}
+input::placeholder {
+    color: cyan;
+}
+section::-webkit-scrollbar {
+    background: none;
+}
+section::-webkit-scrollbar-thumb {
+    background: cyan;
+    border: 1px solid black;
+}
