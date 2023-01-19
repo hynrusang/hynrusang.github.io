@@ -174,7 +174,7 @@ const reloadSList = () => {
             }
         })
         listcase.children(3).onclick = (e => {
-            if (!firebase.auth().currentUser()) alert("먼저 로그인을 해 주십시오.");
+            if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
             else if (confirm("정말로 해당 통계를 제거할까요?")) {
                 delete db.slist[e.target.parentElement.id.split("_")[1]];
                 firebaseUtil.sync();
@@ -227,11 +227,6 @@ scan("#ylist-input").onsubmit = (e => {
     if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
     else {
         (Object.keys(db.ylist).indexOf(e.target[1].value) == -1) ? db.ylist[e.target[1].value] = [] : null;
-        db.ylist = Object.keys(db.ylist).sort().reduce(
-            (result, key) => {
-                result[key] = db.ylist[key];
-                return result;
-            }, {});
         e.target[1].value = "";
         firebaseUtil.sync();
         reloadYList();
@@ -242,11 +237,6 @@ scan("#slist_input").onsubmit = (e => {
     if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
     else {
         (Object.keys(db.slist).indexOf(e.target[1].value) == -1) ? db.slist[e.target[1].value] = [] : null;
-        db.slist = Object.keys(db.slist).sort().reduce(
-            (result, key) => {
-                result[key] = db.slist[key];
-                return result;
-            }, {});
         e.target[1].value = "";
         firebaseUtil.sync();
         reloadSList();
