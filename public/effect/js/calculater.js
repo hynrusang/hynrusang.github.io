@@ -15,7 +15,7 @@ const calculatorMethod = class {
     /**
      * @type {(from: number, to: number) => number}
      */
-    static combine = (from, to) => { return this.permutation(from, to) / factorial(to); }
+    static combine = (from, to) => { return this.permutation(from, to) / this.factorial(to); }
     /**
      * @type {(from: number) => number}
      */
@@ -65,39 +65,31 @@ const calculatorMethod = class {
             46.017,
             50
         ];
-        if (from < 0) return 50 + (50 - this.distribution(-from));
+        if (from < 0) return 100 - this.distribution(-from);
         else if (4.2 <= from) return parseArray[0];
-        else return parseArray[42 - from * 10];
+        else return parseArray[42 - Math.round(from * 10)];
     }
     /**
      * @type {(from: number, to: number, percent: number) => number}
      */
     static independent = (from, to, percent) => {
+        let temp = 0;
         if (to <= 0) return 100;
-        else {
-            let temp = 0;
-            for (i = to; i <= from; i++) temp += this.combine(from, i) * Math.pow(percent, i) * Math.pow(1 - percent, from - i);
-            return (temp *= 100).toFixed(3);
-        }
+        else for (let i = to; i <= from; i++) temp += this.combine(from, i) * Math.pow(percent, i) * Math.pow(1 - percent, from - i);
+        return (temp * 100).toFixed(3);
     }
 }
 const calculatorBody = class {
     /**
      * @type {(dat: number) => dat}
      */
-    static #MinPercentApply = dat => {
+    static #PercentToValify = dat => {
         if (dat < 0.01) {
             alert("기본적인 확률이 너무 작아, 확률을 0.01%로 수정합니다.");
             return 0.01;
-        } else return dat;
-    }
-    /**
-     * @type {(dat: number) => dat}
-     */
-    static #MaxPercentApply = dat => {
-        if (95 < dat) {
-            alert("변화될 확률이 너무 커, 확률을 95%로 수정합니다.");
-            return 95;
+        } else if (99.9 < dat) {
+            alert("변화될 확률이 너무 커, 확률을 99.9%로 수정합니다.");
+            return 99.9;
         } else return dat;
     }
     /**
@@ -127,21 +119,20 @@ const calculatorBody = class {
     static percent = () => {
         const a = parseInt(prompt("몇번 시도하실 겁니까?"));
         const b = parseInt(prompt("몇번이상 나오길 원하십니까?"));
-        const c = this.#MinPercentApply(parseFloat(prompt("기본적인 확률은 몇%입니까? (숫자만 입력해주십시오)")));
+        const c = this.#PercentToValify(parseFloat(prompt("기본적인 확률은 몇%입니까? (숫자만 입력해주십시오)")));
         if (170 < a) {
             const avarage = a * (c / 100);
             const deciation = Math.pow(avarage * (1 - (c / 100)), 0.5);
             const standard = (b - avarage) / deciation;
-            scan("#calcout").innerHTML = `${calculatorMethod.distribution(standard)
-        }%`;
-        } else scan("#calcout").innerHTML = `${calculatorMethod.independent(a, b, c)}%`;
+            scan("#calcout").innerHTML = `${calculatorMethod.distribution(standard)}%`;
+        } else scan("#calcout").innerHTML = `${calculatorMethod.independent(a, b, (c / 100))}%`;
     }
     /**
      * @type {() => void}
      */
     static count = () => {
-        const a = this.#MinPercentApply(parseFloat(prompt("기본적인 확률은 몇%입니까? (숫자만 입력해주십시오)")));
-        const b = this.#MaxPercentApply(parseFloat(prompt("몇% 이상으로 되길 원하십니까? (숫자만 입력해주시오.)")));
+        const a = this.#PercentToValify(parseFloat(prompt("기본적인 확률은 몇%입니까? (숫자만 입력해주십시오)")));
+        const b = this.#PercentToValify(parseFloat(prompt("몇% 이상으로 되길 원하십니까? (숫자만 입력해주시오.)")));
         if (!(a <= b)) {
             alert("변화될 확률이 잘못됬습니다. a보다 작거나 잘못된 값입니다.");
             return;
@@ -152,13 +143,13 @@ const calculatorBody = class {
                 const avarage = i * (a / 100);
                 const deciation = Math.pow(avarage * (1 - (a / 100)), 0.5);
                 const standard = (1 - avarage) / deciation;
-                if (b <= distribution(standard)) {
-                    scan("#calcout").innerHTML = `${i} (${a}% -> ${calculatorMethod.distribution(standard)}%)`
+                if (b <= calculatorMethod.distribution(standard)) {
+                    scan("#calcout").innerHTML = `${i} (${a}% -> ${calculatorMethod.distribution(standard)}%)`;
                     return;
                 }
             } else {
-                if (b <= independent(i, 1, (a / 100))) {
-                    scan("#calcout").innerHTML = `${i} (${a}% -> ${calculatorMethod.independent(i, 1, a)}%)`
+                if (b <= calculatorMethod.independent(i, 1, (a / 100))) {
+                    scan("#calcout").innerHTML = `${i} (${a}% -> ${calculatorMethod.independent(i, 1, (a / 100))}%)`
                     return;
                 }
             }
