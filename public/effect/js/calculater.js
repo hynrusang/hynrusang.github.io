@@ -178,10 +178,7 @@ const calculatorBody = class {
     static getNextPredictIsCorrectPercent = () => {
         const array = db.slist[prompt("값을 추출할 통계를 입력해주세요.")];
         if (!this.#checkStatisticsArrayIsValify(array)) return;
-        else {
-            let over = parseFloat(prompt("무슨 값 이상이 나오길 원하십니까?"));
-            scan("#calcout").innerHTML = `다음 통계량이 ${over} 이상이 될 확률은 ${calculatorMethod.distribution((over - this.#aver(array)[0]) / this.#aver(array)[1])}%`;
-        }
+        else scan("#calcout").innerHTML = `다음 통계량이 ${parseFloat(prompt("무슨 값 이상이 나오길 원하십니까?"))} 이상이 될 확률은 ${calculatorMethod.distribution((over - this.#aver(array)[0]) / this.#aver(array)[1])}%`;
     }
 }
 function calculator(e) {
