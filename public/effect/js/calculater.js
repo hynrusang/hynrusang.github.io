@@ -125,9 +125,9 @@ const calculatorBody = class {
      * @type {() => void}
      */
     static percent = () => {
-        a = parseInt(prompt("몇번 시도하실 겁니까?"));
-        b = parseInt(prompt("몇번이상 나오길 원하십니까?"));
-        c = this.#MinPercentApply(parseFloat(prompt("기본적인 확률은 몇%입니까? (숫자만 입력해주십시오)")));
+        const a = parseInt(prompt("몇번 시도하실 겁니까?"));
+        const b = parseInt(prompt("몇번이상 나오길 원하십니까?"));
+        const c = this.#MinPercentApply(parseFloat(prompt("기본적인 확률은 몇%입니까? (숫자만 입력해주십시오)")));
         if (170 < a) {
             const avarage = a * (c / 100);
             const deciation = Math.pow(avarage * (1 - (c / 100)), 0.5);
@@ -139,8 +139,8 @@ const calculatorBody = class {
      * @type {() => void}
      */
     static count = () => {
-        a = this.#MinPercentApply(parseFloat(prompt("기본적인 확률은 몇%입니까? (숫자만 입력해주십시오)")));
-        b = this.#MaxPercentApply(parseFloat(prompt("몇% 이상으로 되길 원하십니까? (숫자만 입력해주시오.)")));
+        const a = this.#MinPercentApply(parseFloat(prompt("기본적인 확률은 몇%입니까? (숫자만 입력해주십시오)")));
+        const b = this.#MaxPercentApply(parseFloat(prompt("몇% 이상으로 되길 원하십니까? (숫자만 입력해주시오.)")));
         if (!(a <= b)) {
             alert("변화될 확률이 잘못됬습니다. a보다 작거나 잘못된 값입니다.");
             return;
@@ -148,9 +148,9 @@ const calculatorBody = class {
         let i = 0;
         while (true) {
             if (170 < i) {
-                let avarage = i * (a / 100);
-                let deciation = Math.pow(avarage * (1 - (a / 100)), 0.5);
-                let standard = (1 - avarage) / deciation;
+                const avarage = i * (a / 100);
+                const deciation = Math.pow(avarage * (1 - (a / 100)), 0.5);
+                const standard = (1 - avarage) / deciation;
                 if (b <= distribution(standard)) {
                     scan("#calcout").innerHTML = `${i} (${a}% -> ${distribution(standard)}%)`
                     return;
@@ -168,7 +168,7 @@ const calculatorBody = class {
      * @type {() => void}
      */
     static parsingStatistic = () => {
-        let array = db.slist[prompt("값을 추출할 통계를 입력해주세요.")];
+        const array = db.slist[prompt("값을 추출할 통계를 입력해주세요.")];
         if (!this.#checkStatisticsArrayIsValify(array)) return;
         else scan("#calcout").innerHTML = `평균 = ${this.#aver(array)[0]}, 분산 = (${this.#aver(array)[1]})<sup>2</sup>`;
     }
@@ -176,7 +176,7 @@ const calculatorBody = class {
      * @type {() => void}
      */
     static getNextPredictIsCorrectPercent = () => {
-        let array = db.slist[prompt("값을 추출할 통계를 입력해주세요.")];
+        const array = db.slist[prompt("값을 추출할 통계를 입력해주세요.")];
         if (!this.#checkStatisticsArrayIsValify(array)) return;
         else {
             let over = parseFloat(prompt("무슨 값 이상이 나오길 원하십니까?"));
