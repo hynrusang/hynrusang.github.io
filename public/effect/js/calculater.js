@@ -132,8 +132,9 @@ const calculatorBody = class {
             const avarage = a * (c / 100);
             const deciation = Math.pow(avarage * (1 - (c / 100)), 0.5);
             const standard = (b - avarage) / deciation;
-            scan("#calcout").innerHTML = `${distribution(standard)}%`;
-        } else scan("#calcout").innerHTML = `${independent(a, b, c)}%`;
+            scan("#calcout").innerHTML = `${calculatorMethod.distribution(standard)
+        }%`;
+        } else scan("#calcout").innerHTML = `${calculatorMethod.independent(a, b, c)}%`;
     }
     /**
      * @type {() => void}
@@ -152,12 +153,12 @@ const calculatorBody = class {
                 const deciation = Math.pow(avarage * (1 - (a / 100)), 0.5);
                 const standard = (1 - avarage) / deciation;
                 if (b <= distribution(standard)) {
-                    scan("#calcout").innerHTML = `${i} (${a}% -> ${distribution(standard)}%)`
+                    scan("#calcout").innerHTML = `${i} (${a}% -> ${calculatorMethod.distribution(standard)}%)`
                     return;
                 }
             } else {
                 if (b <= independent(i, 1, (a / 100))) {
-                    scan("#calcout").innerHTML = `${i} (${a}% -> ${independent(i, 1, a)}%)`
+                    scan("#calcout").innerHTML = `${i} (${a}% -> ${calculatorMethod.independent(i, 1, a)}%)`
                     return;
                 }
             }
