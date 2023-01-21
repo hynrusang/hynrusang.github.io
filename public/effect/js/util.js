@@ -8,7 +8,7 @@ try {
 } catch { }
 
 /**
- * @type {(e: MouseEvent) => void}
+ * @type {(e: MouseEvent?) => void}
  */
 const toggleWidget = e => {
     if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
