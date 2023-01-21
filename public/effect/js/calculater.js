@@ -151,14 +151,11 @@ function calcNext() {
         scan("#calcout").innerHTML = `다음 통계량이 ${over} 이상이 될 확률은 ${distribution(standard)}%`
     }
 }
-function calculator(obj) {
-    let num = getIndex(obj.parentElement.parentElement, obj.parentElement)
+function calculator(e) {
+    let num = getIndex(e.target.parentElement.parentElement, e.target.parentElement)
     if (num == 1) percentCalc();
     if (num == 2) calcCount();
     if (num == 3) calcAll();
     if (num == 4) calcNext();
 }
-let calculatorButton = scan(["#inner_3_2 td"]);
-for (var i = 1; i < calculatorButton.length; i++) calculatorButton[i].onclick = ((e) => {
-    calculator(e.target);
-});
+let calculatorButton = scan("!#inner_3_2 td").forEach(obj => { obj.onclick = calculator; });
