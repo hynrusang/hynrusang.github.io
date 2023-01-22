@@ -21,14 +21,6 @@ const firebaseUtil = class {
 }
 
 /**
-* @type {() => void}
-*/
-const signInWithGoogle = () => {
-    if (!firebase.auth().currentUser) firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
-    else firebase.auth().signOut().then(() => { location.reload(); })
-}
-
-/**
 * @type {() => Promise<true>}
 */
 const waitFirebaseAuthInfo = async () => {

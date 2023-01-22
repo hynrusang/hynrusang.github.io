@@ -1,4 +1,5 @@
 let db = {
+    uname : "anonymous",
     mlist : [],
     ylist : { "default" : []},
     slist : {}
@@ -196,16 +197,6 @@ const reloadAll = () => {
     reloadSList();
     reloadSKey();
 }
-
-waitFirebaseAuthInfo().then(() => {
-  scan(".login span").innerText = firebase.auth().currentUser.displayName;
-  scan(".login input").value = "로그아웃";
-  firebaseUtil.get("user").then(data => {
-    if (data.data() == null) data.ref.set(db);
-    else db = data.data();
-    reloadAll();
-  });
-})
 
 scan("#ylist-input").onsubmit = (e => {
     e.preventDefault();

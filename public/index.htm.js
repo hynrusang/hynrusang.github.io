@@ -1,8 +1,7 @@
 snipe("!article")[0].reset(
-    $("h2", "$<<main screen", "hidden"),
     $("section").add(
         $("div", "class<<login").add(
-            $("input", "$<<button", "style<<cursor: pointer", "value<<로그인 화면으로 이동")
+            $("input", "$<<button", "style<<cursor: pointer", "value<<로그인 화면으로 이동", "onclick<<loading('login');")
         ),
         $("a", "href<<https://hynrusang.github.io/", "style<<display: block; width: 10vw; height: 10vw; background: url(effect/img/icon-igo.png) 100% no-repeat; background-position: center center;"),
         $("div", "class<<clock").add(
@@ -28,3 +27,15 @@ scan("#mlist-input").onsubmit = (e => {
         reloadMList();
     }
 });
+waitFirebaseAuthInfo().then(() => {
+    scan(".login input").value= firebase.auth().currentUser.displayName;
+    firebaseUtil.get("user").then(data => {
+        if (data.data() == null) data.ref.set(db);
+        else db = data.data();
+        reloadAll();
+    });
+})
+scan("!article input")[0].onclick = e => {
+    if (!firebase.auth().currentUser) loading("login");
+    else if (confirm("사이트에서 로그아웃 하시겠습니까? (타 사이트를 이용하여 로그인 하셨을 경우, 타 사이트에서도 로그아웃 하셔야 합니다.)")) firebase.auth().signOut().then(() => { location.reload(); });
+}

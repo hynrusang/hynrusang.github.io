@@ -42,11 +42,6 @@ input {
 input::placeholder {
     color: white;
 }
-input[type=button], input[type=submit] {
-    border: none;
-    cursor: pointer;
-    background: none;
-}
 fieldset {
     position: relative;
     left: calc(10% - 10px);
@@ -55,10 +50,6 @@ fieldset {
     padding: 0px;
 }
 fieldset input, form input {
-    background: rgba(255, 255, 255, 0.5);
-    background-repeat: no-repeat;
-    background-size: 22px;
-    background-position: left center;
     padding-left: 25px;
     position: relative;
     margin-top: 5px;
@@ -67,7 +58,21 @@ fieldset input, form input {
     left: 10%;
     height: 35px !important;
     border-radius: 24px;
-    }
+}
+input[type=text] {
+    background: rgba(255, 255, 255, 0.5);
+    background-repeat: no-repeat;
+    background-size: 22px;
+    background-position: left center;
+}
+input[type=button], input[type=submit] {
+    border: none;
+    cursor: pointer;
+    background: none;
+    background-repeat: no-repeat;
+    background-size: 22px;
+    background-position: left center;
+}
 a, .login {
     margin: 10px;
     font-size: 16px;

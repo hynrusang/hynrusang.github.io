@@ -7,7 +7,5 @@ const CLOCK = setInterval(function () {
         snipe(".hour_pin").set(`style<<transform:rotate(${DATA.getHours() * 30}deg)`)
         snipe(".minute_pin").set(`style<<transform:rotate(${MINUTE * 6}deg)`)
         snipe(".second_pin").set(`style<<transform:rotate(${SECOND * 6}deg)`)
-    } catch (e) {
-        clearInterval(CLOCK)
-    }
+    } catch (e) { }
 }, 1000);

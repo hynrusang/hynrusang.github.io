@@ -39,9 +39,6 @@ nav {
   flex-grow: 4;
 }
 .login input {
-  background: url("../../effect/img/icon-igo.png") left center no-repeat;
-  background-size: 20px 20px;
-  padding-left: 25px;
   border: 0px;
   width: 200px;
 }
