@@ -27,15 +27,8 @@ scan("#mlist-input").onsubmit = (e => {
         reloadMList();
     }
 });
-waitFirebaseAuthInfo().then(() => {
-    scan(".login input").value= firebase.auth().currentUser.displayName;
-    firebaseUtil.get("user").then(data => {
-        if (data.data() == null) data.ref.set(db);
-        else db = data.data();
-        reloadAll();
-    });
-})
-scan("!article input")[0].onclick = e => {
-    if (!firebase.auth().currentUser) loading("login");
-    else if (confirm("사이트에서 로그아웃 하시겠습니까? (타 사이트를 이용하여 로그인 하셨을 경우, 타 사이트에서도 로그아웃 하셔야 합니다.)")) firebase.auth().signOut().then(() => { location.reload(); });
-}
+scan("!article input")[0].onclick = () => { loading("login"); }
+waitFirebaseAuthInfo().then(() => { 
+    scan(".login input").value = db.uname;
+    reloadMList();
+});
