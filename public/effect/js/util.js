@@ -11,19 +11,16 @@ try {
  * @type {(e: MouseEvent?) => void}
  */
 const toggleWidget = e => {
-    if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
-    else {
-        let index = [];
-        if (e != null) {
-            if (e.target.nodeName != "TD") index = [localStorage.getItem("page"), getIndex(scan("!footer td"), e.target.parentElement)];
-            else index = [localStorage.getItem("page"), getIndex(scan("!footer td"), e.target)];
-            localStorage.setItem("page", index[1]);
-        } else index = [0, localStorage.getItem("page")];
-        scan("!footer td")[index[0]].style.background = null;
-        scan("!main")[index[0]].setAttribute("hidden", null);
-        scan("!footer td")[index[1]].style.background = "rgba(128, 128, 128, 0.5)";
-        scan("!main")[index[1]].removeAttribute("hidden");
-    }
+    let index = [];
+    if (e != null) {
+        if (e.target.nodeName != "TD") index = [localStorage.getItem("page"), getIndex(scan("!footer td"), e.target.parentElement)];
+        else index = [localStorage.getItem("page"), getIndex(scan("!footer td"), e.target)];
+        localStorage.setItem("page", index[1]);
+    } else index = [0, localStorage.getItem("page")];
+    scan("!footer td")[index[0]].style.background = null;
+    scan("!main")[index[0]].setAttribute("hidden", null);
+    scan("!footer td")[index[1]].style.background = "rgba(128, 128, 128, 0.5)";
+    scan("!main")[index[1]].removeAttribute("hidden");
 }
 
 /**
@@ -206,22 +203,10 @@ waitFirebaseAuthInfo().then(() => {
   firebaseUtil.get("user").then(data => {
     if (data.data() == null) data.ref.set(db);
     else db = data.data();
-    toggleWidget();
     reloadAll();
   });
 })
 
-scan("#mlist-input").onsubmit = (e => {
-    e.preventDefault();
-    if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
-    else {
-        (db.mlist.indexOf(e.target[0].value) == -1) ? db.mlist.push(e.target[0].value) : null
-        db.mlist.sort();
-        e.target[0].value = "";
-        firebaseUtil.sync();
-        reloadMList();
-    }
-});
 scan("#ylist-input").onsubmit = (e => {
     e.preventDefault();
     if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
@@ -254,6 +239,7 @@ scan("#skey_input").onsubmit = (e => {
     }
 })
 scan("!footer td").forEach(obj => { obj.onclick = toggleWidget; });
+toggleWidget();
 
 if (localStorage.getItem("hyperlink") != null) {
   db.mlist = JSON.parse(localStorage.getItem("hyperlink"));

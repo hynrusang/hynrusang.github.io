@@ -144,11 +144,23 @@ const scan = selector => {
    else return document.querySelector(selector);
 }
 /**
- * @type {(selector: string) => DomExpert}
+ * @type {{
+ * (selector: `!${string}`) => DomExpert[]
+ * (selector: string) => DomExpert
+ * }}
  */
 const snipe = selector => {
-    let temp = $();
-    temp.node = scan(selector);
+    let temp;
+    if (selector.indexOf("!") == 0) {
+        temp = new Array(scan(selector).length);
+        for (let i = 0; i < temp.length; i++) {
+            temp[i] = $();
+            temp[i].node = scan(selector)[i];
+        }
+    } else {
+        temp = $();
+        temp.node = scan(selector);
+    }
     return temp;
 }
 /**

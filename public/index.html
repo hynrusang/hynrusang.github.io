@@ -39,24 +39,6 @@
             </nav>
         </aside>
         <article>
-            <h2 hidden>main screen</h2>
-            <section>
-                <h2 hidden>main screen</h2>
-                <div class="login">
-                    <input style="cursor: pointer;" type="button" value="구글 로그인" onclick="signInWithGoogle()">
-                    <span>anonymous</span>
-                    <img src="effect/img/icon-igo.png" alt="로그인 버튼">
-                </div>
-                <a href="https://hynrusang.github.io/" style="display: block; width: 10vw; height: 10vw; background: url(effect/img/icon-igo.png) 100% no-repeat; background-position: center center;"></a>
-                <div class="clock">
-                    <div class="hour_pin"></div>
-                    <div class="minute_pin"></div>
-                    <div class="second_pin"></div>
-                </div>
-                <p style="position: relative; top: 10px; text-align: center;" id="time"></p>
-                <form id="mlist-input"><input type="text" style="background-image:url(effect/img/icon-favorite.png)" placeholder="메모 또는 링크" required></form>
-                <ul id="mlist"></ul>
-            </section>
         </article>
     </main>
     <main hidden>
@@ -168,7 +150,7 @@
             </section>
         </article>
     </main>
-    <main id="additional" hidden>
+    <main hidden>
         <aside></aside>
         <article>
             <h2 hidden>secret document</h2>
@@ -191,12 +173,13 @@
     </footer>
     <script src="effect/js/jh.js"></script>
     <script src="effect/js/calculater.js"></script>
+    <script>loading("achive/index");</script>
+    <script>loading("index");</script>
     <script src="effect/js/clock.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
     <script src="effect/js/firebaseUtil.js"></script>
     <script src="effect/js/util.js"></script>
-    <script>loading("achive/index");</script>
 </body>
 </html>
