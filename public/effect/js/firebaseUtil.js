@@ -1,6 +1,6 @@
 const firebaseUtil = class {
     /**
-    * @type {(target: string) => Promise<void>}
+    * @type {() => Promise<void>}
     */
     static sync = async () => {
         localStorage.removeItem("hyperlink");

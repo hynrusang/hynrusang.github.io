@@ -1,7 +1,7 @@
 snipe("!article")[0].reset(
     $("fieldset").add(
         $("legend").add(
-            $("img", "$<<effect/img/icon-special.png", "style<<width: auto; height: 25px;", "alt<<로그인 창"),
+            $("img", "$<<effect/img/icon-plus.png", "style<<width: auto; height: 25px;", "alt<<로그인 창"),
             $("span", "$<<회원가입")
         ),
         $("form", "id<<regist", "method<<post").add(

@@ -1,7 +1,7 @@
 snipe("!article")[0].reset(
     $("section").add(
         $("div", "class<<login").add(
-            $("input", "$<<button", "style<<cursor: pointer", "value<<로그인 화면으로 이동", "onclick<<loading('login');")
+            $("input", "$<<button", "style<<cursor: pointer; background-image: url('effect/img/icon-setting.png')", "value<<로그인 화면으로 이동", "onclick<<loading('login');")
         ),
         $("a", "href<<https://hynrusang.github.io/", "style<<display: block; width: 10vw; height: 10vw; background: url(effect/img/icon-igo.png) 100% no-repeat; background-position: center center;"),
         $("div", "class<<clock").add(
@@ -28,7 +28,5 @@ scan("#mlist-input").onsubmit = (e => {
     }
 });
 scan("!article input")[0].onclick = () => { loading("login"); }
-waitFirebaseAuthInfo().then(() => { 
-    scan(".login input").value = db.uname;
-    reloadMList();
-});
+scan(".login input").value = db.uname;
+reloadMList();
