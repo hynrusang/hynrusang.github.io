@@ -161,7 +161,7 @@ const calculatorBody = class {
      */
     static parsingStatistic = () => {
         const array = db.slist[prompt("값을 추출할 통계를 입력해주세요.")];
-        if (!this.#checkStatisticsArrayIsValify(array)) return;
+        if (this.#checkStatisticsArrayIsValify(array)) return;
         else scan("#calcout").innerHTML = `평균 = ${this.#aver(array)[0]}, 분산 = (${this.#aver(array)[1]})<sup>2</sup>`;
     }
     /**
@@ -169,8 +169,11 @@ const calculatorBody = class {
      */
     static getNextPredictIsCorrectPercent = () => {
         const array = db.slist[prompt("값을 추출할 통계를 입력해주세요.")];
-        if (!this.#checkStatisticsArrayIsValify(array)) return;
-        else scan("#calcout").innerHTML = `다음 통계량이 ${parseFloat(prompt("무슨 값 이상이 나오길 원하십니까?"))} 이상이 될 확률은 ${calculatorMethod.distribution((over - this.#aver(array)[0]) / this.#aver(array)[1])}%`;
+        if (this.#checkStatisticsArrayIsValify(array)) return;
+        else {
+            const wantOver = parseFloat(prompt("무슨 값 이상이 나오길 원하십니까?"));
+            scan("#calcout").innerHTML = `다음 통계량이 ${wantOver} 이상이 될 확률은 ${calculatorMethod.distribution((wantOver - this.#aver(array)[0]) / this.#aver(array)[1])}%`;
+        }
     }
 }
 function calculator(e) {
