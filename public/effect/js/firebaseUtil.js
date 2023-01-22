@@ -19,12 +19,12 @@ const firebaseUtil = class {
         return info;
     }
 }
-
 /**
 * @type {() => Promise<true>}
 */
 const waitFirebaseAuthInfo = async () => {
-    while (firebase.auth().currentUser == null) await wait(100);
+    while (!firebase.auth().currentUser) await wait(100);
+    if (!firebase.auth().currentUser.emailVerified) firebase.auth().signOut();
     return true;
 }
 

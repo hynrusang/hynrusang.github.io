@@ -198,6 +198,15 @@ const reloadAll = () => {
     reloadSKey();
 }
 
+waitFirebaseAuthInfo().then(() => {
+    firebaseUtil.get("user").then(data => {
+        if (data.data() == null) data.ref.set(db);
+        else db = data.data();
+        scan(".login input").value = db.uname;
+        reloadAll();
+    });
+})
+
 scan("#ylist-input").onsubmit = (e => {
     e.preventDefault();
     if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
