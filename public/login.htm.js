@@ -10,7 +10,7 @@ if (!firebase.auth().currentUser) {
     snipe("!article")[0].reset(
         $("fieldset").add(
             $("legend").add(
-                $("img", "$<<effect/img/icon-special.png", "style<<width: auto; height: 25px;", "alt<<로그인 창"),
+                $("img", "$<<effect/img/icon-library.png", "style<<width: auto; height: 25px;", "alt<<로그인 창"),
                 $("span", "$<<로그인")
             ),
             $("form", "id<<login", "method<<post").add(
@@ -28,7 +28,8 @@ if (!firebase.auth().currentUser) {
         await firebase.auth().signInWithEmailAndPassword(scan("!#login input")[0].value, scan("!#login input")[1].value).then(async data => {
             if (!data.user.emailVerified) {
                 alert("이메일 인증이 되지 않은 계정은 사용하실 수 없습니다.");
-                await data.user.sendEmailVerification().then(() => { alert("인증용 메일을 다시 보냈습니다."); });
+                await data.user.sendEmailVerification().then(() => { alert("인증용 메일을 다시 보냈습니다."); })
+                .catch(e => { if (e.code == "auth/too-many-requests") alert("현재 요청이 너무 많아서 요청을 보류중입니다. (잠시 후 다시 시도해주세요.)"); });
             }
             location.reload();
         }).catch(e => {
@@ -64,7 +65,11 @@ if (!firebase.auth().currentUser) {
     scan("!#user_field input")[2].onclick = async () => { await firebase.auth().signOut().then(() => { location.reload(); }); };
     scan("!#user_field input")[3].onclick = async () => {
         if (confirm("정말로 이 계정을 삭제하시겠습니까? (이 결정은 번복되지 않습니다.) (추가로 다시 한 번 물어보는 절차도 없습니다.)")) {
-            
+            await firebaseUtil.get("user").then(data => { data.ref.delete() });
+            await firebase.auth().currentUser.delete().then(() => { 
+                alert("사이트에서 당신의 정보를 삭제했습니다. (다음에 뵙기를 믿습니다.)");
+                location.reload();
+            });
         }
     }
 }
