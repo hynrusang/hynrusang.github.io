@@ -14,7 +14,7 @@ if (!firebase.auth().currentUser) {
                 $("span", "$<<로그인")
             ),
             $("form", "id<<login", "method<<post").add(
-                $("input", "$<<text", "style<<background-image: url('effect/img/icon-igo.png')", "placeholder<<이메일 주소"),
+                $("input", "$<<text", "style<<background-image: url('effect/img/icon-igo.png')", "placeholder<<이메일 주소", "list<<email_sample"),
                 $("input", "$<<password", "style<<background-image: url('effect/img/icon-special.png')", "placeholder<<비밀번호"),
                 $("input", "$<<submit", "value<<로그인"),
                 $("input", "$<<button", "value<<비밀번호 초기화"),

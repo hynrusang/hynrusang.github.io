@@ -5,7 +5,7 @@ snipe("!article")[0].reset(
             $("span", "$<<회원가입")
         ),
         $("form", "id<<regist", "method<<post").add(
-            $("input", "$<<text", "style<<background-image: url('effect/img/icon-igo.png')", "placeholder<<이메일 주소 (인증에 사용됩니다.)"),
+            $("input", "$<<text", "style<<background-image: url('effect/img/icon-igo.png')", "placeholder<<이메일 주소 (인증에 사용됩니다.)", "list<<email_sample"),
             $("input", "$<<password", "style<<background-image: url('effect/img/icon-special.png')", "placeholder<<비밀번호 (6자 이상)"),
             $("input", "$<<password", "style<<background-image: url('effect/img/icon-special.png')", "placeholder<<비밀번호 확인"),
             $("input", "$<<submit", "value<<회원가입"),
