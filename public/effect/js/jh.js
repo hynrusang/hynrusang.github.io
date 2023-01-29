@@ -167,10 +167,8 @@ const snipe = selector => {
  * @type {(jhpath: string) => void}
  */
 const loading = jhpath => {
-    for (var i = 0; i < jhpath.length; i++) {
-        const REQUEST = new XMLHttpRequest();
-        REQUEST.open('GET', `${jhpath[i]}.htm.js`);
+    const REQUEST = new XMLHttpRequest();
+        REQUEST.open('GET', `${jhpath}.htm.js`);
         REQUEST.send();
         REQUEST.onreadystatechange = (e => { (e.target.readyState == 4) ? eval(REQUEST.response) : null});
-    }
 }
