@@ -1,7 +1,7 @@
 let db = {
     uname : "anonymous",
     mlist : [],
-    ylist : { "default" : { }},
+    ylist : {},
     slist : {}
 };
 try {
@@ -126,17 +126,14 @@ const reloadYList = () => {
             }
         })
         listcase.children(3).onclick = (e => {
-            if (keys[i] == "default") alert("default 재생목록 모음은 지울 수 없습니다.");
-            else {
-                if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
-                else if (confirm("정말로 해당 재생목록 모음을 삭제하시겠습니까?")) {
-                    delete db.ylist[keys[i]];
-                    firebaseUtil.sync();
-                    reloadYList();
-                }
+            if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
+            else if (confirm("정말로 해당 재생목록 모음을 삭제하시겠습니까?")) {
+                delete db.ylist[keys[i]];
+                firebaseUtil.sync();
+                reloadYList();
             }
         })
-        snipe("#ylist").add(listcase)
+        snipe("#ylist").add(listcase);
     }
 }
 
@@ -146,8 +143,8 @@ const reloadYList = () => {
 const reloadSList = () => {
     snipe("#slist").reset();
     const keys = Object.keys(db.slist).sort();
-    for (var i = 0; i < keys.length; i++) {
-        let listcase = $("fieldset", `id<<statistics_${keys[i]}`).add(
+    for (let i = 0; i < keys.length; i++) {
+        let listcase = $("fieldset").add(
             $("legend", `$<<통계 ${keys[i]}`),
             $("form").add(
                 $("input", "$<<text", "placeholder<<저장할 통계량(실수만 입력)", "style<<background-image: url(effect/img/icon-plus.png)")
@@ -164,10 +161,7 @@ const reloadSList = () => {
             list.children(1).onclick = (e => {
                 if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
                 else if (confirm("정말로 해당 통계량을 해당 통계에서 제거할까요?")) {
-                    let key = e.target.parentElement.parentElement.parentElement.id.split("_")[1];
-                    db.slist[key] = db.slist[key].filter((data, index) => {  
-                        return index !== getIndex(e.target.parentElement.parentElement, e.target.parentElement); 
-                    })
+                    db.slist[keys[i]] = db.slist[keys[i]].filter((data, index) => { return index !== getIndex(e.target.parentElement.parentElement, e.target.parentElement); })
                     firebaseUtil.sync();
                     reloadSList();
                 }
@@ -178,7 +172,7 @@ const reloadSList = () => {
             e.preventDefault();
             if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
             else {
-                db.slist[e.target.parentElement.id.split("_")[1]].push(e.target[0].value);
+                db.slist[keys[i]].push(e.target[0].value);
                 firebaseUtil.sync();
                 reloadSList();
             }
@@ -186,7 +180,7 @@ const reloadSList = () => {
         listcase.children(3).onclick = (e => {
             if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
             else if (confirm("정말로 해당 통계를 제거할까요?")) {
-                delete db.slist[e.target.parentElement.id.split("_")[1]];
+                delete db.slist[keys[i]];
                 firebaseUtil.sync();
                 reloadSList();
             }
