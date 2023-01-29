@@ -1,7 +1,7 @@
 let db = {
     uname : "anonymous",
     mlist : [],
-    ylist : { "default" : []},
+    ylist : { "default" : { }},
     slist : {}
 };
 try {
@@ -77,23 +77,37 @@ const reloadYList = () => {
             ),
             $("ul"),
             $("input", "$<<button", "value<<이 재생목록 모음 지우기")
+        ), sort = Object.keys(db.ylist[keys[i]]).sort().reduce(
+            (parsing, key) => {
+                parsing[key] = db.ylist[keys[i]][key];
+                return parsing;
+             }, {}
         );
-        const values = db.ylist[keys[i]];
-        for (let j = 0; j < values.length; j++) {
+        for (let j of Object.keys(sort)) {
             let list = $("li").add(
                 $("img", `$<<https://www.google.com/s2/favicons?domain=https://youtube.com/`),
-                $("span", `$<<${keys[i]} 중 ${[j + 1]}번 재생목록`, `link<<${values[j]}`, "style<<cursor:pointer"),
-                $("input", "$<<button", "value<< / 제거")
+                $("span", `$<<${j}`, `link<<${sort[j]}`, "style<<cursor:pointer;display:inline-block;width:80%"),
+                $("br"),
+                $("input", "$<<button", "style<<width:20%;", "value<<이름 수정"),
+                $("input", "$<<button", "style<<width:20%;", "value<<제거")
             );
             list.children(1).onclick = (e => {
                 scan("#inner_2_2 iframe").src = `${e.target.attributes[0].nodeValue.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1`;
                 location.href = "#inner_2_2"
             })
-            list.children(2).onclick = (e => {
+            list.children(3).onclick = (e => {
+                let value = prompt("재생목록의 이름을 무엇으로 하겠습니까? (취소나 공백을 입력하면 변경이 적용되지 않습니다.)")
+                if (value && value != "") {
+                    db.ylist[keys[i]][value] = db.ylist[keys[i]][j];
+                    delete db.ylist[keys[i]][j];
+                    firebaseUtil.sync();
+                    reloadYList();
+                }
+            })
+            list.children(4).onclick = (e => {
                 if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
                 else if (confirm("정말로 해당 재생목록을 재생목록 모음에서 제거할까요?")) {
-                    let key = e.target.parentElement.parentElement.parentElement.id.split("_")[1];
-                    db.ylist[key] = db.ylist[key].filter(data => { return getIndex(db.ylist[key], data) !== getIndex(e.target.parentElement.parentElement, e.target.parentElement) });
+                    delete db.ylist[keys[i]][j];
                     firebaseUtil.sync();
                     reloadYList();
                 }
@@ -105,8 +119,8 @@ const reloadYList = () => {
             if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
             else {
                 let key = e.target.parentElement.id.split("_")[1];
-                if (db.ylist[key].indexOf(e.target[0].value) == -1) {
-                    db.ylist[key].push(e.target[0].value);
+                if (Object.values(db.ylist[key]).indexOf(e.target[0].value) == -1) {
+                    db.ylist[key][e.target[0].value] = e.target[0].value;
                     firebaseUtil.sync();
                     reloadYList();
                 } else alert("해당 재생목록은 이미 존재합니다.");
@@ -125,6 +139,52 @@ const reloadYList = () => {
             }
         })
         snipe("#ylist").add(listcase)
+        // for (let j = 0; j < Object.keys(data).length; j++) {
+        //     let list = $("li").add(
+        //         $("img", `$<<https://www.google.com/s2/favicons?domain=https://youtube.com/`),
+        //         $("span", `$<<${Object.keys(data)[j]}`, `link<<${values[j]}`, "style<<cursor:pointer"),
+        //         $("input", "$<<button", "value<< / 제거")
+        //     );
+        //     list.children(1).onclick = (e => {
+        //         scan("#inner_2_2 iframe").src = `${e.target.attributes[0].nodeValue.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1`;
+        //         location.href = "#inner_2_2"
+        //     })
+        //     list.children(2).onclick = (e => {
+        //         if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
+        //         else if (confirm("정말로 해당 재생목록을 재생목록 모음에서 제거할까요?")) {
+        //             let key = e.target.parentElement.parentElement.parentElement.id.split("_")[1];
+        //             db.ylist[key] = db.ylist[key].filter(data => { return getIndex(db.ylist[key], data) !== getIndex(e.target.parentElement.parentElement, e.target.parentElement) });
+        //             firebaseUtil.sync();
+        //             reloadYList();
+        //         }
+        //     })
+        //     listcase.children(2).appendChild(list.node);
+        // }
+        // listcase.children(1).onsubmit = (e => {
+        //     e.preventDefault();
+        //     if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
+        //     else {
+        //         let key = e.target.parentElement.id.split("_")[1];
+        //         if (db.ylist[key].indexOf(e.target[0].value) == -1) {
+        //             db.ylist[key].push(e.target[0].value);
+        //             firebaseUtil.sync();
+        //             reloadYList();
+        //         } else alert("해당 재생목록은 이미 존재합니다.");
+        //     }
+        // })
+        // listcase.children(3).onclick = (e => {
+        //     let key = e.target.parentElement.id.split("_")[1];
+        //     if (key == "default") alert("default 재생목록 모음은 지울 수 없습니다.");
+        //     else {
+        //         if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
+        //         else if (confirm("정말로 해당 재생목록 모음을 삭제하시겠습니까?")) {
+        //             delete db.ylist[key];
+        //             firebaseUtil.sync();
+        //             reloadYList();
+        //         }
+        //     }
+        // })
+        // snipe("#ylist").add(listcase)
     }
 }
 
@@ -200,8 +260,27 @@ const reloadAll = () => {
 
 waitFirebaseAuthInfo().then(() => {
     firebaseUtil.get("user").then(data => {
-        if (data.data() == null) data.ref.set(db);
-        else db = data.data();
+        (data.data()) ? db = data.data() : data.ref.set(db);
+        if (localStorage.getItem("hyperlink") != null) {
+            db.mlist = JSON.parse(localStorage.getItem("hyperlink"));
+            localStorage.removeItem("hyperlink");
+            firebaseUtil.sync();
+        }
+        if (localStorage.getItem("youtube") != null) {
+            db.ylist = JSON.parse(localStorage.getItem("youtube"));
+            for (let i of Object.keys(db.ylist)) {
+                let parsing = {};
+                for (let j of db.ylist[i]) parsing[j] = j;
+                db.ylist[i] = parsing;
+            }
+            localStorage.removeItem("youtube");
+            firebaseUtil.sync();
+        }
+        if (localStorage.getItem("statistics") != null) {
+            db.slist = JSON.parse(localStorage.getItem("statistics"));
+            localStorage.removeItem("statistics");
+            firebaseUtil.sync();
+        }
         scan(".login input").value = db.uname;
         reloadAll();
     });
@@ -240,16 +319,3 @@ scan("#skey_input").onsubmit = (e => {
 })
 scan("!footer td").forEach(obj => { obj.onclick = toggleWidget; });
 toggleWidget();
-
-if (localStorage.getItem("hyperlink") != null) {
-  db.mlist = JSON.parse(localStorage.getItem("hyperlink"));
-  reloadMList();
-}
-if (localStorage.getItem("youtube") != null) {
-  db.ylist = JSON.parse(localStorage.getItem("youtube"));
-  reloadYList();
-}
-if (localStorage.getItem("statistics") != null) {
-  db.slist = JSON.parse(localStorage.getItem("statistics"));
-  reloadSList();
-}

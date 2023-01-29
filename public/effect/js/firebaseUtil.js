@@ -2,12 +2,7 @@ const firebaseUtil = class {
     /**
     * @type {() => Promise<void>}
     */
-    static sync = async () => {
-        localStorage.removeItem("hyperlink");
-        localStorage.removeItem("youtube");
-        localStorage.removeItem("statistics");
-        await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(db);
-    }
+    static sync = async () => { await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(db); }
 
     /**
      * * @type {(target: string) => Promise<null | object>}
