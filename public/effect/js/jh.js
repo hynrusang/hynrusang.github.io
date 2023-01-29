@@ -164,9 +164,9 @@ const snipe = selector => {
     return temp;
 }
 /**
- * @type {(...jhpath: string) => void}
+ * @type {(jhpath: string) => void}
  */
-const loading = (...jhpath) => {
+const loading = jhpath => {
     for (var i = 0; i < jhpath.length; i++) {
         const REQUEST = new XMLHttpRequest();
         REQUEST.open('GET', `${jhpath[i]}.htm.js`);
