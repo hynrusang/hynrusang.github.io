@@ -87,9 +87,9 @@ const calculatorBody = class {
         if (dat < 0.01) {
             alert("기본적인 확률이 너무 작아, 확률을 0.01%로 수정합니다.");
             return 0.01;
-        } else if (99.9 < dat) {
+        } else if (99.99 < dat) {
             alert("변화될 확률이 너무 커, 확률을 99.9%로 수정합니다.");
-            return 99.9;
+            return 99.99;
         } else return dat;
     }
     /**
@@ -108,52 +108,62 @@ const calculatorBody = class {
      * @type {() => void}
      */
     static percent = () => {
-        let a = parseInt(prompt("몇번 시도하실 겁니까?")), b, c;
-        if (isNaN(a)) return;
-        b = parseInt(prompt("몇번이상 나오길 원하십니까?"));
-        if (isNaN(b)) return;
-        c = this.#PercentToValify(parseFloat(prompt("기본적인 확률은 몇%입니까? (숫자만 입력해주십시오)")));
-        if (170 < a) {
-            const avarage = a * (c / 100);
-            const deciation = Math.pow(avarage * (1 - (c / 100)), 0.5);
-            const standard = (b - avarage) / deciation;
-            scan("!#inner_3_2 td")[0].innerHTML = `${calculatorMethod.distribution(standard)}%`;
-        } else scan("!#inner_3_2 td")[0].innerHTML = `${calculatorMethod.independent(a, b, (c / 100))}%`;
+        let p = parseFloat(scan("!td input")[0].value);
+        if (p < 0.01) scan("!td input")[0].value = p = 0.01;
+        else if (99.99 < p) scan("!td input")[0].value = p = 99.99;
+        if (isNaN(p)) alert("우선 기본적인 확률을 선택해주세요.");
+        else {
+            let a = parseInt(prompt("몇번 시도하실 겁니까?")), b;
+            if (isNaN(a)) return;
+            b = parseInt(prompt("몇번이상 나오길 원하십니까?"));
+            if (isNaN(b)) return;
+            if (170 < a) {
+                const avarage = a * (p / 100);
+                const deciation = Math.pow(avarage * (1 - (p / 100)), 0.5);
+                const standard = (b - avarage) / deciation;
+                scan("!#inner_3_2 td")[0].innerHTML = `${calculatorMethod.distribution(standard)}%`;
+            } else scan("!#inner_3_2 td")[0].innerHTML = `${calculatorMethod.independent(a, b, (p / 100))}%`;
+        }
     }
     /**
      * @type {() => void}
      */
     static count = () => {
-        const a = this.#PercentToValify(parseFloat(prompt("기본적인 확률은 몇%입니까? (숫자만 입력해주십시오)")));
-        const b = this.#PercentToValify(parseFloat(prompt("몇% 이상으로 되길 원하십니까? (숫자만 입력해주시오.)")));
-        if (!(a <= b)) {
-            alert("변화될 확률이 잘못됬습니다. a보다 작거나 잘못된 값입니다.");
-            return;
-        }
-        let i = 0;
-        while (true) {
-            if (170 < i) {
-                const avarage = i * (a / 100);
-                const deciation = Math.pow(avarage * (1 - (a / 100)), 0.5);
-                const standard = (1 - avarage) / deciation;
-                if (b <= calculatorMethod.distribution(standard)) {
-                    scan("!#inner_3_2 td")[0].innerHTML = `${i} (${a}% -> ${calculatorMethod.distribution(standard)}%)`;
-                    return;
-                }
-            } else {
-                if (b <= calculatorMethod.independent(i, 1, (a / 100))) {
-                    scan("!#inner_3_2 td")[0].innerHTML = `${i} (${a}% -> ${calculatorMethod.independent(i, 1, (a / 100))}%)`
-                    return;
-                }
+        let p = parseFloat(scan("!td input")[0].value);
+        if (p < 0.01) scan("!td input")[0].value = p = 0.01;
+        else if (99.99 < p) scan("!td input")[0].value = p = 99.99;
+        if (isNaN(p)) alert("우선 기본적인 확률을 선택해주세요.");
+        else {
+            const b = this.#PercentToValify(parseFloat(prompt("몇% 이상으로 되길 원하십니까? (숫자만 입력해주시오.)")));
+            if (!(p <= b)) {
+                alert("변화될 확률이 잘못됬습니다. a보다 작거나 잘못된 값입니다.");
+                return;
             }
-            i++;
+            let i = 0;
+            while (true) {
+                if (170 < i) {
+                    const avarage = i * (p / 100);
+                    const deciation = Math.pow(avarage * (1 - (p / 100)), 0.5);
+                    const standard = (1 - avarage) / deciation;
+                    if (b <= calculatorMethod.distribution(standard)) {
+                        scan("!#inner_3_2 td")[0].innerHTML = `${i} (${p}% -> ${calculatorMethod.distribution(standard)}%)`;
+                        return;
+                    }
+                } else {
+                    if (b <= calculatorMethod.independent(i, 1, (p / 100))) {
+                        scan("!#inner_3_2 td")[0].innerHTML = `${i} (${p}% -> ${calculatorMethod.independent(i, 1, (p / 100))}%)`
+                        return;
+                    }
+                }
+                i++;
+            }
         }
     }
     /**
      * @type {() => void}
      */
     static parsingStatistic = () => {
-        const array = db.slist[scan("td input").value];
+        const array = db.slist[scan("!td input")[1].value];
         if (!array) alert("먼저 통계를 선택해주세요.");
         else scan("!#inner_3_2 td")[0].innerHTML = `평균 = ${this.#aver(array)[0]}, 분산 = (${this.#aver(array)[1]})<sup>2</sup>`;
     }
@@ -161,7 +171,7 @@ const calculatorBody = class {
      * @type {() => void}
      */
     static getNextPredictIsCorrectPercent = () => {
-        const array = db.slist[scan("td input").value];
+        const array = db.slist[scan("!td input")[1].value];
         if (!array) alert("먼저 통계를 선택해주세요.");
         else {
             const wantOver = parseFloat(prompt("무슨 값 이상이 나오길 원하십니까?"));
@@ -172,16 +182,16 @@ const calculatorBody = class {
 function calculator(e) {
     let num = getIndex(scan("!#inner_3_2 td"), e.target);
     switch (num) {
-        case 2:
+        case 3:
             calculatorBody.percent();
             break;
-        case 3:
+        case 4:
             calculatorBody.count();
             break;
-        case 4:
+        case 5:
             calculatorBody.parsingStatistic();
             break;
-        case 5:
+        case 6:
             calculatorBody.getNextPredictIsCorrectPercent();
             break;
     }

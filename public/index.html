@@ -96,13 +96,16 @@
             <section id="inner_3_2">
                 <h2 hidden>statistic calculator</h2>
                 <table style="border-radius: 24px; position: relative; top: 20%; left: 10%; width: 80%; height: 60%;">
-                    <tr style="height: 120px">
-                        <td></td>
+                    <tr>
+                        <td rowspan="2"></td>
+                        <td><input type="number" placeholder="(calc)기본 확률 (0.01 ~ 99.99)" step="0.01" min="0.01" max="99.99"></td>
+                    </tr>
+                    <tr>
                         <td><input type="text" placeholder="(statistics)통계 선택" list="statistics_list"></td>
                     </tr>
                     <tr>
-                        <td style="cursor: pointer;">a번 중 b번 이상 c%인 확률이 뜰 확률</td>
-                        <td style="cursor: pointer;">a%인 확률이 b% 확률이 되는 최소 시도횟수</td>
+                        <td style="cursor: pointer;">(calc)a번 중 b번 이상 c%인 확률이 뜰 확률</td>
+                        <td style="cursor: pointer;">(calc)a%인 확률이 b% 확률이 되는 최소 시도횟수</td>
                     </tr>
                     <tr>
                         <td style="cursor: pointer;">(statistics)통계의 평균, 분산, 표준편차 구하기</td>

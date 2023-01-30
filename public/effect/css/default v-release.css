@@ -79,7 +79,6 @@ input[type=button], input[type=submit] {
 }
 td {
     text-align:center; 
-    height: calc(100% / 3);
     background: rgba(180, 180, 180, 0.3);
 }
 td * {
