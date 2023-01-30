@@ -143,8 +143,10 @@ const reloadYList = () => {
  */
 const reloadSList = () => {
     snipe("#slist").reset();
+    snipe("#statistics_list").reset();
     const keys = Object.keys(db.slist).sort();
     for (let i = 0; i < keys.length; i++) {
+        snipe("#statistics_list").add($("option", `$<<${keys[i]}`));
         let listcase = $("fieldset").add(
             $("legend", `$<<통계 ${keys[i]}`),
             $("form").add(
@@ -156,8 +158,8 @@ const reloadSList = () => {
         const values = db.slist[keys[i]];
         for (let j = 0; j < values.length; j++) {
             let list = $("li").add(
-                $("span", `$<<${values[j]}`, "style<<cursor:pointer"),
-                $("input", "$<<button", "value<< / 제거")
+                $("span", `$<<${values[j]}`),
+                $("input", "$<<button", "style<<width:60px;padding:0px;", "value<<제거")
             )
             list.children(1).onclick = (e => {
                 if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");

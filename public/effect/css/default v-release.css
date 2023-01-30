@@ -79,8 +79,7 @@ input[type=button], input[type=submit] {
 }
 td {
     text-align:center; 
-    width: 50%;
-    height: 20%;
+    height: calc(100% / 3);
     background: rgba(180, 180, 180, 0.3);
 }
 td * {
@@ -93,6 +92,17 @@ a, .login {
     font-size: 16px;
     text-decoration: none;
     transition: 0.5s all;
+}
+.login {
+    padding: 0px;
+    width: 100%;
+    height: 40px;
+    display: flex;
+    flex-direction: row-reverse;
+}
+.login input {
+    border: 0px;
+    width: 160px;
 }
 [hidden] {
     display: none;

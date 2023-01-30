@@ -38,17 +38,6 @@ nav {
   flex-direction: column;
   flex-grow: 4;
 }
-.login input {
-  border: 0px;
-  width: 160px;
-}
-.login {
-  padding: 0px;
-  width: 100%;
-  height: 40px;
-  display: flex;
-  flex-direction: row-reverse;
-}
 aside {
   width: 220px;
   height: 100%;

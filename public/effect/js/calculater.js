@@ -105,27 +105,20 @@ const calculatorBody = class {
         return [avarage, deviation];
     }
     /**
-     * @type {(array: number[]) => boolean}
-     */
-    static #checkStatisticsArrayIsValify = array => {
-        if (!array) {
-            alert("해당 통계는 잘못된 통계입니다.");
-            return false;
-        } else true;
-    }
-    /**
      * @type {() => void}
      */
     static percent = () => {
-        const a = parseInt(prompt("몇번 시도하실 겁니까?"));
-        const b = parseInt(prompt("몇번이상 나오길 원하십니까?"));
-        const c = this.#PercentToValify(parseFloat(prompt("기본적인 확률은 몇%입니까? (숫자만 입력해주십시오)")));
+        let a = parseInt(prompt("몇번 시도하실 겁니까?")), b, c;
+        if (isNaN(a)) return;
+        b = parseInt(prompt("몇번이상 나오길 원하십니까?"));
+        if (isNaN(b)) return;
+        c = this.#PercentToValify(parseFloat(prompt("기본적인 확률은 몇%입니까? (숫자만 입력해주십시오)")));
         if (170 < a) {
             const avarage = a * (c / 100);
             const deciation = Math.pow(avarage * (1 - (c / 100)), 0.5);
             const standard = (b - avarage) / deciation;
-            scan("#calcout").innerHTML = `${calculatorMethod.distribution(standard)}%`;
-        } else scan("#calcout").innerHTML = `${calculatorMethod.independent(a, b, (c / 100))}%`;
+            scan("!#inner_3_2 td")[0].innerHTML = `${calculatorMethod.distribution(standard)}%`;
+        } else scan("!#inner_3_2 td")[0].innerHTML = `${calculatorMethod.independent(a, b, (c / 100))}%`;
     }
     /**
      * @type {() => void}
@@ -144,12 +137,12 @@ const calculatorBody = class {
                 const deciation = Math.pow(avarage * (1 - (a / 100)), 0.5);
                 const standard = (1 - avarage) / deciation;
                 if (b <= calculatorMethod.distribution(standard)) {
-                    scan("#calcout").innerHTML = `${i} (${a}% -> ${calculatorMethod.distribution(standard)}%)`;
+                    scan("!#inner_3_2 td")[0].innerHTML = `${i} (${a}% -> ${calculatorMethod.distribution(standard)}%)`;
                     return;
                 }
             } else {
                 if (b <= calculatorMethod.independent(i, 1, (a / 100))) {
-                    scan("#calcout").innerHTML = `${i} (${a}% -> ${calculatorMethod.independent(i, 1, (a / 100))}%)`
+                    scan("!#inner_3_2 td")[0].innerHTML = `${i} (${a}% -> ${calculatorMethod.independent(i, 1, (a / 100))}%)`
                     return;
                 }
             }
@@ -160,23 +153,37 @@ const calculatorBody = class {
      * @type {() => void}
      */
     static parsingStatistic = () => {
-        const array = db.slist[prompt("값을 추출할 통계를 입력해주세요.")];
-        if (this.#checkStatisticsArrayIsValify(array)) return;
-        else scan("#calcout").innerHTML = `평균 = ${this.#aver(array)[0]}, 분산 = (${this.#aver(array)[1]})<sup>2</sup>`;
+        const array = db.slist[scan("td input").value];
+        if (!array) alert("먼저 통계를 선택해주세요.");
+        else scan("!#inner_3_2 td")[0].innerHTML = `평균 = ${this.#aver(array)[0]}, 분산 = (${this.#aver(array)[1]})<sup>2</sup>`;
     }
     /**
      * @type {() => void}
      */
     static getNextPredictIsCorrectPercent = () => {
-        const array = db.slist[prompt("값을 추출할 통계를 입력해주세요.")];
-        if (this.#checkStatisticsArrayIsValify(array)) return;
+        const array = db.slist[scan("td input").value];
+        if (!array) alert("먼저 통계를 선택해주세요.");
         else {
             const wantOver = parseFloat(prompt("무슨 값 이상이 나오길 원하십니까?"));
-            scan("#calcout").innerHTML = `다음 통계량이 ${wantOver} 이상이 될 확률은 ${calculatorMethod.distribution((wantOver - this.#aver(array)[0]) / this.#aver(array)[1])}%`;
+            scan("!#inner_3_2 td")[0].innerHTML = `다음 통계량이 ${wantOver} 이상이 될 확률은 ${calculatorMethod.distribution((wantOver - this.#aver(array)[0]) / this.#aver(array)[1])}%`;
         }
     }
 }
 function calculator(e) {
-    let num = getIndex(e.target.parentElement.parentElement, e.target.parentElement)
+    let num = getIndex(scan("!#inner_3_2 td"), e.target);
+    switch (num) {
+        case 2:
+            calculatorBody.percent();
+            break;
+        case 3:
+            calculatorBody.count();
+            break;
+        case 4:
+            calculatorBody.parsingStatistic();
+            break;
+        case 5:
+            calculatorBody.getNextPredictIsCorrectPercent();
+            break;
+    }
 }
 scan("!#inner_3_2 td").forEach(obj => { obj.onclick = calculator; });

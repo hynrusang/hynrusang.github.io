@@ -135,8 +135,8 @@ const getIndex = (parent, child) => {
 * (selector: "!li") => NodeListOf<HTMLLIElement>
 * (selector: "!pre") => NodeListOf<HTMLPreElement>
 * (selector: "!script") => NodeListOf<HTMLScriptElement>
-* (selector: `!${string}`) => NodeListOf<Element>
-* (selector: String) => Element
+* (selector: `!${string}`) => NodeListOf<HTMLElement>
+* (selector: String) => HTMLElement
 * }}
 */
 const scan = selector => {
