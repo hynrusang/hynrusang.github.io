@@ -5,8 +5,8 @@ snipe("#inner_4_1").reset(
         $("ul").add(
             $("li").add(
                 $("a", "$<<1.0.0", "href<<javascript:loading('achive/1/index')"),
-                $("a", "$<<2.0.0", "href<<javascript:loading('achive/1/index')"),
-                $("a", "$<<3.0.0", "href<<javascript:loading('achive/1/index')"),
+                $("a", "$<<2.0.0", "href<<javascript:loading('achive/2/index')"),
+                $("a", "$<<3.0.0", "href<<javascript:loading('achive/3/index')"),
             )
         )
     ),

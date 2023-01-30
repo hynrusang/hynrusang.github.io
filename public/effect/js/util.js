@@ -20,7 +20,7 @@ const toggleWidget = e => {
     } else index = [0, localStorage.getItem("page")];
     scan("!footer td")[index[0]].style.background = null;
     scan("!main")[index[0]].setAttribute("hidden", null);
-    scan("!footer td")[index[1]].style.background = "rgba(128, 128, 128, 0.5)";
+    scan("!footer td")[index[1]].style.background = "rgba(180, 180, 180, 0.6)";
     scan("!main")[index[1]].removeAttribute("hidden");
 }
 
@@ -34,7 +34,7 @@ const reloadMList = () => {
         if (db.mlist[i].indexOf("http") == 0) {
             obj = $("li").add(
                 $("img", `$<<https://www.google.com/s2/favicons?domain=${db.mlist[i]}`),
-                $("span", `$<<${db.mlist[i]}`, "style<<cursor:pointer", "onclick<<window.open(this.innerHTML)"),
+                $("a", `$<<${db.mlist[i]}`, `href<<${db.mlist[i]}`, "style<<cursor:pointer"),
                 $("input", "$<<button", "value<< / 제거")
             )
             obj.children(2).onclick = (e => {
@@ -86,13 +86,14 @@ const reloadYList = () => {
         for (let j of Object.keys(sort)) {
             let list = $("li").add(
                 $("img", `$<<https://www.google.com/s2/favicons?domain=https://youtube.com/`),
-                $("span", `$<<${j}`, `link<<${sort[j]}`, "style<<cursor:pointer;display:inline-block;width:80%"),
+                $("a", `$<<${j}`, `href<<${sort[j]}`, "style<<cursor:pointer;display:inline-block;width:80%;margin:0px;margin-left:5px;"),
                 $("br"),
                 $("input", "$<<button", "style<<width:20%;", "value<<이름 수정"),
                 $("input", "$<<button", "style<<width:20%;", "value<<제거")
             );
             list.children(1).onclick = (e => {
-                scan("#inner_2_2 iframe").src = `${e.target.attributes[0].nodeValue.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1`;
+                e.preventDefault();
+                scan("#inner_2_2 iframe").src = `${e.target.href.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1`;
                 location.href = "#inner_2_2"
             })
             list.children(3).onclick = (() => {

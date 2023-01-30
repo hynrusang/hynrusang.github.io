@@ -1,9 +1,5 @@
-a:hover {
-    background: rgba(128, 128, 128, 0.5);
-    text-decoration: underline;
-}
-footer td:hover {
-    background: rgba(128, 128, 128, 0.5);
+a:hover, footer td:hover {
+    background: rgba(180, 180, 180, 0.6);
 }
 @media screen and (max-width: 900px) {
     footer span, nav span{
