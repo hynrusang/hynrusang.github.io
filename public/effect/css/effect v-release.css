@@ -1,7 +1,7 @@
 a:hover, footer td:hover {
     background: rgba(180, 180, 180, 0.6);
 }
-:is(input[type=text], input[type=password]):hover {
+input:hover {
     background: rgba(180, 180, 180, 0.6);
     background-repeat: no-repeat;
     background-size: 22px;

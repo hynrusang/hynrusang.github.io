@@ -35,7 +35,7 @@ const reloadMList = () => {
             obj = $("li").add(
                 $("img", `$<<https://www.google.com/s2/favicons?domain=${db.mlist[i]}`),
                 $("a", `$<<${db.mlist[i]}`, `href<<${db.mlist[i]}`, "style<<cursor:pointer"),
-                $("input", "$<<button", "value<< / 제거")
+                $("input", "$<<button", "value<<제거")
             )
             obj.children(2).onclick = (e => {
                 if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
@@ -48,7 +48,7 @@ const reloadMList = () => {
         } else {
             obj = $("li").add(
                 $("span", `$<<${db.mlist[i]}`),
-                $("input", "$<<button", "value<< / 제거")
+                $("input", "$<<button", "value<<제거")
             )
             obj.children(1).onclick = (e => {
                 if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
@@ -86,10 +86,10 @@ const reloadYList = () => {
         for (let j of Object.keys(sort)) {
             let list = $("li").add(
                 $("img", `$<<https://www.google.com/s2/favicons?domain=https://youtube.com/`),
-                $("a", `$<<${j}`, `href<<${sort[j]}`, "style<<cursor:pointer;display:inline-block;width:80%;margin:0px;margin-left:5px;"),
+                $("a", `$<<${j}`, `href<<${sort[j]}`, "style<<cursor:pointer;display:inline-block;width:80%"),
                 $("br"),
-                $("input", "$<<button", "style<<width:20%;", "value<<이름 수정"),
-                $("input", "$<<button", "style<<width:20%;", "value<<제거")
+                $("input", "$<<button", "style<<width:20%;padding:0px;", "value<<이름 수정"),
+                $("input", "$<<button", "style<<width:20%;padding:0px;", "value<<제거")
             );
             list.children(1).onclick = (e => {
                 e.preventDefault();

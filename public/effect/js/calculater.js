@@ -178,9 +178,5 @@ const calculatorBody = class {
 }
 function calculator(e) {
     let num = getIndex(e.target.parentElement.parentElement, e.target.parentElement)
-    if (num == 1) calculatorBody.percent();
-    if (num == 2) calculatorBody.count();
-    if (num == 3) calculatorBody.parsingStatistic();
-    if (num == 4) calculatorBody.getNextPredictIsCorrectPercent();
 }
 scan("!#inner_3_2 td").forEach(obj => { obj.onclick = calculator; });
