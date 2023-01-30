@@ -85,10 +85,10 @@ const calculatorBody = class {
      */
     static #PercentToValify = dat => {
         if (dat < 0.01) {
-            alert("기본적인 확률이 너무 작아, 확률을 0.01%로 수정합니다.");
+            alert("확률이 너무 작아, 확률을 0.01%로 수정합니다.");
             return 0.01;
         } else if (99.99 < dat) {
-            alert("변화될 확률이 너무 커, 확률을 99.9%로 수정합니다.");
+            alert("확률이 너무 커, 확률을 99.9%로 수정합니다.");
             return 99.99;
         } else return dat;
     }
@@ -111,7 +111,7 @@ const calculatorBody = class {
         let p = parseFloat(scan("!td input")[0].value);
         if (p < 0.01) scan("!td input")[0].value = p = 0.01;
         else if (99.99 < p) scan("!td input")[0].value = p = 99.99;
-        if (isNaN(p)) alert("우선 기본적인 확률을 선택해주세요.");
+        if (isNaN(p)) alert("우선 기본 확률을 입력해주세요.");
         else {
             let a = parseInt(prompt("몇번 시도하실 겁니까?")), b;
             if (isNaN(a)) return;
@@ -132,7 +132,7 @@ const calculatorBody = class {
         let p = parseFloat(scan("!td input")[0].value);
         if (p < 0.01) scan("!td input")[0].value = p = 0.01;
         else if (99.99 < p) scan("!td input")[0].value = p = 99.99;
-        if (isNaN(p)) alert("우선 기본적인 확률을 선택해주세요.");
+        if (isNaN(p)) alert("우선 기본 확률을 입력해주세요.");
         else {
             const b = this.#PercentToValify(parseFloat(prompt("몇% 이상으로 되길 원하십니까? (숫자만 입력해주시오.)")));
             if (!(p <= b)) {
