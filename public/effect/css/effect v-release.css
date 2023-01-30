@@ -1,6 +1,12 @@
 a:hover, footer td:hover {
     background: rgba(180, 180, 180, 0.6);
 }
+:is(input[type=text], input[type=password]):hover {
+    background: rgba(180, 180, 180, 0.6);
+    background-repeat: no-repeat;
+    background-size: 22px;
+    background-position: left center;
+}
 @media screen and (max-width: 900px) {
     footer span, nav span{
         display: none;
