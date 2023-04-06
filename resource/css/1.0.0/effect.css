@@ -4,19 +4,19 @@ a:hover, input:hover, footer td:hover {
 
 @media screen and (max-width: 900px) {
     article, aside {
-        width: 100%;
+        width: 100% !important;
     }
     article {
-        height: calc(100% - 70px);
+        height: calc(100% - 70px) !important;
     }
     footer span, nav span{
-        display: none;
+        display: none !important;
     }
     aside {
-        height: 70px;
+        height: 70px !important;
     }
     nav {
-        flex-direction: row;
+        flex-direction: row !important;
     }
 }
 @media screen and (min-width: 1000px) {
