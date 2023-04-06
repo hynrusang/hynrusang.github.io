@@ -1,0 +1,10 @@
+{
+ "name": "N.R.M.A",
+ "icons": [
+  {
+    "src": "public/favicon.ico",
+    "sizes": "96x96",
+    "type": "image/x-icon"
+  }
+ ]
+}

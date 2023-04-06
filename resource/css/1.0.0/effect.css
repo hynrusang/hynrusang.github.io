@@ -1,0 +1,30 @@
+a:hover, input:hover, footer td:hover {
+    background-color: rgba(180, 180, 180, 0.3);
+}
+
+@media screen and (max-width: 900px) {
+    article, aside {
+        width: 100%;
+    }
+    article {
+        height: calc(100% - 70px);
+    }
+    footer span, nav span{
+        display: none;
+    }
+    aside {
+        height: 70px;
+    }
+    nav {
+        flex-direction: row;
+    }
+}
+@media screen and (min-width: 1000px) {
+    fieldset {
+        position: relative;
+        
+        left: calc(50% - 360px) !important;
+
+        width: 720px !important;
+    }
+}

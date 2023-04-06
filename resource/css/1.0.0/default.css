@@ -1,0 +1,110 @@
+* {
+    overflow: hidden;
+
+    box-sizing: border-box;
+
+    color: white;
+}
+html, body {
+    overflow: scroll;
+}
+body::-webkit-scrollbar, textarea::-webkit-scrollbar {
+    display: none;
+}
+body {
+    margin: 0px;
+
+    width: 100vw;
+    height: 100vh;
+}
+body, fieldset {
+    background: rgba(0, 0, 0, 0.8);
+}
+fieldset {
+    padding: 0px;
+}
+fieldset, form {
+    width: 100%;
+}
+fieldset input, form input, ul {
+    padding-left: 30px;
+    border-radius: 20px;
+}
+fieldset input, form input {
+    margin-top: 5px;
+    margin-bottom: 5px;
+
+    position: relative;
+    left: 10%;
+
+    width: 80%;
+    height: 35px !important;
+}
+input::placeholder, textarea::placeholder {
+    color: white;
+}
+input {
+    transition: 0.4s all;
+
+    background-color: rgba(180, 180, 180, 0.0);
+    background-size: 22px;
+    background-repeat: no-repeat;
+    background-position: 5px center;
+}
+input[type=button], input[type=submit] {
+    padding-left: 0px;
+
+    cursor: pointer;
+
+    border: none;
+}
+textarea {
+    margin-top: 1em;
+
+    width: 100%;
+    height: calc(100vh - 460px);
+
+    overflow-y: scroll;
+}
+textarea, input:not([type="button"], [type="submit"]), ul {
+    background-color: rgba(180, 180, 180, 0.3);
+}
+section::-webkit-scrollbar {
+    width: 10px;
+    
+    background: linear-gradient(rgba(0, 255, 255, 0.5), rgba(255, 0, 255, 0.5));
+}
+section::-webkit-scrollbar-thumb {
+    background: linear-gradient(rgb(0, 255, 255), rgb(255, 0, 255));
+}
+iframe {
+    width: 100%;
+    height: calc(100% -  3.51px);
+}
+
+td {
+    text-align: center; 
+}
+td * {
+    width: 100%;
+    height: 100%;
+
+    text-align: center;
+}
+li {
+    margin-top: 8px;
+    margin-bottom: 8px;
+
+    list-style: none;
+}
+li a {
+    margin:0px;
+    margin-left:5px;
+}
+a {
+    transition: 0.4s all;
+
+    margin: 10px;
+
+    text-decoration: none;
+}
