@@ -99,7 +99,7 @@ const reloadUtil = class {
                 );
                 list.children(1).onclick = e => {
                     e.preventDefault();
-                    scan("#inner_2_2 iframe").src = e.target.href.in("list?") ? `${e.target.href.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : e.target.href.replace("m.", "www.").replace("watch?v=", "embed/");
+                    scan("#inner_2_2 iframe").src = e.target.href.in("list=") ? `${e.target.href.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : e.target.href.replace("m.", "www.").replace("watch?v=", "embed/");
                     location.href = "#inner_2_2";
                 }
                 list.children(3).onclick = () => {
