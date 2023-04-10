@@ -99,8 +99,8 @@ const reloadUtil = class {
                 );
                 list.children(1).onclick = e => {
                     e.preventDefault();
-                    scan("#inner_2_2 iframe").src = `${e.target.href.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1`;
-                    location.href = "#inner_2_2"
+                    scan("#inner_2_2 iframe").src = e.target.href.in("list?") ? `${e.target.href.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : e.target.href.replace("m.", "www.").replace("watch?v=", "embed/");
+                    location.href = "#inner_2_2";
                 }
                 list.children(3).onclick = () => {
                     let value = prompt("재생목록의 이름을 무엇으로 하겠습니까? (취소나 공백을 입력하면 변경이 적용되지 않습니다.)")
