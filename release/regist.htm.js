@@ -6,9 +6,9 @@ snipe("!article")[0].reset(
         ),
         $("span", {"innerText":"Enter 키를 누르면, 자동으로 다음 절차로 넘어갑니다."}),
         $("form", {"id":"regist", "method":"post"}).add(
-            $("input", {"preValue": " ", "type":"email", "pattern":"[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z]{2,}", "style":"background-image: url('/resource/img/icon/program.png')", "placeholder":"이메일 주소 (*@*.*) - 인증에 사용됩니다.", "oninput": e => {
+            $("input", {"type":"email", "pattern":"[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z]{2,}", "style":"background-image: url('/resource/img/icon/program.png')", "placeholder":"이메일 주소 (*@*.*) - 인증에 사용됩니다.", "oninput": e => {
                 const target = e.target;
-                const preValue = target.getAttribute("preValue");
+                const preValue = target.preValue ? target.preValue : "";
                 if (preValue.indexOf("@") == preValue.length - 1) {
                     switch (e.data) {
                     case "d":
@@ -25,7 +25,7 @@ snipe("!article")[0].reset(
                         break;
                     }
                 }
-                snipe(e.target).set({"preValue": e.target.value});
+                target.preValue = target.value
             }}),
             $("input", {"type":"password", "style":"background-image: url('/resource/img/icon/lock.png')", "placeholder":"비밀번호 - 6자 이상", "autocomplete":"off"}),
             $("input", {"type":"password", "style":"background-image: url('/resource/img/icon/lock.png')", "placeholder":"비밀번호 확인", "autocomplete":"off"}),
