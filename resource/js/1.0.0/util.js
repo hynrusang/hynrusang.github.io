@@ -226,8 +226,7 @@ const CLOCK = setInterval(function () {
 
 waitFirebaseAuthInfo().then(() => {
     firebaseUtil.get("user").then(data => {
-        (data.data()) ? db = data.data() : data.ref.set(db);
-        if (localStorage.getItem("hyperlink")) localStorage.clear();
+        data.data() ? db = data.data() : data.ref.set(db);
         scan(".login input").value = db.uname;
         reloadUtil.all();
     });

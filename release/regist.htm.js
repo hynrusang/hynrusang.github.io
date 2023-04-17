@@ -9,7 +9,7 @@ snipe("!article")[0].reset(
             $("input", {"type":"email", "pattern":"[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z]{2,}", "style":"background-image: url('/resource/img/icon/program.png')", "placeholder":"이메일 주소 (*@*.*) - 인증에 사용됩니다.", "oninput": e => {
                 const target = e.target;
                 const preValue = target.preValue ? target.preValue : "";
-                if (preValue.indexOf("@") == preValue.length - 1) {
+                if (preValue.in("@") && preValue.indexOf("@") == preValue.length - 1) {
                     switch (e.data) {
                     case "d":
                         e.target.value = e.target.value + "aum.net";
