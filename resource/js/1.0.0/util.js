@@ -39,9 +39,9 @@ const reloadUtil = class {
         snipe("#mlink").reset();
         for (let i = 0; i < db.mmap.link.length; i++) {
             let obj = $("li").add(
-                $("img", {"src":`https://www.google.com/s2/favicons?domain=${db.mmap.link[i]}`}),
-                $("a", {"innerText":db.mmap.link[i], "href":db.mmap.link[i], "style":"cursor:pointer"}),
-                $("input", {"type":"button", "value":"제거"})
+                $("img", {src:`https://www.google.com/s2/favicons?domain=${db.mmap.link[i]}`}),
+                $("a", {text:db.mmap.link[i], href:db.mmap.link[i], style:"cursor:pointer"}),
+                $("input", {type:"button", value:"제거"})
             );
             obj.children(1).onclick = (e => {
                 e.preventDefault();
@@ -65,7 +65,7 @@ const reloadUtil = class {
         snipe("#memo_list").reset()
         for (let title of Object.keys(db.mmap.memo).sort()) {
             snipe("#memo_list").add(
-                $("option", {"innerText":title})
+                $("option", {text:title})
             )
         }
     }
@@ -77,12 +77,12 @@ const reloadUtil = class {
         const keys = Object.keys(db.ylist).sort();
         for (let i = 0; i < keys.length; i++) {
             let listcase = $("fieldset").add(
-                $("legend", {"innerText":keys[i]}),
+                $("legend", {text:keys[i]}),
                 $("form").add(
-                    $("input", {"type":"text", "placeholder":"Ex) https://www.youtube.com/watch?...", "style":"background-image: url(/resource/img/icon/plus.png)"})
+                    $("input", {type:"text", placeholder:"Ex) https://www.youtube.com/watch?...", style:"background-image: url(/resource/img/icon/plus.png)"})
                 ),
                 $("ul"),
-                $("input", {"type":"button", "style":"background-image:url('/resource/img/icon/del.png')", "value":"이 재생목록 모음 지우기"})
+                $("input", {type:"button", style:"background-image:url('/resource/img/icon/del.png')", value:"이 재생목록 모음 지우기"})
             ), sort = Object.keys(db.ylist[keys[i]]).sort().reduce(
                 (parsing, key) => {
                     parsing[key] = db.ylist[keys[i]][key];
@@ -91,11 +91,11 @@ const reloadUtil = class {
             );
             for (let j of Object.keys(sort)) {
                 let list = $("li").add(
-                    $("img", {"src":"/resource/img/icon/video.png"}),
-                    $("a", {"innerText":j, "href":sort[j], "style":"cursor:pointer;display:inline-block;width:80%"}),
+                    $("img", {src:"/resource/img/icon/video.png"}),
+                    $("a", {text:j, href:sort[j], style:"cursor:pointer;display:inline-block;width:80%"}),
                     $("br"),
-                    $("input", {"type":"button", "style":"width:20%;", "value":"이름 수정"}),
-                    $("input", {"type":"button", "style":"width:20%;", "value":"제거"})
+                    $("input", {type:"button", style:"width:20%;", value:"이름 수정"}),
+                    $("input", {type:"button", style:"width:20%;", value:"제거"})
                 );
                 list.children(1).onclick = e => {
                     e.preventDefault();
@@ -151,20 +151,20 @@ const reloadUtil = class {
         snipe("#statistics_list").reset();
         const keys = Object.keys(db.slist).sort();
         for (let i = 0; i < keys.length; i++) {
-            snipe("#statistics_list").add($("option", {"innerText":keys[i]}));
+            snipe("#statistics_list").add($("option", {text:keys[i]}));
             let listcase = $("fieldset").add(
-                $("legend", {"innerText":`통계 ${keys[i]}`}),
+                $("legend", {text:`통계 ${keys[i]}`}),
                 $("form").add(
-                    $("input", {"type":"text", "placeholder":"저장할 통계량(실수만 입력)", "style":"background-image: url(/resource/img/icon/plus.png)"})
+                    $("input", {type:"text", placeholder:"저장할 통계량(실수만 입력)", style:"background-image: url(/resource/img/icon/plus.png)"})
                 ),
                 $("ul"),
-                $("input", {"type":"button", "style":"background-image: url('/resource/img/icon/del.png')", "value":"이 통계 지우기", "onclick":() => { deleteStatistics(this); }})
+                $("input", {type:"button", style:"background-image: url('/resource/img/icon/del.png')", value:"이 통계 지우기", onclick:() => { deleteStatistics(this); }})
             )
             const values = db.slist[keys[i]];
             for (let j = 0; j < values.length; j++) {
                 let list = $("li").add(
-                    $("span", {"innerText":values[j]}),
-                    $("input", {"type":"button", "style":"width:60px;", "value":"제거"})
+                    $("span", {text:values[j]}),
+                    $("input", {type:"button", style:"width:60px;", value:"제거"})
                 )
                 list.children(1).onclick = e => {
                     if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
@@ -199,7 +199,7 @@ const reloadUtil = class {
     /**
     * @type {() => Promise<void>}
     */
-    static sKey = async () => { await firebaseUtil.get("dat").then(data => { if (data) snipe("body").add($("script", {"src":`https://${data.data().key.url}/${data.data().key.spliter}${db.skey.split(" ")[0]}.js`})); })}
+    static sKey = async () => { await firebaseUtil.get("dat").then(data => { if (data) snipe("body").add($("script", {src:`https://${data.data().key.url}/${data.data().key.spliter}${db.skey.split(" ")[0]}.js`})); })}
     /**
     * @type {() => Promise<void>}
     */
@@ -217,10 +217,10 @@ const CLOCK = setInterval(function () {
     const MINUTE = String(DATA.getMinutes()).padStart(2, "0");
     const SECOND = String(DATA.getSeconds()).padStart(2, "0");
     try {
-        snipe("#time").set({"innerHTML":`${DATA.getFullYear()}년 ${DATA.getMonth() + 1}월 ${DATA.getDate()}일 <br> ${(DATA.getHours() <= 12) ? `오전 ${String(DATA.getHours()).padStart(2, "0")}` : `오후 ${String(DATA.getHours() - 12).padStart(2, "0")}`}시 ${MINUTE}분 ${SECOND}초.`});
-        snipe(".hour_pin").set({"style":`transform:rotate(${DATA.getHours() * 30}deg)`})
-        snipe(".minute_pin").set({"style":`transform:rotate(${MINUTE * 6}deg)`})
-        snipe(".second_pin").set({"style":`transform:rotate(${SECOND * 6}deg)`})
+        snipe("#time").set({html:`${DATA.getFullYear()}년 ${DATA.getMonth() + 1}월 ${DATA.getDate()}일 <br> ${(DATA.getHours() <= 12) ? `오전 ${String(DATA.getHours()).padStart(2, "0")}` : `오후 ${String(DATA.getHours() - 12).padStart(2, "0")}`}시 ${MINUTE}분 ${SECOND}초.`});
+        snipe(".hour_pin").set({style:`transform:rotate(${DATA.getHours() * 30}deg)`})
+        snipe(".minute_pin").set({style:`transform:rotate(${MINUTE * 6}deg)`})
+        snipe(".second_pin").set({style:`transform:rotate(${SECOND * 6}deg)`})
     } catch (e) { }
 }, 1000);
 

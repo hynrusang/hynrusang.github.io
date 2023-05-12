@@ -1,12 +1,12 @@
 snipe("!article")[0].reset(
     $("fieldset").add(
         $("legend").add(
-            $("img", {"src":"/resource/img/icon/plus.png", "alt":"회원가입 창"}),
-            $("span", {"innerText":"회원가입"})
+            $("img", {src:"/resource/img/icon/plus.png", alt:"회원가입 창"}),
+            $("span", {text:"회원가입"})
         ),
-        $("span", {"innerText":"Enter 키를 누르면, 자동으로 다음 절차로 넘어갑니다."}),
-        $("form", {"id":"regist", "method":"post"}).add(
-            $("input", {"type":"email", "pattern":"[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z]{2,}", "style":"background-image: url('/resource/img/icon/program.png')", "placeholder":"이메일 주소 (*@*.*) - 인증에 사용됩니다.", "oninput": e => {
+        $("span", {text:"Enter 키를 누르면, 자동으로 다음 절차로 넘어갑니다."}),
+        $("form", {id:"regist", method:"post"}).add(
+            $("input", {type:"email", pattern:"[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z]{2,}", style:"background-image: url('/resource/img/icon/program.png')", placeholder:"이메일 주소 (*@*.*) - 인증에 사용됩니다.", oninput: e => {
                 const target = e.target;
                 const preValue = target.preValue ? target.preValue : "";
                 if (preValue.in("@") && preValue.indexOf("@") == preValue.length - 1) {
@@ -27,13 +27,13 @@ snipe("!article")[0].reset(
                 }
                 target.preValue = target.value
             }}),
-            $("input", {"type":"password", "style":"background-image: url('/resource/img/icon/lock.png')", "placeholder":"비밀번호 - 6자 이상", "autocomplete":"off"}),
-            $("input", {"type":"password", "style":"background-image: url('/resource/img/icon/lock.png')", "placeholder":"비밀번호 확인", "autocomplete":"off"}),
-            $("input", {"type":"submit", "value":"회원가입"}),
-            $("input", {"type":"button", "value":"로그인 화면으로 이동", "onclick":() => { loading('login'); }})
+            $("input", {type:"password", style:"background-image: url('/resource/img/icon/lock.png')", placeholder:"비밀번호 - 6자 이상", autocomplete:"off"}),
+            $("input", {type:"password", style:"background-image: url('/resource/img/icon/lock.png')", placeholder:"비밀번호 확인", autocomplete:"off"}),
+            $("input", {type:"submit", value:"회원가입"}),
+            $("input", {type:"button", value:"로그인 화면으로 이동", onclick:() => { loading('login'); }})
         )
     ),
-    $("a", {"innerText":"처음 화면으로 돌아가기", "href":"javascript:loading('index');"})
+    $("a", {text:"처음 화면으로 돌아가기", href:"javascript:loading('index');"})
 )
 scan("#regist input").focus();
 scan("!#regist input").forEach((obj, index) => {

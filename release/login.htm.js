@@ -10,11 +10,11 @@ if (!firebase.auth().currentUser) {
     snipe("!article")[0].reset(
         $("fieldset").add(
             $("legend").add(
-                $("img", {"src":"/resource/img/icon/library.png", "alt":"로그인 창"}),
-                $("span", {"text":"로그인"})
+                $("img", {src:"/resource/img/icon/library.png", alt:"로그인 창"}),
+                $("span", {text:"로그인"})
             ),
-            $("span", {"text":"Enter 키를 누르면, 자동으로 다음 절차로 넘어갑니다."}),
-            $("form", {"id":"login", "method":"post", "onsubmit": async e => {
+            $("span", {text:"Enter 키를 누르면, 자동으로 다음 절차로 넘어갑니다."}),
+            $("form", {id:"login", method:"post", onsubmit: async e => {
                 e.preventDefault();
                 await firebase.auth().signInWithEmailAndPassword(scan("!#login input")[0].value, scan("!#login input")[1].value).then(async data => {
                     if (!data.user.emailVerified) {
@@ -31,7 +31,7 @@ if (!firebase.auth().currentUser) {
                     else console.log(e);
                 });
             }}).add(
-                $("input", {"type":"email", "pattern":"[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z]{2,}", "style":"background-image: url('/resource/img/icon/program.png')", "placeholder":"이메일 주소 (*@*.*)", "oninput": e => {
+                $("input", {type:"email", pattern:"[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z]{2,}", style:"background-image: url('/resource/img/icon/program.png')", placeholder:"이메일 주소 (*@*.*)", oninput: e => {
                     const target = e.target;
                     const preValue = target.preValue ? target.preValue : "";
                     if (preValue.in("@") && preValue.indexOf("@") == preValue.length - 1) {
@@ -51,31 +51,31 @@ if (!firebase.auth().currentUser) {
                         }
                     }
                     target.preValue = target.value
-                }, "onkeypress": e => {
+                }, onkeypress: e => {
                     if (e.key === "Enter") {
                         e.preventDefault();
                         scan("!#login input")[getIndex(scan("!#login input"), e.target) + 1].focus();
                     }
                 }}),
-                $("input", {"type":"password", "style":"background-image: url('/resource/img/icon/lock.png')", "placeholder":"비밀번호", "autocomplete":"off"}),
-                $("input", {"type":"submit", "value":"로그인"}),
-                $("input", {"type":"button", "value":"비밀번호 초기화", "onclick": () => {
+                $("input", {type:"password", style:"background-image: url('/resource/img/icon/lock.png')", placeholder:"비밀번호", autocomplete:"off"}),
+                $("input", {type:"submit", value:"로그인"}),
+                $("input", {type:"button", value:"비밀번호 초기화", onclick: () => {
                     resetPassword(scan("!#login input")[0].value); 
                 }}),
-                $("input", {"type":"button", "value":"회원가입 화면으로 이동", "onclick": () => { loading('regist'); }})
+                $("input", {type:"button", value:"회원가입 화면으로 이동", onclick: () => { loading('regist'); }})
             ),
-            $("span", {"style":"display:inline-block;width:100%;text-align:center;", "text":"인증되지 않은 계정으로 로그인 할 시, 인증 메일을 다시 보냅니다."}),
+            $("span", {style:"display:inline-block;width:100%;text-align:center;", text:"인증되지 않은 계정으로 로그인 할 시, 인증 메일을 다시 보냅니다."}),
         ),
-        $("a", {"text":"처음 화면으로 돌아가기", "href":"javascript:loading('index');"})
+        $("a", {text:"처음 화면으로 돌아가기", href:"javascript:loading('index');"})
     )
     scan("#login input").focus();
 } else {
     snipe("!article")[0].reset(
-        $("fieldset", {"id":"user_field"}).add(
+        $("fieldset", {id:"user_field"}).add(
             $("legend").add(
-                $("span", {"text":db.uname}),
+                $("span", {text:db.uname}),
             ),
-            $("input", {"type":"button", "style":"background-image: url('/resource/img/icon/save.png')", "value":"이름 변경", "onclick": () => {
+            $("input", {type:"button", style:"background-image: url('/resource/img/icon/save.png')", value:"이름 변경", onclick: () => {
                 const temp = prompt("당신의 새로운 이름을 알려주세요.\n(아무 값도 입력하지 않으면 변경을 취소합니다.)");
                 if (temp && temp != "") {
                     db.uname = temp;
@@ -83,13 +83,13 @@ if (!firebase.auth().currentUser) {
                     firebaseUtil.sync();
                 }
             }}),
-            $("input", {"type":"button", "style":"background-image: url('/resource/img/icon/lock.png')", "value":"비밀번호 변경 이메일 보내기", "onclick": () => {
+            $("input", {type:"button", style:"background-image: url('/resource/img/icon/lock.png')", value:"비밀번호 변경 이메일 보내기", onclick: () => {
                 resetPassword(firebase.auth().currentUser.email);
             }}),
-            $("input", {"type":"button", "style":"background-image: url('/resource/img/icon/setting.png')", "value":"로그아웃", "onclick": async () => {
+            $("input", {type:"button", style:"background-image: url('/resource/img/icon/setting.png')", value:"로그아웃", onclick: async () => {
                 await firebase.auth().signOut().then(() => { location.reload(); })       
             }}),
-            $("input", {"type":"button", "style":"background-image: url('/resource/img/icon/del.png')", "value":"회원 탈퇴", "onclick": async () => {
+            $("input", {type:"button", style:"background-image: url('/resource/img/icon/del.png')", value:"회원 탈퇴", onclick: async () => {
                 if (confirm("정말로 이 계정을 삭제하시겠습니까?\n(이 결정은 번복되지 않습니다.)\n(추가로 다시 한 번 물어보는 절차도 없습니다.)")) {
                     await firebaseUtil.get("user").then(async data => { await data.ref.delete() });
                     await firebase.auth().currentUser.delete().then(() => { 
@@ -99,6 +99,6 @@ if (!firebase.auth().currentUser) {
                 }
             }}),
         ),
-        $("a", {"innerText":"처음 화면으로 돌아가기", "href":"javascript:loading('index');"})
+        $("a", {text:"처음 화면으로 돌아가기", href:"javascript:loading('index');"})
     )
 }
