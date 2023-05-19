@@ -2,16 +2,15 @@ const firebaseUtil = class {
     /**
     * @type {() => Promise<void>}
     */
-    static sync = async () => { await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(db); }
+    static sync = async () => { await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(JSON.unlivedata(db)) }
 
     /**
      * * @type {(target: string) => Promise<null | object>}
      */
     static get = async target => {
-        let info = null;
-        if (target == "dat") await firebase.firestore().collection("dat").doc("surface").get().then(data => { info = data; }).catch(e => { });
-        else if (target == "user") await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).get().then(data => { info = data; }).catch(e => { });
-        return info;
+        return (target == "dat") ? await firebase.firestore().collection("dat").doc("surface").get().then(data => data).catch(() => null) 
+            : (target == "user") ? await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).get().then(data => data).catch(() => null) 
+            : null;
     }
 }
 /**
