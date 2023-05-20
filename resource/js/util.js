@@ -3,15 +3,6 @@ try {
 } catch { 
     alert("웹 사이트 쿠키를 허용해주세요.\nchrome://settings/cookies")
 }
-
-const swip = e => {
-    const index = (e) ? (e.target.nodeName != "TD") ? [localStorage.getItem("page"), getIndex(scan("!footer td"), e.target.parentElement)] : [localStorage.getItem("page"), getIndex(scan("!footer td"), e.target)] : [0, localStorage.getItem("page")];
-    if (e) localStorage.setItem("page", index[1]);
-    scan("!footer td")[index[0]].style.background = null;
-    scan("!main")[index[0]].setAttribute("hidden", null);
-    scan("!footer td")[index[1]].style.background = "rgba(180, 180, 180, 0.3)";
-    scan("!main")[index[1]].removeAttribute("hidden");
-}
 const CLOCK = setInterval(function () {
     const DATA = new Date();
     const MINUTE = String(DATA.getMinutes()).padStart(2, "0");
@@ -49,17 +40,5 @@ scan("#ylist-input").onsubmit = (e => {
         e.target[1].value = "";
     }
 })
-scan("#skey_input").onsubmit = (e => {
-    e.preventDefault();
-    if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
-    else {
-        firebaseUtil.get("dat").then(async data => {
-            if (data) {
-                db.skey.value = e.target[0].value;
-                await firebaseUtil.sync().then(() => { location.reload(); })
-            } else alert("관리자 권한이 없는 사람은 특수문서에 링크하실 수 없습니다.");
-        })
-    }
-})
-scan("!footer td").forEach(obj => { obj.onclick = swip; });
-swip();
+__$$CURRENTFRAGMENT.value = parseInt(localStorage.getItem("page"));
+scan("!footer td").forEach((obj, index) => { obj.onclick = () => __$$CURRENTFRAGMENT.value = index; })

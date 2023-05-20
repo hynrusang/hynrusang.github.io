@@ -11,8 +11,8 @@
     border: 0px;
     width: 160px;
 }
-[hidden] {
-    display: none !important;
+.selected {
+    background: rgba(180, 180, 180, 0.3);
 }
 
 div.clock {

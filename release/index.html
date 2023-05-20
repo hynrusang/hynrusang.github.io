@@ -12,34 +12,17 @@
     <link rel="stylesheet" href="/resource/css/init.css">
 </head>
 <body>
-    <main>
+    <fragment rid="page"></fragment>
+    <main id="youtube" style="display: none">
         <aside>
             <nav>
-                <a href="javascript:window.open('https://google.com/')"><img src="https://www.google.com/s2/favicons?domain=https://www.google.com/" alt="구글로 이동"><span>구글</span></a>
-                <a href="javascript:if (window.innerWidth>450) { window.open('https://www.naver.com/'); } else { window.open('https://m.naver.com'); }"><img src="https://www.google.com/s2/favicons?domain=https://www.naver.com/" alt="네이버로 이동"><span>네이버</span></a>
-                <a href="javascript:window.open('https://www.daum.net/')"><img src="https://www.google.com/s2/favicons?domain=https://m.daum.net/" alt="다음으로 이동"><span>다음</span></a>
-                <a href="javascript:window.open('https://duckduckgo.com/')"><img src="https://www.google.com/s2/favicons?domain=https://duckduckgo.com/" alt="덕덕고로 이동"><span>덕덕고</span></a>
-                <a href="javascript:window.open('https://chat.openai.com/chat')"><img src="https://www.google.com/s2/favicons?domain=https://chat.openai.com/" alt="chatGPT로 이동"><span>chatGPT</span></a>
-                <a href="javascript:window.open('https://papago.naver.com/')"><img src="https://www.google.com/s2/favicons?domain=https://papago.naver.com/" alt="papago로 이동"><span>papago</span></a>
-                <a href="javascript:window.open('https://youtube.com/')"><img src="https://www.google.com/s2/favicons?domain=https://youtube.com/" alt="유튜브로 이동"><span>유튜브</span></a>
-                <a href="javascript:window.open('https://twitch.tv/')"><img src="https://www.google.com/s2/favicons?domain=https://twitch.tv/" alt="트위치로 이동"><span>트위치</span></a>
-            </nav>
-        </aside>
-        <article>
-            <h2 hidden>main screen</h2>
-            <fragment rid="mscreen"></fragment>
-        </article>
-    </main>
-    <main hidden>
-        <aside>
-            <nav>
-                <a href="#inner_2_1"><img src="/resource/img/icon/save.png" alt="유튜브 재생목록 저장소"><span>유튜브 재생목록 저장소</span></a>
-                <a href="#inner_2_2"><img src="https://www.google.com/s2/favicons?domain=https://youtube.com/" alt="유튜브 재생목록 재생기"><span>유튜브 재생목록 재생기</span></a>
+                <a href="#storage"><img src="/resource/img/icon/save.png" alt="유튜브 재생목록 저장소"><span>유튜브 재생목록 저장소</span></a>
+                <a href="#player"><img src="https://www.google.com/s2/favicons?domain=https://youtube.com/" alt="유튜브 재생목록 재생기"><span>유튜브 재생목록 재생기</span></a>
             </nav>
         </aside>
         <article>
             <h2 hidden>youtube videolist manager</h2>
-            <section id="inner_2_1">
+            <section id="storage">
                 <h2 hidden>youtube videolist saver</h2>
                 <form id="ylist-input">
                     <fieldset>
@@ -49,46 +32,16 @@
                 </form>
                 <div id="ylist"></div>
             </section>
-            <section id="inner_2_2">
+            <section id="player">
                 <h2 hidden>youtube videolist viewer</h2>
                 <iframe allowfullscreen></iframe>
             </section>
         </article>
     </main>
-    <main hidden>
-        <aside>
-        </aside>
-        <article>
-            <h2 hidden>site setting</h2>
-            <section>
-                <h2 hidden>site setting</h2>
-                <fieldset>
-                    <legend>사이트 검증 상태</legend>
-                    <div style="position:relative;left:calc(50% - 180px);"><img src="/resource/img/html-validator-pass.png" style="border:0; width:360px; height:60px; cursor:pointer;" onclick="window.open('https://validator.w3.org/nu/?doc=https%3A%2F%2Fhynrusang.github.io%2Frelease%2F')" alt="html validator pass"></div>
-                </fieldset>
-                <fieldset>
-                    <legend><img src="/resource/img/icon/lock.png" alt="특수문서 키"><span>특수문서 키 (관리자 전용)</span></legend>
-                    <form id="skey_input">
-                        <input type="text" style="background-image:url('/resource/img/icon/setting.png');">
-                        <input type="submit" style="background-image: url('/resource/img/icon/save.png');" value="값 저장">
-                    </form>
-                </fieldset>
-            </section>
-        </article>
-    </main>
-    <main hidden>
-        <aside></aside>
-        <article>
-            <h2 hidden>secret document</h2>
-            <fieldset>
-                <p style="text-align: center;">죄송하지만... 연결할 특수 문서가 없는 것 같네요...</p>
-            </fieldset>
-        </article>
-    </main>
     <footer>
         <table>
             <tr>
-                <td style="background: rgba(180, 180, 180, 0.3);"><img src="favicon.ico" alt="사이트 메인"><span>사이트 메인</span></td>
+                <td class="selected"><img src="favicon.ico" alt="사이트 메인"><span>사이트 메인</span></td>
                 <td><img src="https://www.google.com/s2/favicons?domain=https://youtube.com/" alt="재생목록 플레이어"><br><span>재생목록 플레이어</span></td>
                 <td><img src="/resource/img/icon/setting.png" alt="설정"><br><span>설정</span></td>
                 <td><img src="/resource/img/icon/lock.png" alt="특수문서"><br><span>특수문서</span></td>
@@ -96,16 +49,16 @@
         </table>
     </footer>
     <script src="https://hynrusang.github.io/js-lib/jade.js">
-        dynamic, release;
-        advanced, release;
+        dynamic, developer;
+        advanced, developer;
         livedata, developer;
     </script>
     <jade src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></jade>
     <jade src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></jade>
     <jade src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></jade>
-    <jade src="/resource/js/database.js"></jade>
+    <jade src="database.js"></jade>
+    <jade src="fragment.js"></jade>
     <jade src="/resource/js/firebaseUtil.js"></jade>
     <jade src="/resource/js/util.js"></jade>
-    <jade src="fragment.js"></jade>
 </body>
 </html>

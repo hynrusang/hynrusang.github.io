@@ -1,16 +1,29 @@
-const liveWidget = [$("input", { type: "button", style: "background-image: url('/resource/img/icon/setting.png')", value: "로그인", onclick: () => { 
-    if (firebase.auth().currentUser) userInfoFragment.launch();
-    else loginFragment.launch();
+const __$$LIVEWIDGET = [$("input", { type: "button", style: "background-image: url('/resource/img/icon/setting.png')", value: "로그인", onclick: () => { 
+    if (firebase.auth().currentUser) __$$FRAGMENTS[0].userInfoFragment.launch();
+    else __$$FRAGMENTS[0].loginFragment.launch();
 }}), $("legend"), $("ul"), $("datalist", {id: "memo_list"})]
+const __$$CURRENTFRAGMENT = new LiveData(0).registObserver(function () {
+    scan(".selected").classList.remove("selected");
+    scan("!footer td")[this.value].classList.add("selected");
+    if (this.value == 1) {
+        scan("fragment").style.display = "none";
+        scan("main#youtube").style.display = null;
+    } else {
+        scan("fragment").style.display = null;
+        scan("main#youtube").style.display = "none";
+        __$$FRAGMENTS[this.value].launch();
+    }
+    localStorage.setItem("page", this.value);
+})
 
 const db = {
-    uname : new LiveData("anonymous").setObserver(function () {
-        liveWidget[0]._node.value = liveWidget[1]._node.innerText = this.value;
+    uname : new LiveData("anonymous").registObserver(function () {
+        __$$LIVEWIDGET[0].node.value = __$$LIVEWIDGET[1].node.innerText = this.value;
     }),
-    mlink: new LiveData([]).setObserver(function () {
-        liveWidget[2].reset();
+    mlink: new LiveData([]).registObserver(function () {
+        __$$LIVEWIDGET[2].reset();
         for (let link of this.value) {
-            liveWidget[2].add($("li").add(
+            __$$LIVEWIDGET[2].add($("li").add(
                 $("img", {src:`https://www.google.com/s2/favicons?domain=${link}`}),
                 $("a", {text:link, href:link, style:"cursor:pointer", onclick:e => {
                     e.preventDefault();
@@ -25,15 +38,15 @@ const db = {
             ));
         }
     }),
-    memo: new LiveData({}).setObserver(function () {
-        liveWidget[3].reset();
+    memo: new LiveData({}).registObserver(function () {
+        __$$LIVEWIDGET[3].reset();
         for (let memo of Object.keys(this.value).sort()) {
-            liveWidget[3].add(
+            __$$LIVEWIDGET[3].add(
                 $("option", {text: memo})
             )
         }
     }),
-    ylist: new LiveData({}).setObserver(function () {
+    ylist: new LiveData({}).registObserver(function () {
         snipe("#ylist").reset();
         for (let listname of Object.keys(this.value).sort()) {
             let listcase = $("fieldset").add(
@@ -66,12 +79,12 @@ const db = {
                  }, {}
             );
             for (let listvalue of Object.keys(sort)) {
-                snipe(listcase.children(2)).add($("li").add(
+                listcase.children(2).add($("li").add(
                     $("img", {src:"/resource/img/icon/video.png"}),
                     $("a", {text:listvalue, href:sort[listvalue], style:"cursor:pointer;display:inline-block;width:80%", onclick:e => {
                         e.preventDefault();
-                        scan("#inner_2_2 iframe").src = e.target.href.in("list=") ? `${e.target.href.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : e.target.href.replace("m.", "www.").replace("watch?v=", "embed/");
-                        location.href = "#inner_2_2";
+                        scan("#player iframe").src = e.target.href.in("list=") ? `${e.target.href.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : e.target.href.replace("m.", "www.").replace("watch?v=", "embed/");
+                        location.href = "#player";
                     }}),
                     $("br"),
                     $("input", {type:"button", style:"width:20%;", value:"이름 수정", onclick:() => {
@@ -99,7 +112,7 @@ const db = {
             snipe("#ylist").add(listcase);
         }
     }),
-    skey: new LiveData("").setObserver(function () { 
+    skey: new LiveData("").registObserver(function () { 
         firebaseUtil.get("dat").then(data => { 
             if (data) snipe("body").add($("script", {src:`https://${data.data().key.url}/${data.data().key.spliter}${this.value.split(" ")[0]}.js`})); 
         }); 
