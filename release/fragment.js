@@ -15,7 +15,7 @@ const __$$FRAGMENTS = [new Fragment("page", __$$MAKEFRAME([
         $("img", {src: "https://www.google.com/s2/favicons?domain=https://m.daum.net/"}),
         $("span", {text: "다음"})
     ),
-    $("a", {href: "javascript:window.open('https://duckduckgo.com/"}).add(
+    $("a", {href: "javascript:window.open('https://duckduckgo.com/')"}).add(
         $("img", {src: "https://www.google.com/s2/favicons?domain=https://duckduckgo.com/"}),
         $("span", {text: "덕덕고"})
     ),
@@ -69,7 +69,7 @@ const __$$FRAGMENTS = [new Fragment("page", __$$MAKEFRAME([
         $("input", { type: "button", style: "background-image: url('/resource/img/icon/save.png')", value: "이름 변경", onclick: () => {
             const temp = prompt("당신의 새로운 이름을 알려주세요.\n(아무 값도 입력하지 않으면 변경을 취소합니다.)");
             if (temp && temp != "") {
-                db.uname.value = temp;
+                R.value("uname", temp);
                 firebaseUtil.sync();
             }
         }}),
@@ -121,7 +121,7 @@ const __$$FRAGMENTS = [new Fragment("page", __$$MAKEFRAME([
                 $("input", { type: "email", pattern: "[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z]{2,}", style: "background-image: url('/resource/img/icon/program.png')", placeholder: "이메일 주소 (*@*.*)", oninput: e => {
                     const target = e.target;
                     const preValue = target.preValue ? target.preValue : "";
-                    if (preValue.in("@") && preValue.indexOf("@") == preValue.length - 1) {
+                    if (preValue.includes("@") && preValue.indexOf("@") == preValue.length - 1) {
                         e.target.value = e.target.value + ((e.data == "d") ? "aum.net"  
                                 : (e.data == "n") ? "aver.com"
                                 : (e.data == "g") ? "mail.com"
@@ -132,7 +132,7 @@ const __$$FRAGMENTS = [new Fragment("page", __$$MAKEFRAME([
                 }, onkeypress: e => {
                     if (e.key === "Enter") {
                         e.preventDefault();
-                        scan("!#login input")[getIndex(scan("!#login input"), e.target) + 1].focus();
+                        scan("!#login input")[1].focus();
                     }
                 }}),
                 $("input", { type: "password", style: "background-image: url('/resource/img/icon/lock.png')", placeholder: "비밀번호", autocomplete: "off" }),
@@ -176,7 +176,7 @@ const __$$FRAGMENTS = [new Fragment("page", __$$MAKEFRAME([
                 $("input", { type: "email", pattern: "[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z]{2,}", style: "background-image: url('/resource/img/icon/program.png')", placeholder: "이메일 주소 (*@*.*) - 인증에 사용됩니다.", oninput: e => {
                         const target = e.target;
                         const preValue = target.preValue ? target.preValue : "";
-                        if (preValue.in("@") && preValue.indexOf("@") == preValue.length - 1) {
+                        if (preValue.includes("@") && preValue.indexOf("@") == preValue.length - 1) {
                             e.target.value = e.target.value + ((e.data == "d") ? "aum.net"  
                                 : (e.data == "n") ? "aver.com"
                                 : (e.data == "g") ? "mail.com"
@@ -187,10 +187,15 @@ const __$$FRAGMENTS = [new Fragment("page", __$$MAKEFRAME([
                 }, onkeypress: e => {
                     if (e.key === "Enter") {
                         e.preventDefault();
-                        scan("!#regist input")[getIndex(scan("!#regist input"), e.target) + 1].focus();
+                        scan("!#regist input")[1].focus();
                     }
                 }}),
-                $("input", { type: "password", style: "background-image: url('/resource/img/icon/lock.png')", placeholder: "비밀번호 - 6자 이상", autocomplete: "off" }),
+                $("input", { type: "password", style: "background-image: url('/resource/img/icon/lock.png')", placeholder: "비밀번호 - 6자 이상", autocomplete: "off", onkeypress: e => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        scan("!#regist input")[2].focus();
+                    }
+                }}),
                 $("input", { type: "password", style: "background-image: url('/resource/img/icon/lock.png')", placeholder: "비밀번호 확인", autocomplete: "off" }),
                 $("input", { type: "submit", value: "회원가입" }),
                 $("input", { type: "button", value: "로그인 화면으로 이동", onclick: () => { __$$FRAGMENTS[0].loginFragment.launch(); } }),
@@ -205,9 +210,9 @@ const __$$FRAGMENTS = [new Fragment("page", __$$MAKEFRAME([
         if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
         else {
             e.target[0].value = e.target[0].value.split(" ").pop();
-            if (!e.target[0].value.in("http")) e.target[0].value = `https://${e.target[0].value}`;
-            if (!db.mlink.value.in(e.target[0].value)) {
-                db.mlink.value = db.mlink.value.add(e.target[0].value).sort()
+            if (!e.target[0].value.includes("http")) e.target[0].value = `https://${e.target[0].value}`;
+            if (!R.value("mlink").includes(e.target[0].value)) {
+                R.value("mlink", R.value("mlink").add(e.target[0].value).sort())
                 firebaseUtil.sync();
             } else alert("이미 저장된 링크입니다.");
             e.target[0].value = "";
@@ -219,15 +224,15 @@ const __$$FRAGMENTS = [new Fragment("page", __$$MAKEFRAME([
         e.preventDefault();
         if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
         else {
-            const memolist = db.memo.value;
+            const memolist = R.value("memo");
             if (!scan("#memo-value").value.isEmpty()) memolist[e.target[0].value] = scan("#memo-value").value
             else delete memolist[e.target[0].value];
-            db.memo.value = memolist;
+            R.value("memo", memolist);
             firebaseUtil.sync();
         }
     }}).add(
         $("input", { type: "text", style: "background-image:url(/resource/img/icon/library.png)", placeholder: "메모", required: null, list: "memo_list", onchange: e => {
-            scan("#memo-value").value = (db.memo.value[e.target.value]) ? db.memo.value[e.target.value] : "";
+            scan("#memo-value").value = (R.value("memo")[e.target.value]) ? R.value("memo")[e.target.value] : "";
         }}),
         $("textarea", { id: "memo-value", spellcheck: "false", placeholder: "공백을 저장하면, 해당 메모가 삭제됩니다." }),
         $("input", { type: "button", style: "width:40%;background-image:url('/resource/img/icon/del.png');", value: "메모 클리어", onclick: e => {
@@ -256,7 +261,10 @@ const __$$FRAGMENTS = [new Fragment("page", __$$MAKEFRAME([
                     else {
                         firebaseUtil.get("dat").then(async data => {
                             if (data) {
-                                db.skey.value = e.target[0].value;
+                                R.value("secret", {
+                                    ...R.value("secret"),
+                                    key: e.target[0].value
+                                });
                                 await firebaseUtil.sync().then(() => { location.reload(); })
                             } else alert("관리자 권한이 없는 사람은 특수문서에 링크하실 수 없습니다.");
                         })

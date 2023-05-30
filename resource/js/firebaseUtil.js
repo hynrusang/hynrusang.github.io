@@ -2,7 +2,7 @@ const firebaseUtil = class {
     /**
     * @type {() => Promise<void>}
     */
-    static sync = async () => { await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(JSON.unlivedata(db)) }
+    static sync = async () => { await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(R.toObject()) }
 
     /**
      * * @type {(target: string) => Promise<null | object>}

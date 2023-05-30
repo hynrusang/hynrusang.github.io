@@ -19,11 +19,11 @@ waitFirebaseAuthInfo().then(() => {
     firebaseUtil.get("user").then(data => {
         const rdb = data.data();
         if (rdb) {
-            for (let key of Object.keys(rdb)) {
-                if (["uname", "mlink", "memo", "ylist", "skey"].includes(key)) db[key].value = data.data()[key];
-                else db[key] = data.data()[key]
-            }
-        } else data.ref.set(JSON.unlivedata(db))
+            for (let key of Object.keys(rdb)) R.value(key, data.data()[key]);
+        } else {
+            R.value("uname", "anonymous");
+            data.ref.set(R.toObject())
+        }
     });
 })
 
@@ -31,10 +31,10 @@ scan("#ylist-input").onsubmit = (e => {
     e.preventDefault();
     if (!firebase.auth().currentUser) alert("먼저 로그인을 해 주십시오.");
     else {
-        let new_ylist = db.ylist.value;
-        if (!Object.keys(new_ylist).in(e.target[1].value)) {
+        let new_ylist = R.value("ylist");
+        if (!Object.keys(new_ylist).includes(e.target[1].value)) {
             new_ylist[e.target[1].value] = { }
-            db.ylist.value = new_ylist;
+            R.value("ylist", new_ylist);
             firebaseUtil.sync();
         } else alert("해당 재생목록 모음은 이미 존재합니다.");
         e.target[1].value = "";
@@ -42,3 +42,7 @@ scan("#ylist-input").onsubmit = (e => {
 })
 __$$CURRENTFRAGMENT.value = parseInt(localStorage.getItem("page"));
 scan("!footer td").forEach((obj, index) => { obj.onclick = () => __$$CURRENTFRAGMENT.value = index; })
+Array.prototype.edit = function (data, toReplace) {
+    this[this.indexOf(data)] = toReplace;
+    return this;
+}

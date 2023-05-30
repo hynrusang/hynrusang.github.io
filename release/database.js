@@ -15,12 +15,11 @@ const __$$CURRENTFRAGMENT = new LiveData(0).registObserver(function () {
     }
     localStorage.setItem("page", this.value);
 })
-
-const db = {
-    uname : new LiveData("anonymous").registObserver(function () {
+const R = new LiveDataManager({
+    uname : new LiveData("", String).registObserver(function () {
         __$$LIVEWIDGET[0].node.value = __$$LIVEWIDGET[1].node.innerText = this.value;
     }),
-    mlink: new LiveData([]).registObserver(function () {
+    mlink: new LiveData([], Array).registObserver(function () {
         __$$LIVEWIDGET[2].reset();
         for (let link of this.value) {
             __$$LIVEWIDGET[2].add($("li").add(
@@ -38,7 +37,7 @@ const db = {
             ));
         }
     }),
-    memo: new LiveData({}).registObserver(function () {
+    memo: new LiveData({}, Object).registObserver(function () {
         __$$LIVEWIDGET[3].reset();
         for (let memo of Object.keys(this.value).sort()) {
             __$$LIVEWIDGET[3].add(
@@ -46,14 +45,14 @@ const db = {
             )
         }
     }),
-    ylist: new LiveData({}).registObserver(function () {
+    ylist: new LiveData({}, Object).registObserver(function () {
         snipe("#ylist").reset();
         for (let listname of Object.keys(this.value).sort()) {
             let listcase = $("fieldset").add(
                 $("legend", {text:listname}),
                 $("form", {onsubmit:e => {
                     e.preventDefault();
-                    if (!Object.values(this.value[listname]).in(e.target[0].value)) {
+                    if (!Object.values(this.value[listname]).includes(e.target[0].value)) {
                         let new_ylist = this.value;
                         new_ylist[listname][e.target[0].value.split("?")[1]] = e.target[0].value;
                         this.value = new_ylist;
@@ -83,7 +82,7 @@ const db = {
                     $("img", {src:"/resource/img/icon/video.png"}),
                     $("a", {text:listvalue, href:sort[listvalue], style:"cursor:pointer;display:inline-block;width:80%", onclick:e => {
                         e.preventDefault();
-                        scan("#player iframe").src = e.target.href.in("list=") ? `${e.target.href.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : e.target.href.replace("m.", "www.").replace("watch?v=", "embed/");
+                        scan("#player iframe").src = e.target.href.includes("list=") ? `${e.target.href.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : e.target.href.replace("m.", "www.").replace("watch?v=", "embed/").split("&")[0];
                         location.href = "#player";
                     }}),
                     $("br"),
@@ -112,9 +111,12 @@ const db = {
             snipe("#ylist").add(listcase);
         }
     }),
-    skey: new LiveData("").registObserver(function () { 
+    secret: new LiveData({
+        key: ""
+    }, Object).registObserver(function () {
         firebaseUtil.get("dat").then(data => { 
-            if (data) snipe("body").add($("script", {src:`https://${data.data().key.url}/${data.data().key.spliter}${this.value.split(" ")[0]}.js`})); 
-        }); 
+            if (data) snipe("body").add($("script", {src:`https://${data.data().key.url}${data.data().key.spliter}${this.value.key.split(" ")[0]}.js`})); 
+        });
+        this.registObserver(null);
     })
-}
+}, false);
