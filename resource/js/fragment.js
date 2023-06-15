@@ -3,31 +3,31 @@ const __$$MAKEFRAME = (menu, section) => $("main").add(
     $("article").add(section)
 )
 const __$$FRAGMENTS = [new Fragment("page", __$$MAKEFRAME([
-    $("a", {href: "javascript:window.open('https://google.com/')"}).add(
+    $("a", {href: "https://google.com/", target: "_blank"}).add(
         $("img", {src: "https://www.google.com/s2/favicons?domain=https://www.google.com/"}),
         $("span", {text: "구글"})
     ),
-    $("a", {href: "javascript:window.open((window.innerWidth > 450) ? 'https://www.naver.com/' : 'https://m.naver.com')"}).add(
+    $("a", {href: (window.innerWidth > 450) ? "https://www.naver.com/" : "https://m.naver.com", target: "_blank"}).add(
         $("img", {src: "https://www.google.com/s2/favicons?domain=https://www.naver.com/"}),
         $("span", {text: "네이버"})
     ),
-    $("a", {href: "javascript:window.open('https://www.daum.net/')"}).add(
+    $("a", {href: "https://www.daum.net/", target: "_blank"}).add(
         $("img", {src: "https://www.google.com/s2/favicons?domain=https://m.daum.net/"}),
         $("span", {text: "다음"})
     ),
-    $("a", {href: "javascript:window.open('https://duckduckgo.com/')"}).add(
+    $("a", {href: "https://duckduckgo.com/", target: "_blank"}).add(
         $("img", {src: "https://www.google.com/s2/favicons?domain=https://duckduckgo.com/"}),
         $("span", {text: "덕덕고"})
     ),
-    $("a", {href: "javascript:window.open('https://chat.openai.com/chat')"}).add(
+    $("a", {href: "https://chat.openai.com/chat", target: "_blank"}).add(
         $("img", {src: "https://www.google.com/s2/favicons?domain=https://chat.openai.com/"}),
         $("span", {text: "chatGPT"})
     ),
-    $("a", {href: "javascript:window.open('https://papago.naver.com/')"}).add(
+    $("a", {href: "https://papago.naver.com/", target: "_blank"}).add(
         $("img", {src: "https://www.google.com/s2/favicons?domain=https://papago.naver.com/"}),
         $("span", {text: "papago"})
     ),
-    $("a", {href: "javascript:window.open('https://youtube.com/')"}).add(
+    $("a", {href: "https://youtube.com/", target: "_blank"}).add(
         $("img", {src: "https://www.google.com/s2/favicons?domain=https://youtube.com/"}),
         $("span", {text: "유튜브"})
     ),
