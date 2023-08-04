@@ -267,7 +267,7 @@ const subFragment = {
                             style: "background-image: url(/resource/img/icon/save.png); width: 100%;",
                             placeholder: "메모 제목",
                             list: "memo",
-                            onchange: e => scan("textarea").value = DB.value("memo")[e.target.value] ?? ""
+                            oninput: e => scan("textarea").value = DB.value("memo")[e.target.value] ?? ""
                         }),
                         $("input", {
                             type: "button",
