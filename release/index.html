@@ -2,7 +2,6 @@
 <html lang="ko">
 <head>
     <title>Necronomicon</title>
-    <meta http-equiv="X-Frame-Options" content="deny">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
     <meta name="author" content="김민기">
@@ -12,53 +11,34 @@
     <link rel="stylesheet" href="/resource/css/init.css">
 </head>
 <body>
+    <input class="menuicon" style="background-image: url(/resource/img/icon/menu.png);" type="button">
+    <h1 id="toast"></h1>
+    <details>
+        <summary></summary>
+        <fragment rid="menu"></fragment>
+    </details>
     <fragment rid="page"></fragment>
-    <main id="youtube" style="display: none">
-        <aside>
-            <nav>
-                <a href="#storage"><img src="/resource/img/icon/save.png" alt="유튜브 재생목록 저장소"><span>유튜브 재생목록 저장소</span></a>
-                <a href="#player"><img src="https://www.google.com/s2/favicons?domain=https://youtube.com/" alt="유튜브 재생목록 재생기"><span>유튜브 재생목록 재생기</span></a>
-            </nav>
-        </aside>
-        <article>
-            <h2 hidden>youtube videolist manager</h2>
-            <section id="storage">
-                <h2 hidden>youtube videolist saver</h2>
-                <form id="ylist-input">
-                    <fieldset>
-                        <legend>유튜브 재생목록 모음으로 쓸 이름을 입력해주세요.</legend>
-                        <input type="text" placeholder="재생목록 모음의 이름" style="background-image: url(/resource/img/icon/save.png)">
-                    </fieldset>
-                </form>
-                <div id="ylist"></div>
-            </section>
-            <section id="player">
-                <h2 hidden>youtube videolist viewer</h2>
-                <iframe allowfullscreen></iframe>
-            </section>
-        </article>
+    <main style="display: none" player>
+        <iframe id="player" class="media" allowfullscreen></iframe>
+        <span id="playlistname"></span>
     </main>
     <footer>
-        <table>
-            <tr>
-                <td class="selected"><img src="favicon.ico" alt="사이트 메인"><span>사이트 메인</span></td>
-                <td><img src="https://www.google.com/s2/favicons?domain=https://youtube.com/" alt="재생목록 플레이어"><br><span>재생목록 플레이어</span></td>
-                <td><img src="/resource/img/icon/setting.png" alt="설정"><br><span>설정</span></td>
-                <td><img src="/resource/img/icon/lock.png" alt="특수문서"><br><span>특수문서</span></td>
-            </tr>
-        </table>
+        <input type="button" style="background-image: url(favicon.ico)" class="current" target="main" value="메인">
+        <input type="button" style="background-image: url(https://www.google.com/s2/favicons?domain=https://youtube.com/)" target="video" value="플레이어">
+        <input type="button" style="background-image: url(/resource/img/icon/setting.png)" target="setting" value="설정">
+        <input type="button" style="background-image: url(/resource/img/icon/lock.png)" target="secret" value="특수문서">
     </footer>
     <script src="https://hynrusang.github.io/js-lib/jade.js">
-        dynamic, developer;
-        advanced, developer;
-        livedata, developer;
+        dynamic, prerelease;
+        advanced, prerelease;
+        livedata, prerelease;
+        tagx, prerelease
     </script>
     <jade src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></jade>
     <jade src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></jade>
     <jade src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></jade>
-    <jade src="database.js"></jade>
-    <jade src="fragment.js"></jade>
-    <jade src="/resource/js/firebaseUtil.js"></jade>
-    <jade src="/resource/js/util.js"></jade>
+    <jade src="/resource/js/builder.js"></jade>
+    <jade src="/resource/js/database.js"></jade>
+    <jade src="/resource/js/fragment.js"></jade>
 </body>
 </html>

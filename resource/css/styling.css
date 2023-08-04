@@ -1,0 +1,18 @@
+input {
+    background-color: initial;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    border: none;
+}
+[type=button], [type=submit] {
+    border-radius: 30px;
+}
+
+a {
+    border-radius: 30px;
+    color: cornflowerblue;
+}
+a:hover {
+    background: linear-gradient(45deg, paleturquoise, gainsboro);
+    box-shadow: 6px 4px rgba(0, 120, 200, 0.8);
+}
