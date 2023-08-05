@@ -29,6 +29,7 @@
 }
 #player {
     height: calc(40vw);
+    min-height: 400px;
 }
 
 #playlistname {
