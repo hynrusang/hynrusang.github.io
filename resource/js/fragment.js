@@ -283,7 +283,7 @@ const subFragment = {
                     $("input", {
                         type: "button",
                         class: "inputWidget",
-                        style: "width: 50%; background-image: url(/resource/img/icon/del.png)",
+                        style: "background-image: url(/resource/img/icon/del.png)",
                         value: "메모 삭제",
                         onclick: () => {
                             if (confirm("정말로 해당 메모를 삭제하시겠습니까?\n해당 시도는 되돌릴 수 없습니다.")) {
@@ -299,7 +299,7 @@ const subFragment = {
                     $("input", {
                         type: "submit",
                         class: "inputWidget",
-                        style: "width: 50%; background-image: url(/resource/img/icon/save.png)",
+                        style: "background-image: url(/resource/img/icon/save.png)",
                         value: "메모 저장"
                     })
                 ),
