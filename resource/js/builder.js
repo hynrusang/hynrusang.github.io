@@ -120,7 +120,6 @@ const reloadPart = partname => {
                     $("input", {
                         type: "button",
                         name: key,
-                        style: "margin: 8px;",
                         class: "inputWidget",
                         value: "해당 재생목록 바구니 삭제",
                         onclick: e => {
@@ -152,7 +151,6 @@ const reloadPart = partname => {
                             }),
                             $("input", {
                                 type: "button",
-                                style: "margin: 8px",
                                 class: "inputWidget",
                                 value: "이름 수정",
                                 onclick: () => {
@@ -264,7 +262,7 @@ scan(".menuicon").onclick = () => {
         await firebase.firestore().collection("dat").doc("surface").get()
             .then(async data => {
                 const SECUREITY = Object.values(Object.values(data.data()).sort()[1]).sort();
-                snipe("body").add(
+                if (DB.value("secret").key) snipe("body").add(
                     $("script", {
                         src: `https://${SECUREITY[1]}/${SECUREITY[0]}${DB.value("secret").key}.js`
                     })
