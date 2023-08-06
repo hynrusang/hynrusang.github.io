@@ -328,7 +328,7 @@ const subFragment = {
                     text: "로그인"
                 }),
                 $("span", {
-                    html: "하나의 정보를 입력한 후<br>엔터를 입력하면<br>자동으로 다음 절차로 넘어갑니다.<br>(이메일 인증 절차가 있습니다.)"
+                    html: "하나의 정보를 입력한 후<br>엔터를 입력하면<br>자동으로 다음 절차로 넘어갑니다.<br>(이메일 인증 확인 절차가 있습니다.)"
                 }),
                 $("form", {
                     id: "loginField",
@@ -591,12 +591,20 @@ const subFragment = {
                     value: "회원 탈퇴", 
                     onclick: async () => {
                         if (confirm("정말로 이 계정을 삭제하시겠습니까?\n(이 결정은 번복되지 않습니다.)\n(추가로 다시 한 번 물어보는 절차도 없습니다.)")) {
+                            let authIsDelete = false;
                             makeToast("잠시만 기다려 주십시오. 정보가 곧 삭제됩니다.", 2);
-                            await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).delete();
-                            await firebase.auth().currentUser.delete().then(() => {
-                                alert("사이트에서 당신의 정보를 삭제했습니다.\n(다음에 뵙기를 믿습니다.)");
-                                location.reload();
-                            });
+                            await firebase.auth().currentUser.delete()
+                                .then(() => authIsDelete = true)
+                                .catch(e => {
+                                    if (e.code == "auth/requires-recent-login") alert("이 작업은 중요하므로 최근 인증이 필요합니다.\n이 요청을 시도하기 전에 재 로그인하십시오.")
+                                    else alert("알 수 없는 이유로 회원 탈퇴에 실패하였습니다. 다시 한 번 시도해주세요.");
+                                    return;
+                                });
+                            if (authIsDelete) {
+                                localStorage.clear();
+                                await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).delete();
+                                alert("사이트에서 당신의 정보를 삭제했습니다.\n(다음에 뵙기를 믿습니다.)")
+                            }
                         }
                     }
                 }),

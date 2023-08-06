@@ -92,7 +92,33 @@ const reloadPart = partname => {
             subFragment.main.memo.firstReloadState = true;
             break;
         case "ylist":
-            snipe("#playlistbox").reset();
+            snipe("#playlistbox").reset($("input", {
+                style: "width: 100%; text-align: left; background-image: url(/resource/img/icon/program.png)",
+                type: "button",
+                class: "inputWidget",
+                value: "랜덤 추천",
+                onclick: () => {
+                    if (Object.keys(DB.value("ylist")).isEmpty()) {
+                        makeToast("재생목록 바구니가 하나도 존재하지 않습니다.", 2);
+                    } else {
+                        const keyData = {
+                            list: Object.keys(DB.value("ylist")),
+                            num: Math.floor(Math.random() * Object.keys(DB.value("ylist")).length)
+                        }
+                        const valueData = {
+                            keys: Object.keys(DB.value("ylist")[keyData.list[keyData.num]]),
+                            values: Object.values(DB.value("ylist")[keyData.list[keyData.num]]).map(obj => {
+                                return obj.includes("list=") ? `${obj.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : obj.replace("m.", "www.").replace("watch?v=", "embed/").split("&")[0];
+                            }),
+                            num: Math.floor(Math.random() * Object.keys(DB.value("ylist")[keyData.list[keyData.num]]).length)
+                        }
+                        const href = valueData.values[valueData.num];
+                        scan("#player").src = href;
+                        scan("#playlistname").innerText = valueData.keys[valueData.num];
+                        if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                    }
+                }
+            }));
             for (let key of Object.keys(DB.value("ylist")).sort()) {
                 const listcase = $("fieldset", {
                     style: "width: 100%; margin-left: 0px;"
@@ -103,7 +129,7 @@ const reloadPart = partname => {
                     $("form", {
                         onsubmit: e => {
                             e.preventDefault();
-                            if (Object.values(DB.value("ylist")["default"]).includes(e.target[0].value)) makeToast("해당 재생목록은 이미 재생목록 바구니 내에 존재합니다.", 2);
+                            if (Object.values(DB.value("ylist")[e.target.parentElement.children[0].innerText]).includes(e.target[0].value)) makeToast("해당 재생목록은 이미 재생목록 바구니 내에 존재합니다.", 2);
                             else {
                                 const newYlist = DB.value("ylist");
                                 newYlist[key][e.target[0].value] = e.target[0].value;
@@ -261,6 +287,19 @@ scan(".menuicon").onclick = () => {
         firebase.auth().signOut();
     } else if (firebase.auth().currentUser.emailVerified) {
         localStorage.setItem("timestamp", new Date());
+        if (!localStorage.getItem("setting") || JSON.parse(localStorage.getItem("setting")).version != "2.3") {
+            localStorage.setItem("setting", JSON.stringify({
+                version: "2.3",
+                auto: {
+                    menuSwitch: true,
+                    closeOnClick: true,
+                    rememberTapInfo: {
+                        activate: true,
+                        destination: "main"
+                    }
+                }
+            }));
+        }
         await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).get().then(data => {
             if (!data.data()) data.ref.set(DB.toObject());
             else for (let key of Object.keys(data.data())) DB.value(key, data.data()[key]);
@@ -279,6 +318,7 @@ scan(".menuicon").onclick = () => {
             })
             .catch(e => null);
         scan("!footer input").forEach(obj => obj.onclick = e => currentFragment.value("main", e.target.attributes.target.value));
+        settingInfo.value = JSON.parse(localStorage.getItem("setting"));
         if (settingInfo.value.auto.rememberTapInfo.activate) currentFragment.value("main", settingInfo.value.auto.rememberTapInfo.destination);
     } else firebase.auth().signOut();
 })();
