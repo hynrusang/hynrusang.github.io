@@ -331,6 +331,7 @@ const subFragment = {
                             if (!data.user.emailVerified) {
                                 firebase.auth().signOut();
                                 makeToast("이메일 인증이 되지 않은 계정은 사용하실 수 없습니다.\n(인증용 메일을 다시 보내드릴 테니, 해당 메일에서 이메일 인증을 해주세요.)", 2);
+                                await wait(1000);
                                 await data.user.sendEmailVerification()
                                     .then(() => makeToast("인증용 메일을 다시 보냈습니다.", 2))
                                     .catch(e => { if (e.code == "auth/too-many-requests") makeToast("현재 요청이 너무 많아 요청을 보류중입니다. 잠시 후 다시 시도해주세요.", 2); });
@@ -443,6 +444,7 @@ const subFragment = {
                                 makeToast("회원가입 인증을 위한 메일을 발송하는 중입니다.", 2);
                                 await data.user.sendEmailVerification().then(() => {
                                     alert("회원가입이 완료되었습니다.\n(회원가입 때 사용하셨던 이메일 주소에서, 이메일 인증을 해주세요.)");
+                                    firebase.auth().signOut();
                                     location.reload();
                                 });
                             }).catch(e => {

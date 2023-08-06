@@ -257,12 +257,11 @@ scan(".menuicon").onclick = () => {
 }
 (async () => {
     while (!firebase.auth().currentUser) await wait(250);
-    if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime()) >= 604800016) {
+    if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime()) >= 259200000) {
         localStorage.removeItem("timestamp");
         firebase.auth().signOut();
-    }
-    localStorage.setItem("timestamp", new Date());
-    if (firebase.auth().currentUser.emailVerified) {
+    } else if (firebase.auth().currentUser.emailVerified) {
+        localStorage.setItem("timestamp", new Date());
         await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).get().then(data => {
             if (!data.data()) data.ref.set(DB.toObject());
             else for (let key of Object.keys(data.data())) DB.value(key, data.data()[key]);
@@ -276,7 +275,7 @@ scan(".menuicon").onclick = () => {
                     })
                 )
                 await firebase.firestore().collection("dat").doc("center").get()
-                    .then(data =>  SDB.value = data.data())
+                    .then(data => SDB.value = data.data())
                     .catch(e => null);
             })
             .catch(e => null);
