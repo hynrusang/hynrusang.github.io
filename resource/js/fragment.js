@@ -578,7 +578,10 @@ const subFragment = {
                     style: "display: block; background-image: url('/resource/img/icon/setting.png')", 
                     value: "로그아웃", 
                     onclick: async () => {
-                        await firebase.auth().signOut().then(() => location.reload())
+                        await firebase.auth().signOut().then(() => {
+                            localStorage.clear();
+                            location.reload()
+                        })
                     }
                 }),
                 $("input", { 
