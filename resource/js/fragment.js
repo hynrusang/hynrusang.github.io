@@ -12,12 +12,16 @@ const currentFragment = new LiveDataManager({
                 scan("fragment[rid=page]").style.display = null;
                 mainFragment[this.value].launch();
             }
-            if (DB.value("setinfo").auto.menuSwitch) {
+            if (settingInfo.value.auto.menuSwitch) {
                 if (["video", "secret"].includes(this.value)) scan("details").setAttribute("open", null); 
                 else scan("details").removeAttribute("open"); 
             }
             menuFragment[this.value].launch();
-            if (DB.value("setinfo").auto.rememberTapInfo) localStorage.setItem("currentTap", this.value);
+            if (settingInfo.value.auto.rememberTapInfo.activate) {
+                const newSetting = settingInfo.value;
+                newSetting.auto.rememberTapInfo.destination = this.value;
+                settingInfo.value = newSetting;
+            }
             autoReload();
         }
     }),
@@ -36,7 +40,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (DB.value("setinfo").auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -53,7 +57,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (DB.value("setinfo").auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -70,7 +74,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (DB.value("setinfo").auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -87,7 +91,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (DB.value("setinfo").auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -104,7 +108,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (DB.value("setinfo").auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -121,7 +125,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (DB.value("setinfo").auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -138,7 +142,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (DB.value("setinfo").auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -155,7 +159,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (DB.value("setinfo").auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -267,7 +271,7 @@ const subFragment = {
                             style: "background-image: url(/resource/img/icon/save.png); width: 100%;",
                             placeholder: "메모 제목",
                             list: "memo",
-                            onchange: e => scan("textarea").value = DB.value("memo")[e.target.value] ?? ""
+                            oninput: e => scan("textarea").value = DB.value("memo")[e.target.value] ?? ""
                         }),
                         $("input", {
                             type: "button",
@@ -283,7 +287,7 @@ const subFragment = {
                     $("input", {
                         type: "button",
                         class: "inputWidget",
-                        style: "width: 50%; background-image: url(/resource/img/icon/del.png)",
+                        style: "background-image: url(/resource/img/icon/del.png)",
                         value: "메모 삭제",
                         onclick: () => {
                             if (confirm("정말로 해당 메모를 삭제하시겠습니까?\n해당 시도는 되돌릴 수 없습니다.")) {
@@ -299,7 +303,7 @@ const subFragment = {
                     $("input", {
                         type: "submit",
                         class: "inputWidget",
-                        style: "width: 50%; background-image: url(/resource/img/icon/save.png)",
+                        style: "background-image: url(/resource/img/icon/save.png)",
                         value: "메모 저장"
                     })
                 ),

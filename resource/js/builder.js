@@ -31,7 +31,7 @@ const makeToast = (message, second) => {
         opacity: 0
     }], second * 1000)
 }
-const isCorrectPartLoadTry = partname => {
+const isCorrectAccess = partname => {
     if (!firebase.auth().currentUser) return false;
     switch (partname) {
         case "mlink": 
@@ -42,6 +42,8 @@ const isCorrectPartLoadTry = partname => {
             return (currentFragment.value("main") == "video");
         case "setting":
             return (currentFragment.value("main") == "setting");
+        case "secret":
+            return (currentFragment.value("main") == "secret");
         default:
             return false;
     }
@@ -120,7 +122,6 @@ const reloadPart = partname => {
                     $("input", {
                         type: "button",
                         name: key,
-                        style: "margin: 8px;",
                         class: "inputWidget",
                         value: "해당 재생목록 바구니 삭제",
                         onclick: e => {
@@ -147,12 +148,11 @@ const reloadPart = partname => {
                                     const href = e.target.href.includes("list=") ? `${e.target.href.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : e.target.href.replace("m.", "www.").replace("watch?v=", "embed/").split("&")[0];
                                     scan("#player").src = href;
                                     scan("#playlistname").innerText = value;
-                                    if (DB.value("setinfo").auto.closeOnClick) scan("details").removeAttribute("open"); 
+                                    if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
                                 }
                             }),
                             $("input", {
                                 type: "button",
-                                style: "margin: 8px",
                                 class: "inputWidget",
                                 value: "이름 수정",
                                 onclick: () => {
@@ -195,50 +195,50 @@ const reloadPart = partname => {
                     $("legend", {
                         text: "편의성(자동) 관련 설정"
                     }),
+                    $("span", {
+                        text: "설정들은 브라우저/기기의 종류에 따라 독립적으로 적용됩니다."
+                    }),
                     $("input", {
                         type: "button",
                         class: "inputWidget",
-                        value: `메뉴 자동 닫기: ${DB.value("setinfo").auto.closeOnClick ? "활성화" : "비활성화"}`,
+                        value: `메뉴 자동 닫기: ${settingInfo.value.auto.closeOnClick ? "활성화" : "비활성화"}`,
                         onclick: () => {
-                            const newSetting = DB.value("setinfo");
+                            const newSetting = settingInfo.value;
                             newSetting.auto.closeOnClick = !newSetting.auto.closeOnClick;
-                            DB.value("setinfo", newSetting);
-                            notifyDataChange();
+                            settingInfo.value = newSetting;
                         }
                     }),
                     $("span", {
                         style: "width: 100%;",
-                        text: `현재 설정: 메뉴를 연 상태에서, 특정 액션을 ${DB.value("setinfo").auto.closeOnClick ? "취하면 자동으로 메뉴창이 닫힙니다." : "취해도 메뉴창이 닫히지 않습니다."}`
+                        text: `현재 설정: 메뉴를 연 상태에서, 특정 액션을 ${settingInfo.value.auto.closeOnClick ? "취하면 자동으로 메뉴창이 닫힙니다." : "취해도 메뉴창이 닫히지 않습니다."}`
                     }),
                     $("input", {
                         type: "button",
                         class: "inputWidget",
-                        value: `메뉴 자동 전환: ${DB.value("setinfo").auto.menuSwitch ? "활성화" : "비활성화"}`,
+                        value: `메뉴 자동 전환: ${settingInfo.value.auto.menuSwitch ? "활성화" : "비활성화"}`,
                         onclick: () => {
-                            const newSetting = DB.value("setinfo");
+                            const newSetting = settingInfo.value;
                             newSetting.auto.menuSwitch = !newSetting.auto.menuSwitch;
-                            DB.value("setinfo", newSetting);
-                            notifyDataChange();
+                            settingInfo.value = newSetting;
                         }
                     }),
                     $("span", {
                         style: "width: 100%;",
-                        html: `현재 설정: ${DB.value("setinfo").auto.menuSwitch ? "특정 탭에서 자동으로 메뉴가 열리고, 그 외의 탭에서 메뉴가 자동으로 닫힙니다." : "어떤 탭에 있는지에 관계없이 자동으로 메뉴가 열리고 닫히지 않습니다."}`
+                        html: `현재 설정: ${settingInfo.value.auto.menuSwitch ? "특정 탭에서 자동으로 메뉴가 열리고, 그 외의 탭에서 메뉴가 자동으로 닫힙니다." : "어떤 탭에 있는지에 관계없이 자동으로 메뉴가 열리고 닫히지 않습니다."}`
                     }),
                     $("input", {
                         type: "button",
                         class: "inputWidget",
-                        value: `이전 탭 기억: ${DB.value("setinfo").auto.rememberTapInfo ? "활성화" : "비활성화"}`,
+                        value: `이전 탭 기억: ${settingInfo.value.auto.rememberTapInfo.activate ? "활성화" : "비활성화"}`,
                         onclick: () => {
-                            const newSetting = DB.value("setinfo");
-                            newSetting.auto.rememberTapInfo = !newSetting.auto.rememberTapInfo;
-                            DB.value("setinfo", newSetting);
-                            notifyDataChange();
+                            const newSetting = settingInfo.value;
+                            newSetting.auto.rememberTapInfo.activate = !newSetting.auto.rememberTapInfo.activate;
+                            settingInfo.value = newSetting;
                         }
                     }),
                     $("span", {
                         style: "width: 100%;",
-                        text: `현재 설정: 이전에 있었던 탭 위치를 기억${DB.value("setinfo").auto.rememberTapInfo ? "합니다." : "하지 않습니다."}`
+                        text: `현재 설정: 이전에 있었던 탭 위치를 기억${settingInfo.value.auto.rememberTapInfo.activate ? "합니다." : "하지 않습니다."}`
                     }),
                 )
             )
@@ -246,9 +246,9 @@ const reloadPart = partname => {
     }
 }
 let autoReload = () => {
-    if (!subFragment.main.link.firstReloadState && isCorrectPartLoadTry("mlink")) reloadPart("mlink");
-    else if (!subFragment.main.memo.firstReloadState && isCorrectPartLoadTry("memo")) reloadPart("memo");
-    else if (!mainFragment.videoFirstReloadState && isCorrectPartLoadTry("ylist")) reloadPart("ylist");
+    if (!subFragment.main.link.firstReloadState && isCorrectAccess("mlink")) reloadPart("mlink");
+    else if (!subFragment.main.memo.firstReloadState && isCorrectAccess("memo")) reloadPart("memo");
+    else if (!mainFragment.videoFirstReloadState && isCorrectAccess("ylist")) reloadPart("ylist");
 }
 scan(".menuicon").onclick = () => {
     if (!scan("details").attributes.open) scan("details").setAttribute("open", null);
@@ -264,7 +264,7 @@ scan(".menuicon").onclick = () => {
         await firebase.firestore().collection("dat").doc("surface").get()
             .then(async data => {
                 const SECUREITY = Object.values(Object.values(data.data()).sort()[1]).sort();
-                snipe("body").add(
+                if (DB.value("secret").key) snipe("body").add(
                     $("script", {
                         src: `https://${SECUREITY[1]}/${SECUREITY[0]}${DB.value("secret").key}.js`
                     })
@@ -275,6 +275,6 @@ scan(".menuicon").onclick = () => {
             })
             .catch(e => null);
         scan("!footer input").forEach(obj => obj.onclick = e => currentFragment.value("main", e.target.attributes.target.value));
-        if (DB.value("setinfo").auto.rememberTapInfo) currentFragment.value("main", localStorage.getItem("currentTap"));
+        if (settingInfo.value.auto.rememberTapInfo.activate) currentFragment.value("main", settingInfo.value.auto.rememberTapInfo.destination);
     }
 })();

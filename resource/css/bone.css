@@ -52,7 +52,8 @@ iframe {
     border: none;
 }
 fieldset {
-    width: calc(100vw - 3px); 
+    width: calc(100vw - 800px);
+    margin-left: 400px;
 }
 fieldset span {
     margin: 12px; 
@@ -75,9 +76,9 @@ li {
     margin: 10px;
 }
 
-@media screen and (min-width: 700px) {
+@media screen and (max-width: 1200px) {
     fieldset {
-        width: 700px;
-        margin-left: calc(50% - 350px);
+        margin-left: 0px;
+        width: 100vw;
     }
 }

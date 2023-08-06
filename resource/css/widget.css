@@ -20,6 +20,7 @@
     background-position: left center; 
     padding-left: 25px;
     padding-right: 25px;
+    margin: 8px;
     height: 30px;
 }
 .media {
@@ -28,6 +29,7 @@
 }
 #player {
     height: calc(40vw);
+    min-height: 400px;
 }
 
 #playlistname {
