@@ -261,6 +261,19 @@ scan(".menuicon").onclick = () => {
         firebase.auth().signOut();
     } else if (firebase.auth().currentUser.emailVerified) {
         localStorage.setItem("timestamp", new Date());
+        if (!localStorage.getItem("setting") || JSON.parse(localStorage.getItem("setting")).version != "2.2") {
+            localStorage.setItem("setting", JSON.stringify({
+                version: "2.2",
+                auto: {
+                    menuSwitch: true,
+                    closeOnClick: true,
+                    rememberTapInfo: {
+                        activate: true,
+                        destination: "main"
+                    }
+                }
+            }));
+        }
         await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).get().then(data => {
             if (!data.data()) data.ref.set(DB.toObject());
             else for (let key of Object.keys(data.data())) DB.value(key, data.data()[key]);
