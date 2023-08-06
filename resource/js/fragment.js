@@ -35,7 +35,7 @@ const currentFragment = new LiveDataManager({
 const menuFragment = {
     main: new Fragment("menu", 
         $("a", {
-            style: "display: inline-block; width: 100%; height: calc(100% / 8);",
+            style: "display: flex; width: 100%; height: 30px; margin: 8px;",
             href: "https://google.com/",
             onclick: e => {
                 e.preventDefault();
@@ -44,15 +44,16 @@ const menuFragment = {
             }
         }).add(
             $("img", {
-                style: "height: 50%; position: relative; top: 25%; margin-left: 12px;",
+                style: "height: 22px; top:4px; position: relative;",
                 src: "https://www.google.com/s2/favicons?domain=https://www.google.com/"
             }),
             $("span", {
+                style: "padding-top: 4px;",
                 text: "구글"
             })
         ),
         $("a", {
-            style: "display: inline-block; width: 100%; height: calc(100% / 8);",
+            style: "display: flex; width: 100%; height: 30px; margin: 8px;",
             href: (window.innerWidth > 450) ? "https://www.naver.com/" : "https://m.naver.com", 
             onclick: e => {
                 e.preventDefault();
@@ -61,15 +62,16 @@ const menuFragment = {
             }
         }).add(
             $("img", {
-                style: "height: 50%; position: relative; top: 25%; margin-left: 12px;",
+                style: "height: 22px; top:4px; position: relative;",
                 src: "https://www.google.com/s2/favicons?domain=https://www.naver.com/"
             }),
             $("span", {
+                style: "padding-top: 4px;",
                 text: "네이버"
             })
         ),
         $("a", {
-            style: "display: inline-block; width: 100%; height: calc(100% / 8);",
+            style: "display: flex; width: 100%; height: 30px; margin: 8px;",
             href: "https://www.daum.net/", 
             onclick: e => {
                 e.preventDefault();
@@ -78,15 +80,16 @@ const menuFragment = {
             }
         }).add(
             $("img", {
-                style: "height: 50%; position: relative; top: 25%; margin-left: 12px;",
+                style: "height: 22px; top:4px; position: relative;",
                 src: "https://www.google.com/s2/favicons?domain=https://m.daum.net/"
             }),
             $("span", {
+                style: "padding-top: 4px;",
                 text: "다음"
             })
         ),
         $("a", {
-            style: "display: inline-block; width: 100%; height: calc(100% / 8);",
+            style: "display: flex; width: 100%; height: 30px; margin: 8px;",
             href: "https://duckduckgo.com/", 
             onclick: e => {
                 e.preventDefault();
@@ -95,15 +98,16 @@ const menuFragment = {
             }
         }).add(
             $("img", {
-                style: "height: 50%; position: relative; top: 25%; margin-left: 12px;",
+                style: "height: 22px; top:4px; position: relative;",
                 src: "https://www.google.com/s2/favicons?domain=https://duckduckgo.com/"
             }),
             $("span", {
+                style: "padding-top: 4px;",
                 text: "덕덕고"
             })
         ),
         $("a", {
-            style: "display: inline-block; width: 100%; height: calc(100% / 8);",
+            style: "display: flex; width: 100%; height: 30px; margin: 8px;",
             href: "https://chat.openai.com/chat", 
             onclick: e => {
                 e.preventDefault();
@@ -112,15 +116,16 @@ const menuFragment = {
             }
         }).add(
             $("img", {
-                style: "height: 50%; position: relative; top: 25%; margin-left: 12px;",
+                style: "height: 22px; top:4px; position: relative;",
                 src: "https://www.google.com/s2/favicons?domain=https://chat.openai.com/"
             }),
             $("span", {
+                style: "padding-top: 4px;",
                 text: "chatGPT"
             })
         ),
         $("a", {
-            style: "display: inline-block; width: 100%; height: calc(100% / 8);",
+            style: "display: flex; width: 100%; height: 30px; margin: 8px;",
             href: "https://papago.naver.com/", 
             onclick: e => {
                 e.preventDefault();
@@ -129,15 +134,16 @@ const menuFragment = {
             }
         }).add(
             $("img", {
-                style: "height: 50%; position: relative; top: 25%; margin-left: 12px;",
+                style: "height: 22px; top:4px; position: relative;",
                 src: "https://www.google.com/s2/favicons?domain=https://papago.naver.com/"
             }),
             $("span", {
+                style: "padding-top: 4px;",
                 text: "papago"
             })
         ),
         $("a", {
-            style: "display: inline-block; width: 100%; height: calc(100% / 8);",
+            style: "display: flex; width: 100%; height: 30px; margin: 8px;",
             href: "https://youtube.com/", 
             onclick: e => {
                 e.preventDefault();
@@ -146,15 +152,16 @@ const menuFragment = {
             }
         }).add(
             $("img", {
-                style: "height: 50%; position: relative; top: 25%; margin-left: 12px;",
+                style: "height: 22px; top:4px; position: relative;",
                 src: "https://www.google.com/s2/favicons?domain=https://youtube.com/"
             }),
             $("span", {
+                style: "padding-top: 4px;",
                 text: "유튜브"
             })
         ),
         $("a", {
-            style: "display: inline-block; width: 100%; height: calc(100% / 8);",
+            style: "display: flex; width: 100%; height: 30px; margin: 8px;",
             href: "https://twitch.tv/",
             onclick: e => {
                 e.preventDefault();
@@ -163,10 +170,11 @@ const menuFragment = {
             }
         }).add(
             $("img", {
-                style: "height: 50%; position: relative; top: 25%; margin-left: 12px;",
+                style: "height: 22px; top:4px; position: relative;",
                 src: "https://www.google.com/s2/favicons?domain=https://twitch.tv/"
             }),
             $("span", {
+                style: "padding-top: 4px;",
                 text: "트위치"
             })
         )

@@ -11,10 +11,6 @@
     background-position: center center;
 }
 
-:is(.inputWidget, input[type=submit]):hover {
-    background-color: aliceblue;
-    box-shadow: 6px 3px rgba(128, 128, 128, 0.5);
-}
 .inputWidget {
     background-size: 22px;
     background-position: left center; 
