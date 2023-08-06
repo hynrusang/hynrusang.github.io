@@ -33,7 +33,7 @@ const SDB = new LiveData(null, {
     type: Object
 })
 Binder.define("uname", DB.value("uname"));
-if (!localStorage.getItem("setting")) localStorage.setItem("setting", JSON.stringify({
+if (!localStorage.getItem("setting") || JSON.parse(localStorage.getItem("setting")).version != "2.0.0") localStorage.setItem("setting", JSON.stringify({
     version: "2.0.0",
     auto: {
         menuSwitch: true,
