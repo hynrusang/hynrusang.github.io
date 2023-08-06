@@ -334,7 +334,10 @@ const subFragment = {
                                 await data.user.sendEmailVerification()
                                     .then(() => makeToast("인증용 메일을 다시 보냈습니다.", 2))
                                     .catch(e => { if (e.code == "auth/too-many-requests") makeToast("현재 요청이 너무 많아 요청을 보류중입니다. 잠시 후 다시 시도해주세요.", 2); });
-                            } else location.reload();
+                            } else {
+                                localStorage.setItem("timestamp", new Date());
+                                location.reload();
+                            }
                         }).catch(e => {
                             if (e.code == "auth/wrong-password") makeToast("비밀번호가 잘못되었습니다.", 2);
                             else if (e.code == "auth/invalid-email") makeToast("잘못된 이메일 주소입니다.", 2);
