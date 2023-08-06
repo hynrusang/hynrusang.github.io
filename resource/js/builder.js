@@ -195,6 +195,9 @@ const reloadPart = partname => {
                     $("legend", {
                         text: "편의성(자동) 관련 설정"
                     }),
+                    $("span", {
+                        text: "설정들은 브라우저/기기의 종류에 따라 독립적으로 적용됩니다."
+                    }),
                     $("input", {
                         type: "button",
                         class: "inputWidget",
