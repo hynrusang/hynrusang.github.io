@@ -198,6 +198,7 @@ const reloadPart = partname => {
                     $("span", {
                         text: "설정들은 브라우저/기기의 종류에 따라 독립적으로 적용됩니다."
                     }),
+                    $("br"),
                     $("input", {
                         type: "button",
                         class: "inputWidget",
