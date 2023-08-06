@@ -12,7 +12,7 @@ a {
     border-radius: 30px;
     color: cornflowerblue;
 }
-a:hover {
-    background: linear-gradient(45deg, paleturquoise, gainsboro);
-    box-shadow: 6px 4px rgba(0, 120, 200, 0.8);
+:is(a, .inputWidget, input[type=submit]):hover {
+    background-color: rgba(0, 255, 255, 0.5);
+    box-shadow: 10px 5px rgba(0, 200, 200, 0.5);
 }

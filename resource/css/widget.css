@@ -1,5 +1,5 @@
 .current {
-    padding-top: 20px;
+    padding-top: 28px;
     background-size: 20px;
 }
 .menuicon {
@@ -7,20 +7,16 @@
     height: 30px;
     border: 1px solid rgba(128, 128, 128, 0.5);
     border-radius: 30px;
-    margin: 8px;
+    margin: 10px;
     background-position: center center;
 }
 
-:is(.inputWidget, input[type=submit]):hover {
-    background-color: aliceblue;
-    box-shadow: 6px 3px rgba(128, 128, 128, 0.5);
-}
 .inputWidget {
     background-size: 22px;
     background-position: left center; 
     padding-left: 25px;
     padding-right: 25px;
-    margin: 8px;
+    margin: 10px;
     height: 30px;
 }
 .media {

@@ -162,7 +162,6 @@ const reloadPart = partname => {
                                         const newYlist = DB.value("ylist");
                                         newYlist[key][newName] = newYlist[key][value];
                                         delete newYlist[key][value];
-                                        console.log(newYlist)
                                         DB.value("ylist", newYlist);
                                         notifyDataChange();
                                     }
@@ -170,7 +169,6 @@ const reloadPart = partname => {
                             }),
                             $("input", {
                                 type: "button",
-                                style: "",
                                 class: "inputWidget",
                                 value: "재생목록 삭제",
                                 onclick: () => {
@@ -198,6 +196,7 @@ const reloadPart = partname => {
                     $("span", {
                         text: "설정들은 브라우저/기기의 종류에 따라 독립적으로 적용됩니다."
                     }),
+                    $("br"),
                     $("input", {
                         type: "button",
                         class: "inputWidget",
@@ -249,6 +248,7 @@ let autoReload = () => {
     if (!subFragment.main.link.firstReloadState && isCorrectAccess("mlink")) reloadPart("mlink");
     else if (!subFragment.main.memo.firstReloadState && isCorrectAccess("memo")) reloadPart("memo");
     else if (!mainFragment.videoFirstReloadState && isCorrectAccess("ylist")) reloadPart("ylist");
+    else if (isCorrectAccess("setting")) reloadPart("setting");
 }
 scan(".menuicon").onclick = () => {
     if (!scan("details").attributes.open) scan("details").setAttribute("open", null);
@@ -256,7 +256,11 @@ scan(".menuicon").onclick = () => {
 }
 (async () => {
     while (!firebase.auth().currentUser) await wait(250);
-    if (firebase.auth().currentUser.emailVerified) {
+    if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime()) >= 259200000) {
+        localStorage.clear();
+        firebase.auth().signOut();
+    } else if (firebase.auth().currentUser.emailVerified) {
+        localStorage.setItem("timestamp", new Date());
         await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).get().then(data => {
             if (!data.data()) data.ref.set(DB.toObject());
             else for (let key of Object.keys(data.data())) DB.value(key, data.data()[key]);
@@ -270,11 +274,11 @@ scan(".menuicon").onclick = () => {
                     })
                 )
                 await firebase.firestore().collection("dat").doc("center").get()
-                    .then(data =>  SDB.value = data.data())
+                    .then(data => SDB.value = data.data())
                     .catch(e => null);
             })
             .catch(e => null);
         scan("!footer input").forEach(obj => obj.onclick = e => currentFragment.value("main", e.target.attributes.target.value));
         if (settingInfo.value.auto.rememberTapInfo.activate) currentFragment.value("main", settingInfo.value.auto.rememberTapInfo.destination);
-    }
+    } else firebase.auth().signOut();
 })();

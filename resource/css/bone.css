@@ -2,14 +2,14 @@ fragment, footer {
     width: 100%;
 }
 fragment[rid=page], main {
-    height: calc(100% - 106px);
+    height: calc(100% - 100px);
     overflow-y: scroll;
 }
 fragment {
     display: block;
 }
 footer {
-    height: 60px;
+    height: 50px;
     display: flex;
 }
 footer input {
@@ -26,10 +26,10 @@ footer input {
 
 details {
     position: absolute;
-    top: 46px;
+    top: 50px;
     overflow-x: hidden;
     width: 0px;
-    height: calc(100% - 106px);
+    height: calc(100% - 100px);
     z-index: 4;
     background-color: ghostwhite;
     border-radius: 30px;
@@ -56,7 +56,7 @@ fieldset {
     margin-left: 400px;
 }
 fieldset span {
-    margin: 12px; 
+    margin: 10px; 
     display: inline-block;
 }
 
@@ -68,7 +68,7 @@ textarea {
     min-height: 450px;
     border: none;
     background: floralwhite;
-    padding: 12px;
+    padding: 10px;
 }
 li {
     list-style: decimal-leading-zero;

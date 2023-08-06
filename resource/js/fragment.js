@@ -35,7 +35,7 @@ const currentFragment = new LiveDataManager({
 const menuFragment = {
     main: new Fragment("menu", 
         $("a", {
-            style: "display: inline-block; width: 100%; height: calc(100% / 8);",
+            style: "display: flex; width: 100%; height: 30px; margin: 10px;",
             href: "https://google.com/",
             onclick: e => {
                 e.preventDefault();
@@ -44,15 +44,16 @@ const menuFragment = {
             }
         }).add(
             $("img", {
-                style: "height: 50%; position: relative; top: 25%; margin-left: 12px;",
+                style: "height: 22px; top:4px; position: relative;",
                 src: "https://www.google.com/s2/favicons?domain=https://www.google.com/"
             }),
             $("span", {
+                style: "padding-top: 4px;",
                 text: "구글"
             })
         ),
         $("a", {
-            style: "display: inline-block; width: 100%; height: calc(100% / 8);",
+            style: "display: flex; width: 100%; height: 30px; margin: 10px;",
             href: (window.innerWidth > 450) ? "https://www.naver.com/" : "https://m.naver.com", 
             onclick: e => {
                 e.preventDefault();
@@ -61,15 +62,16 @@ const menuFragment = {
             }
         }).add(
             $("img", {
-                style: "height: 50%; position: relative; top: 25%; margin-left: 12px;",
+                style: "height: 22px; top:4px; position: relative;",
                 src: "https://www.google.com/s2/favicons?domain=https://www.naver.com/"
             }),
             $("span", {
+                style: "padding-top: 4px;",
                 text: "네이버"
             })
         ),
         $("a", {
-            style: "display: inline-block; width: 100%; height: calc(100% / 8);",
+            style: "display: flex; width: 100%; height: 30px; margin: 10px;",
             href: "https://www.daum.net/", 
             onclick: e => {
                 e.preventDefault();
@@ -78,15 +80,16 @@ const menuFragment = {
             }
         }).add(
             $("img", {
-                style: "height: 50%; position: relative; top: 25%; margin-left: 12px;",
+                style: "height: 22px; top:4px; position: relative;",
                 src: "https://www.google.com/s2/favicons?domain=https://m.daum.net/"
             }),
             $("span", {
+                style: "padding-top: 4px;",
                 text: "다음"
             })
         ),
         $("a", {
-            style: "display: inline-block; width: 100%; height: calc(100% / 8);",
+            style: "display: flex; width: 100%; height: 30px; margin: 10px;",
             href: "https://duckduckgo.com/", 
             onclick: e => {
                 e.preventDefault();
@@ -95,15 +98,16 @@ const menuFragment = {
             }
         }).add(
             $("img", {
-                style: "height: 50%; position: relative; top: 25%; margin-left: 12px;",
+                style: "height: 22px; top:4px; position: relative;",
                 src: "https://www.google.com/s2/favicons?domain=https://duckduckgo.com/"
             }),
             $("span", {
+                style: "padding-top: 4px;",
                 text: "덕덕고"
             })
         ),
         $("a", {
-            style: "display: inline-block; width: 100%; height: calc(100% / 8);",
+            style: "display: flex; width: 100%; height: 30px; margin: 10px;",
             href: "https://chat.openai.com/chat", 
             onclick: e => {
                 e.preventDefault();
@@ -112,15 +116,16 @@ const menuFragment = {
             }
         }).add(
             $("img", {
-                style: "height: 50%; position: relative; top: 25%; margin-left: 12px;",
+                style: "height: 22px; top:4px; position: relative;",
                 src: "https://www.google.com/s2/favicons?domain=https://chat.openai.com/"
             }),
             $("span", {
+                style: "padding-top: 4px;",
                 text: "chatGPT"
             })
         ),
         $("a", {
-            style: "display: inline-block; width: 100%; height: calc(100% / 8);",
+            style: "display: flex; width: 100%; height: 30px; margin: 10px;",
             href: "https://papago.naver.com/", 
             onclick: e => {
                 e.preventDefault();
@@ -129,15 +134,16 @@ const menuFragment = {
             }
         }).add(
             $("img", {
-                style: "height: 50%; position: relative; top: 25%; margin-left: 12px;",
+                style: "height: 22px; top:4px; position: relative;",
                 src: "https://www.google.com/s2/favicons?domain=https://papago.naver.com/"
             }),
             $("span", {
+                style: "padding-top: 4px;",
                 text: "papago"
             })
         ),
         $("a", {
-            style: "display: inline-block; width: 100%; height: calc(100% / 8);",
+            style: "display: flex; width: 100%; height: 30px; margin: 10px;",
             href: "https://youtube.com/", 
             onclick: e => {
                 e.preventDefault();
@@ -146,15 +152,16 @@ const menuFragment = {
             }
         }).add(
             $("img", {
-                style: "height: 50%; position: relative; top: 25%; margin-left: 12px;",
+                style: "height: 22px; top:4px; position: relative;",
                 src: "https://www.google.com/s2/favicons?domain=https://youtube.com/"
             }),
             $("span", {
+                style: "padding-top: 4px;",
                 text: "유튜브"
             })
         ),
         $("a", {
-            style: "display: inline-block; width: 100%; height: calc(100% / 8);",
+            style: "display: flex; width: 100%; height: 30px; margin: 10px;",
             href: "https://twitch.tv/",
             onclick: e => {
                 e.preventDefault();
@@ -163,10 +170,11 @@ const menuFragment = {
             }
         }).add(
             $("img", {
-                style: "height: 50%; position: relative; top: 25%; margin-left: 12px;",
+                style: "height: 22px; top:4px; position: relative;",
                 src: "https://www.google.com/s2/favicons?domain=https://twitch.tv/"
             }),
             $("span", {
+                style: "padding-top: 4px;",
                 text: "트위치"
             })
         )
@@ -331,6 +339,7 @@ const subFragment = {
                             if (!data.user.emailVerified) {
                                 firebase.auth().signOut();
                                 makeToast("이메일 인증이 되지 않은 계정은 사용하실 수 없습니다.\n(인증용 메일을 다시 보내드릴 테니, 해당 메일에서 이메일 인증을 해주세요.)", 2);
+                                await wait(1000);
                                 await data.user.sendEmailVerification()
                                     .then(() => makeToast("인증용 메일을 다시 보냈습니다.", 2))
                                     .catch(e => { if (e.code == "auth/too-many-requests") makeToast("현재 요청이 너무 많아 요청을 보류중입니다. 잠시 후 다시 시도해주세요.", 2); });
@@ -443,6 +452,7 @@ const subFragment = {
                                 makeToast("회원가입 인증을 위한 메일을 발송하는 중입니다.", 2);
                                 await data.user.sendEmailVerification().then(() => {
                                     alert("회원가입이 완료되었습니다.\n(회원가입 때 사용하셨던 이메일 주소에서, 이메일 인증을 해주세요.)");
+                                    firebase.auth().signOut();
                                     location.reload();
                                 });
                             }).catch(e => {
@@ -568,7 +578,10 @@ const subFragment = {
                     style: "display: block; background-image: url('/resource/img/icon/setting.png')", 
                     value: "로그아웃", 
                     onclick: async () => {
-                        await firebase.auth().signOut().then(() => location.reload())
+                        await firebase.auth().signOut().then(() => {
+                            localStorage.clear();
+                            location.reload()
+                        })
                     }
                 }),
                 $("input", { 
@@ -604,7 +617,7 @@ const mainFragment = {
         $("input", {
             type: "button",
             class: "inputWidget",
-            style: "background-image: url(/resource/img/icon/setting.png); position: absolute; right: 0px; margin: 12px;",
+            style: "background-image: url(/resource/img/icon/setting.png); position: absolute; right: 0px; margin: 10px;",
             exp: "uname -> {uname}",
             onclick: () => firebase.auth().currentUser ? currentFragment.value("sub", "info") : currentFragment.value("sub", "login")
         }),
@@ -623,7 +636,7 @@ const mainFragment = {
             subFragment.main.link.fragment
         )
     ).launch(),
-    setting: new Fragment("page").registAction(() => reloadPart("setting")),
+    setting: new Fragment("page"),
     secret: new Fragment("page", 
         $("span", {
             style: "color: red; width: 100%; text-align: center; display: inline-block; font-size: larger;",
