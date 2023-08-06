@@ -257,8 +257,12 @@ scan(".menuicon").onclick = () => {
 }
 (async () => {
     while (!firebase.auth().currentUser) await wait(250);
-    if (!localStorage.getItem("timestamp") || (new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime()) >= 604800016) firebase.auth().signOut();
-    else if (firebase.auth().currentUser.emailVerified) {
+    if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime()) >= 604800016) {
+        localStorage.removeItem("timestamp");
+        firebase.auth().signOut();
+    }
+    localStorage.setItem("timestamp", new Date());
+    if (firebase.auth().currentUser.emailVerified) {
         await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).get().then(data => {
             if (!data.data()) data.ref.set(DB.toObject());
             else for (let key of Object.keys(data.data())) DB.value(key, data.data()[key]);
