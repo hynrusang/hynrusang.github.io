@@ -257,7 +257,7 @@ scan(".menuicon").onclick = () => {
 (async () => {
     while (!firebase.auth().currentUser) await wait(250);
     if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime()) >= 259200000) {
-        localStorage.removeItem("timestamp");
+        localStorage.clear();
         firebase.auth().signOut();
     } else if (firebase.auth().currentUser.emailVerified) {
         localStorage.setItem("timestamp", new Date());
