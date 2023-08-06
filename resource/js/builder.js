@@ -246,9 +246,9 @@ const reloadPart = partname => {
     }
 }
 let autoReload = () => {
-    if (!subFragment.main.link.firstReloadState && isCorrectPartLoadTry("mlink")) reloadPart("mlink");
-    else if (!subFragment.main.memo.firstReloadState && isCorrectPartLoadTry("memo")) reloadPart("memo");
-    else if (!mainFragment.videoFirstReloadState && isCorrectPartLoadTry("ylist")) reloadPart("ylist");
+    if (!subFragment.main.link.firstReloadState && isCorrectAccess("mlink")) reloadPart("mlink");
+    else if (!subFragment.main.memo.firstReloadState && isCorrectAccess("memo")) reloadPart("memo");
+    else if (!mainFragment.videoFirstReloadState && isCorrectAccess("ylist")) reloadPart("ylist");
 }
 scan(".menuicon").onclick = () => {
     if (!scan("details").attributes.open) scan("details").setAttribute("open", null);
