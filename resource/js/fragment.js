@@ -601,6 +601,7 @@ const subFragment = {
                                     return;
                                 });
                             if (authIsDelete) {
+                                localStorage.clear();
                                 await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).delete();
                                 alert("사이트에서 당신의 정보를 삭제했습니다.\n(다음에 뵙기를 믿습니다.)")
                             }
