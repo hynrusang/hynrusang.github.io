@@ -162,7 +162,6 @@ const reloadPart = partname => {
                                         const newYlist = DB.value("ylist");
                                         newYlist[key][newName] = newYlist[key][value];
                                         delete newYlist[key][value];
-                                        console.log(newYlist)
                                         DB.value("ylist", newYlist);
                                         notifyDataChange();
                                     }
