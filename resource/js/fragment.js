@@ -636,7 +636,7 @@ const mainFragment = {
             subFragment.main.link.fragment
         )
     ).launch(),
-    setting: new Fragment("page").registAction(() => reloadPart("setting")),
+    setting: new Fragment("page"),
     secret: new Fragment("page", 
         $("span", {
             style: "color: red; width: 100%; text-align: center; display: inline-block; font-size: larger;",

@@ -249,6 +249,7 @@ let autoReload = () => {
     if (!subFragment.main.link.firstReloadState && isCorrectAccess("mlink")) reloadPart("mlink");
     else if (!subFragment.main.memo.firstReloadState && isCorrectAccess("memo")) reloadPart("memo");
     else if (!mainFragment.videoFirstReloadState && isCorrectAccess("ylist")) reloadPart("ylist");
+    else if (isCorrectAccess("setting")) reloadPart("setting");
 }
 scan(".menuicon").onclick = () => {
     if (!scan("details").attributes.open) scan("details").setAttribute("open", null);
