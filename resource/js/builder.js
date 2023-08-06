@@ -31,7 +31,7 @@ const makeToast = (message, second) => {
         opacity: 0
     }], second * 1000)
 }
-const isCorrectPartLoadTry = partname => {
+const isCorrectAccess = partname => {
     if (!firebase.auth().currentUser) return false;
     switch (partname) {
         case "mlink": 
@@ -42,6 +42,8 @@ const isCorrectPartLoadTry = partname => {
             return (currentFragment.value("main") == "video");
         case "setting":
             return (currentFragment.value("main") == "setting");
+        case "secret":
+            return (currentFragment.value("main") == "secret");
         default:
             return false;
     }
