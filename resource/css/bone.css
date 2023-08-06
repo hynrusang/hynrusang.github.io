@@ -2,14 +2,14 @@ fragment, footer {
     width: 100%;
 }
 fragment[rid=page], main {
-    height: calc(100% - 106px);
+    height: calc(100% - 96px);
     overflow-y: scroll;
 }
 fragment {
     display: block;
 }
 footer {
-    height: 60px;
+    height: 50px;
     display: flex;
 }
 footer input {
