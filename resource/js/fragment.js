@@ -35,7 +35,7 @@ const currentFragment = new LiveDataManager({
 const menuFragment = {
     main: new Fragment("menu", 
         $("a", {
-            style: "display: flex; width: 100%; height: 30px; margin: 8px;",
+            style: "display: flex; width: 100%; height: 30px; margin: 10px;",
             href: "https://google.com/",
             onclick: e => {
                 e.preventDefault();
@@ -53,7 +53,7 @@ const menuFragment = {
             })
         ),
         $("a", {
-            style: "display: flex; width: 100%; height: 30px; margin: 8px;",
+            style: "display: flex; width: 100%; height: 30px; margin: 10px;",
             href: (window.innerWidth > 450) ? "https://www.naver.com/" : "https://m.naver.com", 
             onclick: e => {
                 e.preventDefault();
@@ -71,7 +71,7 @@ const menuFragment = {
             })
         ),
         $("a", {
-            style: "display: flex; width: 100%; height: 30px; margin: 8px;",
+            style: "display: flex; width: 100%; height: 30px; margin: 10px;",
             href: "https://www.daum.net/", 
             onclick: e => {
                 e.preventDefault();
@@ -89,7 +89,7 @@ const menuFragment = {
             })
         ),
         $("a", {
-            style: "display: flex; width: 100%; height: 30px; margin: 8px;",
+            style: "display: flex; width: 100%; height: 30px; margin: 10px;",
             href: "https://duckduckgo.com/", 
             onclick: e => {
                 e.preventDefault();
@@ -107,7 +107,7 @@ const menuFragment = {
             })
         ),
         $("a", {
-            style: "display: flex; width: 100%; height: 30px; margin: 8px;",
+            style: "display: flex; width: 100%; height: 30px; margin: 10px;",
             href: "https://chat.openai.com/chat", 
             onclick: e => {
                 e.preventDefault();
@@ -125,7 +125,7 @@ const menuFragment = {
             })
         ),
         $("a", {
-            style: "display: flex; width: 100%; height: 30px; margin: 8px;",
+            style: "display: flex; width: 100%; height: 30px; margin: 10px;",
             href: "https://papago.naver.com/", 
             onclick: e => {
                 e.preventDefault();
@@ -143,7 +143,7 @@ const menuFragment = {
             })
         ),
         $("a", {
-            style: "display: flex; width: 100%; height: 30px; margin: 8px;",
+            style: "display: flex; width: 100%; height: 30px; margin: 10px;",
             href: "https://youtube.com/", 
             onclick: e => {
                 e.preventDefault();
@@ -161,7 +161,7 @@ const menuFragment = {
             })
         ),
         $("a", {
-            style: "display: flex; width: 100%; height: 30px; margin: 8px;",
+            style: "display: flex; width: 100%; height: 30px; margin: 10px;",
             href: "https://twitch.tv/",
             onclick: e => {
                 e.preventDefault();
@@ -614,7 +614,7 @@ const mainFragment = {
         $("input", {
             type: "button",
             class: "inputWidget",
-            style: "background-image: url(/resource/img/icon/setting.png); position: absolute; right: 0px; margin: 12px;",
+            style: "background-image: url(/resource/img/icon/setting.png); position: absolute; right: 0px; margin: 10px;",
             exp: "uname -> {uname}",
             onclick: () => firebase.auth().currentUser ? currentFragment.value("sub", "info") : currentFragment.value("sub", "login")
         }),
