@@ -170,7 +170,6 @@ const reloadPart = partname => {
                             }),
                             $("input", {
                                 type: "button",
-                                style: "",
                                 class: "inputWidget",
                                 value: "재생목록 삭제",
                                 onclick: () => {
