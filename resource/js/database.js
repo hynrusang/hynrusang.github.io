@@ -33,7 +33,7 @@ const SDB = new LiveData(null, {
     type: Object
 })
 Binder.define("uname", DB.value("uname"));
-const settingInfo = new LiveData(JSON.parse(localStorage.getItem("setting")), {
+const settingInfo = new LiveData(null, {
     type: Object,
     observer: function () {
         if (isCorrectAccess("setting")) reloadPart("setting");
