@@ -12,12 +12,16 @@ const currentFragment = new LiveDataManager({
                 scan("fragment[rid=page]").style.display = null;
                 mainFragment[this.value].launch();
             }
-            if (DB.value("setinfo").auto.menuSwitch) {
+            if (settingInfo.value.auto.menuSwitch) {
                 if (["video", "secret"].includes(this.value)) scan("details").setAttribute("open", null); 
                 else scan("details").removeAttribute("open"); 
             }
             menuFragment[this.value].launch();
-            if (DB.value("setinfo").auto.rememberTapInfo) localStorage.setItem("currentTap", this.value);
+            if (settingInfo.value.auto.rememberTapInfo.activate) {
+                const newSetting = settingInfo.value;
+                newSetting.auto.rememberTapInfo.destination = this.value;
+                settingInfo.value = newSetting;
+            }
             autoReload();
         }
     }),
@@ -36,7 +40,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (DB.value("setinfo").auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -53,7 +57,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (DB.value("setinfo").auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -70,7 +74,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (DB.value("setinfo").auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -87,7 +91,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (DB.value("setinfo").auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -104,7 +108,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (DB.value("setinfo").auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -121,7 +125,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (DB.value("setinfo").auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -138,7 +142,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (DB.value("setinfo").auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -155,7 +159,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (DB.value("setinfo").auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {

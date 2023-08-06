@@ -23,18 +23,6 @@ const DB = new LiveDataManager({
             if (isCorrectAccess("ylist")) reloadPart("ylist");
         }
     }),
-    setinfo: new LiveData({
-        auto: {
-            menuSwitch: true,
-            closeOnClick: true,
-            rememberTapInfo: true
-        },
-    }, {
-        type: Object,
-        observer: function () {
-            if (isCorrectAccess("setting")) reloadPart("setting")
-        }
-    }),
     secret: new LiveData({
         key: ""
     }, {
@@ -46,8 +34,20 @@ const SDB = new LiveData(null, {
 })
 Binder.define("uname", DB.value("uname"));
 if (!localStorage.getItem("setting")) localStorage.setItem("setting", JSON.stringify({
-    menuSwitch: true,
-    closeOnClick: true,
-    rememberTapInfo: true
+    auto: {
+        menuSwitch: true,
+        closeOnClick: true,
+        rememberTapInfo: {
+            activate: true,
+            destination: "main"
+        }
+    }
 }));
+const settingInfo = new LiveData(JSON.parse(localStorage.getItem("setting")), {
+    type: Object,
+    observer: function () {
+        if (isCorrectAccess("setting")) reloadPart("setting");
+        localStorage.setItem("setting", JSON.stringify(this.value));
+    }
+})
 const notifyDataChange = () => firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(DB.toObject());
