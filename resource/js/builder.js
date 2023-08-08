@@ -301,6 +301,7 @@ scan(".menuicon").onclick = () => {
                 }
             }));
         }
+        settingInfo.value = JSON.parse(localStorage.getItem("setting"));
         isLoggedIn.value = true;
         await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).get().then(data => {
             if (!data.data()) data.ref.set(DB.toObject());
@@ -320,7 +321,6 @@ scan(".menuicon").onclick = () => {
             })
             .catch(e => null);
         scan("!footer input").forEach(obj => obj.onclick = e => currentFragment.value("main", e.target.attributes.target.value));
-        settingInfo.value = JSON.parse(localStorage.getItem("setting"));
         if (settingInfo.value.auto.rememberTapInfo.activate) currentFragment.value("main", settingInfo.value.auto.rememberTapInfo.destination);
     } else firebase.auth().signOut();
 })();
