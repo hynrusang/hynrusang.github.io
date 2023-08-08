@@ -542,20 +542,7 @@ const subFragment = {
         info: new Fragment("main",
             $("fieldset").add(
                 $("legend", {
-                    exp: "uname -> {uname}님의 정보"
-                }),
-                $("input", { 
-                    type: "button",
-                    class: "inputWidget",
-                    style: "display: block; background-image: url('/resource/img/icon/save.png')", 
-                    value: "이름 변경", 
-                    onclick: () => {
-                        const temp = prompt("당신의 새로운 이름을 알려주세요.\n(아무 값도 입력하지 않으면 변경을 취소합니다.)");
-                        if (temp && temp != "") {
-                            DB.value("uname", temp);
-                            notifyDataChange();
-                        }
-                    }
+                    text: "로그인 정보 관리"
                 }),
                 $("input", { 
                     type: "button",
@@ -626,7 +613,7 @@ const mainFragment = {
             type: "button",
             class: "inputWidget",
             style: "background-image: url(/resource/img/icon/setting.png); position: absolute; right: 0px; margin: 10px;",
-            exp: "uname -> {uname}",
+            exp: "loginWidget -> {loginWidget}",
             onclick: () => firebase.auth().currentUser ? currentFragment.value("sub", "info") : currentFragment.value("sub", "login")
         }),
         $("div", { class: "clock" }).add(

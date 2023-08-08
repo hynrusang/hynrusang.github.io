@@ -1,10 +1,4 @@
 const DB = new LiveDataManager({
-    uname : new LiveData("anonymous", {
-        type: String,
-        observer: function () {
-            Binder.update("uname", this.value)
-        }
-    }),
     mlink: new LiveData([], {
         type: Array,
         observer: function () {
@@ -29,10 +23,14 @@ const DB = new LiveDataManager({
         type: Object
     })
 }, false);
+const isLoggedIn = new LiveData(false, {
+    type: Boolean,
+    observer: () => Binder.update("loginWidget", "정보창")
+})
 const SDB = new LiveData(null, {
     type: Object
 })
-Binder.define("uname", DB.value("uname"));
+Binder.define("loginWidget", "로그인");
 const settingInfo = new LiveData(null, {
     type: Object,
     observer: function () {
