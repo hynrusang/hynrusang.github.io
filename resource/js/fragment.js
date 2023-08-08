@@ -223,9 +223,9 @@ const subFragment = {
                         e.preventDefault();
                         e.target[0].value = e.target[0].value.trim();
                         if (!e.target[0].value.includes("http")) e.target[0].value = `https://${e.target[0].value}`;
-                        if (DB.value("mlink").includes(e.target[0].value)) makeToast("이미 저장된 링크입니다.", 2);
+                        if (DB.value("link").includes(e.target[0].value)) makeToast("이미 저장된 링크입니다.", 2);
                         else {
-                            DB.value("mlink", DB.value("mlink").add(e.target[0].value).sort());
+                            DB.value("link", DB.value("link").add(e.target[0].value).sort());
                             notifyDataChange();
                         }
                         e.target[0].value = "";
