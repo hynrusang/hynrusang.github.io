@@ -1,8 +1,8 @@
 const DB = new LiveDataManager({
-    mlink: new LiveData([], {
+    link: new LiveData([], {
         type: Array,
         observer: function () {
-            if (isCorrectAccess("mlink")) reloadPart("mlink");
+            if (isCorrectAccess("link")) reloadPart("link");
         }
     }),
     memo: new LiveData({}, {
@@ -11,10 +11,10 @@ const DB = new LiveDataManager({
             if (isCorrectAccess("memo")) reloadPart("memo");
         }
     }),
-    ylist: new LiveData({}, {
+    playlist: new LiveData({}, {
         type: Object,
         observer: function () {
-            if (isCorrectAccess("ylist")) reloadPart("ylist");
+            if (isCorrectAccess("playlist")) reloadPart("playlist");
         }
     }),
     secret: new LiveData({
@@ -38,4 +38,3 @@ const settingInfo = new LiveData(null, {
         localStorage.setItem("setting", JSON.stringify(this.value));
     }
 })
-const notifyDataChange = () => firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(DB.toObject());
