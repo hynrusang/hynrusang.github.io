@@ -29,6 +29,7 @@ const currentFragment = new LiveDataManager({
         type: String,
         observer: function () {
             subFragment[currentFragment.value("main")][this.value].launch();
+            autoReload()
         }
     })
 });
