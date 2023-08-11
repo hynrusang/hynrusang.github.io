@@ -27,8 +27,8 @@ const currentFragment = new LiveDataManager({
     }),
     sub: new LiveData("link", {
         type: String,
-        observer: function () {
-            subFragment[currentFragment.value("main")][this.value].launch();
+        observer: async function () {
+            await subFragment[currentFragment.value("main")][this.value].launch();
             autoReload();
         }
     })
@@ -317,10 +317,7 @@ const subFragment = {
                     })
                 ),
             )
-        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => {
-            currentFragment.value("sub", "memo");
-            autoReload();
-        }),
+        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => currentFragment.value("sub", "memo")),
         login: new Fragment("main",
             $("fieldset", {
                 style: "position: absolute;"
