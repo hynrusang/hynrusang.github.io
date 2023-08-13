@@ -183,12 +183,12 @@ const menuFragment = {
         $("form", {
             onsubmit: e => {
                 e.preventDefault();
-                if (Object.keys(DB.value("ylist")).includes(e.target[0].value)) makeToast("해당 이름은 이미 존재합니다.", 2)
+                if (Object.keys(DB.value("playlist")).includes(e.target[0].value)) makeToast("해당 이름은 이미 존재합니다.", 2)
                 else {
-                    const newYlist = DB.value("ylist");
-                    newYlist[e.target[0].value] = {};
+                    const newPlaylist = DB.value("playlist");
+                    newPlaylist[e.target[0].value] = {};
                     e.target[0].value = "";
-                    DB.value("ylist", newYlist);
+                    DB.value("playlist", newPlaylist);
                     notifyDataChange();
                 }
             }
