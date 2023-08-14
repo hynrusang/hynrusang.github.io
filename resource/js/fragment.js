@@ -1,37 +1,3 @@
-const currentFragment = new LiveDataManager({
-    main: new LiveData("main", {
-        type: String,
-        observer: function () {
-            scan(".current").classList.remove("current");
-            scan(`input[target=${this.value}]`).classList.add("current");
-            if (this.value == "video") {
-                scan("main[player]").style.display = null;
-                scan("fragment[rid=page]").style.display = "none";
-            } else {
-                scan("main[player]").style.display = "none";
-                scan("fragment[rid=page]").style.display = null;
-                mainFragment[this.value].launch();
-            }
-            if (settingInfo.value.auto.menuSwitch) {
-                if (["video", "secret"].includes(this.value)) scan("details").setAttribute("open", null); 
-                else scan("details").removeAttribute("open"); 
-            }
-            menuFragment[this.value].launch();
-            if (settingInfo.value.auto.rememberTapInfo.activate) {
-                const newSetting = settingInfo.value;
-                newSetting.auto.rememberTapInfo.destination = this.value;
-                settingInfo.value = newSetting;
-            }
-            autoReload();
-        }
-    }),
-    sub: new LiveData("link", {
-        type: String,
-        observer: function () {
-            subFragment[currentFragment.value("main")][this.value].launch();
-        }
-    })
-});
 const menuFragment = {
     main: new Fragment("menu", 
         $("a", {
@@ -183,12 +149,12 @@ const menuFragment = {
         $("form", {
             onsubmit: e => {
                 e.preventDefault();
-                if (Object.keys(DB.value("ylist")).includes(e.target[0].value)) makeToast("해당 이름은 이미 존재합니다.", 2)
+                if (Object.keys(DB.value("playlist")).includes(e.target[0].value)) makeToast("해당 이름은 이미 존재합니다.", 2)
                 else {
-                    const newYlist = DB.value("ylist");
-                    newYlist[e.target[0].value] = {};
+                    const newPlaylist = DB.value("playlist");
+                    newPlaylist[e.target[0].value] = {};
                     e.target[0].value = "";
-                    DB.value("ylist", newYlist);
+                    DB.value("playlist", newPlaylist);
                     notifyDataChange();
                 }
             }
@@ -223,9 +189,9 @@ const subFragment = {
                         e.preventDefault();
                         e.target[0].value = e.target[0].value.trim();
                         if (!e.target[0].value.includes("http")) e.target[0].value = `https://${e.target[0].value}`;
-                        if (DB.value("mlink").includes(e.target[0].value)) makeToast("이미 저장된 링크입니다.", 2);
+                        if (DB.value("link").includes(e.target[0].value)) makeToast("이미 저장된 링크입니다.", 2);
                         else {
-                            DB.value("mlink", DB.value("mlink").add(e.target[0].value).sort());
+                            DB.value("link", DB.value("link").add(e.target[0].value).sort());
                             notifyDataChange();
                         }
                         e.target[0].value = "";
@@ -247,7 +213,10 @@ const subFragment = {
                 ),
                 $("ul")
             )
-        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => currentFragment.value("sub", "link")),
+        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => {
+            currentFragment.value("sub", "link");
+            autoReload();
+        }),
         memo: new Fragment("main",
             $("datalist", {
                 id: "memo"
@@ -542,20 +511,7 @@ const subFragment = {
         info: new Fragment("main",
             $("fieldset").add(
                 $("legend", {
-                    exp: "uname -> {uname}님의 정보"
-                }),
-                $("input", { 
-                    type: "button",
-                    class: "inputWidget",
-                    style: "display: block; background-image: url('/resource/img/icon/save.png')", 
-                    value: "이름 변경", 
-                    onclick: () => {
-                        const temp = prompt("당신의 새로운 이름을 알려주세요.\n(아무 값도 입력하지 않으면 변경을 취소합니다.)");
-                        if (temp && temp != "") {
-                            DB.value("uname", temp);
-                            notifyDataChange();
-                        }
-                    }
+                    text: "로그인 정보 관리"
                 }),
                 $("input", { 
                     type: "button",
@@ -626,7 +582,7 @@ const mainFragment = {
             type: "button",
             class: "inputWidget",
             style: "background-image: url(/resource/img/icon/setting.png); position: absolute; right: 0px; margin: 10px;",
-            exp: "uname -> {uname}",
+            exp: "loginWidget -> {loginWidget}",
             onclick: () => firebase.auth().currentUser ? currentFragment.value("sub", "info") : currentFragment.value("sub", "login")
         }),
         $("div", { class: "clock" }).add(
