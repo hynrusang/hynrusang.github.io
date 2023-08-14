@@ -48,11 +48,11 @@ const currentFragment = new LiveDataManager({
                 scan("fragment[rid=page]").style.display = null;
                 mainFragment[this.value].launch();
             }
+            menuFragment[this.value].launch();
             if (settingInfo.value.auto.menuSwitch) {
                 if (["video", "secret"].includes(this.value)) scan("details").setAttribute("open", null); 
                 else scan("details").removeAttribute("open"); 
             }
-            menuFragment[this.value].launch();
             if (settingInfo.value.auto.rememberTapInfo.activate) {
                 const newSetting = settingInfo.value;
                 newSetting.auto.rememberTapInfo.destination = this.value;
