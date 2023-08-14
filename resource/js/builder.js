@@ -283,9 +283,9 @@ scan(".menuicon").onclick = () => {
         firebase.auth().signOut();
     } else if (firebase.auth().currentUser.emailVerified) {
         localStorage.setItem("timestamp", new Date());
-        if (!localStorage.getItem("setting") || JSON.parse(localStorage.getItem("setting")).version != "2.3") {
+        if (!localStorage.getItem("setting") || JSON.parse(localStorage.getItem("setting")).version != "2.4") {
             localStorage.setItem("setting", JSON.stringify({
-                version: "2.3",
+                version: "2.4",
                 auto: {
                     menuSwitch: true,
                     closeOnClick: true,
