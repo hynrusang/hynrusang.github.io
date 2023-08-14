@@ -113,10 +113,7 @@ const reloadPart = partname => {
                             }),
                             num: Math.floor(Math.random() * Object.keys(DB.value("playlist")[keyData.list[keyData.num]]).length)
                         }
-                        const href = valueData.values[valueData.num];
-                        scan("#player").src = href;
-                        scan("#playlistname").innerText = `${keyData.list[keyData.num]}: ${valueData.keys[valueData.num]}`;
-                        if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                        currentVideo.value = [keyData.list[keyData.num], valueData.keys[valueData.num], valueData.values[valueData.num]];
                     }
                 }
             }));
@@ -173,9 +170,7 @@ const reloadPart = partname => {
                                 onclick: e => {
                                     e.preventDefault();
                                     const href = e.target.href.includes("list=") ? `${e.target.href.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : e.target.href.replace("m.", "www.").replace("watch?v=", "embed/").split("&")[0];
-                                    scan("#player").src = href;
-                                    scan("#playlistname").innerText = `${key}: ${value}`;
-                                    if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                                    currentVideo.value = [key, value, href];
                                 }
                             }),
                             $("input", {

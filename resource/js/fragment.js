@@ -1,37 +1,3 @@
-const currentFragment = new LiveDataManager({
-    main: new LiveData("main", {
-        type: String,
-        observer: function () {
-            scan(".current").classList.remove("current");
-            scan(`input[target=${this.value}]`).classList.add("current");
-            if (this.value == "video") {
-                scan("main[player]").style.display = null;
-                scan("fragment[rid=page]").style.display = "none";
-            } else {
-                scan("main[player]").style.display = "none";
-                scan("fragment[rid=page]").style.display = null;
-                mainFragment[this.value].launch();
-            }
-            if (settingInfo.value.auto.menuSwitch) {
-                if (["video", "secret"].includes(this.value)) scan("details").setAttribute("open", null); 
-                else scan("details").removeAttribute("open"); 
-            }
-            menuFragment[this.value].launch();
-            if (settingInfo.value.auto.rememberTapInfo.activate) {
-                const newSetting = settingInfo.value;
-                newSetting.auto.rememberTapInfo.destination = this.value;
-                settingInfo.value = newSetting;
-            }
-            autoReload();
-        }
-    }),
-    sub: new LiveData("link", {
-        type: String,
-        observer: function () {
-            subFragment[currentFragment.value("main")][this.value].launch();
-        }
-    })
-});
 const menuFragment = {
     main: new Fragment("menu", 
         $("a", {
