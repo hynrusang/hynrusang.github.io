@@ -552,7 +552,7 @@ const subFragment = {
                             await firebase.auth().currentUser.delete()
                                 .then(() => authIsDelete = true)
                                 .catch(e => {
-                                    if (e.code == "auth/requires-recent-login") alert("이 작업은 중요하므로 최근 인증이 필요합니다.\n이 요청을 시도하기 전에 재 로그인하십시오.")
+                                    if (e.code == "auth/requires-recent-login") alert("이 작업은 중요하므로 최근 인증이 필요합니다.\n이 요청을 시도하기 전에 재 로그인하십시오.");
                                     else alert("알 수 없는 이유로 회원 탈퇴에 실패하였습니다. 다시 한 번 시도해주세요.");
                                     return;
                                 });
