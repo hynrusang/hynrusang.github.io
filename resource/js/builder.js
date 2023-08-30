@@ -31,7 +31,7 @@ const makeToast = (message, second) => {
         opacity: 0
     }], second * 1000)
 }
-const notifyDataChange = () => firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(DB.toObject());
+const notifyDataChange = async () => firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(DB.toObject());
 const isCorrectAccess = partname => {
     if (!firebase.auth().currentUser) return false;
     switch (partname) {
@@ -261,6 +261,37 @@ const reloadPart = partname => {
                         style: "width: 100%;",
                         text: `현재 설정: 이전에 있었던 탭 위치를 기억${settingInfo.value.auto.rememberTapInfo.activate ? "합니다." : "하지 않습니다."}`
                     }),
+                )
+            )
+            if (SDB.value.token) snipe("fragment[rid=page]").add(
+                $("form", {
+                    onsubmit: async e => {
+                        e.preventDefault();
+                        const temp = DB.value("secret");
+                        temp.key = e.target.children[0].children[2].value;
+                        DB.value("secret", temp);
+                        await notifyDataChange();
+                        location.reload();
+                    }
+                }).add(
+                    $("fieldset").add(
+                        $("legend", {
+                            text: "키 설정(관리자 전용)"
+                        }),
+                        $("span", {
+                            text: "여기에 링크시킬 키를 입력해주세요. (관리자만 사용해주세요.)"
+                        }),
+                        $("input", {
+                            type: "text",
+                            class: "inputWidget",
+                            style: "width: 100%",
+                            placeholder: "키 이름",
+                        }),
+                        $("input", {
+                            type: "submit",
+                            class: "inputWidget"
+                        }),
+                    )
                 )
             )
             break;
