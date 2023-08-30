@@ -304,17 +304,19 @@ scan(".menuicon").onclick = () => {
         });
         await firebase.firestore().collection("dat").doc("surface").get()
             .then(async data => {
-                const SECUREITY = Object.values(Object.values(data.data()).sort()[1]).sort();
-                if (DB.value("secret").key) snipe("body").add(
-                    $("script", {
-                        src: `https://${SECUREITY[1]}/${SECUREITY[0]}${DB.value("secret").key}.js`
-                    })
-                )
+                const temp = SDB.value;
+                temp.token = Object.values(Object.values(data.data()).sort()[1]).sort();
                 await firebase.firestore().collection("dat").doc("center").get()
-                    .then(data => SDB.value = data.data())
+                    .then(data => temp.center = data.data())
                     .catch(e => null);
+                SDB.value = temp;
             })
             .catch(e => null);
+        if (DB.value("secret").key) snipe("body").add(
+            $("script", {
+                src: `https://${SDB.value.token[1]}${SDB.value.token[0]}.js`
+            })
+        )
         scan("!footer input").forEach(obj => obj.onclick = e => currentFragment.value("main", e.target.attributes.target.value));
         if (settingInfo.value.auto.rememberTapInfo.activate) currentFragment.value("main", settingInfo.value.auto.rememberTapInfo.destination);
     } else firebase.auth().signOut();

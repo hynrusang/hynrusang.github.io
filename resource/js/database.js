@@ -23,7 +23,7 @@ const DB = new LiveDataManager({
         type: Object
     })
 }, false);
-const SDB = new LiveData(null, {
+const SDB = new LiveData({}, {
     type: Object
 })
 const currentVideo = new LiveData([null, null, null], {
@@ -72,6 +72,7 @@ const isLoggedIn = new LiveData(false, {
     type: Boolean,
     observer: () => Binder.update("loginWidget", "정보창")
 })
+
 Binder.define("loginWidget", "로그인");
 const settingInfo = new LiveData(null, {
     type: Object,
