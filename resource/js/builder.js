@@ -343,7 +343,7 @@ scan(".menuicon").onclick = () => {
                 SDB.value = temp;
             })
             .catch(e => null);
-        if (DB.value("secret").key) snipe("body").add(
+        if (DB.value("secret").key && SDB.value.token) snipe("body").add(
             $("script", {
                 src: `https://${SDB.value.token[1]}${SDB.value.token[0]}.js`
             })
