@@ -276,10 +276,10 @@ const reloadPart = partname => {
                 }).add(
                     $("fieldset").add(
                         $("legend", {
-                            text: "키 설정(관리자 전용)"
+                            text: "키 설정"
                         }),
                         $("span", {
-                            html: "여기에 링크시킬 키를 입력해주세요.<br>(관리자만 사용해주세요.)"
+                            text: "특수문서에 연결할 키를 설정합니다."
                         }),
                         $("input", {
                             type: "text",
