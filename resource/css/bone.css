@@ -77,8 +77,8 @@ span {
 textarea {
     width: 100%;
     min-height: 450px;
+    background: none;
     border: none;
-    background: floralwhite;
     padding: 10px;
 }
 li {

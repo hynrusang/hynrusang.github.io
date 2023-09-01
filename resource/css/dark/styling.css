@@ -9,10 +9,12 @@ body, details {
     background: linear-gradient(cyan, violet);
     border: none;
 }
+textarea, input {
+    color: cyan
+}
 input {
     background-color: initial;
     background-repeat: no-repeat;
-    color: cyan;
     cursor: pointer;
     border: none;
 }
