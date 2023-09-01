@@ -6,7 +6,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -24,7 +24,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -42,7 +42,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -60,7 +60,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -78,7 +78,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -96,7 +96,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -114,7 +114,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -132,7 +132,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -149,7 +149,7 @@ const menuFragment = {
         $("form", {
             onsubmit: e => {
                 e.preventDefault();
-                if (Object.keys(DB.value("playlist")).includes(e.target[0].value)) makeToast("해당 이름은 이미 존재합니다.", 2)
+                if (Object.keys(DB.value("playlist")).includes(e.target[0].value)) makeToast("해당 이름은 이미 존재합니다.")
                 else {
                     const newPlaylist = DB.value("playlist");
                     newPlaylist[e.target[0].value] = {};
@@ -189,7 +189,7 @@ const subFragment = {
                         e.preventDefault();
                         e.target[0].value = e.target[0].value.trim();
                         if (!e.target[0].value.includes("http")) e.target[0].value = `https://${e.target[0].value}`;
-                        if (DB.value("link").includes(e.target[0].value)) makeToast("이미 저장된 링크입니다.", 2);
+                        if (DB.value("link").includes(e.target[0].value)) makeToast("이미 저장된 링크입니다.");
                         else {
                             DB.value("link", DB.value("link").add(e.target[0].value).sort());
                             notifyDataChange();
@@ -229,13 +229,14 @@ const subFragment = {
                     html: "여기에 기억해야 할 정보를 남겨보세요.<br>(메모 제목을 먼저 적으신 후, 메모를 작성해주세요.)<br>(중간에 메모 제목을 지우면, 현재까지 작업한 내용이 사라집니다.)"
                 }),
                 $("form", {
-                    onsubmit: e => {
+                    onsubmit: async e => {
                         e.preventDefault();
                         const memotemp = DB.value("memo");
                         if (![e.target[0].value.trim(), e.target[2].value.trim()].includes("")) {
                             memotemp[e.target[0].value] = e.target[2].value;
                             DB.value("memo", memotemp);
-                            notifyDataChange();
+                            await notifyDataChange();
+                            makeToast("저장되었습니다.");
                         }
                     }
                 }).add(
@@ -307,17 +308,17 @@ const subFragment = {
                         await firebase.auth().signInWithEmailAndPassword(scan("!#loginField input")[0].value, scan("!#loginField input")[1].value).then(async data => {
                             if (!data.user.emailVerified) {
                                 firebase.auth().signOut();
-                                makeToast("이메일 인증이 되지 않은 계정은 사용하실 수 없습니다.\n(인증용 메일을 다시 보내드릴 테니, 해당 메일에서 이메일 인증을 해주세요.)", 2);
+                                makeToast("이메일 인증이 되지 않은 계정은 사용하실 수 없습니다.\n(인증용 메일을 다시 보내드릴 테니, 해당 메일에서 이메일 인증을 해주세요.)");
                                 await wait(1000);
                                 await data.user.sendEmailVerification()
-                                    .then(() => makeToast("인증용 메일을 다시 보냈습니다.", 2))
-                                    .catch(e => { if (e.code == "auth/too-many-requests") makeToast("현재 요청이 너무 많아 요청을 보류중입니다. 잠시 후 다시 시도해주세요.", 2); });
+                                    .then(() => makeToast("인증용 메일을 다시 보냈습니다."))
+                                    .catch(e => { if (e.code == "auth/too-many-requests") makeToast("현재 요청이 너무 많아 요청을 보류중입니다. 잠시 후 다시 시도해주세요."); });
                             } else location.reload();
                         }).catch(e => {
-                            if (e.code == "auth/wrong-password") makeToast("비밀번호가 잘못되었습니다.", 2);
-                            else if (e.code == "auth/invalid-email") makeToast("잘못된 이메일 주소입니다.", 2);
-                            else if (e.code == "auth/user-not-found") makeToast("해당 계정은 존재하지 않습니다.", 2);
-                            else if (e.code == "auth/internal-error") makeToast("이 사이트에서는 로그인 API를 호출하실 수 없습니다.", 2);
+                            if (e.code == "auth/wrong-password") makeToast("비밀번호가 잘못되었습니다.");
+                            else if (e.code == "auth/invalid-email") makeToast("잘못된 이메일 주소입니다.");
+                            else if (e.code == "auth/user-not-found") makeToast("해당 계정은 존재하지 않습니다.");
+                            else if (e.code == "auth/internal-error") makeToast("이 사이트에서는 로그인 API를 호출하실 수 없습니다.");
                             else console.log(e);
                         });
                     }
@@ -365,12 +366,12 @@ const subFragment = {
                         style: "display: block; background-image: url('/resource/img/icon/help.png')", 
                         value: "비밀번호 변경 이메일 보내기", 
                         onclick: async () => {
-                            makeToast("이메일 주소로 비밀번호 초기화 메일을 보내기 시도하는 중입니다.", 2);
+                            makeToast("이메일 주소로 비밀번호 초기화 메일을 보내기 시도하는 중입니다.");
                             await firebase.auth().sendPasswordResetEmail(scan("#loginField [type=text]").value)
-                                .then(() => makeToast("이메일 주소로 초기화 메일을 보냈습니다.", 2))
+                                .then(() => makeToast("이메일 주소로 초기화 메일을 보냈습니다."))
                                 .catch(e => {
-                                    if (e.code == "auth/invalid-email") makeToast("잘못된 이메일 주소입니다.", 2);
-                                    else if (e.code == "auth/user-not-found") makeToast("해당 계정은 존재하지 않습니다.", 2);
+                                    if (e.code == "auth/invalid-email") makeToast("잘못된 이메일 주소입니다.");
+                                    else if (e.code == "auth/user-not-found") makeToast("해당 계정은 존재하지 않습니다.");
                             })
                         }
                     }),
@@ -414,20 +415,20 @@ const subFragment = {
                     method: "post", 
                     onsubmit: async e => {
                         e.preventDefault();
-                        if (scan("!#registField input")[1].value != scan("!#registField input")[2].value) makeToast("비밀번호가 일치하지 않습니다", 2);
+                        if (scan("!#registField input")[1].value != scan("!#registField input")[2].value) makeToast("비밀번호가 일치하지 않습니다");
                         else {
-                            makeToast("회원가입을 시도하는 중입니다.", 2);
+                            makeToast("회원가입을 시도하는 중입니다.");
                             await firebase.auth().createUserWithEmailAndPassword(scan("!#registField input")[0].value, scan("!#registField input")[1].value).then(async data => {
-                                makeToast("회원가입 인증을 위한 메일을 발송하는 중입니다.", 2);
+                                makeToast("회원가입 인증을 위한 메일을 발송하는 중입니다.");
                                 await data.user.sendEmailVerification().then(() => {
                                     alert("회원가입이 완료되었습니다.\n(회원가입 때 사용하셨던 이메일 주소에서, 이메일 인증을 해주세요.)");
                                     firebase.auth().signOut();
                                     location.reload();
                                 });
                             }).catch(e => {
-                                if (e.code == "auth/weak-password") makeToast("비밀번호는 최소 6자리 이상이여야만 합니다.", 2);
-                                else if (e.code == "auth/email-already-in-use") makeToast("이미 가입된 이메일입니다.\n만약, 비밀번호가 생각이 안나거나 본인이 가입한 것이 아닌 경우, 비밀번호 찾기를 해주세요.", 2);
-                                else if (e.code == "auth/internal-error") makeToast("이 사이트에서는 로그인 API를 호출하실 수 없습니다.", 2);
+                                if (e.code == "auth/weak-password") makeToast("비밀번호는 최소 6자리 이상이여야만 합니다.");
+                                else if (e.code == "auth/email-already-in-use") makeToast("이미 가입된 이메일입니다.\n만약, 비밀번호가 생각이 안나거나 본인이 가입한 것이 아닌 경우, 비밀번호 찾기를 해주세요.");
+                                else if (e.code == "auth/internal-error") makeToast("이 사이트에서는 로그인 API를 호출하실 수 없습니다.");
                                 else console.log(e);
                             })
                         }
@@ -519,12 +520,12 @@ const subFragment = {
                     style: "display: block; background-image: url('/resource/img/icon/lock.png')", 
                     value: "비밀번호 변경 이메일 보내기", 
                     onclick: async () => {
-                        makeToast("이메일 주소로 비밀번호 초기화 메일을 보내기 시도하는 중입니다.", 2);
+                        makeToast("이메일 주소로 비밀번호 초기화 메일을 보내기 시도하는 중입니다.");
                         await firebase.auth().sendPasswordResetEmail(firebase.auth().currentUser.email)
-                            .then(() => makeToast("이메일 주소로 초기화 메일을 보냈습니다.", 2))
+                            .then(() => makeToast("이메일 주소로 초기화 메일을 보냈습니다."))
                             .catch(e => {
-                                if (e.code == "auth/invalid-email") makeToast("잘못된 이메일 주소입니다.", 2);
-                                else if (e.code == "auth/user-not-found") makeToast("해당 계정은 존재하지 않습니다.", 2);
+                                if (e.code == "auth/invalid-email") makeToast("잘못된 이메일 주소입니다.");
+                                else if (e.code == "auth/user-not-found") makeToast("해당 계정은 존재하지 않습니다.");
                         })
                     }
                 }),
@@ -548,11 +549,11 @@ const subFragment = {
                     onclick: async () => {
                         if (confirm("정말로 이 계정을 삭제하시겠습니까?\n(이 결정은 번복되지 않습니다.)\n(추가로 다시 한 번 물어보는 절차도 없습니다.)")) {
                             let authIsDelete = false;
-                            makeToast("잠시만 기다려 주십시오. 정보가 곧 삭제됩니다.", 2);
+                            makeToast("잠시만 기다려 주십시오. 정보가 곧 삭제됩니다.");
                             await firebase.auth().currentUser.delete()
                                 .then(() => authIsDelete = true)
                                 .catch(e => {
-                                    if (e.code == "auth/requires-recent-login") alert("이 작업은 중요하므로 최근 인증이 필요합니다.\n이 요청을 시도하기 전에 재 로그인하십시오.")
+                                    if (e.code == "auth/requires-recent-login") alert("이 작업은 중요하므로 최근 인증이 필요합니다.\n이 요청을 시도하기 전에 재 로그인하십시오.");
                                     else alert("알 수 없는 이유로 회원 탈퇴에 실패하였습니다. 다시 한 번 시도해주세요.");
                                     return;
                                 });
