@@ -213,7 +213,7 @@ const reloadPart = partname => {
             snipe("fragment[rid=page]").reset(
                 $("fieldset").add(
                     $("legend", {
-                        text: "편의성(자동) 관련 설정"
+                        text: "브라우저/기기 종속 설정"
                     }),
                     $("span", {
                         text: "설정들은 브라우저/기기의 종류에 따라 독립적으로 적용됩니다."
@@ -279,7 +279,7 @@ const reloadPart = partname => {
                             text: "키 설정(관리자 전용)"
                         }),
                         $("span", {
-                            text: "여기에 링크시킬 키를 입력해주세요. (관리자만 사용해주세요.)"
+                            html: "여기에 링크시킬 키를 입력해주세요.<br>(관리자만 사용해주세요.)"
                         }),
                         $("input", {
                             type: "text",
