@@ -17,6 +17,14 @@ const DB = new LiveDataManager({
             if (isCorrectAccess("playlist")) reloadPart("playlist");
         }
     }),
+    setting : new LiveData({
+        theme: "right"
+    }, {
+        type: Object,
+        observer: function() {
+            for (let name of ["styling", "widget"]) scan(`#${name}`).href = `/resource/css/${this.value.theme}/${name}.css`
+        }
+    }),
     secret: new LiveData({
         key: ""
     }, {
@@ -26,12 +34,19 @@ const DB = new LiveDataManager({
 const SDB = new LiveData({}, {
     type: Object
 })
+const setting = new LiveData(JSON.parse(localStorage.getItem("setting")), {
+    type: Object,
+    observer: function () {
+        if (isCorrectAccess("setting")) reloadPart("setting");
+        localStorage.setItem("setting", JSON.stringify(this.value));
+    }
+})
 const currentVideo = new LiveData([null, null, null], {
     type: Array,
     observer: function () {
         scan("#player").src = this.value[2];
         scan("#playlistname").innerText = `${this.value[0]}: ${this.value[1]}`;
-        if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+        if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
     }
 })
 const currentFragment = new LiveDataManager({
@@ -49,14 +64,14 @@ const currentFragment = new LiveDataManager({
                 mainFragment[this.value].launch();
             }
             menuFragment[this.value].launch();
-            if (settingInfo.value.auto.menuSwitch) {
+            if (setting.value.auto.menuSwitch) {
                 if (["video", "secret"].includes(this.value)) scan("details").setAttribute("open", null); 
                 else scan("details").removeAttribute("open"); 
             }
-            if (settingInfo.value.auto.rememberTapInfo.activate) {
-                const newSetting = settingInfo.value;
-                newSetting.auto.rememberTapInfo.destination = this.value;
-                settingInfo.value = newSetting;
+            if (setting.value.auto.rememberTapInfo.activate) {
+                const temp = setting.value;
+                temp.auto.rememberTapInfo.destination = this.value;
+                setting.value = temp;
             }
             autoReload();
         }
@@ -72,12 +87,4 @@ const isLoggedIn = new LiveData(false, {
     type: Boolean,
     observer: () => Binder.update("loginWidget", "정보창")
 })
-
 Binder.define("loginWidget", "로그인");
-const settingInfo = new LiveData(null, {
-    type: Object,
-    observer: function () {
-        if (isCorrectAccess("setting")) reloadPart("setting");
-        localStorage.setItem("setting", JSON.stringify(this.value));
-    }
-})

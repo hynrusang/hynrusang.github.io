@@ -1,0 +1,33 @@
+body, details {
+    background: black;
+    color: cyan;
+}
+*::-webkit-scrollbar {
+    background: none;
+}
+*::-webkit-scrollbar-thumb {
+    background: linear-gradient(cyan, violet);
+    border: none;
+}
+input {
+    background-color: initial;
+    background-repeat: no-repeat;
+    color: cyan;
+    cursor: pointer;
+    border: none;
+}
+input::placeholder {
+    color: rgba(0, 255, 255, 0.4);
+}
+[type=button], [type=submit] {
+    border-radius: 30px;
+}
+
+a {
+    border-radius: 30px;
+    color: cornflowerblue;
+}
+:is(a, .inputWidget, input[type=submit]):hover {
+    background-color: rgba(0, 255, 255, 0.5);
+    box-shadow: 10px 5px rgba(0, 200, 200, 0.5);
+}

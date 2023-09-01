@@ -216,50 +216,75 @@ const reloadPart = partname => {
                         text: "브라우저/기기 종속 설정"
                     }),
                     $("span", {
-                        text: "설정들은 브라우저/기기의 종류에 따라 독립적으로 적용됩니다."
+                        text: "이 필드의 설정들은 브라우저/기기의 종류에 따라 독립적으로 적용됩니다."
                     }),
                     $("br"),
                     $("input", {
                         type: "button",
                         class: "inputWidget",
-                        value: `메뉴 자동 닫기: ${settingInfo.value.auto.closeOnClick ? "활성화" : "비활성화"}`,
+                        value: `메뉴 자동 닫기: ${setting.value.auto.closeOnClick ? "활성화" : "비활성화"}`,
                         onclick: () => {
-                            const newSetting = settingInfo.value;
-                            newSetting.auto.closeOnClick = !newSetting.auto.closeOnClick;
-                            settingInfo.value = newSetting;
+                            const temp = setting.value;
+                            temp.auto.closeOnClick = !temp.auto.closeOnClick;
+                            setting.value = temp;
                         }
                     }),
                     $("span", {
                         style: "width: 100%;",
-                        text: `현재 설정: 메뉴를 연 상태에서, 특정 액션을 ${settingInfo.value.auto.closeOnClick ? "취하면 자동으로 메뉴창이 닫힙니다." : "취해도 메뉴창이 닫히지 않습니다."}`
+                        text: `현재 설정: 메뉴를 연 상태에서, 특정 액션을 ${setting.value.auto.closeOnClick ? "취하면 자동으로 메뉴창이 닫힙니다." : "취해도 메뉴창이 닫히지 않습니다."}`
                     }),
                     $("input", {
                         type: "button",
                         class: "inputWidget",
-                        value: `메뉴 자동 전환: ${settingInfo.value.auto.menuSwitch ? "활성화" : "비활성화"}`,
+                        value: `메뉴 자동 전환: ${setting.value.auto.menuSwitch ? "활성화" : "비활성화"}`,
                         onclick: () => {
-                            const newSetting = settingInfo.value;
-                            newSetting.auto.menuSwitch = !newSetting.auto.menuSwitch;
-                            settingInfo.value = newSetting;
+                            const temp = setting.value;
+                            temp.auto.menuSwitch = !temp.auto.menuSwitch;
+                            setting.value = temp;
                         }
                     }),
                     $("span", {
                         style: "width: 100%;",
-                        html: `현재 설정: ${settingInfo.value.auto.menuSwitch ? "특정 탭에서 자동으로 메뉴가 열리고, 그 외의 탭에서 메뉴가 자동으로 닫힙니다." : "어떤 탭에 있는지에 관계없이 자동으로 메뉴가 열리고 닫히지 않습니다."}`
+                        html: `현재 설정: ${setting.value.auto.menuSwitch ? "특정 탭에서 자동으로 메뉴가 열리고, 그 외의 탭에서 메뉴가 자동으로 닫힙니다." : "어떤 탭에 있는지에 관계없이 자동으로 메뉴가 열리고 닫히지 않습니다."}`
                     }),
                     $("input", {
                         type: "button",
                         class: "inputWidget",
-                        value: `이전 탭 기억: ${settingInfo.value.auto.rememberTapInfo.activate ? "활성화" : "비활성화"}`,
+                        value: `이전 탭 기억: ${setting.value.auto.rememberTapInfo.activate ? "활성화" : "비활성화"}`,
                         onclick: () => {
-                            const newSetting = settingInfo.value;
-                            newSetting.auto.rememberTapInfo.activate = !newSetting.auto.rememberTapInfo.activate;
-                            settingInfo.value = newSetting;
+                            const temp = setting.value;
+                            temp.auto.rememberTapInfo.activate = !temp.auto.rememberTapInfo.activate;
+                            setting.value = temp;
                         }
                     }),
                     $("span", {
                         style: "width: 100%;",
-                        text: `현재 설정: 이전에 있었던 탭 위치를 기억${settingInfo.value.auto.rememberTapInfo.activate ? "합니다." : "하지 않습니다."}`
+                        text: `현재 설정: 이전에 있었던 탭 위치를 기억${setting.value.auto.rememberTapInfo.activate ? "합니다." : "하지 않습니다."}`
+                    })
+                ),
+                $("fieldset").add(
+                    $("legend", {
+                        text: "계정 종속 설정"
+                    }),
+                    $("span", {
+                        text: "이 필드의 설정들은 계정마다 독립적으로 적용됩니다."
+                    }),
+                    $("br"),
+                    $("input", {
+                        type: "button",
+                        class: "inputWidget",
+                        value: `테마: ${DB.value("setting").theme}`,
+                        onclick: () => {
+                            const temp = DB.value("setting");
+                            temp.theme = (temp.theme == "right") ? "dark" : "right";
+                            DB.value("setting", temp);
+                            notifyDataChange();
+                            reloadPart("setting");
+                        }
+                    }),
+                    $("span", {
+                        style: "width: 100%;",
+                        text: `현재 테마: ${(DB.value("setting").theme == "right") ? "밝은색" : "어두운색"} 테마를 적용합니다.`
                     }),
                 )
             )
@@ -314,9 +339,9 @@ scan(".menuicon").onclick = () => {
         firebase.auth().signOut();
     } else if (firebase.auth().currentUser.emailVerified) {
         localStorage.setItem("timestamp", new Date());
-        if (!localStorage.getItem("setting") || JSON.parse(localStorage.getItem("setting")).version != "2.4") {
-            localStorage.setItem("setting", JSON.stringify({
-                version: "2.4",
+        if (!localStorage.getItem("setting") || JSON.parse(localStorage.getItem("setting")).version != "2.5") {
+            setting.value = {
+                version: "2.5",
                 auto: {
                     menuSwitch: true,
                     closeOnClick: true,
@@ -325,9 +350,8 @@ scan(".menuicon").onclick = () => {
                         destination: "main"
                     }
                 }
-            }));
+            }
         }
-        settingInfo.value = JSON.parse(localStorage.getItem("setting"));
         isLoggedIn.value = true;
         await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).get().then(data => {
             if (!data.data()) data.ref.set(DB.toObject());
@@ -349,6 +373,6 @@ scan(".menuicon").onclick = () => {
             })
         )
         scan("!footer input").forEach(obj => obj.onclick = e => currentFragment.value("main", e.target.attributes.target.value));
-        if (settingInfo.value.auto.rememberTapInfo.activate) currentFragment.value("main", settingInfo.value.auto.rememberTapInfo.destination);
+        if (setting.value.auto.rememberTapInfo.activate) currentFragment.value("main", setting.value.auto.rememberTapInfo.destination);
     } else firebase.auth().signOut();
 })();

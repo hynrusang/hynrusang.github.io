@@ -6,7 +6,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -24,7 +24,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -42,7 +42,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -60,7 +60,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -78,7 +78,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -96,7 +96,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -114,7 +114,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -132,7 +132,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (settingInfo.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
             }
         }).add(
             $("img", {
