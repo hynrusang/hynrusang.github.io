@@ -18,7 +18,7 @@ const CLOCK = setInterval(function () {
         scan(".second_pin").style.transform = `rotate(${SECOND * 6}deg)`;
     } catch (e) { }
 }, 250);
-const makeToast = (message, second) => {
+const makeToast = message => {
     scan("#toast").innerText = message;
     scan("#toast").animate([{
         backgroundColor: "blue",
@@ -29,7 +29,7 @@ const makeToast = (message, second) => {
     }, {
         backgroundColor: "blue",
         opacity: 0
-    }], second * 1000)
+    }], 1000)
 }
 const notifyDataChange = async () => firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(DB.toObject());
 const isCorrectAccess = partname => {
@@ -100,7 +100,7 @@ const reloadPart = partname => {
                 value: "랜덤 추천",
                 onclick: () => {
                     if (Object.keys(DB.value("playlist")).isEmpty()) {
-                        makeToast("재생목록 바구니가 하나도 존재하지 않습니다.", 2);
+                        makeToast("재생목록 바구니가 하나도 존재하지 않습니다.");
                     } else {
                         const keyData = {
                             list: Object.keys(DB.value("playlist")),
@@ -127,7 +127,7 @@ const reloadPart = partname => {
                     $("form", {
                         onsubmit: e => {
                             e.preventDefault();
-                            if (Object.values(DB.value("playlist")[e.target.parentElement.children[0].innerText]).includes(e.target[0].value)) makeToast("해당 재생목록은 이미 재생목록 바구니 내에 존재합니다.", 2);
+                            if (Object.values(DB.value("playlist")[e.target.parentElement.children[0].innerText]).includes(e.target[0].value)) makeToast("해당 재생목록은 이미 재생목록 바구니 내에 존재합니다.");
                             else {
                                 const newYlist = DB.value("playlist");
                                 newYlist[key][e.target[0].value] = e.target[0].value;
@@ -179,7 +179,7 @@ const reloadPart = partname => {
                                 value: "이름 수정",
                                 onclick: () => {
                                     const newName = prompt("재생목록의 이름을 뭘로 변경하시겠습니까?\n(만약, 공백으로 넘어가시면, 이름 변경은 취소됩니다.)");
-                                    if (DB.value("playlist")[key][newName]) makeToast("해당 이름은 이미 재생목록 바구니 내에 존재합니다.", 2);
+                                    if (DB.value("playlist")[key][newName]) makeToast("해당 이름은 이미 재생목록 바구니 내에 존재합니다.");
                                     else if (newName && !newName.isEmpty()) {
                                         const newYlist = DB.value("playlist");
                                         newYlist[key][newName] = newYlist[key][value];
