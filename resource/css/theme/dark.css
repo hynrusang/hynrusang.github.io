@@ -1,0 +1,27 @@
+* {
+    color: cyan
+}
+*::-webkit-scrollbar-thumb {
+    background: linear-gradient(cyan, violet);
+    border: none;
+}
+body, details {
+    background: black;
+}
+input::placeholder {
+    color: rgba(0, 255, 255, 0.4);
+}
+
+a {
+    color: aquamarine;
+}
+
+div.hour_pin {
+    border: 1px solid rgba(255,255,255,0.8);
+}
+div.minute_pin {
+    border: 1px solid rgba(255,255,255,0.5);
+}
+div.second_pin {
+    border: 1px solid rgba(255,255,255,0.2);
+}

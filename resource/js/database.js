@@ -22,7 +22,7 @@ const DB = new LiveDataManager({
     }, {
         type: Object,
         observer: function() {
-            for (let name of ["styling", "widget"]) scan(`#${name}`).href = `/resource/css/${this.value.theme}/${name}.css`
+            scan("#theme").href = `/resource/css/theme/${this.value.theme}.css`
         }
     }),
     secret: new LiveData({
