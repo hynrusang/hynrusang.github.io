@@ -1,12 +1,12 @@
-* {
-    color: cyan
-}
 *::-webkit-scrollbar-thumb {
     background: linear-gradient(cyan, violet);
     border: none;
 }
 body, details {
     background: black;
+}
+fragment, main, footer, input {
+    color: cyan
 }
 input::placeholder {
     color: rgba(0, 255, 255, 0.4);
