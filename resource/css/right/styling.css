@@ -1,3 +1,7 @@
+*::-webkit-scrollbar-thumb {
+    background: rgba(128,128,128,0.5);
+    border: none;
+}
 input {
     background-color: initial;
     background-repeat: no-repeat;

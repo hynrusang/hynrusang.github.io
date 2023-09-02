@@ -1,16 +1,12 @@
 body, details {
     background: black;
-    color: cyan;
 }
-*::-webkit-scrollbar {
-    background: none;
+* {
+    color: cyan
 }
 *::-webkit-scrollbar-thumb {
     background: linear-gradient(cyan, violet);
     border: none;
-}
-textarea, input {
-    color: cyan
 }
 input {
     background-color: initial;

@@ -2,6 +2,10 @@
     box-sizing: border-box;
     transition: 0.3s all;
 }
+*::-webkit-scrollbar {
+    width: 10px;
+    background: none;
+}
 html, body {
     width: 100vw;
     height: 100vh;
@@ -14,6 +18,7 @@ fragment, footer {
 }
 fragment[rid=page], main {
     height: calc(100% - 100px);
+    overflow-x: hidden;
     overflow-y: scroll;
 }
 fragment {
@@ -30,9 +35,6 @@ footer input {
     background-size: 0px;
     background-repeat: no-repeat;
     background-position: center 10px;
-}
-:is(main, fragment[rid=page])::-webkit-scrollbar {
-    display: none
 }
 
 details {
