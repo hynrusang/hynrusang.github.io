@@ -11,11 +11,11 @@ a {
 }
 
 div.hour_pin {
-    border: 1px solid rgba(0,0,0,0.8);
+    border: 1px solid rgba(0,0,0,0.9);
 }
 div.minute_pin {
-    border: 1px solid rgba(0,0,0,0.5);
+    border: 1px solid rgba(0,0,0,0.6);
 }
 div.second_pin {
-    border: 1px solid rgba(0,0,0,0.2);
+    border: 1px solid rgba(0,0,0,0.3);
 }
