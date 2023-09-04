@@ -353,7 +353,7 @@ scan(".menuicon").onclick = () => {
             }
         }
         isLoggedIn.value = true;
-        await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).get().then(data => {
+        firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).get().then(data => {
             if (!data.data()) data.ref.set(DB.toObject());
             else for (let key of Object.keys(data.data())) DB.value(key, data.data()[key]);
         });
