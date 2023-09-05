@@ -332,12 +332,14 @@ scan(".menuicon").onclick = () => {
     if (!scan("details").attributes.open) scan("details").setAttribute("open", null);
     else scan("details").removeAttribute("open");
 }
+if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime()) >= 259200000) {
+    localStorage.clear();
+    firebase.auth().signOut();
+}
 (async () => {
     while (!firebase.auth().currentUser) await wait(250);
-    if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime()) >= 259200000) {
-        localStorage.clear();
-        firebase.auth().signOut();
-    } else if (firebase.auth().currentUser.emailVerified) {
+    if (firebase.auth().currentUser.emailVerified) {
+        isLoggedIn.value = true;
         localStorage.setItem("timestamp", new Date());
         if (!localStorage.getItem("setting") || JSON.parse(localStorage.getItem("setting")).version != "2.5") {
             setting.value = {
@@ -352,7 +354,6 @@ scan(".menuicon").onclick = () => {
                 }
             }
         }
-        isLoggedIn.value = true;
         firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).get().then(data => {
             if (!data.data()) data.ref.set(DB.toObject());
             else for (let key of Object.keys(data.data())) DB.value(key, data.data()[key]);
