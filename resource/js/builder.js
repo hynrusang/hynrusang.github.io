@@ -332,6 +332,7 @@ scan(".menuicon").onclick = () => {
     if (!scan("details").attributes.open) scan("details").setAttribute("open", null);
     else scan("details").removeAttribute("open");
 }
+scan("!footer input").forEach(obj => obj.onclick = e => currentFragment.value("main", e.target.attributes.target.value));
 if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime()) >= 259200000) {
     localStorage.clear();
     firebase.auth().signOut();
@@ -373,7 +374,6 @@ if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localS
                 src: `https://${SDB.value.token[1]}${SDB.value.token[0]}.js`
             })
         )
-        scan("!footer input").forEach(obj => obj.onclick = e => currentFragment.value("main", e.target.attributes.target.value));
         if (setting.value.auto.rememberTapInfo.activate) currentFragment.value("main", setting.value.auto.rememberTapInfo.destination);
     } else firebase.auth().signOut();
 })();
