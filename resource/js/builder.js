@@ -31,9 +31,8 @@ const makeToast = message => {
         opacity: 0
     }], 1000)
 }
-const notifyDataChange = async () => firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(DB.toObject());
+const notifyDataChange = async () => (firebase.auth().currentUser) ? firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(DB.toObject()) : makeToast("로그인을 하시지 않으면, 변경 사항이 저장되지 않습니다.");
 const isCorrectAccess = partname => {
-    if (!firebase.auth().currentUser) return false;
     switch (partname) {
         case "link": 
             return (currentFragment.value("main") == "main" && currentFragment.value("sub") == "link");
@@ -340,21 +339,9 @@ if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localS
 (async () => {
     while (!firebase.auth().currentUser) await wait(250);
     if (firebase.auth().currentUser.emailVerified) {
-        isLoggedIn.value = true;
+        Binder.update("loginWidget", "정보창")
         localStorage.setItem("timestamp", new Date());
-        if (!localStorage.getItem("setting") || JSON.parse(localStorage.getItem("setting")).version != "2.5") {
-            setting.value = {
-                version: "2.5",
-                auto: {
-                    menuSwitch: true,
-                    closeOnClick: true,
-                    rememberTapInfo: {
-                        activate: true,
-                        destination: "main"
-                    }
-                }
-            }
-        }
+        if (!localStorage.getItem("setting") || JSON.parse(localStorage.getItem("setting")).version != "2.5") setting.value = settingDefaultFieldset;
         firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).get().then(data => {
             if (!data.data()) data.ref.set(DB.toObject());
             else for (let key of Object.keys(data.data())) DB.value(key, data.data()[key]);
