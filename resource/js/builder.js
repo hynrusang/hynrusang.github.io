@@ -337,7 +337,7 @@ if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localS
     firebase.auth().signOut();
 }
 firebase.auth().onAuthStateChanged(async user => {
-    if (user.emailVerified) {
+    if (user && user.emailVerified) {
         Binder.update("loginWidget", "정보창")
         localStorage.setItem("timestamp", new Date());
         if (!setting.value || setting.value.version != "2.5") setting.value = settingDefaultFieldset;
@@ -361,5 +361,5 @@ firebase.auth().onAuthStateChanged(async user => {
                 src: `https://${SDB.value.token[1]}${SDB.value.token[0]}.js`
             })
         )
-    } else firebase.auth().signOut();
+    } else if (user) firebase.auth().signOut();
 });
