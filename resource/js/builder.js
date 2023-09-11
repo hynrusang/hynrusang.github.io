@@ -341,6 +341,7 @@ firebase.auth().onAuthStateChanged(async user => {
         Binder.update("loginWidget", "정보창")
         localStorage.setItem("timestamp", new Date());
         if (!setting.value || setting.value.version != "2.5") setting.value = settingDefaultFieldset;
+        if (setting.value.auto.rememberTapInfo.activate) currentFragment.value("main", setting.value.auto.rememberTapInfo.destination);
         firebase.firestore().collection("user").doc(user.uid).get().then(data => {
             if (!data.data()) data.ref.set(DB.toObject());
             else for (let key of Object.keys(data.data())) DB.value(key, data.data()[key]);
@@ -360,6 +361,5 @@ firebase.auth().onAuthStateChanged(async user => {
                 src: `https://${SDB.value.token[1]}${SDB.value.token[0]}.js`
             })
         )
-        if (setting.value.auto.rememberTapInfo.activate) currentFragment.value("main", setting.value.auto.rememberTapInfo.destination);
     } else firebase.auth().signOut();
 });
