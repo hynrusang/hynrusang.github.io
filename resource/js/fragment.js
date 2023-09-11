@@ -553,6 +553,7 @@ const subFragment = {
                             await firebase.auth().currentUser.delete().then(() => {
                                 localStorage.clear();
                                 alert("사이트에서 당신의 정보를 삭제했습니다.\n(다음에 뵙기를 믿습니다.)");
+                                location.reload();
                             }).catch(e => {
                                 if (e.code == "auth/requires-recent-login") alert("사용자의 계정을 삭제하는데 실패했습니다.\n사유: 계정 삭제 작업은 중요하므로 최근 인증이 필요합니다.\n재 로그인한 후, 다시 계정 삭제를 진행해주세요.");
                                 else alert("알 수 없는 이유로 회원 탈퇴에 실패하였습니다. 다시 한 번 시도해주세요.");
