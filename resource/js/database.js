@@ -35,7 +35,7 @@ const SDB = new LiveData({}, {
     type: Object
 })
 const settingDefaultFieldset = {
-    version: "2.5",
+    version: "2.6",
     auto: {
         menuSwitch: true,
         closeOnClick: true,
