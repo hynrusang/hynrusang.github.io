@@ -336,8 +336,7 @@ if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localS
     localStorage.clear();
     firebase.auth().signOut();
 }
-(async () => {
-    while (!firebase.auth().currentUser) await wait(250);
+firebase.auth().onAuthStateChanged(async (user) => {
     if (firebase.auth().currentUser.emailVerified) {
         Binder.update("loginWidget", "정보창")
         localStorage.setItem("timestamp", new Date());
@@ -363,4 +362,4 @@ if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localS
         )
         if (setting.value.auto.rememberTapInfo.activate) currentFragment.value("main", setting.value.auto.rememberTapInfo.destination);
     } else firebase.auth().signOut();
-})();
+});
