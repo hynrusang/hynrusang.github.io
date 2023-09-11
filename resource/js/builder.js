@@ -31,7 +31,7 @@ const makeToast = message => {
         opacity: 0
     }], 1000)
 }
-const notifyDataChange = async () => (firebase.auth().currentUser) ? firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(DB.toObject()) : makeToast("로그인을 하시지 않으면, 변경 사항이 저장되지 않습니다.");
+const notifyDataChange = async () => firebase.auth().currentUser ? firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(DB.toObject()) : makeToast("로그인을 하시지 않으면, 변경 사항이 저장되지 않습니다.");
 const isCorrectAccess = partname => {
     switch (partname) {
         case "link": 
