@@ -45,7 +45,7 @@ const settingDefaultFieldset = {
         }
     }
 }
-const setting = new LiveData(JSON.parse(localStorage.getItem("setting")) ?? settingDefaultFieldset, {
+const setting = new LiveData(JSON.parse(localStorage.getItem("setting")), {
     type: Object,
     observer: function () {
         if (isCorrectAccess("setting")) reloadPart("setting");

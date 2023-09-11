@@ -340,7 +340,7 @@ firebase.auth().onAuthStateChanged(async user => {
     if (user.emailVerified) {
         Binder.update("loginWidget", "정보창")
         localStorage.setItem("timestamp", new Date());
-        if (!localStorage.getItem("setting") || JSON.parse(localStorage.getItem("setting")).version != "2.5") setting.value = settingDefaultFieldset;
+        if (!setting.value || setting.value.version != "2.5") setting.value = settingDefaultFieldset;
         firebase.firestore().collection("user").doc(user.uid).get().then(data => {
             if (!data.data()) data.ref.set(DB.toObject());
             else for (let key of Object.keys(data.data())) DB.value(key, data.data()[key]);
