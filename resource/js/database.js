@@ -22,6 +22,7 @@ const DB = new LiveDataManager({
     }, {
         type: Object,
         observer: function() {
+            if (isCorrectAccess("setting")) reloadPart("setting");
             scan("#theme").href = `/resource/css/theme/${this.value.theme}.css`
         }
     }),
