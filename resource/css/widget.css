@@ -64,18 +64,15 @@ div.clock > div {
 div.hour_pin {
     top: 30%;
     height: 20%;
-    border: 1px solid rgba(255,255,255,0.8);
     z-index: 3;
 }
 div.minute_pin {
     height: 30%;
-    border: 1px solid rgba(255,255,255,0.5);
     z-index: 2;
 }
 div.second_pin {
     top: -40%;
     height: 40%;
-    border: 1px solid rgba(255,255,255,0.2);
     z-index: 1;
 }
 

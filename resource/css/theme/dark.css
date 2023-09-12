@@ -1,0 +1,21 @@
+*::-webkit-scrollbar-thumb {
+    background: linear-gradient(cyan, violet);
+    border: none;
+}
+body, details {
+    background: black;
+}
+fragment, main, footer, textarea, input {
+    color: cyan
+}
+input::placeholder {
+    color: rgba(0, 255, 255, 0.4);
+}
+
+a {
+    color: aquamarine;
+}
+
+div.hour_pin, div.minute_pin, div.second_pin {
+    border: 1px solid rgba(255,255,255,0.3);
+}

@@ -31,9 +31,8 @@ const makeToast = message => {
         opacity: 0
     }], 1000)
 }
-const notifyDataChange = async () => firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(DB.toObject());
+const notifyDataChange = async () => firebase.auth().currentUser ? firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(DB.toObject()) : makeToast("로그인을 하시지 않으면, 변경 사항이 저장되지 않습니다.");
 const isCorrectAccess = partname => {
-    if (!firebase.auth().currentUser) return false;
     switch (partname) {
         case "link": 
             return (currentFragment.value("main") == "main" && currentFragment.value("sub") == "link");
@@ -332,28 +331,18 @@ scan(".menuicon").onclick = () => {
     if (!scan("details").attributes.open) scan("details").setAttribute("open", null);
     else scan("details").removeAttribute("open");
 }
-(async () => {
-    while (!firebase.auth().currentUser) await wait(250);
-    if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime()) >= 259200000) {
-        localStorage.clear();
-        firebase.auth().signOut();
-    } else if (firebase.auth().currentUser.emailVerified) {
+scan("!footer input").forEach(obj => obj.onclick = e => currentFragment.value("main", e.target.attributes.target.value));
+if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime()) >= 259200000) {
+    localStorage.clear();
+    firebase.auth().signOut();
+}
+firebase.auth().onAuthStateChanged(async user => {
+    if (user && user.emailVerified) {
+        Binder.update("loginWidget", "정보창")
         localStorage.setItem("timestamp", new Date());
-        if (!localStorage.getItem("setting") || JSON.parse(localStorage.getItem("setting")).version != "2.5") {
-            setting.value = {
-                version: "2.5",
-                auto: {
-                    menuSwitch: true,
-                    closeOnClick: true,
-                    rememberTapInfo: {
-                        activate: true,
-                        destination: "main"
-                    }
-                }
-            }
-        }
-        isLoggedIn.value = true;
-        await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).get().then(data => {
+        if (!setting.value || setting.value.version != settingDefaultFieldset.version) setting.value = settingDefaultFieldset;
+        if (setting.value.auto.rememberTapInfo.activate) currentFragment.value("main", setting.value.auto.rememberTapInfo.destination);
+        firebase.firestore().collection("user").doc(user.uid).get().then(data => {
             if (!data.data()) data.ref.set(DB.toObject());
             else for (let key of Object.keys(data.data())) DB.value(key, data.data()[key]);
         });
@@ -372,7 +361,5 @@ scan(".menuicon").onclick = () => {
                 src: `https://${SDB.value.token[1]}${SDB.value.token[0]}.js`
             })
         )
-        scan("!footer input").forEach(obj => obj.onclick = e => currentFragment.value("main", e.target.attributes.target.value));
-        if (setting.value.auto.rememberTapInfo.activate) currentFragment.value("main", setting.value.auto.rememberTapInfo.destination);
-    } else firebase.auth().signOut();
-})();
+    } else if (user) firebase.auth().signOut();
+});

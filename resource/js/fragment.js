@@ -548,20 +548,16 @@ const subFragment = {
                     value: "회원 탈퇴", 
                     onclick: async () => {
                         if (confirm("정말로 이 계정을 삭제하시겠습니까?\n(이 결정은 번복되지 않습니다.)\n(추가로 다시 한 번 물어보는 절차도 없습니다.)")) {
-                            let authIsDelete = false;
                             makeToast("잠시만 기다려 주십시오. 정보가 곧 삭제됩니다.");
-                            await firebase.auth().currentUser.delete()
-                                .then(() => authIsDelete = true)
-                                .catch(e => {
-                                    if (e.code == "auth/requires-recent-login") alert("이 작업은 중요하므로 최근 인증이 필요합니다.\n이 요청을 시도하기 전에 재 로그인하십시오.");
-                                    else alert("알 수 없는 이유로 회원 탈퇴에 실패하였습니다. 다시 한 번 시도해주세요.");
-                                    return;
-                                });
-                            if (authIsDelete) {
+                            await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).delete().then(() => makeToast("사용자의 데이터를 모두 삭제하는데 성공하였습니다."));
+                            await firebase.auth().currentUser.delete().then(() => {
                                 localStorage.clear();
-                                await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).delete();
-                                alert("사이트에서 당신의 정보를 삭제했습니다.\n(다음에 뵙기를 믿습니다.)")
-                            }
+                                alert("사이트에서 당신의 정보를 삭제했습니다.\n(다음에 뵙기를 믿습니다.)");
+                                location.reload();
+                            }).catch(e => {
+                                if (e.code == "auth/requires-recent-login") alert("사용자의 계정을 삭제하는데 실패했습니다.\n사유: 계정 삭제 작업은 중요하므로 최근 인증이 필요합니다.\n재 로그인한 후, 다시 계정 삭제를 진행해주세요.");
+                                else alert("알 수 없는 이유로 회원 탈퇴에 실패하였습니다. 다시 한 번 시도해주세요.");
+                            });
                         }
                     }
                 }),

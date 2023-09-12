@@ -2,6 +2,10 @@
     box-sizing: border-box;
     transition: 0.3s all;
 }
+*::-webkit-scrollbar {
+    width: 10px;
+    background: none;
+}
 html, body {
     width: 100vw;
     height: 100vh;
@@ -14,6 +18,7 @@ fragment, footer {
 }
 fragment[rid=page], main {
     height: calc(100% - 100px);
+    overflow-x: hidden;
     overflow-y: scroll;
 }
 fragment {
@@ -31,9 +36,6 @@ footer input {
     background-repeat: no-repeat;
     background-position: center 10px;
 }
-:is(main, fragment[rid=page])::-webkit-scrollbar {
-    display: none
-}
 
 details {
     position: absolute;
@@ -42,7 +44,6 @@ details {
     width: 0px;
     height: calc(100% - 100px);
     z-index: 4;
-    background-color: ghostwhite;
     border-radius: 30px;
 }
 details > fragment {
@@ -70,6 +71,15 @@ fieldset span {
     margin: 10px; 
     display: inline-block;
 }
+input {
+    background-color: initial;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    border: none;
+}
+[type=button], [type=submit] {
+    border-radius: 30px;
+}
 
 span {
     line-height: 22px;
@@ -77,14 +87,21 @@ span {
 textarea {
     width: 100%;
     min-height: 450px;
+    background: none;
     border: none;
-    background: floralwhite;
     padding: 10px;
 }
 li {
     list-style: decimal-leading-zero;
     word-break: break-all;
     margin: 10px;
+}
+a {
+    border-radius: 30px;
+}
+:is(a, .inputWidget, input[type=submit]):hover {
+    background-color: rgba(0, 255, 255, 0.5);
+    box-shadow: 10px 5px rgba(0, 200, 200, 0.5);
 }
 
 @media screen and (max-width: 1200px) {

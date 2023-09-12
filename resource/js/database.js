@@ -22,7 +22,7 @@ const DB = new LiveDataManager({
     }, {
         type: Object,
         observer: function() {
-            for (let name of ["styling", "widget"]) scan(`#${name}`).href = `/resource/css/${this.value.theme}/${name}.css`
+            scan("#theme").href = `/resource/css/theme/${this.value.theme}.css`
         }
     }),
     secret: new LiveData({
@@ -34,11 +34,22 @@ const DB = new LiveDataManager({
 const SDB = new LiveData({}, {
     type: Object
 })
+const settingDefaultFieldset = {
+    version: "2.6",
+    auto: {
+        menuSwitch: true,
+        closeOnClick: true,
+        rememberTapInfo: {
+            activate: true,
+            destination: "main"
+        }
+    }
+}
 const setting = new LiveData(JSON.parse(localStorage.getItem("setting")), {
     type: Object,
     observer: function () {
         if (isCorrectAccess("setting")) reloadPart("setting");
-        localStorage.setItem("setting", JSON.stringify(this.value));
+        if (firebase.auth().currentUser) localStorage.setItem("setting", JSON.stringify(this.value));
     }
 })
 const currentVideo = new LiveData([null, null, null], {
@@ -83,8 +94,4 @@ const currentFragment = new LiveDataManager({
         }
     })
 });
-const isLoggedIn = new LiveData(false, {
-    type: Boolean,
-    observer: () => Binder.update("loginWidget", "정보창")
-})
 Binder.define("loginWidget", "로그인");

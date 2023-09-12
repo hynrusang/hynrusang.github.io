@@ -1,0 +1,15 @@
+*::-webkit-scrollbar-thumb {
+    background: rgba(128,128,128,0.5);
+    border: none;
+}
+details {
+    background: ghostwhite;
+}
+
+a {
+    color: cornflowerblue;
+}
+
+div.hour_pin, div.minute_pin, div.second_pin {
+    border: 1px solid rgba(0,0,0,0.3);
+}
