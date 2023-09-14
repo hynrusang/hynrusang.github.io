@@ -1,3 +1,21 @@
+const settingDefaultFieldset = {
+    version: "2.6",
+    auto: {
+        menuSwitch: true,
+        closeOnClick: true,
+        rememberTapInfo: {
+            activate: true,
+            destination: "main"
+        }
+    }
+}
+const setting = new LiveData(JSON.parse(localStorage.getItem("setting")), {
+    type: Object,
+    observer: function () {
+        if (isCorrectAccess("setting")) reloadPart("setting");
+        if (firebase.auth().currentUser) localStorage.setItem("setting", JSON.stringify(this.value));
+    }
+})
 const DB = new LiveDataManager({
     link: new LiveData([], {
         type: Array,
@@ -34,24 +52,6 @@ const DB = new LiveDataManager({
 }, false);
 const SDB = new LiveData({}, {
     type: Object
-})
-const settingDefaultFieldset = {
-    version: "2.6",
-    auto: {
-        menuSwitch: true,
-        closeOnClick: true,
-        rememberTapInfo: {
-            activate: true,
-            destination: "main"
-        }
-    }
-}
-const setting = new LiveData(JSON.parse(localStorage.getItem("setting")), {
-    type: Object,
-    observer: function () {
-        if (isCorrectAccess("setting")) reloadPart("setting");
-        if (firebase.auth().currentUser) localStorage.setItem("setting", JSON.stringify(this.value));
-    }
 })
 const currentVideo = new LiveData([null, null, null], {
     type: Array,
