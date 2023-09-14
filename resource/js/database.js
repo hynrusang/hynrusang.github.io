@@ -53,8 +53,8 @@ const SDB = new LiveData({})
 const currentVideo = new LiveData([null, null, null], {
     type: Array,
     observer: function () {
-        scan("#player").src = this.value[2];
-        scan("#playlistname").innerText = `${this.value[0]}: ${this.value[1]}`;
+        scan("main iframe").src = this.value[2];
+        scan("main span").innerText = `${this.value[0]}: ${this.value[1]}`;
         if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
     }
 })
