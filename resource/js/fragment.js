@@ -533,6 +533,9 @@ const subFragment = {
                 $("legend", {
                     text: "로그인 정보 관리"
                 }),
+                $("span", {
+                    text: "로그인 정보는 최대 3일동안만 유지됩니다."
+                }),
                 $("input", { 
                     type: "button",
                     class: "inputWidget",
