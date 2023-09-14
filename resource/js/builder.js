@@ -37,7 +37,7 @@ const reloadPart = partname => {
     switch (partname) {
         case "main":
             target = [subFragment.main.link.fragment[0].children(3).reset(), subFragment.main.memo.fragment[0].reset()];
-            for (let link of DB.value("link")) target[0].add(
+            for (let link of DB.value("main").link) target[0].add(
                 $("li").add(
                     $("img", {
                         src: `https://www.google.com/s2/favicons?domain=${link}`
@@ -56,14 +56,16 @@ const reloadPart = partname => {
                         value:"제거",
                         onclick: () => {
                             if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) {
-                                DB.value("link", DB.value("link").remove(link));
+                                const temp = DB.value("main")
+                                temp.link.remove(link);
+                                DB.value("main", temp);
                                 notifyDataChange();
                             }
                         }
                     })
                 )
             )
-            for (let memo of Object.keys(DB.value("memo")).sort()) {
+            for (let memo of Object.keys(DB.value("main").memo).sort()) {
                 target[1].add(
                     $("option", {
                         text: memo
@@ -85,9 +87,9 @@ const reloadPart = partname => {
                             e.preventDefault();
                             if (Object.values(DB.value("playlist")[e.target.parentElement.children[0].innerText]).includes(e.target[0].value)) makeToast("해당 재생목록은 이미 재생목록 바구니 내에 존재합니다.");
                             else {
-                                const newYlist = DB.value("playlist");
-                                newYlist[key][e.target[0].value] = e.target[0].value;
-                                DB.value("playlist", newYlist);
+                                const temp = DB.value("playlist");
+                                temp[key][e.target[0].value] = e.target[0].value;
+                                DB.value("playlist", temp);
                                 notifyDataChange();
                             }
                         }
@@ -107,9 +109,9 @@ const reloadPart = partname => {
                         onclick: e => {
                             e.preventDefault();
                             if (confirm("정말 해당 재생목록 바구니를 삭제하시겠습니까?\n(해당 결정은 되돌릴 수 없습니다.)")) {
-                                const newYlist = DB.value("playlist");
-                                delete newYlist[key];
-                                DB.value("playlist", newYlist);
+                                const temp = DB.value("playlist");
+                                delete temp[key];
+                                DB.value("playlist", temp);
                                 notifyDataChange();
                             }
                         }
@@ -137,10 +139,10 @@ const reloadPart = partname => {
                                     const newName = prompt("재생목록의 이름을 뭘로 변경하시겠습니까?\n(만약, 공백으로 넘어가시면, 이름 변경은 취소됩니다.)");
                                     if (DB.value("playlist")[key][newName]) makeToast("해당 이름은 이미 재생목록 바구니 내에 존재합니다.");
                                     else if (newName && !newName.isEmpty()) {
-                                        const newYlist = DB.value("playlist");
-                                        newYlist[key][newName] = newYlist[key][value];
-                                        delete newYlist[key][value];
-                                        DB.value("playlist", newYlist);
+                                        const temp = DB.value("playlist");
+                                        temp[key][newName] = temp[key][value];
+                                        delete temp[key][value];
+                                        DB.value("playlist", temp);
                                         notifyDataChange();
                                     }
                                 }
@@ -151,9 +153,9 @@ const reloadPart = partname => {
                                 value: "재생목록 삭제",
                                 onclick: () => {
                                     if (confirm("정말 해당 재생목록을 삭제하시겠습니까?\n(해당 결정은 되돌릴 수 없습니다.)")) {
-                                        const newYlist = DB.value("playlist");
-                                        delete newYlist[key][value];
-                                        DB.value("playlist", newYlist);
+                                        const temp = DB.value("playlist");
+                                        delete temp[key][value];
+                                        DB.value("playlist", temp);
                                         notifyDataChange();
                                     }
                                 }
@@ -235,7 +237,6 @@ const reloadPart = partname => {
                             temp.theme = (temp.theme == "right") ? "dark" : "right";
                             DB.value("setting", temp);
                             notifyDataChange();
-                            reloadPart("setting");
                         }
                     }),
                     $("span", {

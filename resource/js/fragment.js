@@ -213,9 +213,11 @@ const subFragment = {
                         e.preventDefault();
                         e.target[0].value = e.target[0].value.trim();
                         if (!e.target[0].value.includes("http")) e.target[0].value = `https://${e.target[0].value}`;
-                        if (DB.value("link").includes(e.target[0].value)) makeToast("이미 저장된 링크입니다.");
+                        if (DB.value("main").link.includes(e.target[0].value)) makeToast("이미 저장된 링크입니다.");
                         else {
-                            DB.value("link", DB.value("link").add(e.target[0].value).sort());
+                            const temp = DB.value("main");
+                            temp.link = temp.link.add(e.target[0].value).sort();
+                            DB.value("main", temp);
                             notifyDataChange();
                         }
                         e.target[0].value = "";
@@ -252,10 +254,10 @@ const subFragment = {
                 $("form", {
                     onsubmit: async e => {
                         e.preventDefault();
-                        const memotemp = DB.value("memo");
+                        const temp = DB.value("main");
                         if (![e.target[0].value.trim(), e.target[2].value.trim()].includes("")) {
-                            memotemp[e.target[0].value] = e.target[2].value;
-                            DB.value("memo", memotemp);
+                            temp.memo[e.target[0].value] = e.target[2].value;
+                            DB.value("main", temp);
                             await notifyDataChange();
                             makeToast("저장되었습니다.");
                         }
@@ -270,7 +272,7 @@ const subFragment = {
                             style: "background-image: url(/resource/img/icon/save.png); width: 100%;",
                             placeholder: "메모 제목",
                             list: "memo",
-                            oninput: e => scan("textarea").value = DB.value("memo")[e.target.value] ?? ""
+                            oninput: e => scan("textarea").value = DB.value('main').memo[e.target.value] ?? ''
                         }),
                         $("input", {
                             type: "button",
@@ -281,7 +283,7 @@ const subFragment = {
                         })
                     ),
                     $("textarea", { 
-                        spellcheck: "false"
+                        spellcheck: "false",
                     }),
                     $("input", {
                         type: "button",
@@ -290,11 +292,10 @@ const subFragment = {
                         value: "메모 삭제",
                         onclick: () => {
                             if (confirm("정말로 해당 메모를 삭제하시겠습니까?\n해당 시도는 되돌릴 수 없습니다.")) {
-                                const memotemp = DB.value("memo");
-                                delete memotemp[scan("[list=memo]").value];
-                                scan("[list=memo]").value = "";
-                                scan("textarea").value = "";
-                                DB.value("memo", memotemp);
+                                const temp = DB.value("main");
+                                delete temp.memo[scan("[list=memo]").value];
+                                scan("[list=memo]").value = scan("textarea").value = "";
+                                DB.value("main", temp);
                                 notifyDataChange();
                             }
                         }

@@ -17,13 +17,10 @@ const setting = new LiveData(JSON.parse(localStorage.getItem("setting")), {
     }
 })
 const DB = new LiveDataManager({
-    link: new LiveData([], {
-        type: Array,
-        observer: function () {
-            reloadPart("main");
-        }
-    }),
-    memo: new LiveData({}, {
+    main: new LiveData({
+        link: [],
+        memo: {}
+    }, {
         type: Object,
         observer: function () {
             reloadPart("main");
