@@ -244,7 +244,7 @@ const reloadPart = partname => {
                     }),
                 )
             )
-            if (SDB.value.token) snipe("fragment[rid=page]").add(
+            if (SDB.value.token) target.add(
                 $("form", {
                     onsubmit: async e => {
                         e.preventDefault();
