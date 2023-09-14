@@ -12,8 +12,10 @@ const settingDefaultFieldset = {
 const setting = new LiveData({auto: settingDefaultFieldset.auto}, {
     type: Object,
     observer: function () {
-        reloadPart("setting");
-        if (firebase.auth().currentUser) localStorage.setItem("setting", JSON.stringify(this.value));
+        if (this.value) {
+            reloadPart("setting");
+            if (firebase.auth().currentUser) localStorage.setItem("setting", JSON.stringify(this.value));
+        }
     }
 })
 const DB = new LiveDataManager({
