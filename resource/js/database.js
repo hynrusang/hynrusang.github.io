@@ -47,9 +47,7 @@ const DB = new LiveDataManager({
         type: Object
     })
 }, false);
-const SDB = new LiveData({}, {
-    type: Object
-})
+const SDB = new LiveData({})
 const currentVideo = new LiveData([null, null, null], {
     type: Array,
     observer: function () {
