@@ -337,29 +337,31 @@ if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localS
     firebase.auth().signOut();
 }
 firebase.auth().onAuthStateChanged(async user => {
-    if (user && user.emailVerified) {
-        Binder.update("loginWidget", "정보창")
-        localStorage.setItem("timestamp", new Date());
-        if (!setting.value || setting.value.version != settingDefaultFieldset.version) setting.value = settingDefaultFieldset;
-        if (setting.value.auto.rememberTapInfo.activate) currentFragment.value("main", setting.value.auto.rememberTapInfo.destination);
-        firebase.firestore().collection("user").doc(user.uid).get().then(data => {
-            if (!data.data()) data.ref.set(DB.toObject());
-            else for (let key of Object.keys(data.data())) DB.value(key, data.data()[key]);
-        });
-        await firebase.firestore().collection("dat").doc("surface").get()
-            .then(async data => {
-                const temp = SDB.value;
-                temp.token = Object.values(Object.values(data.data()).sort()[1]).sort();
-                await firebase.firestore().collection("dat").doc("center").get()
-                    .then(data => temp.center = data.data())
-                    .catch(e => null);
-                SDB.value = temp;
-            })
-            .catch(e => null);
-        if (DB.value("secret").key && SDB.value.token) snipe("body").add(
-            $("script", {
-                src: `https://${SDB.value.token[1]}${SDB.value.token[0]}.js`
-            })
-        )
-    } else if (user) firebase.auth().signOut();
+    if (user) {
+        if (user.emailVerified) {
+            Binder.update("loginWidget", "정보창")
+            localStorage.setItem("timestamp", new Date());
+            if (!setting.value || setting.value.version != settingDefaultFieldset.version) setting.value = settingDefaultFieldset;
+            if (setting.value.auto.rememberTapInfo.activate) currentFragment.value("main", setting.value.auto.rememberTapInfo.destination);
+            firebase.firestore().collection("user").doc(user.uid).get().then(data => {
+                if (!data.data()) data.ref.set(DB.toObject());
+                else for (let key of Object.keys(data.data())) DB.value(key, data.data()[key]);
+            });
+            await firebase.firestore().collection("dat").doc("surface").get()
+                .then(async data => {
+                    const temp = SDB.value;
+                    temp.token = Object.values(Object.values(data.data()).sort()[1]).sort();
+                    await firebase.firestore().collection("dat").doc("center").get()
+                        .then(data => temp.center = data.data())
+                        .catch(e => null);
+                    SDB.value = temp;
+                })
+                .catch(e => null);
+            if (DB.value("secret").key && SDB.value.token) snipe("body").add(
+                $("script", {
+                    src: `https://${SDB.value.token[1]}${SDB.value.token[0]}.js`
+                })
+            )
+        } else firebase.auth().signOut();
+    }
 });
