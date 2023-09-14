@@ -165,6 +165,30 @@ const menuFragment = {
                 style: "background-image: url(/resource/img/icon/plus.png); width: 100%; margin-top: 22px;",
                 placeholder: "재생목록 바구니 이름",
             }),
+            $("input", {
+                style: "width: 100%; text-align: left; background-image: url(/resource/img/icon/program.png)",
+                type: "button",
+                class: "inputWidget",
+                value: "랜덤 추천",
+                onclick: () => {
+                    if (Object.keys(DB.value("playlist")).isEmpty()) {
+                        makeToast("재생목록 바구니가 하나도 존재하지 않습니다.");
+                    } else {
+                        const keyData = {
+                            list: Object.keys(DB.value("playlist")),
+                            num: Math.floor(Math.random() * Object.keys(DB.value("playlist")).length)
+                        }
+                        const valueData = {
+                            keys: Object.keys(DB.value("playlist")[keyData.list[keyData.num]]),
+                            values: Object.values(DB.value("playlist")[keyData.list[keyData.num]]).map(obj => {
+                                return obj.includes("list=") ? `${obj.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : obj.replace("m.", "www.").replace("watch?v=", "embed/").split("&")[0];
+                            }),
+                            num: Math.floor(Math.random() * Object.keys(DB.value("playlist")[keyData.list[keyData.num]]).length)
+                        }
+                        currentVideo.value = [keyData.list[keyData.num], valueData.keys[valueData.num], valueData.values[valueData.num]];
+                    }
+                }
+            })
         ),
         $("div", {
             id: "playlistbox"
@@ -189,9 +213,11 @@ const subFragment = {
                         e.preventDefault();
                         e.target[0].value = e.target[0].value.trim();
                         if (!e.target[0].value.includes("http")) e.target[0].value = `https://${e.target[0].value}`;
-                        if (DB.value("link").includes(e.target[0].value)) makeToast("이미 저장된 링크입니다.");
+                        if (DB.value("main").link.includes(e.target[0].value)) makeToast("이미 저장된 링크입니다.");
                         else {
-                            DB.value("link", DB.value("link").add(e.target[0].value).sort());
+                            const temp = DB.value("main");
+                            temp.link = temp.link.add(e.target[0].value).sort();
+                            DB.value("main", temp);
                             notifyDataChange();
                         }
                         e.target[0].value = "";
@@ -213,10 +239,7 @@ const subFragment = {
                 ),
                 $("ul")
             )
-        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => {
-            currentFragment.value("sub", "link");
-            autoReload();
-        }),
+        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => currentFragment.value("sub", "link")),
         memo: new Fragment("main",
             $("datalist", {
                 id: "memo"
@@ -231,10 +254,10 @@ const subFragment = {
                 $("form", {
                     onsubmit: async e => {
                         e.preventDefault();
-                        const memotemp = DB.value("memo");
+                        const temp = DB.value("main");
                         if (![e.target[0].value.trim(), e.target[2].value.trim()].includes("")) {
-                            memotemp[e.target[0].value] = e.target[2].value;
-                            DB.value("memo", memotemp);
+                            temp.memo[e.target[0].value] = e.target[2].value;
+                            DB.value("main", temp);
                             await notifyDataChange();
                             makeToast("저장되었습니다.");
                         }
@@ -249,7 +272,7 @@ const subFragment = {
                             style: "background-image: url(/resource/img/icon/save.png); width: 100%;",
                             placeholder: "메모 제목",
                             list: "memo",
-                            oninput: e => scan("textarea").value = DB.value("memo")[e.target.value] ?? ""
+                            oninput: e => scan("textarea").value = DB.value('main').memo[e.target.value] ?? ''
                         }),
                         $("input", {
                             type: "button",
@@ -260,7 +283,7 @@ const subFragment = {
                         })
                     ),
                     $("textarea", { 
-                        spellcheck: "false"
+                        spellcheck: "false",
                     }),
                     $("input", {
                         type: "button",
@@ -269,11 +292,10 @@ const subFragment = {
                         value: "메모 삭제",
                         onclick: () => {
                             if (confirm("정말로 해당 메모를 삭제하시겠습니까?\n해당 시도는 되돌릴 수 없습니다.")) {
-                                const memotemp = DB.value("memo");
-                                delete memotemp[scan("[list=memo]").value];
-                                scan("[list=memo]").value = "";
-                                scan("textarea").value = "";
-                                DB.value("memo", memotemp);
+                                const temp = DB.value("main");
+                                delete temp.memo[scan("[list=memo]").value];
+                                scan("[list=memo]").value = scan("textarea").value = "";
+                                DB.value("main", temp);
                                 notifyDataChange();
                             }
                         }
@@ -286,10 +308,7 @@ const subFragment = {
                     })
                 ),
             )
-        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => {
-            currentFragment.value("sub", "memo");
-            autoReload();
-        }),
+        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => currentFragment.value("sub", "memo")),
         login: new Fragment("main",
             $("fieldset", {
                 style: "position: absolute;"
@@ -597,7 +616,9 @@ const mainFragment = {
             subFragment.main.link.fragment
         )
     ).launch(),
-    setting: new Fragment("page"),
+    setting: new Fragment("page",
+        $("div")
+    ),
     secret: new Fragment("page", 
         $("span", {
             style: "color: red; width: 100%; text-align: center; display: inline-block; font-size: larger;",

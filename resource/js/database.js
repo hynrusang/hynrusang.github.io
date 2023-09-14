@@ -1,41 +1,5 @@
-const DB = new LiveDataManager({
-    link: new LiveData([], {
-        type: Array,
-        observer: function () {
-            if (isCorrectAccess("link")) reloadPart("link");
-        }
-    }),
-    memo: new LiveData({}, {
-        type: Object,
-        observer: function () {
-            if (isCorrectAccess("memo")) reloadPart("memo");
-        }
-    }),
-    playlist: new LiveData({}, {
-        type: Object,
-        observer: function () {
-            if (isCorrectAccess("playlist")) reloadPart("playlist");
-        }
-    }),
-    setting : new LiveData({
-        theme: "right"
-    }, {
-        type: Object,
-        observer: function() {
-            scan("#theme").href = `/resource/css/theme/${this.value.theme}.css`
-        }
-    }),
-    secret: new LiveData({
-        key: ""
-    }, {
-        type: Object
-    })
-}, false);
-const SDB = new LiveData({}, {
-    type: Object
-})
 const settingDefaultFieldset = {
-    version: "2.6",
+    version: "2.7",
     auto: {
         menuSwitch: true,
         closeOnClick: true,
@@ -48,9 +12,43 @@ const settingDefaultFieldset = {
 const setting = new LiveData(JSON.parse(localStorage.getItem("setting")), {
     type: Object,
     observer: function () {
-        if (isCorrectAccess("setting")) reloadPart("setting");
+        reloadPart("setting");
         if (firebase.auth().currentUser) localStorage.setItem("setting", JSON.stringify(this.value));
     }
+})
+const DB = new LiveDataManager({
+    main: new LiveData({
+        link: [],
+        memo: {}
+    }, {
+        type: Object,
+        observer: function () {
+            reloadPart("main");
+        }
+    }),
+    playlist: new LiveData({}, {
+        type: Object,
+        observer: function () {
+            reloadPart("playlist");
+        }
+    }),
+    setting : new LiveData({
+        theme: "right"
+    }, {
+        type: Object,
+        observer: function() {
+            reloadPart("setting");
+            scan("#theme").href = `/resource/css/theme/${this.value.theme}.css`
+        }
+    }),
+    secret: new LiveData({
+        key: ""
+    }, {
+        type: Object
+    })
+}, false);
+const SDB = new LiveData({}, {
+    type: Object
 })
 const currentVideo = new LiveData([null, null, null], {
     type: Array,
@@ -84,7 +82,6 @@ const currentFragment = new LiveDataManager({
                 temp.auto.rememberTapInfo.destination = this.value;
                 setting.value = temp;
             }
-            autoReload();
         }
     }),
     sub: new LiveData("link", {

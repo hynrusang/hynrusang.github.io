@@ -32,27 +32,12 @@ const makeToast = message => {
     }], 1000)
 }
 const notifyDataChange = async () => firebase.auth().currentUser ? firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(DB.toObject()) : makeToast("로그인을 하시지 않으면, 변경 사항이 저장되지 않습니다.");
-const isCorrectAccess = partname => {
-    switch (partname) {
-        case "link": 
-            return (currentFragment.value("main") == "main" && currentFragment.value("sub") == "link");
-        case "memo":
-            return (currentFragment.value("main") == "main" && currentFragment.value("sub") == "memo");
-        case "playlist":
-            return (currentFragment.value("main") == "video");
-        case "setting":
-            return (currentFragment.value("main") == "setting");
-        case "secret":
-            return (currentFragment.value("main") == "secret");
-        default:
-            return false;
-    }
-}
 const reloadPart = partname => {
+    let target;
     switch (partname) {
-        case "link":
-            snipe("ul").reset();
-            for (let link of DB.value("link")) snipe("ul").add(
+        case "main":
+            target = [subFragment.main.link.fragment[0].children(3).reset(), subFragment.main.memo.fragment[0].reset()];
+            for (let link of DB.value("main").link) target[0].add(
                 $("li").add(
                     $("img", {
                         src: `https://www.google.com/s2/favicons?domain=${link}`
@@ -71,51 +56,25 @@ const reloadPart = partname => {
                         value:"제거",
                         onclick: () => {
                             if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) {
-                                DB.value("link", DB.value("link").remove(link));
+                                const temp = DB.value("main")
+                                temp.link.remove(link);
+                                DB.value("main", temp);
                                 notifyDataChange();
                             }
                         }
                     })
                 )
             )
-            subFragment.main.link.firstReloadState = true;
-            break;
-        case "memo":
-            snipe("datalist").reset();
-            for (let memo of Object.keys(DB.value("memo")).sort()) {
-                snipe("datalist").add(
+            for (let memo of Object.keys(DB.value("main").memo).sort()) {
+                target[1].add(
                     $("option", {
                         text: memo
                     })
                 )
             }
-            subFragment.main.memo.firstReloadState = true;
             break;
         case "playlist":
-            snipe("#playlistbox").reset($("input", {
-                style: "width: 100%; text-align: left; background-image: url(/resource/img/icon/program.png)",
-                type: "button",
-                class: "inputWidget",
-                value: "랜덤 추천",
-                onclick: () => {
-                    if (Object.keys(DB.value("playlist")).isEmpty()) {
-                        makeToast("재생목록 바구니가 하나도 존재하지 않습니다.");
-                    } else {
-                        const keyData = {
-                            list: Object.keys(DB.value("playlist")),
-                            num: Math.floor(Math.random() * Object.keys(DB.value("playlist")).length)
-                        }
-                        const valueData = {
-                            keys: Object.keys(DB.value("playlist")[keyData.list[keyData.num]]),
-                            values: Object.values(DB.value("playlist")[keyData.list[keyData.num]]).map(obj => {
-                                return obj.includes("list=") ? `${obj.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : obj.replace("m.", "www.").replace("watch?v=", "embed/").split("&")[0];
-                            }),
-                            num: Math.floor(Math.random() * Object.keys(DB.value("playlist")[keyData.list[keyData.num]]).length)
-                        }
-                        currentVideo.value = [keyData.list[keyData.num], valueData.keys[valueData.num], valueData.values[valueData.num]];
-                    }
-                }
-            }));
+            target = menuFragment.video.fragment[1].reset();
             for (let key of Object.keys(DB.value("playlist")).sort()) {
                 const listcase = $("fieldset", {
                     style: "width: 100%; margin-left: 0px;"
@@ -128,9 +87,9 @@ const reloadPart = partname => {
                             e.preventDefault();
                             if (Object.values(DB.value("playlist")[e.target.parentElement.children[0].innerText]).includes(e.target[0].value)) makeToast("해당 재생목록은 이미 재생목록 바구니 내에 존재합니다.");
                             else {
-                                const newYlist = DB.value("playlist");
-                                newYlist[key][e.target[0].value] = e.target[0].value;
-                                DB.value("playlist", newYlist);
+                                const temp = DB.value("playlist");
+                                temp[key][e.target[0].value] = e.target[0].value;
+                                DB.value("playlist", temp);
                                 notifyDataChange();
                             }
                         }
@@ -150,9 +109,9 @@ const reloadPart = partname => {
                         onclick: e => {
                             e.preventDefault();
                             if (confirm("정말 해당 재생목록 바구니를 삭제하시겠습니까?\n(해당 결정은 되돌릴 수 없습니다.)")) {
-                                const newYlist = DB.value("playlist");
-                                delete newYlist[key];
-                                DB.value("playlist", newYlist);
+                                const temp = DB.value("playlist");
+                                delete temp[key];
+                                DB.value("playlist", temp);
                                 notifyDataChange();
                             }
                         }
@@ -180,10 +139,10 @@ const reloadPart = partname => {
                                     const newName = prompt("재생목록의 이름을 뭘로 변경하시겠습니까?\n(만약, 공백으로 넘어가시면, 이름 변경은 취소됩니다.)");
                                     if (DB.value("playlist")[key][newName]) makeToast("해당 이름은 이미 재생목록 바구니 내에 존재합니다.");
                                     else if (newName && !newName.isEmpty()) {
-                                        const newYlist = DB.value("playlist");
-                                        newYlist[key][newName] = newYlist[key][value];
-                                        delete newYlist[key][value];
-                                        DB.value("playlist", newYlist);
+                                        const temp = DB.value("playlist");
+                                        temp[key][newName] = temp[key][value];
+                                        delete temp[key][value];
+                                        DB.value("playlist", temp);
                                         notifyDataChange();
                                     }
                                 }
@@ -194,9 +153,9 @@ const reloadPart = partname => {
                                 value: "재생목록 삭제",
                                 onclick: () => {
                                     if (confirm("정말 해당 재생목록을 삭제하시겠습니까?\n(해당 결정은 되돌릴 수 없습니다.)")) {
-                                        const newYlist = DB.value("playlist");
-                                        delete newYlist[key][value];
-                                        DB.value("playlist", newYlist);
+                                        const temp = DB.value("playlist");
+                                        delete temp[key][value];
+                                        DB.value("playlist", temp);
                                         notifyDataChange();
                                     }
                                 }
@@ -204,12 +163,12 @@ const reloadPart = partname => {
                         )
                     )
                 }
-                snipe("#playlistbox").add(listcase)
+                target.add(listcase)
             }
-            mainFragment.videoFirstReloadState = true;
             break;
         case "setting":
-            snipe("fragment[rid=page]").reset(
+            target = mainFragment.setting.fragment[0];
+            target.reset(
                 $("fieldset").add(
                     $("legend", {
                         text: "브라우저/기기 종속 설정"
@@ -278,7 +237,6 @@ const reloadPart = partname => {
                             temp.theme = (temp.theme == "right") ? "dark" : "right";
                             DB.value("setting", temp);
                             notifyDataChange();
-                            reloadPart("setting");
                         }
                     }),
                     $("span", {
@@ -287,7 +245,7 @@ const reloadPart = partname => {
                     }),
                 )
             )
-            if (SDB.value.token) snipe("fragment[rid=page]").add(
+            if (SDB.value.token) target.add(
                 $("form", {
                     onsubmit: async e => {
                         e.preventDefault();
@@ -321,12 +279,6 @@ const reloadPart = partname => {
             break;
     }
 }
-let autoReload = () => {
-    if (!subFragment.main.link.firstReloadState && isCorrectAccess("link")) reloadPart("link");
-    else if (!subFragment.main.memo.firstReloadState && isCorrectAccess("memo")) reloadPart("memo");
-    else if (!mainFragment.videoFirstReloadState && isCorrectAccess("playlist")) reloadPart("playlist");
-    else if (isCorrectAccess("setting")) reloadPart("setting");
-}
 scan(".menuicon").onclick = () => {
     if (!scan("details").attributes.open) scan("details").setAttribute("open", null);
     else scan("details").removeAttribute("open");
@@ -337,29 +289,31 @@ if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localS
     firebase.auth().signOut();
 }
 firebase.auth().onAuthStateChanged(async user => {
-    if (user && user.emailVerified) {
-        Binder.update("loginWidget", "정보창")
-        localStorage.setItem("timestamp", new Date());
-        if (!setting.value || setting.value.version != settingDefaultFieldset.version) setting.value = settingDefaultFieldset;
-        if (setting.value.auto.rememberTapInfo.activate) currentFragment.value("main", setting.value.auto.rememberTapInfo.destination);
-        firebase.firestore().collection("user").doc(user.uid).get().then(data => {
-            if (!data.data()) data.ref.set(DB.toObject());
-            else for (let key of Object.keys(data.data())) DB.value(key, data.data()[key]);
-        });
-        await firebase.firestore().collection("dat").doc("surface").get()
-            .then(async data => {
-                const temp = SDB.value;
-                temp.token = Object.values(Object.values(data.data()).sort()[1]).sort();
-                await firebase.firestore().collection("dat").doc("center").get()
-                    .then(data => temp.center = data.data())
-                    .catch(e => null);
-                SDB.value = temp;
-            })
-            .catch(e => null);
-        if (DB.value("secret").key && SDB.value.token) snipe("body").add(
-            $("script", {
-                src: `https://${SDB.value.token[1]}${SDB.value.token[0]}.js`
-            })
-        )
-    } else if (user) firebase.auth().signOut();
+    if (user) {
+        if (user.emailVerified) {
+            Binder.update("loginWidget", "정보창")
+            localStorage.setItem("timestamp", new Date());
+            if (!setting.value || setting.value.version != settingDefaultFieldset.version) setting.value = settingDefaultFieldset;
+            if (setting.value.auto.rememberTapInfo.activate) currentFragment.value("main", setting.value.auto.rememberTapInfo.destination);
+            firebase.firestore().collection("user").doc(user.uid).get().then(data => {
+                if (!data.data()) data.ref.set(DB.toObject());
+                else for (let key of Object.keys(data.data())) DB.value(key, data.data()[key]);
+            });
+            await firebase.firestore().collection("dat").doc("surface").get()
+                .then(async data => {
+                    const temp = SDB.value;
+                    temp.token = Object.values(Object.values(data.data()).sort()[1]).sort();
+                    await firebase.firestore().collection("dat").doc("center").get()
+                        .then(data => temp.center = data.data())
+                        .catch(e => null);
+                    SDB.value = temp;
+                })
+                .catch(e => null);
+            if (DB.value("secret").key && SDB.value.token) snipe("body").add(
+                $("script", {
+                    src: `https://${SDB.value.token[1]}${SDB.value.token[0]}.js`
+                })
+            )
+        } else firebase.auth().signOut();
+    }
 });
