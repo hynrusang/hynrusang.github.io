@@ -293,6 +293,7 @@ firebase.auth().onAuthStateChanged(async user => {
         if (user.emailVerified) {
             Binder.update("loginWidget", "정보창")
             localStorage.setItem("timestamp", new Date());
+            setting.value = JSON.parse(localStorage.getItem("setting"));
             if (!setting.value || setting.value.version != settingDefaultFieldset.version) setting.value = settingDefaultFieldset;
             if (setting.value.auto.rememberTapInfo.activate) currentFragment.value("main", setting.value.auto.rememberTapInfo.destination);
             firebase.firestore().collection("user").doc(user.uid).get().then(data => {

@@ -9,7 +9,7 @@ const settingDefaultFieldset = {
         }
     }
 }
-const setting = new LiveData(JSON.parse(localStorage.getItem("setting")), {
+const setting = new LiveData({auto: settingDefaultFieldset.auto}, {
     type: Object,
     observer: function () {
         reloadPart("setting");
