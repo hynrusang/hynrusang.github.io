@@ -12,7 +12,7 @@ const settingDefaultFieldset = {
 const setting = new LiveData(JSON.parse(localStorage.getItem("setting")), {
     type: Object,
     observer: function () {
-        if (isCorrectAccess("setting")) reloadPart("setting");
+        reloadPart("setting");
         if (firebase.auth().currentUser) localStorage.setItem("setting", JSON.stringify(this.value));
     }
 })
@@ -20,19 +20,19 @@ const DB = new LiveDataManager({
     link: new LiveData([], {
         type: Array,
         observer: function () {
-            if (isCorrectAccess("link")) reloadPart("link");
+            reloadPart("main");
         }
     }),
     memo: new LiveData({}, {
         type: Object,
         observer: function () {
-            if (isCorrectAccess("memo")) reloadPart("memo");
+            reloadPart("main");
         }
     }),
     playlist: new LiveData({}, {
         type: Object,
         observer: function () {
-            if (isCorrectAccess("playlist")) reloadPart("playlist");
+            reloadPart("playlist");
         }
     }),
     setting : new LiveData({
@@ -40,7 +40,7 @@ const DB = new LiveDataManager({
     }, {
         type: Object,
         observer: function() {
-            if (isCorrectAccess("setting")) reloadPart("setting");
+            reloadPart("setting");
             scan("#theme").href = `/resource/css/theme/${this.value.theme}.css`
         }
     }),
@@ -85,7 +85,6 @@ const currentFragment = new LiveDataManager({
                 temp.auto.rememberTapInfo.destination = this.value;
                 setting.value = temp;
             }
-            autoReload();
         }
     }),
     sub: new LiveData("link", {

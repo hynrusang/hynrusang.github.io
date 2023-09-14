@@ -32,27 +32,12 @@ const makeToast = message => {
     }], 1000)
 }
 const notifyDataChange = async () => firebase.auth().currentUser ? firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(DB.toObject()) : makeToast("로그인을 하시지 않으면, 변경 사항이 저장되지 않습니다.");
-const isCorrectAccess = partname => {
-    switch (partname) {
-        case "link": 
-            return (currentFragment.value("main") == "main" && currentFragment.value("sub") == "link");
-        case "memo":
-            return (currentFragment.value("main") == "main" && currentFragment.value("sub") == "memo");
-        case "playlist":
-            return (currentFragment.value("main") == "video");
-        case "setting":
-            return (currentFragment.value("main") == "setting");
-        case "secret":
-            return (currentFragment.value("main") == "secret");
-        default:
-            return false;
-    }
-}
 const reloadPart = partname => {
+    let target;
     switch (partname) {
-        case "link":
-            snipe("ul").reset();
-            for (let link of DB.value("link")) snipe("ul").add(
+        case "main":
+            target = [subFragment.main.link.fragment[0].children(3).reset(), subFragment.main.memo.fragment[0].reset()];
+            for (let link of DB.value("link")) target[0].add(
                 $("li").add(
                     $("img", {
                         src: `https://www.google.com/s2/favicons?domain=${link}`
@@ -78,44 +63,16 @@ const reloadPart = partname => {
                     })
                 )
             )
-            subFragment.main.link.firstReloadState = true;
-            break;
-        case "memo":
-            snipe("datalist").reset();
             for (let memo of Object.keys(DB.value("memo")).sort()) {
-                snipe("datalist").add(
+                target[1].add(
                     $("option", {
                         text: memo
                     })
                 )
             }
-            subFragment.main.memo.firstReloadState = true;
             break;
         case "playlist":
-            snipe("#playlistbox").reset($("input", {
-                style: "width: 100%; text-align: left; background-image: url(/resource/img/icon/program.png)",
-                type: "button",
-                class: "inputWidget",
-                value: "랜덤 추천",
-                onclick: () => {
-                    if (Object.keys(DB.value("playlist")).isEmpty()) {
-                        makeToast("재생목록 바구니가 하나도 존재하지 않습니다.");
-                    } else {
-                        const keyData = {
-                            list: Object.keys(DB.value("playlist")),
-                            num: Math.floor(Math.random() * Object.keys(DB.value("playlist")).length)
-                        }
-                        const valueData = {
-                            keys: Object.keys(DB.value("playlist")[keyData.list[keyData.num]]),
-                            values: Object.values(DB.value("playlist")[keyData.list[keyData.num]]).map(obj => {
-                                return obj.includes("list=") ? `${obj.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : obj.replace("m.", "www.").replace("watch?v=", "embed/").split("&")[0];
-                            }),
-                            num: Math.floor(Math.random() * Object.keys(DB.value("playlist")[keyData.list[keyData.num]]).length)
-                        }
-                        currentVideo.value = [keyData.list[keyData.num], valueData.keys[valueData.num], valueData.values[valueData.num]];
-                    }
-                }
-            }));
+            target = menuFragment.video.fragment[1].reset();
             for (let key of Object.keys(DB.value("playlist")).sort()) {
                 const listcase = $("fieldset", {
                     style: "width: 100%; margin-left: 0px;"
@@ -204,12 +161,12 @@ const reloadPart = partname => {
                         )
                     )
                 }
-                snipe("#playlistbox").add(listcase)
+                target.add(listcase)
             }
-            mainFragment.videoFirstReloadState = true;
             break;
         case "setting":
-            snipe("fragment[rid=page]").reset(
+            target = mainFragment.setting.fragment[0];
+            target.reset(
                 $("fieldset").add(
                     $("legend", {
                         text: "브라우저/기기 종속 설정"
@@ -320,12 +277,6 @@ const reloadPart = partname => {
             )
             break;
     }
-}
-let autoReload = () => {
-    if (!subFragment.main.link.firstReloadState && isCorrectAccess("link")) reloadPart("link");
-    else if (!subFragment.main.memo.firstReloadState && isCorrectAccess("memo")) reloadPart("memo");
-    else if (!mainFragment.videoFirstReloadState && isCorrectAccess("playlist")) reloadPart("playlist");
-    else if (isCorrectAccess("setting")) reloadPart("setting");
 }
 scan(".menuicon").onclick = () => {
     if (!scan("details").attributes.open) scan("details").setAttribute("open", null);
