@@ -200,37 +200,29 @@ const currentVideo = new LiveData([null, null, null], {
         if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
     }
 })
-const currentFragment = new LiveDataManager({
-    main: new LiveData("main", {
-        type: String,
-        observer: function () {
-            scan(".current").classList.remove("current");
-            scan(`input[target=${this.value}]`).classList.add("current");
-            if (this.value == "video") {
-                scan("main[player]").style.display = null;
-                scan("fragment[rid=page]").style.display = "none";
-            } else {
-                scan("main[player]").style.display = "none";
-                scan("fragment[rid=page]").style.display = null;
-                mainFragment[this.value].launch();
-            }
-            menuFragment[this.value].launch();
-            if (setting.value.auto.menuSwitch) {
-                if (["video", "secret"].includes(this.value)) scan("details").setAttribute("open", null); 
-                else scan("details").removeAttribute("open"); 
-            }
-            if (setting.value.auto.rememberTapInfo.activate) {
-                const temp = setting.value;
-                temp.auto.rememberTapInfo.destination = this.value;
-                setting.value = temp;
-            }
+const currentFragment = new LiveData("main", {
+    type: String,
+    observer: function () {
+        scan(".current").classList.remove("current");
+        scan(`input[target=${this.value}]`).classList.add("current");
+        if (this.value == "video") {
+            scan("main[player]").style.display = null;
+            scan("fragment[rid=page]").style.display = "none";
+        } else {
+            scan("main[player]").style.display = "none";
+            scan("fragment[rid=page]").style.display = null;
+            mainFragment[this.value].launch();
         }
-    }),
-    sub: new LiveData("link", {
-        type: String,
-        observer: function () {
-            subFragment[currentFragment.value("main")][this.value].launch();
+        menuFragment[this.value].launch();
+        if (setting.value.auto.menuSwitch) {
+            if (["video", "secret"].includes(this.value)) scan("details").setAttribute("open", null); 
+            else scan("details").removeAttribute("open"); 
         }
-    })
-}, false);
+        if (setting.value.auto.rememberTapInfo.activate) {
+            const temp = setting.value;
+            temp.auto.rememberTapInfo.destination = this.value;
+            setting.value = temp;
+        }
+    }
+})
 Binder.define("loginWidget", "로그인");

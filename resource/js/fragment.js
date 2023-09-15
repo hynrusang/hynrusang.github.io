@@ -234,12 +234,12 @@ const subFragment = {
                         class: "inputWidget",
                         style: "background-image: url(/resource/img/icon/library.png);",
                         value: "메모로 전환",
-                        onclick: () => currentFragment.value("sub", "memo")
+                        onclick: () => subFragment.main.memo.launch()
                     })
                 ),
                 $("ul")
             )
-        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => currentFragment.value("sub", "link")),
+        ).registAnimation(FragAnimation.fade, 0.2),
         memo: new Fragment("main",
             $("datalist", {
                 id: "memo"
@@ -279,7 +279,7 @@ const subFragment = {
                             class: "inputWidget",
                             style: "background-image: url(/resource/img/icon/library.png);",
                             value: "즐겨찾기로 전환",
-                            onclick: () => currentFragment.value("sub", "link")
+                            onclick: () => subFragment.main.link.launch()
                         })
                     ),
                     $("textarea", { 
@@ -308,7 +308,7 @@ const subFragment = {
                     })
                 ),
             )
-        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => currentFragment.value("sub", "memo")),
+        ).registAnimation(FragAnimation.fade, 0.2),
         login: new Fragment("main",
             $("fieldset", {
                 style: "position: absolute;"
@@ -398,7 +398,7 @@ const subFragment = {
                         class: "inputWidget",
                         type: "button",
                         value: "회원가입 화면으로",
-                        onclick: () => currentFragment.value("sub", "regist")
+                        onclick: () => subFragment.main.regist.launch()
                     }),
                     $("input", {
                         style: "position: absolute; right: 10px;",
@@ -410,14 +410,11 @@ const subFragment = {
                         class: "inputWidget",
                         type: "button",
                         value: "메인 화면으로 돌아가기",
-                        onclick: () => currentFragment.value("sub", "link")
+                        onclick: () => subFragment.main.link.launch()
                     }),
                 )
             )
-        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => {
-            scan("#loginField input").focus();
-            currentFragment.value("sub", "login");
-        }),
+        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => scan("#loginField input").focus()),
         regist: new Fragment("main",
             $("fieldset", {
                 style: "position: absolute;"
@@ -507,7 +504,7 @@ const subFragment = {
                         class: "inputWidget",
                         type: "button",
                         value: "로그인 화면으로",
-                        onclick: () => currentFragment.value("sub", "login")
+                        onclick: () => subFragment.main.login.launch()
                     }),
                     $("input", {
                         style: "position: absolute; right: 10px;",
@@ -519,14 +516,11 @@ const subFragment = {
                         class: "inputWidget",
                         type: "button",
                         value: "메인 화면으로 돌아가기",
-                        onclick: () => currentFragment.value("sub", "link")
+                        onclick: () => subFragment.main.link.launch()
                     }),
                 )
             )
-        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => {
-            scan("#registField input").focus();
-            currentFragment.value("sub", "regist");
-        }),
+        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => scan("#registField input").focus()),
         info: new Fragment("main",
             $("fieldset").add(
                 $("legend", {
@@ -588,10 +582,10 @@ const subFragment = {
                     class: "inputWidget",
                     type: "button",
                     value: "메인 화면으로 돌아가기",
-                    onclick: () => currentFragment.value("sub", "link")
+                    onclick: () => subFragment.main.link.launch()
                 }),
             )
-        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => currentFragment.value("sub", "info")),
+        ).registAnimation(FragAnimation.fade, 0.2),
     }
 };
 const mainFragment = {
@@ -601,7 +595,7 @@ const mainFragment = {
             class: "inputWidget",
             style: "background-image: url(/resource/img/icon/setting.png); position: absolute; right: 0px; margin: 10px;",
             exp: "loginWidget -> {loginWidget}",
-            onclick: () => firebase.auth().currentUser ? currentFragment.value("sub", "info") : currentFragment.value("sub", "login")
+            onclick: () => firebase.auth().currentUser ? subFragment.main.info.launch() : subFragment.main.login.launch()
         }),
         $("div", { class: "clock" }).add(
             $("div", { class: "hour_pin" }),

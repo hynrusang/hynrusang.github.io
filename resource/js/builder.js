@@ -147,7 +147,7 @@ scan(".menuicon").onclick = () => {
     if (!scan("details").attributes.open) scan("details").setAttribute("open", null);
     else scan("details").removeAttribute("open");
 }
-scan("!footer input").forEach(obj => obj.onclick = e => currentFragment.value("main", e.target.attributes.target.value));
+scan("!footer input").forEach(obj => obj.onclick = e => currentFragment.value = e.target.attributes.target.value);
 if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime()) >= 259200000) {
     localStorage.clear();
     firebase.auth().signOut();
@@ -159,7 +159,7 @@ firebase.auth().onAuthStateChanged(async user => {
             localStorage.setItem("timestamp", new Date());
             setting.value = JSON.parse(localStorage.getItem("setting"));
             if (!setting.value || setting.value.version != settingDefaultFieldset.version) setting.value = settingDefaultFieldset;
-            if (setting.value.auto.rememberTapInfo.activate) currentFragment.value("main", setting.value.auto.rememberTapInfo.destination);
+            if (setting.value.auto.rememberTapInfo.activate) currentFragment.value = setting.value.auto.rememberTapInfo.destination;
             firebase.firestore().collection("user").doc(user.uid).get().then(data => {
                 if (!data.data()) data.ref.set(DB.toObject());
                 else for (let key of Object.keys(data.data())) DB.value(key, data.data()[key]);
