@@ -16,6 +16,6 @@ a {
     color: aquamarine;
 }
 
-div.hour_pin, div.minute_pin, div.second_pin {
+div.clock > div {
     border: 1px solid rgba(255,255,255,0.3);
 }
