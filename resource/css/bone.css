@@ -3,7 +3,7 @@
     transition: 0.3s all;
 }
 *::-webkit-scrollbar {
-    width: 8px;
+    width: 10px;
     background: none;
 }
 html, body {
