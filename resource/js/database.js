@@ -230,5 +230,5 @@ const currentFragment = new LiveDataManager({
             subFragment[currentFragment.value("main")][this.value].launch();
         }
     })
-});
+}, false);
 Binder.define("loginWidget", "로그인");
