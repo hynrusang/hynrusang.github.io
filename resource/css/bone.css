@@ -41,7 +41,7 @@ details {
     position: absolute;
     overflow-x: hidden;
     width: 0px;
-    height: calc(100% - 80px);
+    height: calc(100% - 60px);
     z-index: 2;
     border-radius: 30px;
 }
