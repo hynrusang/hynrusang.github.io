@@ -1,12 +1,10 @@
 .current {
     background-size: 20px !important;
+    padding-left: 20px !important;
 }
 .menuicon {
-    width: 30px;
-    height: 30px;
-    border: 1px solid rgba(128, 128, 128, 0.5);
-    border-radius: 30px;
-    margin: 10px;
+    width: 40px;
+    height: 100%;
     background-image: url(/resource/img/icon/menu.png);
     background-position: center center;
     background-size: contain;

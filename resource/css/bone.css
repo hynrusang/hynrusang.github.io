@@ -12,12 +12,13 @@ html, body {
     margin: 0px;
     display: flex;
     flex-direction: column;
+    overscroll-behavior: contain;
 }
 fragment, footer {
     width: 100%;
 }
-fragment[rid=page], main {
-    height: calc(100% - 50px);
+fragment[rid=page], main, details {
+    height: calc(100vh - 40px);
     overflow-x: hidden;
     overflow-y: scroll;
 }
@@ -25,25 +26,23 @@ fragment {
     display: block;
 }
 footer {
-    height: 50px;
+    height: 40px;
     display: flex;
     justify-content: space-between;
+    z-index: 3;
 }
 footer input:not(.menuicon) {
     width: 100%;
     height: 100%;
-    padding-left: 25px;
+    padding-left: 0px;
     background-size: 0px;
-    background-position: 5px 15px;
+    background-position: 5px 10px;
 }
 
 details {
     position: absolute;
-    overflow-x: hidden;
     width: 0px;
-    height: calc(100% - 80px);
     z-index: 2;
-    border-radius: 30px;
 }
 details > fragment {
     width: 100%;
@@ -94,9 +93,6 @@ li {
     list-style: decimal-leading-zero;
     word-break: break-all;
     margin: 10px;
-}
-a {
-    border-radius: 30px;
 }
 :is(a, .inputWidget, input[type=submit]):hover {
     background-color: rgba(0, 255, 255, 0.5);
