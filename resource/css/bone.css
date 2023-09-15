@@ -3,7 +3,7 @@
     transition: 0.3s all;
 }
 *::-webkit-scrollbar {
-    width: 10px;
+    width: 8px;
     background: none;
 }
 html, body {
@@ -103,6 +103,6 @@ li {
 @media screen and (max-width: 1000px) {
     fieldset {
         margin-left: 0px;
-        width: 100vw;
+        width: 100%;
     }
 }
