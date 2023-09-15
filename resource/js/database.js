@@ -79,7 +79,7 @@ const DB = new LiveDataManager({
                         style: "padding-left: 8px; padding-right: 8px",
                         value: "이름변경",
                         onclick: () => {
-                            const name = prompt("링크의 이름을 뭘로 변경하시겠습니까?\n(만약, 공백으로 넘어가시면, 이름 변경은 취소됩니다.)");
+                            const name = prompt("링크의 이름을 뭘로 변경하시겠습니까?\n추천양식) 분류: 이름");
                             if (this.value.link[name]) makeToast("해당 이름은 이미 링크목록 내에 존재합니다.");
                             else if (name && !name.isEmpty()) {
                                 const temp = this.value;
@@ -152,7 +152,7 @@ const DB = new LiveDataManager({
                         value: "해당 재생목록 바구니 삭제",
                         onclick: e => {
                             e.preventDefault();
-                            if (confirm("정말 해당 재생목록 바구니를 삭제하시겠습니까?\n(해당 결정은 되돌릴 수 없습니다.)")) {
+                            if (confirm("정말 해당 재생목록 바구니를 삭제하시겠습니까?")) {
                                 const temp = this.value;
                                 delete temp[key];
                                 this.value = temp;
@@ -180,7 +180,7 @@ const DB = new LiveDataManager({
                                 class: "inputWidget",
                                 value: "이름 수정",
                                 onclick: () => {
-                                    const name = prompt("재생목록의 이름을 뭘로 변경하시겠습니까?\n(만약, 공백으로 넘어가시면, 이름 변경은 취소됩니다.)");
+                                    const name = prompt("재생목록의 이름을 뭘로 변경하시겠습니까?");
                                     if (this.value[key][name]) makeToast("해당 이름은 이미 재생목록 바구니 내에 존재합니다.");
                                     else if (name && !name.isEmpty()) {
                                         const temp = this.value;
