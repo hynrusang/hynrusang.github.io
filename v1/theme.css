@@ -4,7 +4,7 @@
   fragment, main, footer, textarea, input, input::placeholder, a {
       color: white;
   }
-  body, fieldset {
+  body, fieldset, details {
       background: rgba(0, 0, 0, 0.8);
   }
   textarea, input:not([type="button"], [type="submit"]), ul {
