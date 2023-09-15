@@ -12,6 +12,7 @@ html, body {
     margin: 0px;
     display: flex;
     flex-direction: column;
+    overscroll-behavior: contain;
 }
 fragment, footer {
     width: 100%;
