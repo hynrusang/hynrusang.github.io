@@ -326,7 +326,6 @@ const subFragment = {
                         e.preventDefault();
                         await firebase.auth().signInWithEmailAndPassword(scan("!#loginField input")[0].value, scan("!#loginField input")[1].value).then(async data => {
                             if (!data.user.emailVerified) {
-                                firebase.auth().signOut();
                                 makeToast("이메일 인증이 되지 않은 계정은 사용하실 수 없습니다.\n(인증용 메일을 다시 보내드릴 테니, 해당 메일에서 이메일 인증을 해주세요.)");
                                 await wait(1000);
                                 await data.user.sendEmailVerification()
