@@ -20,7 +20,7 @@ const setting = new LiveData({auto: settingDefaultFieldset.auto}, {
 })
 const DB = new LiveDataManager({
     main: new LiveData({
-        link: [],
+        link: {},
         memo: {}
     }, {
         type: Object,
