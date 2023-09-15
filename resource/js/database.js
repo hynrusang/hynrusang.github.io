@@ -1,5 +1,5 @@
 const settingDefaultFieldset = {
-    version: "2.7",
+    version: "2.8",
     auto: {
         menuSwitch: true,
         closeOnClick: true,
@@ -9,11 +9,13 @@ const settingDefaultFieldset = {
         }
     }
 }
-const setting = new LiveData(JSON.parse(localStorage.getItem("setting")), {
+const setting = new LiveData({auto: settingDefaultFieldset.auto}, {
     type: Object,
     observer: function () {
-        reloadPart("setting");
-        if (firebase.auth().currentUser) localStorage.setItem("setting", JSON.stringify(this.value));
+        if (this.value) {
+            reloadPart("setting");
+            if (firebase.auth().currentUser) localStorage.setItem("setting", JSON.stringify(this.value));
+        }
     }
 })
 const DB = new LiveDataManager({
@@ -47,14 +49,12 @@ const DB = new LiveDataManager({
         type: Object
     })
 }, false);
-const SDB = new LiveData({}, {
-    type: Object
-})
+const SDB = new LiveData({})
 const currentVideo = new LiveData([null, null, null], {
     type: Array,
     observer: function () {
-        scan("#player").src = this.value[2];
-        scan("#playlistname").innerText = `${this.value[0]}: ${this.value[1]}`;
+        scan("main iframe").src = this.value[2];
+        scan("main span").innerText = `${this.value[0]}: ${this.value[1]}`;
         if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
     }
 })

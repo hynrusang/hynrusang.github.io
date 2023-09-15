@@ -211,16 +211,16 @@ const subFragment = {
                     style: "display: flex",
                     onsubmit: e => {
                         e.preventDefault();
-                        e.target[0].value = e.target[0].value.trim();
-                        if (!e.target[0].value.includes("http")) e.target[0].value = `https://${e.target[0].value}`;
-                        if (DB.value("main").link.includes(e.target[0].value)) makeToast("이미 저장된 링크입니다.");
-                        else {
-                            const temp = DB.value("main");
-                            temp.link = temp.link.add(e.target[0].value).sort();
-                            DB.value("main", temp);
-                            notifyDataChange();
-                        }
+                        let value = e.target[0].value.trim();
                         e.target[0].value = "";
+                        if (value.isEmpty()) {
+                            makeToast("저장할 링크를 입력해주세요.");
+                            return;
+                        } else if (!value.includes("http")) value = `https://${value}`;
+                        const temp = DB.value("main");
+                        temp.link[value] = value;
+                        DB.value("main", temp);
+                        notifyDataChange();
                     }
                 }).add(
                     $("input", {
@@ -532,6 +532,9 @@ const subFragment = {
             $("fieldset").add(
                 $("legend", {
                     text: "로그인 정보 관리"
+                }),
+                $("span", {
+                    text: "로그인 정보는 최대 3일동안만 유지됩니다."
                 }),
                 $("input", { 
                     type: "button",

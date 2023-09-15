@@ -37,27 +37,44 @@ const reloadPart = partname => {
     switch (partname) {
         case "main":
             target = [subFragment.main.link.fragment[0].children(3).reset(), subFragment.main.memo.fragment[0].reset()];
-            for (let link of DB.value("main").link) target[0].add(
+            for (let key of Object.keys(DB.value("main").link).sort()) target[0].add(
                 $("li").add(
                     $("img", {
-                        src: `https://www.google.com/s2/favicons?domain=${link}`
+                        src: `https://www.google.com/s2/favicons?domain=${DB.value("main").link[key]}`
                     }),
                     $("a", {
-                        text:link, 
-                        href:link, 
-                        style:"cursor:pointer", 
-                        onclick:e => {
-                            e.preventDefault();
-                            window.open(e.target.innerText);
+                        text: key, 
+                        href: DB.value("main").link[key], 
+                        style: "cursor:pointer",
+                        target: "_blank"
+                    }),
+                    $("br"),
+                    $("input", {
+                        type: "button",
+                        class: "inputWidget",
+                        style: "padding-left: 8px; padding-right: 8px",
+                        value: "이름변경",
+                        onclick: () => {
+                            const name = prompt("링크의 이름을 뭘로 변경하시겠습니까?\n(만약, 공백으로 넘어가시면, 이름 변경은 취소됩니다.)");
+                            if (DB.value("main").link[name]) makeToast("해당 이름은 이미 링크목록 내에 존재합니다.");
+                            else if (name && !name.isEmpty()) {
+                                const temp = DB.value("main");
+                                temp.link[name] = temp.link[key];
+                                delete temp.link[key];
+                                DB.value("main", temp);
+                                notifyDataChange();
+                            }
                         }
                     }),
                     $("input", {
-                        type:"button",
-                        value:"제거",
+                        type: "button",
+                        class: "inputWidget",
+                        style: "padding-left: 8px; padding-right: 8px",
+                        value: "제거",
                         onclick: () => {
                             if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) {
                                 const temp = DB.value("main")
-                                temp.link.remove(link);
+                                delete temp.link[key];
                                 DB.value("main", temp);
                                 notifyDataChange();
                             }
@@ -136,11 +153,11 @@ const reloadPart = partname => {
                                 class: "inputWidget",
                                 value: "이름 수정",
                                 onclick: () => {
-                                    const newName = prompt("재생목록의 이름을 뭘로 변경하시겠습니까?\n(만약, 공백으로 넘어가시면, 이름 변경은 취소됩니다.)");
-                                    if (DB.value("playlist")[key][newName]) makeToast("해당 이름은 이미 재생목록 바구니 내에 존재합니다.");
-                                    else if (newName && !newName.isEmpty()) {
+                                    const name = prompt("재생목록의 이름을 뭘로 변경하시겠습니까?\n(만약, 공백으로 넘어가시면, 이름 변경은 취소됩니다.)");
+                                    if (DB.value("playlist")[key][name]) makeToast("해당 이름은 이미 재생목록 바구니 내에 존재합니다.");
+                                    else if (name && !name.isEmpty()) {
                                         const temp = DB.value("playlist");
-                                        temp[key][newName] = temp[key][value];
+                                        temp[key][name] = temp[key][value];
                                         delete temp[key][value];
                                         DB.value("playlist", temp);
                                         notifyDataChange();
@@ -293,6 +310,7 @@ firebase.auth().onAuthStateChanged(async user => {
         if (user.emailVerified) {
             Binder.update("loginWidget", "정보창")
             localStorage.setItem("timestamp", new Date());
+            setting.value = JSON.parse(localStorage.getItem("setting"));
             if (!setting.value || setting.value.version != settingDefaultFieldset.version) setting.value = settingDefaultFieldset;
             if (setting.value.auto.rememberTapInfo.activate) currentFragment.value("main", setting.value.auto.rememberTapInfo.destination);
             firebase.firestore().collection("user").doc(user.uid).get().then(data => {

@@ -43,7 +43,7 @@ details {
     overflow-x: hidden;
     width: 0px;
     height: calc(100% - 100px);
-    z-index: 4;
+    z-index: 1;
     border-radius: 30px;
 }
 details > fragment {
@@ -64,8 +64,8 @@ iframe {
     border: none;
 }
 fieldset {
-    width: calc(100vw - 800px);
-    margin-left: 400px;
+    width: 70vw;
+    margin-left: 15vw;
 }
 fieldset span {
     margin: 10px; 
@@ -104,7 +104,7 @@ a {
     box-shadow: 10px 5px rgba(0, 200, 200, 0.5);
 }
 
-@media screen and (max-width: 1200px) {
+@media screen and (max-width: 1000px) {
     fieldset {
         margin-left: 0px;
         width: 100vw;

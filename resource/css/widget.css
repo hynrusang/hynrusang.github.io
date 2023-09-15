@@ -10,7 +10,6 @@
     margin: 10px;
     background-position: center center;
 }
-
 .inputWidget {
     background-size: 22px;
     background-position: left center; 
@@ -19,20 +18,7 @@
     margin: 10px;
     height: 30px;
 }
-.media {
-    width: calc(100vw - 400px);
-    margin-left: 400px;
-}
-#player {
-    height: calc(40vw);
-    min-height: 400px;
-}
 
-#playlistname {
-    margin-left: 400px;
-    padding: 10px;
-    font-size: x-large;
-}
 #toast {
     position: absolute;
     top: 30%;
@@ -74,16 +60,4 @@ div.second_pin {
     top: -40%;
     height: 40%;
     z-index: 1;
-}
-
-@media screen and (max-width: 900px) {
-    .media, #playlistname {
-        margin-left: 0px;
-    }
-    .media {
-        width: 100vw;
-    }
-    #player {
-        height: 60vw;
-    }
 }
