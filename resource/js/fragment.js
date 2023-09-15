@@ -190,9 +190,7 @@ const menuFragment = {
                 }
             })
         ),
-        $("div", {
-            id: "playlistbox"
-        })
+        $("div")
     ),
     setting: new Fragment("menu"),
     secret: new Fragment("menu")
