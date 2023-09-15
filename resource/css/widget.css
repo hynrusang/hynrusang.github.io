@@ -46,18 +46,16 @@ div.clock > div {
     position: relative;
     left: 50%;
     width: 0px;
+    z-index: 1;
 }
 div.hour_pin {
     top: 30%;
     height: 20%;
-    z-index: 3;
 }
 div.minute_pin {
     height: 30%;
-    z-index: 2;
 }
 div.second_pin {
     top: -40%;
     height: 40%;
-    z-index: 1;
 }
