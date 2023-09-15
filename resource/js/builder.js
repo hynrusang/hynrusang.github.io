@@ -147,7 +147,7 @@ scan(".menuicon").onclick = () => {
     if (!scan("details").attributes.open) scan("details").setAttribute("open", null);
     else scan("details").removeAttribute("open");
 }
-scan("!footer input").forEach(obj => obj.onclick = e => current.value("tab", e.target.attributes.target.value));
+scan("!header div input").forEach(obj => obj.onclick = e => current.value("tab", e.target.attributes.target.value));
 if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime()) >= 259200000) {
     localStorage.clear();
     firebase.auth().signOut();
