@@ -217,7 +217,7 @@ const DB = new LiveDataManager({
         type: Object,
         observer: function() {
             reloadSetting();
-            if (document.URL.split("/").length == 4) scan("#theme").href = `/resource/css/theme/${this.value.theme}.css`;
+            scan("#theme").href = `/resource/css/theme/${this.value.theme}.css`;
         }
     }),
     secret: new LiveData({

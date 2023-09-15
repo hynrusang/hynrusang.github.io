@@ -107,17 +107,20 @@ const reloadSetting = () => {
             }),
             $("span", {
                 style: "width: 100%;",
-                text: `현재 테마: ${(DB.value("setting").theme == "right") ? "밝은색" : "어두운색"} 테마를 적용합니다.`
+                text: `현재 테마: ${(DB.value("setting").theme == "right") ? "밝은색" : (DB.value("setting").theme == "dark") ? "어두운색" : "다른 버전 "} 테마를 적용합니다.`
             }),
             $("select", {
                 class: "inputWidget",
                 style: "background: none; color: grey",
                 onchange: e => {
-                    location.href = `/${e.target[e.target.selectedIndex].value}`
+                    const temp = DB.value("setting");
+                    temp.theme = e.target[e.target.selectedIndex].value;
+                    DB.value("setting", temp);
+                    notifyDataChange();
                 }
             }).add(
                 $("option", {
-                    text: "기타 다른 테마",
+                    text: "다른 버전 테마",
                     selected: null,
                     disabled: null
                 }),
