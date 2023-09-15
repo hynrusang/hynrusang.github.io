@@ -185,7 +185,7 @@ const menuFragment = {
                             }),
                             num: Math.floor(Math.random() * Object.keys(DB.value("playlist")[keyData.list[keyData.num]]).length)
                         }
-                        currentVideo.value = [keyData.list[keyData.num], valueData.keys[valueData.num], valueData.values[valueData.num]];
+                        current.value("video", [keyData.list[keyData.num], valueData.keys[valueData.num], valueData.values[valueData.num]]);
                     }
                 }
             })

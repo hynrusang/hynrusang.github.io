@@ -18,6 +18,41 @@ const setting = new LiveData({auto: settingDefaultFieldset.auto}, {
         }
     }
 })
+const current = new LiveDataManager({
+    video: new LiveData([null, null, null], {
+        type: Array,
+        observer: function () {
+            scan("main iframe").src = this.value[2];
+            scan("main span").innerText = `${this.value[0]}: ${this.value[1]}`;
+            if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+        }
+    }),
+    tab: new LiveData("main", {
+        type: String,
+        observer: function () {
+            scan(".current").classList.remove("current");
+            scan(`input[target=${this.value}]`).classList.add("current");
+            if (this.value == "video") {
+                scan("main[player]").style.display = null;
+                scan("fragment[rid=page]").style.display = "none";
+            } else {
+                scan("main[player]").style.display = "none";
+                scan("fragment[rid=page]").style.display = null;
+                mainFragment[this.value].launch();
+            }
+            menuFragment[this.value].launch();
+            if (setting.value.auto.menuSwitch) {
+                if (["video", "secret"].includes(this.value)) scan("details").setAttribute("open", null); 
+                else scan("details").removeAttribute("open"); 
+            }
+            if (setting.value.auto.rememberTapInfo.activate) {
+                const temp = setting.value;
+                temp.auto.rememberTapInfo.destination = this.value;
+                setting.value = temp;
+            }
+        }
+    })
+}, false)
 const DB = new LiveDataManager({
     main: new LiveData({
         link: {},
@@ -137,7 +172,7 @@ const DB = new LiveDataManager({
                                 onclick: e => {
                                     e.preventDefault();
                                     const href = e.target.href.includes("list=") ? `${e.target.href.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : e.target.href.replace("m.", "www.").replace("watch?v=", "embed/").split("&")[0];
-                                    currentVideo.value = [key, value, href];
+                                    current.value("video", [key, value, href]);
                                 }
                             }),
                             $("input", {
@@ -192,37 +227,4 @@ const DB = new LiveDataManager({
     })
 }, false);
 const SDB = new LiveData({})
-const currentVideo = new LiveData([null, null, null], {
-    type: Array,
-    observer: function () {
-        scan("main iframe").src = this.value[2];
-        scan("main span").innerText = `${this.value[0]}: ${this.value[1]}`;
-        if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
-    }
-})
-const currentFragment = new LiveData("main", {
-    type: String,
-    observer: function () {
-        scan(".current").classList.remove("current");
-        scan(`input[target=${this.value}]`).classList.add("current");
-        if (this.value == "video") {
-            scan("main[player]").style.display = null;
-            scan("fragment[rid=page]").style.display = "none";
-        } else {
-            scan("main[player]").style.display = "none";
-            scan("fragment[rid=page]").style.display = null;
-            mainFragment[this.value].launch();
-        }
-        menuFragment[this.value].launch();
-        if (setting.value.auto.menuSwitch) {
-            if (["video", "secret"].includes(this.value)) scan("details").setAttribute("open", null); 
-            else scan("details").removeAttribute("open"); 
-        }
-        if (setting.value.auto.rememberTapInfo.activate) {
-            const temp = setting.value;
-            temp.auto.rememberTapInfo.destination = this.value;
-            setting.value = temp;
-        }
-    }
-})
 Binder.define("loginWidget", "로그인");
