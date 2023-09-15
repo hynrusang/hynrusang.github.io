@@ -17,7 +17,7 @@ fragment, footer {
     width: 100%;
 }
 fragment[rid=page], main {
-    height: calc(100% - 50px);
+    height: calc(100% - 80px);
     overflow-x: hidden;
     overflow-y: scroll;
 }
@@ -25,7 +25,7 @@ fragment {
     display: block;
 }
 footer {
-    height: 50px;
+    height: 40px;
     display: flex;
 }
 footer input {
@@ -42,7 +42,7 @@ details {
     top: 40px;
     overflow-x: hidden;
     width: 0px;
-    height: calc(100% - 90px);
+    height: calc(100% - 80px);
     z-index: 2;
     border-radius: 30px;
 }
