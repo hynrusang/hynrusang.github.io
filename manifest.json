@@ -2,7 +2,7 @@
  "name": "N.R.M.A",
  "icons": [
   {
-    "src": "release/favicon.ico",
+    "src": "favicon.ico",
     "sizes": "96x96",
     "type": "image/x-icon"
   }

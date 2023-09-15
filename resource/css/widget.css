@@ -1,6 +1,5 @@
 .current {
-    padding-top: 28px;
-    background-size: 20px;
+    background-size: 20px !important;
 }
 .menuicon {
     width: 30px;
@@ -8,7 +7,9 @@
     border: 1px solid rgba(128, 128, 128, 0.5);
     border-radius: 30px;
     margin: 10px;
+    background-image: url(/resource/img/icon/menu.png);
     background-position: center center;
+    background-size: contain;
 }
 .inputWidget {
     background-size: 22px;
@@ -46,18 +47,16 @@ div.clock > div {
     position: relative;
     left: 50%;
     width: 0px;
+    z-index: 1;
 }
 div.hour_pin {
     top: 30%;
     height: 20%;
-    z-index: 3;
 }
 div.minute_pin {
     height: 30%;
-    z-index: 2;
 }
 div.second_pin {
     top: -40%;
     height: 40%;
-    z-index: 1;
 }

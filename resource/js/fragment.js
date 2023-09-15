@@ -185,7 +185,7 @@ const menuFragment = {
                             }),
                             num: Math.floor(Math.random() * Object.keys(DB.value("playlist")[keyData.list[keyData.num]]).length)
                         }
-                        currentVideo.value = [keyData.list[keyData.num], valueData.keys[valueData.num], valueData.values[valueData.num]];
+                        current.value("video", [keyData.list[keyData.num], valueData.keys[valueData.num], valueData.values[valueData.num]]);
                     }
                 }
             })
@@ -234,12 +234,12 @@ const subFragment = {
                         class: "inputWidget",
                         style: "background-image: url(/resource/img/icon/library.png);",
                         value: "메모로 전환",
-                        onclick: () => currentFragment.value("sub", "memo")
+                        onclick: () => subFragment.main.memo.launch()
                     })
                 ),
                 $("ul")
             )
-        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => currentFragment.value("sub", "link")),
+        ).registAnimation(FragAnimation.fade, 0.2),
         memo: new Fragment("main",
             $("datalist", {
                 id: "memo"
@@ -279,7 +279,7 @@ const subFragment = {
                             class: "inputWidget",
                             style: "background-image: url(/resource/img/icon/library.png);",
                             value: "즐겨찾기로 전환",
-                            onclick: () => currentFragment.value("sub", "link")
+                            onclick: () => subFragment.main.link.launch()
                         })
                     ),
                     $("textarea", { 
@@ -308,7 +308,7 @@ const subFragment = {
                     })
                 ),
             )
-        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => currentFragment.value("sub", "memo")),
+        ).registAnimation(FragAnimation.fade, 0.2),
         login: new Fragment("main",
             $("fieldset", {
                 style: "position: absolute;"
@@ -326,7 +326,6 @@ const subFragment = {
                         e.preventDefault();
                         await firebase.auth().signInWithEmailAndPassword(scan("!#loginField input")[0].value, scan("!#loginField input")[1].value).then(async data => {
                             if (!data.user.emailVerified) {
-                                firebase.auth().signOut();
                                 makeToast("이메일 인증이 되지 않은 계정은 사용하실 수 없습니다.\n(인증용 메일을 다시 보내드릴 테니, 해당 메일에서 이메일 인증을 해주세요.)");
                                 await wait(1000);
                                 await data.user.sendEmailVerification()
@@ -399,7 +398,7 @@ const subFragment = {
                         class: "inputWidget",
                         type: "button",
                         value: "회원가입 화면으로",
-                        onclick: () => currentFragment.value("sub", "regist")
+                        onclick: () => subFragment.main.regist.launch()
                     }),
                     $("input", {
                         style: "position: absolute; right: 10px;",
@@ -411,14 +410,11 @@ const subFragment = {
                         class: "inputWidget",
                         type: "button",
                         value: "메인 화면으로 돌아가기",
-                        onclick: () => currentFragment.value("sub", "link")
+                        onclick: () => subFragment.main.link.launch()
                     }),
                 )
             )
-        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => {
-            scan("#loginField input").focus();
-            currentFragment.value("sub", "login");
-        }),
+        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => scan("#loginField input").focus()),
         regist: new Fragment("main",
             $("fieldset", {
                 style: "position: absolute;"
@@ -508,7 +504,7 @@ const subFragment = {
                         class: "inputWidget",
                         type: "button",
                         value: "로그인 화면으로",
-                        onclick: () => currentFragment.value("sub", "login")
+                        onclick: () => subFragment.main.login.launch()
                     }),
                     $("input", {
                         style: "position: absolute; right: 10px;",
@@ -520,14 +516,11 @@ const subFragment = {
                         class: "inputWidget",
                         type: "button",
                         value: "메인 화면으로 돌아가기",
-                        onclick: () => currentFragment.value("sub", "link")
+                        onclick: () => subFragment.main.link.launch()
                     }),
                 )
             )
-        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => {
-            scan("#registField input").focus();
-            currentFragment.value("sub", "regist");
-        }),
+        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => scan("#registField input").focus()),
         info: new Fragment("main",
             $("fieldset").add(
                 $("legend", {
@@ -589,10 +582,10 @@ const subFragment = {
                     class: "inputWidget",
                     type: "button",
                     value: "메인 화면으로 돌아가기",
-                    onclick: () => currentFragment.value("sub", "link")
+                    onclick: () => subFragment.main.link.launch()
                 }),
             )
-        ).registAnimation(FragAnimation.fade, 0.2).registAction(() => currentFragment.value("sub", "info")),
+        ).registAnimation(FragAnimation.fade, 0.2),
     }
 };
 const mainFragment = {
@@ -602,7 +595,7 @@ const mainFragment = {
             class: "inputWidget",
             style: "background-image: url(/resource/img/icon/setting.png); position: absolute; right: 0px; margin: 10px;",
             exp: "loginWidget -> {loginWidget}",
-            onclick: () => firebase.auth().currentUser ? currentFragment.value("sub", "info") : currentFragment.value("sub", "login")
+            onclick: () => firebase.auth().currentUser ? subFragment.main.info.launch() : subFragment.main.login.launch()
         }),
         $("div", { class: "clock" }).add(
             $("div", { class: "hour_pin" }),

@@ -17,7 +17,7 @@ fragment, footer {
     width: 100%;
 }
 fragment[rid=page], main {
-    height: calc(100% - 100px);
+    height: calc(100% - 50px);
     overflow-x: hidden;
     overflow-y: scroll;
 }
@@ -27,23 +27,22 @@ fragment {
 footer {
     height: 50px;
     display: flex;
+    justify-content: space-between;
 }
-footer input {
-    padding-top: 0px;
+footer input:not(.menuicon) {
     width: 100%;
     height: 100%;
+    padding-left: 25px;
     background-size: 0px;
-    background-repeat: no-repeat;
-    background-position: center 10px;
+    background-position: 5px 15px;
 }
 
 details {
     position: absolute;
-    top: 50px;
     overflow-x: hidden;
     width: 0px;
-    height: calc(100% - 100px);
-    z-index: 1;
+    height: calc(100% - 80px);
+    z-index: 2;
     border-radius: 30px;
 }
 details > fragment {
