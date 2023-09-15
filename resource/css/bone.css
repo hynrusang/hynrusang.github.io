@@ -17,7 +17,7 @@ fragment, footer {
     width: 100%;
 }
 fragment[rid=page], main {
-    height: 100%;
+    height: calc(100% - 50px);
     overflow-x: hidden;
     overflow-y: scroll;
 }
