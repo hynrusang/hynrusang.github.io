@@ -105,10 +105,6 @@ const reloadSetting = () => {
                     notifyDataChange();
                 }
             }),
-            $("span", {
-                style: "width: 100%;",
-                text: `현재 테마: ${(DB.value("setting").theme == "right") ? "밝은색" : (DB.value("setting").theme == "dark") ? "어두운색" : "다른 버전 "} 테마를 적용합니다.`
-            }),
             $("select", {
                 class: "inputWidget",
                 style: "background: none; color: grey",
@@ -127,7 +123,11 @@ const reloadSetting = () => {
                 $("option", {
                     text: "v1",
                 })
-            )
+            ),
+            $("span", {
+                style: "width: 100%;",
+                text: `현재 테마: ${(DB.value("setting").theme == "right") ? "밝은색" : (DB.value("setting").theme == "dark") ? "어두운색" : "다른 버전 "} 테마를 적용합니다.`
+            })
         )
     )
     if (SDB.value.token) target.add(
