@@ -1,5 +1,5 @@
 .current {
-    background-size: 20px;
+    background-size: 20px !important;
 }
 .menuicon {
     width: 30px;

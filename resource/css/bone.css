@@ -34,7 +34,6 @@ header input:not(.menuicon) {
     height: 100%;
     padding-left: 25px;
     background-size: 0px;
-    background-repeat: no-repeat;
     background-position: 5px 10px;
 }
 
