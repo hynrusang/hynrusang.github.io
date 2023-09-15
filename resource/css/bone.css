@@ -1,4 +1,4 @@
-*:not(details, iframe) {
+*:not(details) {
     box-sizing: border-box;
     transition: 0.3s all;
 }
@@ -40,6 +40,7 @@ footer input:not(.menuicon) {
 }
 
 details {
+    transition: none;
     position: absolute;
     width: 0px;
     z-index: 2;
