@@ -2,7 +2,7 @@
     background: linear-gradient(cyan, violet);
     border: none;
 }
-body, details {
+body, fragment {
     background: black;
 }
 fragment, main, footer, textarea, input {

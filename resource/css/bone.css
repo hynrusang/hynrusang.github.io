@@ -1,4 +1,4 @@
-*:not(details) {
+* {
     box-sizing: border-box;
     transition: 0.3s all;
 }
@@ -6,6 +6,7 @@
     width: 10px;
     background: none;
 }
+
 html, body {
     width: 100vw;
     height: 100vh;
@@ -17,7 +18,7 @@ html, body {
 fragment, footer, textarea {
     width: 100%;
 }
-fragment[rid=page], main, details {
+fragment:not([rid=main]), main {
     height: calc(100vh - 40px);
     overflow-x: hidden;
     overflow-y: scroll;
@@ -42,16 +43,13 @@ main, summary {
     display: none;
 }
 
-details {
+fragment[rid=menu] {
     transition: none;
     position: absolute;
     width: 0px;
     z-index: 2;
 }
-details > fragment {
-    height: 100%;
-}
-details[open] {
+fragment[rid=menu][open] {
     width: 100%;
     max-width: 400px;
 }

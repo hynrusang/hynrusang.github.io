@@ -163,8 +163,8 @@ const reloadSetting = () => {
     )
 }
 scan(".menuicon").onclick = () => {
-    if (!scan("details").attributes.open) scan("details").setAttribute("open", null);
-    else scan("details").removeAttribute("open");
+    if (!scan("[rid=menu]").attributes.open) scan("[rid=menu]").setAttribute("open", null);
+    else scan("[rid=menu]").removeAttribute("open");
 }
 scan("!footer div input").forEach(obj => obj.onclick = e => current.value("tab", e.target.attributes.target.value));
 if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime()) >= 259200000) {

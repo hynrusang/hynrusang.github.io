@@ -24,7 +24,7 @@ const current = new LiveDataManager({
         observer: function () {
             scan("main iframe").src = this.value[2];
             scan("main span").innerText = `${this.value[0]}: ${this.value[1]}`;
-            if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+            if (setting.value.auto.closeOnClick) scan("[rid=menu]").removeAttribute("open"); 
         }
     }),
     tab: new LiveData("main", {
@@ -41,8 +41,8 @@ const current = new LiveDataManager({
             }
             menuFragment[this.value].launch();
             if (setting.value.auto.menuSwitch) {
-                if (["video", "secret"].includes(this.value)) scan("details").setAttribute("open", null); 
-                else scan("details").removeAttribute("open"); 
+                if (["video", "secret"].includes(this.value)) scan("[rid=menu]").setAttribute("open", null); 
+                else scan("[rid=menu]").removeAttribute("open"); 
             }
             if (setting.value.auto.rememberTapInfo.activate) {
                 const temp = setting.value;
