@@ -58,8 +58,13 @@ summary {
     display: none;
 }
 
-iframe, input, textarea {
+iframe, textarea, input {
     border: none;
+}
+textarea {
+    height: 450px;
+    background: none;
+    padding: 10px;
 }
 input {
     background-color: initial;
@@ -78,14 +83,6 @@ fieldset span {
     border-radius: 30px;
 }
 
-span {
-    line-height: 22px;
-}
-textarea {
-    height: 450px;
-    background: none;
-    padding: 10px;
-}
 li {
     list-style: decimal-leading-zero;
     word-break: break-all;
