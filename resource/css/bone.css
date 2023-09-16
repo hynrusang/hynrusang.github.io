@@ -42,6 +42,7 @@ footer input:not(.menuicon) {
 details {
     transition: none;
     position: absolute;
+    overflow-y: scroll;
     width: 0px;
     z-index: 2;
 }
