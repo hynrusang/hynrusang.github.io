@@ -29,7 +29,6 @@ footer {
     height: 40px;
     display: flex;
     justify-content: space-between;
-    z-index: 3;
 }
 footer input:not(.menuicon) {
     width: 100%;
