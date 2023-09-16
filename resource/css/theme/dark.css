@@ -5,11 +5,8 @@
 body, fragment {
     background: black;
 }
-fragment, main, footer, textarea, input {
-    color: cyan
-}
-input::placeholder {
-    color: rgba(0, 255, 255, 0.4);
+fragment, main, footer, textarea, input, input::placeholder {
+    color: rgba(0, 255, 255, 0.5)
 }
 
 a {
