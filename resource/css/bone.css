@@ -4,7 +4,7 @@
     transition: 0.3s all;
 }
 *::-webkit-scrollbar {
-    width: 8px;
+    width: 10px;
     background: none;
 }
 
@@ -32,7 +32,7 @@ footer {
     justify-content: space-between;
     z-index: 3;
 }
-footer input:not(.menuicon) {
+footer > div > input {
     width: 100%;
     height: 100%;
     padding-left: 0px;
