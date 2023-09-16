@@ -38,6 +38,9 @@ footer input:not(.menuicon) {
     background-size: 0px;
     background-position: 5px 10px;
 }
+main, summary {
+    display: none;
+}
 
 details {
     transition: none;
@@ -52,8 +55,13 @@ details[open] {
     width: 100%;
     max-width: 400px;
 }
-summary {
-    display: none;
+fieldset {
+    width: 70vw;
+    margin-left: 15vw;
+}
+fieldset span {
+    margin: 10px; 
+    display: inline-block;
 }
 
 iframe, textarea, input {
@@ -68,14 +76,6 @@ input {
     background-color: initial;
     background-repeat: no-repeat;
     cursor: pointer;
-}
-fieldset {
-    width: 70vw;
-    margin-left: 15vw;
-}
-fieldset span {
-    margin: 10px; 
-    display: inline-block;
 }
 [type=button], [type=submit] {
     border-radius: 30px;

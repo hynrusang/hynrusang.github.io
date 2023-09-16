@@ -33,11 +33,10 @@ const current = new LiveDataManager({
             scan(".current").classList.remove("current");
             scan(`input[target=${this.value}]`).classList.add("current");
             if (this.value == "video") {
-                scan("main[player]").style.display = null;
+                scan("main[player]").style.display = "block";
                 scan("fragment[rid=page]").style.display = "none";
             } else {
-                scan("main[player]").style.display = "none";
-                scan("fragment[rid=page]").style.display = null;
+                scan("main[player]").style = scan("fragment[rid=page]").style = null;
                 mainFragment[this.value].launch();
             }
             menuFragment[this.value].launch();
