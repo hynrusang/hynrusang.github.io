@@ -1,5 +1,6 @@
 * {
     box-sizing: border-box;
+    overflow-x: hidden;
     transition: 0.3s all;
 }
 *::-webkit-scrollbar {
@@ -20,7 +21,6 @@ fragment, footer, textarea {
 }
 fragment:not([rid=main]), main {
     height: calc(100vh - 40px);
-    overflow-x: hidden;
     overflow-y: scroll;
 }
 fragment {
