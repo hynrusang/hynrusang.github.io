@@ -29,6 +29,7 @@ footer {
     height: 40px;
     display: flex;
     justify-content: space-between;
+    z-index: 3;
 }
 footer input:not(.menuicon) {
     width: 100%;
@@ -45,7 +46,6 @@ details {
     z-index: 2;
 }
 details > fragment {
-    width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
