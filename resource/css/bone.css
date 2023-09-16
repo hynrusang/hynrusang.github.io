@@ -47,8 +47,6 @@ details {
 }
 details > fragment {
     height: 100%;
-    display: flex;
-    flex-direction: column;
 }
 details[open] {
     width: 100%;
