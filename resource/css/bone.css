@@ -4,7 +4,7 @@
     transition: 0.3s all;
 }
 *::-webkit-scrollbar {
-    width: 10px;
+    width: 8px;
     background: none;
 }
 
@@ -54,8 +54,8 @@ fragment[rid=menu][open] {
     max-width: 400px;
 }
 fieldset {
-    width: 70vw;
-    margin-left: 15vw;
+    width: 80vw;
+    margin-left: 10vw;
 }
 fieldset span {
     margin: 10px; 
