@@ -18,6 +18,7 @@ const CLOCK = setInterval(function () {
         scan(".second_pin").style.transform = `rotate(${SECOND * 6}deg)`;
     } catch (e) { }
 }, 250);
+const notifyDataChange = async () => firebase.auth().currentUser ? firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(DB.toObject()) : makeToast("로그인을 하시지 않으면, 변경 사항이 저장되지 않습니다.");
 const makeToast = message => {
     scan("#toast").innerText = message;
     scan("#toast").animate([{
@@ -30,8 +31,7 @@ const makeToast = message => {
         backgroundColor: "blue",
         opacity: 0
     }], 1000)
-}
-const notifyDataChange = async () => firebase.auth().currentUser ? firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(DB.toObject()) : makeToast("로그인을 하시지 않으면, 변경 사항이 저장되지 않습니다.");
+};
 const reloadSetting = () => {
     const target = mainFragment.setting.fragment[0]
     mainFragment.setting.fragment[0].reset(
@@ -162,11 +162,11 @@ const reloadSetting = () => {
         )
     )
 }
+scan("!footer div input").forEach(obj => obj.onclick = e => current.value("tab", e.target.attributes.target.value));
 scan(".menuicon").onclick = () => {
     if (!scan("[rid=menu]").attributes.open) scan("[rid=menu]").setAttribute("open", null);
     else scan("[rid=menu]").removeAttribute("open");
 }
-scan("!footer div input").forEach(obj => obj.onclick = e => current.value("tab", e.target.attributes.target.value));
 if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime()) >= 259200000) {
     localStorage.clear();
     firebase.auth().signOut();
