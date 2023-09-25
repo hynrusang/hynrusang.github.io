@@ -171,19 +171,18 @@ const menuFragment = {
                 class: "inputWidget",
                 value: "랜덤 추천",
                 onclick: () => {
-                    if (Object.keys(DB.value("playlist")).isEmpty()) {
+                    const target = DB.value("playlist");
+                    if (Object.keys(target).isEmpty()) {
                         makeToast("재생목록 바구니가 하나도 존재하지 않습니다.");
                     } else {
                         const keyData = {
-                            list: Object.keys(DB.value("playlist")),
-                            num: Math.floor(Math.random() * Object.keys(DB.value("playlist")).length)
+                            list: Object.keys(target),
+                            num: Math.floor(Math.random() * Object.keys(target).length)
                         }
                         const valueData = {
-                            keys: Object.keys(DB.value("playlist")[keyData.list[keyData.num]]),
-                            values: Object.values(DB.value("playlist")[keyData.list[keyData.num]]).map(obj => {
-                                return obj.includes("list=") ? `${obj.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : obj.replace("m.", "www.").replace("watch?v=", "embed/").split("&")[0];
-                            }),
-                            num: Math.floor(Math.random() * Object.keys(DB.value("playlist")[keyData.list[keyData.num]]).length)
+                            keys: Object.keys(target[keyData.list[keyData.num]]),
+                            values: Object.values(target[keyData.list[keyData.num]]).map(obj => obj.includes("list=") ? `${obj.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : obj.replace("m.", "www.").replace("watch?v=", "embed/").split("&")[0]),
+                            num: Math.floor(Math.random() * Object.keys(target[keyData.list[keyData.num]]).length)
                         }
                         current.value("video", [keyData.list[keyData.num], valueData.keys[valueData.num], valueData.values[valueData.num]]);
                     }
