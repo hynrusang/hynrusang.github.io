@@ -593,7 +593,7 @@ const mainFragment = {
         $("input", {
             type: "button",
             class: "inputWidget",
-            style: "background-image: url(/resource/img/icon/setting.png); position: absolute; right: 0px; margin: 10px;",
+            style: "background-image: url(/resource/img/icon/setting.png); position: absolute; right: 0px; background-position-x: 2px;",
             exp: "loginWidget -> {loginWidget}",
             onclick: () => firebase.auth().currentUser ? subFragment.main.info.launch() : subFragment.main.login.launch()
         }),
