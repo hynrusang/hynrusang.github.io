@@ -18,6 +18,7 @@ const CLOCK = setInterval(function () {
         scan(".second_pin").style.transform = `rotate(${SECOND * 6}deg)`;
     } catch (e) { }
 }, 250);
+const notifyDataChange = async () => firebase.auth().currentUser ? firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(DB.toObject()) : makeToast("로그인을 하시지 않으면, 변경 사항이 저장되지 않습니다.");
 const makeToast = message => {
     scan("#toast").innerText = message;
     scan("#toast").animate([{
@@ -30,8 +31,7 @@ const makeToast = message => {
         backgroundColor: "blue",
         opacity: 0
     }], 1000)
-}
-const notifyDataChange = async () => firebase.auth().currentUser ? firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(DB.toObject()) : makeToast("로그인을 하시지 않으면, 변경 사항이 저장되지 않습니다.");
+};
 const reloadSetting = () => {
     const target = mainFragment.setting.fragment[0]
     mainFragment.setting.fragment[0].reset(
@@ -40,7 +40,7 @@ const reloadSetting = () => {
                 text: "브라우저/기기 종속 설정"
             }),
             $("span", {
-                text: "이 필드의 설정들은 브라우저/기기의 종류에 따라 독립적으로 적용됩니다."
+                text: "이 필드의 설정들은 브라우저/기기의 종류에 따라 독립적으로 적용됩니다.\n또한, 로그아웃 및 버전 업데이트 시, 해당 필드의 설정들은 초기화됩니다."
             }),
             $("br"),
             $("input", {
@@ -105,10 +105,29 @@ const reloadSetting = () => {
                     notifyDataChange();
                 }
             }),
+            $("select", {
+                class: "inputWidget",
+                style: "background: none; color: grey",
+                onchange: e => {
+                    const temp = DB.value("setting");
+                    temp.theme = e.target[e.target.selectedIndex].value;
+                    DB.value("setting", temp);
+                    notifyDataChange();
+                }
+            }).add(
+                $("option", {
+                    text: "다른 버전 테마",
+                    selected: null,
+                    disabled: null
+                }),
+                $("option", {
+                    text: "v1",
+                })
+            ),
             $("span", {
                 style: "width: 100%;",
-                text: `현재 테마: ${(DB.value("setting").theme == "right") ? "밝은색" : "어두운색"} 테마를 적용합니다.`
-            }),
+                text: `현재 테마: ${(DB.value("setting").theme == "right") ? "밝은색" : (DB.value("setting").theme == "dark") ? "어두운색" : "다른 버전 "} 테마를 적용합니다.`
+            })
         )
     )
     if (SDB.value.token) target.add(
@@ -143,11 +162,11 @@ const reloadSetting = () => {
         )
     )
 }
-scan(".menuicon").onclick = () => {
-    if (!scan("details").attributes.open) scan("details").setAttribute("open", null);
-    else scan("details").removeAttribute("open");
-}
 scan("!footer div input").forEach(obj => obj.onclick = e => current.value("tab", e.target.attributes.target.value));
+scan(".menuicon").onclick = () => {
+    if (!scan("[rid=menu]").attributes.open) scan("[rid=menu]").setAttribute("open", null);
+    else scan("[rid=menu]").removeAttribute("open");
+}
 if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime()) >= 259200000) {
     localStorage.clear();
     firebase.auth().signOut();

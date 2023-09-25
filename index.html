@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width">
     <meta name="author" content="김민기">
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" href="favicon.ico">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <link rel="icon" href="/favicon.ico">
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="/resource/css/bone.css">
     <link rel="stylesheet" href="/resource/css/widget.css">
@@ -14,13 +15,10 @@
 </head>
 <body>
     <h1 id="toast">사이트를 로드중입니다.</h1>
-    <details>
-        <summary></summary>
-        <fragment rid="menu"></fragment>
-    </details>
+    <fragment rid="menu"></fragment>
     <fragment rid="page"></fragment>
-    <main style="display: none" player>
-        <iframe style="width: 100%; height: 60vw; min-height: 300px; max-height: calc(100% - 42px)" allowfullscreen></iframe>
+    <main player>
+        <iframe style="width: 100%; height: 60vw; min-height: 300px; max-height: 100%" allowfullscreen></iframe>
         <span style="padding: 10px; font-size: x-large;"></span>
     </main>
     <footer>

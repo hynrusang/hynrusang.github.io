@@ -1,5 +1,5 @@
 const settingDefaultFieldset = {
-    version: "2.10",
+    version: "2.11",
     auto: {
         menuSwitch: true,
         closeOnClick: true,
@@ -24,7 +24,7 @@ const current = new LiveDataManager({
         observer: function () {
             scan("main iframe").src = this.value[2];
             scan("main span").innerText = `${this.value[0]}: ${this.value[1]}`;
-            if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+            if (setting.value.auto.closeOnClick) scan("[rid=menu]").removeAttribute("open"); 
         }
     }),
     tab: new LiveData("main", {
@@ -33,17 +33,16 @@ const current = new LiveDataManager({
             scan(".current").classList.remove("current");
             scan(`input[target=${this.value}]`).classList.add("current");
             if (this.value == "video") {
-                scan("main[player]").style.display = null;
+                scan("main[player]").style.display = "block";
                 scan("fragment[rid=page]").style.display = "none";
             } else {
-                scan("main[player]").style.display = "none";
-                scan("fragment[rid=page]").style.display = null;
+                scan("main[player]").style = scan("fragment[rid=page]").style = null;
                 mainFragment[this.value].launch();
             }
             menuFragment[this.value].launch();
             if (setting.value.auto.menuSwitch) {
-                if (["video", "secret"].includes(this.value)) scan("details").setAttribute("open", null); 
-                else scan("details").removeAttribute("open"); 
+                if (["video", "secret"].includes(this.value)) scan("[rid=menu]").setAttribute("open", null); 
+                else scan("[rid=menu]").removeAttribute("open"); 
             }
             if (setting.value.auto.rememberTapInfo.activate) {
                 const temp = setting.value;

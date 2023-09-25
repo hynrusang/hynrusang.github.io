@@ -1,15 +1,15 @@
 *::-webkit-scrollbar-thumb {
-    background: linear-gradient(cyan, violet);
+    background: aquamarine;
     border: none;
 }
-body, details {
+body, fragment {
     background: black;
 }
 fragment, main, footer, textarea, input {
-    color: cyan
+    color: cyan;
 }
 input::placeholder {
-    color: rgba(0, 255, 255, 0.4);
+    color: rgba(0, 255, 255, 0.5);
 }
 
 a {

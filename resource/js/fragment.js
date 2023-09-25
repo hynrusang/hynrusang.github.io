@@ -6,7 +6,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("[rid=menu]").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -24,7 +24,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("[rid=menu]").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -42,7 +42,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("[rid=menu]").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -60,7 +60,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("[rid=menu]").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -78,7 +78,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("[rid=menu]").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -96,7 +96,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("[rid=menu]").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -114,7 +114,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("[rid=menu]").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -132,7 +132,7 @@ const menuFragment = {
             onclick: e => {
                 e.preventDefault();
                 window.open((e.target.nodeName == "A") ? e.target.href : e.target.parentElement.href, "_blank");
-                if (setting.value.auto.closeOnClick) scan("details").removeAttribute("open"); 
+                if (setting.value.auto.closeOnClick) scan("[rid=menu]").removeAttribute("open"); 
             }
         }).add(
             $("img", {
@@ -223,12 +223,14 @@ const subFragment = {
                 }).add(
                     $("input", {
                         type: "text",
+                        name: "link",
                         class: "inputWidget",
                         style: "background-image: url(/resource/img/icon/save.png); width: 100%;",
                         placeholder: "즐겨찾기에 등록할 링크"
                     }),
                     $("input", {
                         type: "button",
+                        name: "switch",
                         class: "inputWidget",
                         style: "background-image: url(/resource/img/icon/library.png);",
                         value: "메모로 전환",
@@ -591,7 +593,7 @@ const mainFragment = {
         $("input", {
             type: "button",
             class: "inputWidget",
-            style: "background-image: url(/resource/img/icon/setting.png); position: absolute; right: 0px; margin: 10px;",
+            style: "background-image: url(/resource/img/icon/setting.png); position: absolute; right: 0px; background-position-x: 3px;",
             exp: "loginWidget -> {loginWidget}",
             onclick: () => firebase.auth().currentUser ? subFragment.main.info.launch() : subFragment.main.login.launch()
         }),

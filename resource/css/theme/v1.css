@@ -1,0 +1,25 @@
+*::-webkit-scrollbar-thumb {
+    background: linear-gradient(rgb(0, 255, 255), rgb(255, 0, 255));
+}
+fragment, main, footer, textarea, input, input::placeholder, a {
+    color: white;
+}
+body, fieldset, fragment[rid=menu] {
+    background: rgba(0, 0, 0, 0.8);
+}
+textarea, input:not([type="button"], [type="submit"]), ul {
+    background-color: rgba(180, 180, 180, 0.3);
+}
+  
+div.clock {
+    background: black;
+}
+div.hour_pin {
+    border: 1px solid red;
+}
+div.minute_pin {
+    border: 1px solid yellow;
+}
+div.second_pin {
+    border: 1px solid cyan;
+}
