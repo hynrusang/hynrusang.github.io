@@ -223,12 +223,14 @@ const subFragment = {
                 }).add(
                     $("input", {
                         type: "text",
+                        name: "link",
                         class: "inputWidget",
                         style: "background-image: url(/resource/img/icon/save.png); width: 100%;",
                         placeholder: "즐겨찾기에 등록할 링크"
                     }),
                     $("input", {
                         type: "button",
+                        name: "switch",
                         class: "inputWidget",
                         style: "background-image: url(/resource/img/icon/library.png);",
                         value: "메모로 전환",
