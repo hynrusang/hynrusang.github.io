@@ -2,6 +2,7 @@
     box-sizing: border-box;
     overflow-x: hidden;
     transition: 0.3s all;
+    text-decoration: none;
 }
 *::-webkit-scrollbar {
     width: 8px;
