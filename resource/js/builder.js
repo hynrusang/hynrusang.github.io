@@ -25,6 +25,7 @@ const makeToast = message => {
         backgroundColor: "blue",
         opacity: 0
     }, {
+        zIndex: 1,
         backgroundColor: "red",
         opacity: 1
     }, {
