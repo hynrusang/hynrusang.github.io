@@ -1,7 +1,7 @@
 const settingDefaultFieldset = {
     version: "2.11",
     auto: {
-        menuSwitch: false,
+        menuSwitch: true,
         closeOnClick: true,
         rememberTapInfo: {
             activate: true,
