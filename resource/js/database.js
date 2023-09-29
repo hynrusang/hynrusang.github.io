@@ -1,5 +1,5 @@
 const settingDefaultFieldset = {
-    version: "2.11",
+    version: "2.12",
     auto: {
         menuSwitch: true,
         closeOnClick: true,
