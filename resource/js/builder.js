@@ -18,6 +18,7 @@ const CLOCK = setInterval(function () {
         scan(".second_pin").style.transform = `rotate(${SECOND * 6}deg)`;
     } catch (e) { }
 }, 250);
+const arrayIsEmpty = array => array.reduce((current, obj) => obj != "" ? false : current, true)
 const notifyDataChange = async () => firebase.auth().currentUser ? firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).update(DB.toObject()) : makeToast("로그인을 하시지 않으면, 변경 사항이 저장되지 않습니다.");
 const makeToast = message => {
     scan("#toast").innerText = message;
@@ -25,6 +26,7 @@ const makeToast = message => {
         backgroundColor: "blue",
         opacity: 0
     }, {
+        zIndex: 1,
         backgroundColor: "red",
         opacity: 1
     }, {

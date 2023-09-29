@@ -150,7 +150,7 @@ const menuFragment = {
             onsubmit: e => {
                 e.preventDefault();
                 if (Object.keys(DB.value("playlist")).includes(e.target[0].value)) makeToast("해당 이름은 이미 존재합니다.")
-                else {
+                else if (e.target[0].value) {
                     const newPlaylist = DB.value("playlist");
                     newPlaylist[e.target[0].value] = {};
                     e.target[0].value = "";
@@ -171,19 +171,18 @@ const menuFragment = {
                 class: "inputWidget",
                 value: "랜덤 추천",
                 onclick: () => {
-                    if (Object.keys(DB.value("playlist")).isEmpty()) {
+                    const target = DB.value("playlist");
+                    if (arrayIsEmpty(Object.keys(target))) {
                         makeToast("재생목록 바구니가 하나도 존재하지 않습니다.");
                     } else {
                         const keyData = {
-                            list: Object.keys(DB.value("playlist")),
-                            num: Math.floor(Math.random() * Object.keys(DB.value("playlist")).length)
+                            list: Object.keys(target),
+                            num: Math.floor(Math.random() * Object.keys(target).length)
                         }
                         const valueData = {
-                            keys: Object.keys(DB.value("playlist")[keyData.list[keyData.num]]),
-                            values: Object.values(DB.value("playlist")[keyData.list[keyData.num]]).map(obj => {
-                                return obj.includes("list=") ? `${obj.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : obj.replace("m.", "www.").replace("watch?v=", "embed/").split("&")[0];
-                            }),
-                            num: Math.floor(Math.random() * Object.keys(DB.value("playlist")[keyData.list[keyData.num]]).length)
+                            keys: Object.keys(target[keyData.list[keyData.num]]),
+                            values: Object.values(target[keyData.list[keyData.num]]).map(obj => obj.includes("list=") ? `${obj.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : obj.replace("m.", "www.").replace("watch?v=", "embed/").split("&")[0]),
+                            num: Math.floor(Math.random() * Object.keys(target[keyData.list[keyData.num]]).length)
                         }
                         current.value("video", [keyData.list[keyData.num], valueData.keys[valueData.num], valueData.values[valueData.num]]);
                     }
@@ -211,7 +210,7 @@ const subFragment = {
                         e.preventDefault();
                         let value = e.target[0].value.trim();
                         e.target[0].value = "";
-                        if (value.isEmpty()) {
+                        if (!value) {
                             makeToast("저장할 링크를 입력해주세요.");
                             return;
                         } else if (!value.includes("http")) value = `https://${value}`;
@@ -327,7 +326,6 @@ const subFragment = {
                         await firebase.auth().signInWithEmailAndPassword(scan("!#loginField input")[0].value, scan("!#loginField input")[1].value).then(async data => {
                             if (!data.user.emailVerified) {
                                 makeToast("이메일 인증이 되지 않은 계정은 사용하실 수 없습니다.\n(인증용 메일을 다시 보내드릴 테니, 해당 메일에서 이메일 인증을 해주세요.)");
-                                await wait(1000);
                                 await data.user.sendEmailVerification()
                                     .then(() => makeToast("인증용 메일을 다시 보냈습니다."))
                                     .catch(e => { if (e.code == "auth/too-many-requests") makeToast("현재 요청이 너무 많아 요청을 보류중입니다. 잠시 후 다시 시도해주세요."); });

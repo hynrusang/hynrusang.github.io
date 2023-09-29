@@ -1,5 +1,5 @@
 const settingDefaultFieldset = {
-    version: "2.11",
+    version: "2.12",
     auto: {
         menuSwitch: true,
         closeOnClick: true,
@@ -80,7 +80,7 @@ const DB = new LiveDataManager({
                         onclick: () => {
                             const name = prompt("링크의 이름을 뭘로 변경하시겠습니까?\n추천양식) 분류: 이름");
                             if (this.value.link[name]) makeToast("해당 이름은 이미 링크목록 내에 존재합니다.");
-                            else if (name && !name.isEmpty()) {
+                            else if (name) {
                                 const temp = this.value;
                                 temp.link[name] = temp.link[key];
                                 delete temp.link[key];
@@ -129,7 +129,7 @@ const DB = new LiveDataManager({
                         onsubmit: e => {
                             e.preventDefault();
                             if (Object.values(this.value[e.target.parentElement.children[0].innerText]).includes(e.target[0].value)) makeToast("해당 재생목록은 이미 재생목록 바구니 내에 존재합니다.");
-                            else {
+                            else if (e.target[0].value) {
                                 const temp = this.value;
                                 temp[key][e.target[0].value] = e.target[0].value;
                                 this.value = temp;
@@ -181,7 +181,7 @@ const DB = new LiveDataManager({
                                 onclick: () => {
                                     const name = prompt("재생목록의 이름을 뭘로 변경하시겠습니까?");
                                     if (this.value[key][name]) makeToast("해당 이름은 이미 재생목록 바구니 내에 존재합니다.");
-                                    else if (name && !name.isEmpty()) {
+                                    else if (name) {
                                         const temp = this.value;
                                         temp[key][name] = temp[key][value];
                                         delete temp[key][value];
