@@ -118,7 +118,7 @@ firebase.auth().onAuthStateChanged(async user => {
                                     if (confirm("정말로 해당 기억할 것을 삭제하시겠습니까?")) {
                                         template.memo.splice(index, 1);
                                         DB.value("memo", template.memo);
-                                        await notifyDataChange(db);
+                                        await notifyDataChange();
                                         makeToast("해당 기억할 것을 성공적으로 삭제하였습니다.");
                                     }
                                 }
