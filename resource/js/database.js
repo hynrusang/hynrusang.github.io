@@ -67,6 +67,15 @@ const current = new LiveDataManager({
                 mainFragment[this.value].launch();
             }
             menuFragment[this.value].launch();
+            if (setting.value.auto.menuSwitch) {
+                if (["video", "secret"].includes(this.value)) scan("[rid=menu]").setAttribute("open", null); 
+                else scan("[rid=menu]").removeAttribute("open"); 
+            }
+            if (setting.value.auto.rememberTapInfo.activate) {
+                const temp = setting.value;
+                temp.auto.rememberTapInfo.destination = this.value;
+                setting.value = temp;
+            }
         }
     })
 })
