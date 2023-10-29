@@ -296,6 +296,7 @@ firebase.auth().onAuthStateChanged(async user => {
                 .catch(e => null);
             menuFragment.main.launch();
             mainFragment.main.launch();
+            scan("[rid=menu]").setAttribute("open", "");
             scan("!footer div input").forEach(obj => obj.onclick = e => current.value("tab", e.target.attributes.target.value));
         } else firebase.auth().signOut();
     }
