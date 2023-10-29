@@ -205,7 +205,7 @@ firebase.auth().onAuthStateChanged(async user => {
                                         if (confirm("정말 해당 재생목록을 삭제하시겠습니까?\n(해당 결정은 되돌릴 수 없습니다.)")) {
                                             delete template.playlist[key][value];
                                             DB.value("playlist", template.playlist);
-                                            notifyDataChange(data);
+                                            notifyDataChange();
                                         }
                                     }
                                 })
