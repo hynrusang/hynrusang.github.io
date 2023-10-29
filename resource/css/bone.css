@@ -27,23 +27,9 @@ fragment:not([rid=main]), main {
 fragment {
     display: block;
 }
-footer {
-    height: 40px;
-    display: flex;
-    justify-content: space-between;
-    z-index: 3;
+fragment[rid=page] {
+    padding-left: 400px;
 }
-footer > div > input {
-    width: 100%;
-    height: 100%;
-    padding-left: 0px;
-    background-size: 0px;
-    background-position: 5px 10px;
-}
-main, summary {
-    display: none;
-}
-
 fragment[rid=menu] {
     transition: none;
     position: absolute;
@@ -54,29 +40,31 @@ fragment[rid=menu][open] {
     width: 100%;
     max-width: 400px;
 }
-fieldset {
-    width: 80vw;
-    margin-left: 10vw;
+footer {
+    height: 40px;
+    display: flex;
+    justify-content: space-between;
+    z-index: 3;
 }
-fieldset span {
-    margin: 10px; 
-    display: inline-block;
+main, summary {
+    display: none;
 }
 
 iframe, textarea, input {
     border: none;
 }
-textarea {
-    height: 450px;
-    background: none;
-    padding: 10px;
+input, a {
+    cursor: pointer;
 }
 input {
     background-color: initial;
     background-repeat: no-repeat;
-    cursor: pointer;
 }
 [type=button], [type=submit] {
+    height: 100%;
+    padding-left: 0px;
+    background-size: 0px;
+    background-position: 5px 10px;
     border-radius: 30px;
 }
 
@@ -91,8 +79,7 @@ li {
 }
 
 @media screen and (max-width: 1000px) {
-    fieldset {
-        margin-left: 0px;
-        width: 100%;
+    fragment[rid=page] {
+        padding-left: 0px;
     }
 }
