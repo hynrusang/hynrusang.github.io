@@ -33,7 +33,6 @@ if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localS
 firebase.auth().onAuthStateChanged(async user => {
     if (user) {
         if (user.emailVerified) {
-            scan("!footer div input").forEach(obj => obj.onclick = e => current.value("tab", e.target.attributes.target.value));
             firebase.firestore().collection("user").doc(user.uid).onSnapshot(snapshot => {
                 const template = snapshot.data();
                 const target = {
@@ -180,6 +179,7 @@ firebase.auth().onAuthStateChanged(async user => {
                                         const href = e.target.href.includes("list=") ? `${e.target.href.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : e.target.href.replace("m.", "www.").replace("watch?v=", "embed/").split("&")[0];
                                         scan("main iframe").src = href;
                                         scan("main span").innerText = `${key}: ${value}`;
+                                        scan("[rid=menu]").removeAttribute("open");
                                     }
                                 }),
                                 $("input", {
@@ -296,6 +296,7 @@ firebase.auth().onAuthStateChanged(async user => {
                 .catch(e => console.log(e));
             menuFragment.main.launch();
             mainFragment.main.launch();
+            scan("!footer div input").forEach(obj => obj.onclick = e => current.value("tab", e.target.attributes.target.value));
         } else firebase.auth().signOut();
     }
 });
