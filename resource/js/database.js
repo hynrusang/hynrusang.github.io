@@ -48,8 +48,6 @@ const current = new LiveDataManager({
                 mainFragment[this.value].launch();
             }
             menuFragment[this.value].launch();
-            if (this.value == "main") scan("[rid=menu]").removeAttribute("open"); 
-            else scan("[rid=menu]").setAttribute("open", null);
         }
     })
 })
