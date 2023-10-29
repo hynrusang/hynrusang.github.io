@@ -34,7 +34,7 @@ firebase.auth().onAuthStateChanged(async user => {
     if (user) {
         if (user.emailVerified) {
             firebase.firestore().collection("user").doc(user.uid).onSnapshot(snapshot => {
-                const template = snapshot.data();
+                const template = snapshot.data() ? snapshot.data() : DB.toObject();
                 const target = {
                     link: subFragment.main.링크.fragment[0].reset(),
                     memo: subFragment.main.메모.fragment[0].reset(),
@@ -293,7 +293,7 @@ firebase.auth().onAuthStateChanged(async user => {
                         })
                     )
                 })
-                .catch(e => console.log(e));
+                .catch(e => null);
             menuFragment.main.launch();
             mainFragment.main.launch();
             scan("!footer div input").forEach(obj => obj.onclick = e => current.value("tab", e.target.attributes.target.value));

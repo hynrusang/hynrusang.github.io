@@ -122,17 +122,30 @@ const mainFragment = {
                     e.preventDefault();
                     await firebase.auth().signInWithEmailAndPassword(e.target[1].value, e.target[2].value).then(async data => {
                         if (!data.user.emailVerified) {
-                            alert("이메일 인증이 되지 않은 계정은 사용하실 수 없습니다.\n(인증용 메일을 다시 보내드릴 테니, 해당 메일에서 이메일 인증을 해주세요.)");
+                            makeToast("이메일 인증이 되지 않은 계정은 사용하실 수 없습니다.\n(인증용 메일을 다시 보내드릴 테니, 해당 메일에서 이메일 인증을 해주세요.)");
                             await data.user.sendEmailVerification()
-                                .then(() => alert("인증용 메일을 다시 보냈습니다."))
-                                .catch(e => { if (e.code == "auth/too-many-requests") alert("현재 요청이 너무 많아 요청을 보류중입니다. 잠시 후 다시 시도해주세요."); });
+                                .then(() => makeToast("인증용 메일을 다시 보냈습니다."))
+                                .catch(e => { if (e.code == "auth/too-many-requests") makeToast("현재 요청이 너무 많아 요청을 보류중입니다. 잠시 후 다시 시도해주세요."); });
                         }
-                    }).catch(e => {
-                        if (e.code == "auth/wrong-password") alert("비밀번호가 잘못되었습니다.");
-                        else if (e.code == "auth/invalid-email") alert("잘못된 이메일 주소입니다.");
-                        else if (e.code == "auth/user-not-found") alert("해당 계정은 존재하지 않습니다.");
-                        else if (e.code == "auth/internal-error") alert("이 사이트에서는 로그인 API를 호출하실 수 없습니다.");
-                        else console.log(e);
+                    }).catch(async err => {
+                        if (err.code == "auth/user-not-found") {
+                            makeToast("회원가입을 시도하는 중입니다.");
+                            await firebase.auth().createUserWithEmailAndPassword(e.target[1].value, e.target[2].value).then(async data => {
+                                makeToast("회원가입 인증을 위한 메일을 발송하는 중입니다.");
+                                await data.user.sendEmailVerification().then(() => {
+                                    alert("회원가입이 완료되었습니다.\n(회원가입 때 사용하셨던 이메일 주소에서, 이메일 인증을 해주세요.)");
+                                    firebase.auth().signOut();
+                                    location.reload();
+                                });
+                            }).catch(e => {
+                                if (e.code == "auth/weak-password") makeToast("비밀번호는 최소 6자리 이상이여야만 합니다.");
+                                else console.log(e);
+                            })
+                        }
+                        else if (err.code == "auth/wrong-password") alert("비밀번호가 잘못되었습니다.");
+                        else if (err.code == "auth/invalid-email") alert("잘못된 이메일 주소입니다.");
+                        else if (err.code == "auth/internal-error") alert("이 사이트에서는 로그인 API를 호출하실 수 없습니다.");
+                        else console.log(err);
                     });
                 }
             }).add(
@@ -185,12 +198,21 @@ const mainFragment = {
                         $("input", {
                             class: "login_button",
                             type: "submit",
-                            value: "login"
+                            value: "login / regist"
                         }),
                         $("input", {
                             class: "login_button",
                             type: "button",
-                            value: "password reset"
+                            value: "password reset",
+                            onclick: async () => {
+                                makeToast("이메일 주소로 비밀번호 초기화 메일을 보내기 시도하는 중입니다.");
+                                await firebase.auth().sendPasswordResetEmail(scan("form").children[0].children[1].value)
+                                    .then(() => makeToast("이메일 주소로 초기화 메일을 보냈습니다."))
+                                    .catch(e => {
+                                        if (e.code == "auth/invalid-email") makeToast("잘못된 이메일 주소입니다.");
+                                        else if (e.code == "auth/user-not-found") makeToast("해당 계정은 존재하지 않습니다.");
+                                })
+                            }
                         })
                     )
                 )
