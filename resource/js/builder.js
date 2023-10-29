@@ -193,7 +193,7 @@ firebase.auth().onAuthStateChanged(async user => {
                                             template.playlist[key][name] = template.playlist[key][value];
                                             delete template.playlist[key][value];
                                             DB.value("playlist", template.playlist);
-                                            notifyDataChange(data);
+                                            notifyDataChange();
                                         }
                                     }
                                 }),
