@@ -3,11 +3,7 @@ const settingDefaultFieldset = {
     version: "3.0",
     auto: {
         menuSwitch: true,
-        closeOnClick: true,
-        rememberTapInfo: {
-            activate: true,
-            destination: "main"
-        }
+        closeOnClick: true
     }
 }
 const setting = new LiveData({auto: settingDefaultFieldset.auto}, {
@@ -70,11 +66,6 @@ const current = new LiveDataManager({
             if (setting.value.auto.menuSwitch) {
                 if (["video", "secret"].includes(this.value)) scan("[rid=menu]").setAttribute("open", null); 
                 else scan("[rid=menu]").removeAttribute("open"); 
-            }
-            if (setting.value.auto.rememberTapInfo.activate) {
-                const temp = setting.value;
-                temp.auto.rememberTapInfo.destination = this.value;
-                setting.value = temp;
             }
         }
     })
