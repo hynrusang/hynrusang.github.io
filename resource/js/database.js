@@ -1,19 +1,4 @@
 let targetUID = "";
-const settingDefaultFieldset = {
-    version: "3.0",
-    auto: {
-        menuSwitch: true,
-        closeOnClick: true
-    }
-}
-const setting = new LiveData({auto: settingDefaultFieldset.auto}, {
-    type: Object,
-    observer: function () {
-        if (this.value) {
-            if (firebase.auth().currentUser) localStorage.setItem("setting", JSON.stringify(this.value));
-        }
-    }
-})
 const DB = new LiveDataManager({
     link: new LiveData([], {
         type: Array
@@ -63,10 +48,8 @@ const current = new LiveDataManager({
                 mainFragment[this.value].launch();
             }
             menuFragment[this.value].launch();
-            if (setting.value.auto.menuSwitch) {
-                if (["video", "secret"].includes(this.value)) scan("[rid=menu]").setAttribute("open", null); 
-                else scan("[rid=menu]").removeAttribute("open"); 
-            }
+            if (this.value == "main") scan("[rid=menu]").removeAttribute("open"); 
+            else scan("[rid=menu]").setAttribute("open", null);
         }
     })
 })
