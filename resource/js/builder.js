@@ -35,6 +35,12 @@ firebase.auth().onAuthStateChanged(async user => {
         if (user.emailVerified) {
             firebase.firestore().collection("user").doc(user.uid).onSnapshot(snapshot => {
                 const template = snapshot.data() ? snapshot.data() : DB.toObject();
+                const scrollInfo = {
+                    link: subFragment.main.링크.fragment[0].node.scrollTop,
+                    memo: subFragment.main.메모.fragment[0].node.scrollTop,
+                    info: subFragment.main.설정.fragment[0].node.scrollTop,
+                    video: menuFragment.video.fragment[1].node.scrollTop
+                }
                 const target = {
                     link: subFragment.main.링크.fragment[0].reset(),
                     memo: subFragment.main.메모.fragment[0].reset(),
@@ -277,8 +283,9 @@ firebase.auth().onAuthStateChanged(async user => {
                         }
                     })
                 )
+                Object.keys(target).forEach(key =>  target[key].node.scrollTop = scrollInfo[key])
                 for (let key of Object.keys(template)) DB.value(key, template[key]);
-            }),
+            });
             await firebase.firestore().collection("dat").doc("surface").get()
                 .then(async data => {
                     const temp = SDB.value;
