@@ -49,7 +49,7 @@ firebase.auth().onAuthStateChanged(async user => {
                     video: menuFragment.video.fragment[1].reset(),
                     chatroom: menuFragment.main.fragment[1].reset()
                 }
-                template.link.forEach((link, index) => target.link.add(
+                template.link.reverse().forEach((link, index) => target.link.add(
                     $("div", {
                         class: "chat",
                         idx: `a${index}`
@@ -94,7 +94,7 @@ firebase.auth().onAuthStateChanged(async user => {
                         )
                     ))
                 )
-                template.memo.forEach((memo, index) => target.memo.add(
+                template.memo.reverse().forEach((memo, index) => target.memo.add(
                     $("div", {
                         class: "chat",
                         idx: `a${index}`
@@ -133,6 +133,19 @@ firebase.auth().onAuthStateChanged(async user => {
                             })
                         )
                     ))
+                )
+                template.chatroom.reverse().forEach((chatroom, index) => target.chatroom.add(
+                    $("input", {
+                        style: "background-image: url(resource/img/icon/server.png)",
+                        class: "inputWidget",
+                        type: "button",
+                        target: chatroom.data[0],
+                        value: chatroom.data[1],
+                        onclick: e => {
+                            current.value("tab", "chatroom");
+                            current.value("chat", e.target.value);
+                        }
+                    }))
                 )
                 for (let key of Object.keys(template.playlist).sort()) {
                     const listcase = $("fieldset", {
@@ -285,15 +298,6 @@ firebase.auth().onAuthStateChanged(async user => {
                         }
                     })
                 )
-                for (let key of template.chatroom) {
-                    target.chatroom.add($("input", {
-                        style: "background-image: url(resource/img/icon/server.png)",
-                        class: "inputWidget",
-                        type: "button",
-                        target: key.data[0],
-                        value: key.data[1]
-                    }))
-                }
                 Object.keys(target).forEach(key =>  target[key].node.scrollTop = scrollInfo[key])
                 for (let key of Object.keys(template)) DB.value(key, template[key]);
             });

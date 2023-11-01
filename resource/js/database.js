@@ -38,19 +38,37 @@ const current = new LiveDataManager({
             subFragment.main[this.value].launch();
         }
     }),
+    chat: new LiveData("", {
+        type: String,
+        observer: function () {
+            if (this.unsubscribe) this.unsubscribe();
+            if (this.value) {
+                this.unsubscribe = firebase.firestore().collection("chat").doc(this.value).collection("enroll").onSnapshot(snapshot => {
+                    snapshot.forEach(data => {
+                        console.log(data.data())
+                    })
+                })
+            }
+        }
+    }),
     tab: new LiveData("main", {
         type: String,
         observer: function () {
-            scan("footer .current").classList.remove("current");
-            scan(`footer [target=${this.value}]`).classList.add("current");
-            if (this.value == "video") {
-                scan("main[player]").style.display = "block";
-                scan("fragment[rid=page]").style.display = "none";
-            } else {
-                scan("main[player]").style = scan("fragment[rid=page]").style = null;
+            if (this.value == "chatroom") {
                 mainFragment[this.value].launch();
+            } else {
+                scan("footer .current").classList.remove("current");
+                scan(`footer [target=${this.value}]`).classList.add("current");
+                if (this.value == "video") {
+                    scan("main[player]").style.display = "block";
+                    scan("fragment[rid=page]").style.display = "none";
+                } else {
+                    scan("main[player]").style = scan("fragment[rid=page]").style = null;
+                    mainFragment[this.value].launch();
+                }
+                menuFragment[this.value].launch();
+                current.value("chat", "")
             }
-            menuFragment[this.value].launch();
         }
     })
 })
