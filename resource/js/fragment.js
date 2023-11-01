@@ -2,7 +2,7 @@ const menuFragment = {
     main: new Fragment("menu",
         $("input", {
             class: "inputWidget",
-            style: "background-image: url(resource/img/icon/userinfo.png)",
+            style: "background-image: url(resource/img/icon/userinfo.png); text-align: left; width: calc(100% - 20px)",
             type: "button",
             value: "마이 페이지",
             onclick: () => current.value("tab", "main")
@@ -40,10 +40,10 @@ const subFragment = {
     main: {
         링크: new Fragment("main",
             $("fieldset", {
-                style: "height: calc(100vh - 240px); background: rgba(0,0,0,0.1); overflow-y: scroll"
+                style: "height: calc(100vh - 180px); background: rgba(0,0,0,0.1); overflow-y: scroll"
             }),
             $("form", {
-                style: "height: 160px; border: 1px solid black;",
+                style: "height: 100px; border: 1px solid black;",
                 onsubmit: async e => {
                     e.preventDefault();
                     const data = DB.value("link");
@@ -63,7 +63,7 @@ const subFragment = {
                     id: "add-link-href",
                     autocomplete: "off",
                     required: "",
-                    style: "width: 100%",
+                    style: "width: 100%; height: 40px",
                     placeholder: "링크의 주소 (https://...)"
                 }),
                 $("hr"),
@@ -74,19 +74,17 @@ const subFragment = {
                     placeholder: "링크의 설명"
                 }),
                 $("input", {
-                    style: "float: right; background-image: url(resource/img/icon/save.png)",
-                    class: "chatButton",
-                    type: "submit",
-                    value: ""
+                    style: "display: none",
+                    type: "submit"
                 })
             )
         ),
         메모: new Fragment("main",
             $("fieldset", {
-                style: "height: calc(100vh - 240px); background: rgba(0,0,0,0.1); overflow-y: scroll"
+                style: "height: calc(100vh - 220px); background: rgba(0,0,0,0.1); overflow-y: scroll"
             }),
             $("form", {
-                style: "height: 160px; border: 1px solid black;",
+                style: "height: 140px; border: 1px solid black;",
                 onsubmit: async e => {
                     e.preventDefault();
                     const data = DB.value("memo");
@@ -100,7 +98,7 @@ const subFragment = {
                     id: "add-memo",
                     required: "",
                     spellcheck: "false",
-                    style: "width: 100%; height: 125px",
+                    style: "width: 100%; height: 100px",
                     placeholder: "기억해야 할 것"
                 }),
                 $("input", {
@@ -120,32 +118,43 @@ const subFragment = {
     chatroom: {
         채팅: new Fragment("main",
             $("fieldset", {
-                style: "height: calc(100vh - 240px); background: rgba(0,0,0,0.1); overflow-y: scroll"
+                style: "height: calc(100vh - 130px); background: rgba(0,0,0,0.1); overflow-y: scroll"
             }),
             $("form", {
-                style: "height: 160px; border: 1px solid black;",
+                style: "height: 50px; border: 1px solid black;",
                 onsubmit: async e => {
                     e.preventDefault();
-                    const data = DB.value("link");
-                    data.push({
+                    const data = chatDB.value;
+                    data.chat.push({
                         data: [
-                            scan("#add-link-href").value,
-                            scan("#add-link-exp").value
+                            new Date().getTime(),
+                            scan("#add-chat").value
                         ]
                     })
-                    DB.value("link", data);
-                    scan("#add-link-href").value = "";
-                    scan("#add-link-exp").value = "";
-                    await notifyDataChange();
+                    scan("#add-chat").value = "";
+                    chatDB.value = data;
+                    notifyChatChange();
                 }
-            })
+            }).add(
+                $("input", {
+                    id: "add-chat",
+                    required: "",
+                    autocomplete: "off",
+                    style: "width: 100%; height: 40px",
+                    placeholder: "|"
+                }),
+                $("input", {
+                    style: "display: none",
+                    type: "submit"
+                })
+            )
         ),
         링크: new Fragment("main",
             $("fieldset", {
-                style: "height: calc(100vh - 240px); background: rgba(0,0,0,0.1); overflow-y: scroll"
+                style: "height: calc(100vh - 180px); background: rgba(0,0,0,0.1); overflow-y: scroll"
             }),
             $("form", {
-                style: "height: 160px; border: 1px solid black;",
+                style: "height: 100px; border: 1px solid black;",
                 onsubmit: async e => {
                     e.preventDefault();
                     const data = DB.value("link");
@@ -165,7 +174,7 @@ const subFragment = {
                     id: "add-link-href",
                     autocomplete: "off",
                     required: "",
-                    style: "width: 100%",
+                    style: "width: 100%; height: 40px",
                     placeholder: "링크의 주소 (https://...)"
                 }),
                 $("hr"),
@@ -176,19 +185,17 @@ const subFragment = {
                     placeholder: "링크의 설명"
                 }),
                 $("input", {
-                    style: "float: right; background-image: url(resource/img/icon/save.png)",
-                    class: "chatButton",
-                    type: "submit",
-                    value: ""
+                    style: "display: none",
+                    type: "submit"
                 })
             )
         ),
         메모: new Fragment("main",
             $("fieldset", {
-                style: "height: calc(100vh - 240px); background: rgba(0,0,0,0.1); overflow-y: scroll"
+                style: "height: calc(100vh - 220px); background: rgba(0,0,0,0.1); overflow-y: scroll"
             }),
             $("form", {
-                style: "height: 160px; border: 1px solid black;",
+                style: "height: 140px; border: 1px solid black;",
                 onsubmit: async e => {
                     e.preventDefault();
                     const data = DB.value("memo");
@@ -202,7 +209,7 @@ const subFragment = {
                     id: "add-memo",
                     required: "",
                     spellcheck: "false",
-                    style: "width: 100%; height: 125px",
+                    style: "width: 100%; height: 100px",
                     placeholder: "기억해야 할 것"
                 }),
                 $("input", {
@@ -379,21 +386,25 @@ const mainFragment = {
                 class: "current",
                 type: "button",
                 value: "채팅",
+                onclick: e => current.value("chat", e.target.value)
             }),
             $("input", {
                 style: "width: 30%; height: 100%; background-image: url(resource/img/icon/link.png)",
                 type: "button",
                 value: "링크",
+                onclick: e => current.value("chat", e.target.value)
             }),
             $("input", {
                 style: "width: 30%; height: 100%; background-image: url(resource/img/icon/memo.png)",
                 type: "button",
                 value: "메모",
+                onclick: e => current.value("chat", e.target.value)
             }),
             $("input", {
                 style: "width: 30%; height: 100%; background-image: url(resource/img/icon/setting.png)",
                 type: "button",
                 value: "설정",
+                onclick: e => current.value("chat", e.target.value)
             })
         )
     ),

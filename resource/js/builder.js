@@ -8,6 +8,7 @@ firebase.initializeApp({
     measurementId: "G-QL8R6QQHGF"
 });
 const notifyDataChange = async () => firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).set(DB.toObject());
+const notifyChatChange = async () => firebase.firestore().collection("chat").doc(current.value("chatroom")).collection("enroll").doc(firebase.auth().currentUser.email).set(chatDB.value);
 const makeToast = message => {
     scan("#toast").innerText = message;
     scan("#toast").animate([{
@@ -136,14 +137,14 @@ firebase.auth().onAuthStateChanged(async user => {
                 )
                 template.chatroom.reverse().forEach((chatroom, index) => target.chatroom.add(
                     $("input", {
-                        style: "background-image: url(resource/img/icon/server.png)",
+                        style: "background-image: url(resource/img/icon/server.png); text-align: left; width: calc(100% - 20px)",
                         class: "inputWidget",
                         type: "button",
                         target: chatroom.data[0],
                         value: chatroom.data[1],
                         onclick: e => {
                             current.value("tab", "chatroom");
-                            current.value("chat", e.target.value);
+                            current.value("chatroom", e.target.value);
                         }
                     }))
                 )
@@ -298,7 +299,7 @@ firebase.auth().onAuthStateChanged(async user => {
                         }
                     })
                 )
-                Object.keys(target).forEach(key =>  target[key].node.scrollTop = scrollInfo[key])
+                Object.keys(target).forEach(key => target[key].node.scrollTop = scrollInfo[key])
                 for (let key of Object.keys(template)) DB.value(key, template[key]);
             });
             await firebase.firestore().collection("dat").doc("surface").get()

@@ -21,11 +21,15 @@
     float: right;
     display: flex;
 }
+.menuButton {
+    text-align: left;
+    width: calc(100% - 20px)
+}
 .chatButton {
-    width: 25px;
-    height: 25px;
+    width: 32px;
+    height: 32px;
     background-position: center;
-    background-size: 20px;
+    background-size: 25px;
     margin-right: 8px;
 }
 .inputWidget {
