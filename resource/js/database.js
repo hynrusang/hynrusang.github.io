@@ -21,6 +21,9 @@ const DB = new LiveDataManager({
         key: ""
     }, {
         type: Object
+    }),
+    chatroom: new LiveData([], {
+        type: Array
     })
 }, false);
 const SDB = new LiveData({}, {

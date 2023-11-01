@@ -39,13 +39,15 @@ firebase.auth().onAuthStateChanged(async user => {
                     link: subFragment.main.링크.fragment[0].node.scrollTop,
                     memo: subFragment.main.메모.fragment[0].node.scrollTop,
                     info: subFragment.main.설정.fragment[0].node.scrollTop,
-                    video: menuFragment.video.fragment[1].node.scrollTop
+                    video: menuFragment.video.fragment[1].node.scrollTop,
+                    chatroom: menuFragment.main.fragment[1].node.scrollTop
                 }
                 const target = {
                     link: subFragment.main.링크.fragment[0].reset(),
                     memo: subFragment.main.메모.fragment[0].reset(),
                     info: subFragment.main.설정.fragment[0].reset(),
-                    video: menuFragment.video.fragment[1].reset()
+                    video: menuFragment.video.fragment[1].reset(),
+                    chatroom: menuFragment.main.fragment[1].reset()
                 }
                 template.link.forEach((link, index) => target.link.add(
                     $("div", {
@@ -283,6 +285,15 @@ firebase.auth().onAuthStateChanged(async user => {
                         }
                     })
                 )
+                for (let key of template.chatroom) {
+                    target.chatroom.add($("input", {
+                        style: "background-image: url(resource/img/icon/server.png)",
+                        class: "inputWidget",
+                        type: "button",
+                        target: key.data[0],
+                        value: key.data[1]
+                    }))
+                }
                 Object.keys(target).forEach(key =>  target[key].node.scrollTop = scrollInfo[key])
                 for (let key of Object.keys(template)) DB.value(key, template[key]);
             });

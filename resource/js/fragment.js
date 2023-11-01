@@ -1,5 +1,16 @@
 const menuFragment = {
-    main: new Fragment("menu"),
+    main: new Fragment("menu",
+        $("input", {
+            class: "inputWidget",
+            style: "background-image: url(resource/img/icon/userinfo.png)",
+            type: "button",
+            value: "마이 페이지",
+            onclick: () => mainFragment.main.launch()
+        }),
+        $("div", {
+            style: "width: 100%"
+        })
+    ),
     video: new Fragment("menu",
         $("form", {
             onsubmit: async e => {
@@ -103,8 +114,7 @@ const subFragment = {
         설정: new Fragment("main",
             $("fieldset", {
                 style: "height: calc(100vh - 80px); background: rgba(0,0,0,0.1);"
-            }).add(
-            )
+            })
         )
     }
 };
