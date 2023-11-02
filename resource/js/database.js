@@ -87,11 +87,12 @@ const current = new LiveDataManager({
                             template[key] = template[key].concat(data[key]).sort((a, b) => b.data[0] - a.data[0])
                         })
                     });
-                    template.chat.forEach(chat => {
+                    template.chat.forEach((chat, index) => {
                         if (chat.data[2] == chatDB.value.name) {
                             target.chat.add(
                                 $("div", {
                                     class: "chat",
+                                    idx: `a${index}`
                                 }).add(
                                     $("span", {
                                         text: chat.data[2]
@@ -104,6 +105,23 @@ const current = new LiveDataManager({
                                     $("div", {
                                         class: "chatGroup"
                                     }).add(
+                                        $("input", {
+                                            type: "button",
+                                            class: "chatButton",
+                                            style: "background-image: url(resource/img/icon/edit.png)",
+                                            onclick: async () => {
+                                                const temp = chatDB.value;
+                                                for (let data of temp.chat) {
+                                                    if (data.data[0] == chat.data[0]) {
+                                                        data.data[1] =scan(`[idx=a${index}] input`).value;
+                                                        break;
+                                                    }
+                                                }
+                                                chatDB.value = temp;
+                                                await notifyChatChange();
+                                                makeToast("해당 채팅의 내용이 변경되였습니다.");
+                                            }
+                                        }),
                                         $("input", {
                                             type: "button",
                                             class: "chatButton",

@@ -156,7 +156,19 @@ const subFragment = {
             $("form", {
                 style: "height: 100px; border: 1px solid black;",
                 onsubmit: async e => {
-
+                    e.preventDefault();
+                    const data = chatDB.value;
+                    data.link.push({
+                        data: [
+                            new Date().getTime(),
+                            scan("#add-link-href").value,
+                            scan("#add-link-exp").value
+                        ]
+                    })
+                    scan("#add-link-href").value = "";
+                    scan("#add-link-exp").value = "";
+                    chatDB.value = data;
+                    notifyChatChange();
                 }
             }).add(
                 $("input", {
@@ -186,7 +198,7 @@ const subFragment = {
             $("form", {
                 style: "height: 140px; border: 1px solid black;",
                 onsubmit: async e => {
-                    
+
                 }
             }).add(
                 $("textarea", {
