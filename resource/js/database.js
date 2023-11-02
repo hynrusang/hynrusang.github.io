@@ -1,5 +1,6 @@
 let targetUID = "";
 const chatDB = new LiveData({
+    name: "",
     chat: [],
     link: [],
     memo: []
@@ -76,21 +77,21 @@ const current = new LiveDataManager({
                     }
                     snapshot.forEach(doc => {
                         const data = doc.data();
-                        if (doc.id == firebase.auth().currentUser.email) {
+                        if (doc.id == firebase.auth().currentUser.uid) {
                             chatDB.value = {
+                                name: data.name,
                                 chat: JSON.parse(JSON.stringify(data.chat)),
                                 link: JSON.parse(JSON.stringify(data.link)),
                                 memo: JSON.parse(JSON.stringify(data.memo))
                             }
                         }
                         ["chat", "link", "memo"].forEach(key => {
-                            data[key].forEach(token => token.data.push(doc.id));
-                            template[key] = template[key].concat(data[key])
+                            data[key].forEach(token => token.data.push(data.name));
+                            template[key] = template[key].concat(data[key]).sort((a, b) => b.data[0] - a.data[0])
                         })
                     });
-                    ["chat", "link", "memo"].forEach(key => template[key] = template[key].sort((a, b) => b.data[0] - a.data[0]))
                     template.chat.forEach(chat => {
-                        if (chat.data[2] == firebase.auth().currentUser.email) {
+                        if (chat.data[2] == chatDB.value.name) {
                             target.chat.add(
                                 $("div", {
                                     class: "chat",
@@ -142,7 +143,8 @@ const current = new LiveDataManager({
                     Object.keys(target).forEach(key => target[key].node.scrollTop = scrollInfo[key]);
                 }, err => {
                     if (confirm("해당 채팅방은 관리자의 승인이 필요합니다.\n지금 해당 채팅방에 승인 요청을 보내시겠습니까?")) {
-                        firebase.firestore().collection("chat").doc(this.value).collection("enroll").doc(firebase.auth().currentUser.email).set({
+                        firebase.firestore().collection("chat").doc(this.value).collection("enroll").doc(firebase.auth().currentUser.uid).set({
+                            name: firebase.auth().currentUser.email,
                             chat: [],
                             link: [],
                             memo: []
@@ -151,6 +153,7 @@ const current = new LiveDataManager({
                     current.value("tab", "main");
                 })
             }
+            scan("[rid=menu]").removeAttribute("open");
         }
     }),
     tab: new LiveData("main", {
