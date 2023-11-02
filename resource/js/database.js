@@ -14,9 +14,6 @@ const DB = new LiveDataManager({
     memo: new LiveData([], {
         type: Array
     }),
-    name: new LiveData("anonymous", {
-        type: String
-    }),
     playlist: new LiveData({}, {
         type: Object,
     }),
