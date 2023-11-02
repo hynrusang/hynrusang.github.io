@@ -72,10 +72,11 @@ firebase.auth().onAuthStateChanged(async user => {
                                 type: "button",
                                 class: "chatButton",
                                 style: "background-image: url(resource/img/icon/edit.png)",
-                                onclick: () => {
+                                onclick: async () => {
                                     template.link[index].data[1] = scan(`[idx=a${index}] input`).value;
                                     DB.value("link", template.link);
-                                    notifyDataChange();
+                                    await notifyDataChange();
+                                    makeToast("해당 링크의 설명이 변경되었습니다.")
                                 }
                             }),
                             $("input", {
@@ -110,21 +111,22 @@ firebase.auth().onAuthStateChanged(async user => {
                                 type: "button",
                                 class: "chatButton",
                                 style: "background-image: url(resource/img/icon/edit.png)",
-                                onclick: () => {
+                                onclick: async () => {
                                     template.memo[index] = scan(`[idx=a${index}] textarea`).value;
                                     DB.value("memo", template.memo);
-                                    notifyDataChange();
+                                    await notifyDataChange();
+                                    makeToast("해당 기억할 것의 내용이 변경되었습니다.")
                                 }
                             }),
                             $("input", {
                                 type: "button",
                                 class: "chatButton",
                                 style: "background-image: url(resource/img/icon/del.png)",
-                                onclick: () => {
+                                onclick: async () => {
                                     if (confirm("정말로 해당 기억할 것을 삭제하시겠습니까?")) {
                                         template.memo.splice(index, 1);
                                         DB.value("memo", template.memo);
-                                        notifyDataChange();
+                                        await notifyDataChange();
                                     }
                                 }
                             })

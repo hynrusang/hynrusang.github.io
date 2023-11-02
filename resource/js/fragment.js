@@ -47,7 +47,7 @@ const subFragment = {
                 onsubmit: async e => {
                     e.preventDefault();
                     const data = DB.value("link");
-                    data.push({
+                    data.unshift({
                         data: [
                             scan("#add-link-href").value,
                             scan("#add-link-exp").value
@@ -88,7 +88,7 @@ const subFragment = {
                 onsubmit: async e => {
                     e.preventDefault();
                     const data = DB.value("memo");
-                    data.push(scan("#add-memo").value);
+                    data.unshift(scan("#add-memo").value);
                     DB.value("memo", data);
                     scan("#add-memo").value = "";
                     await notifyDataChange();
@@ -156,18 +156,7 @@ const subFragment = {
             $("form", {
                 style: "height: 100px; border: 1px solid black;",
                 onsubmit: async e => {
-                    e.preventDefault();
-                    const data = DB.value("link");
-                    data.push({
-                        data: [
-                            scan("#add-link-href").value,
-                            scan("#add-link-exp").value
-                        ]
-                    })
-                    DB.value("link", data);
-                    scan("#add-link-href").value = "";
-                    scan("#add-link-exp").value = "";
-                    await notifyDataChange();
+
                 }
             }).add(
                 $("input", {
@@ -197,12 +186,7 @@ const subFragment = {
             $("form", {
                 style: "height: 140px; border: 1px solid black;",
                 onsubmit: async e => {
-                    e.preventDefault();
-                    const data = DB.value("memo");
-                    data.push(scan("#add-memo").value);
-                    DB.value("memo", data);
-                    scan("#add-memo").value = "";
-                    await notifyDataChange();
+                    
                 }
             }).add(
                 $("textarea", {
