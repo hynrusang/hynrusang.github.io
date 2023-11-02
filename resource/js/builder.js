@@ -238,16 +238,10 @@ firebase.auth().onAuthStateChanged(async user => {
                     $("img", {
                         style: "width: 60px; height: 60px"
                     }),
-                    $("input", {
-                        style: "height: 60px; position: absolute; padding-left: 10px",
-                        spellcheck: "false",
-                        value: template.name
+                    $("span", {
+                        style: "display: inline-block; height: 40px; padding-left: 16px",
+                        html: `uid: <span style="color: red; font-weight: bold;">${firebase.auth().currentUser.uid}`
                     }),
-                    $("div").add(
-                        $("span", {
-                            html: `당신의 uid는 <span style="color: red; font-weight: bold;">${firebase.auth().currentUser.uid}</span>입니다.<br><span style="color: red">절대 가볍게 다른 사람들에게 알려주지 마세요.</span>`
-                        })
-                    ),
                     $("hr"),
                     $("input", { 
                         type: "button",
