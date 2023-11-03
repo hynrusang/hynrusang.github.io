@@ -58,7 +58,7 @@ firebase.auth().onAuthStateChanged(async user => {
                         $("a", {
                             href: link.data[0],
                             text: link.data[0],
-                            target: "_blank()"
+                            target: "_blank"
                         }),
                         $("hr"),
                         $("input", {
