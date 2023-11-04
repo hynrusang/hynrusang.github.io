@@ -53,8 +53,11 @@ main, summary {
 iframe, textarea, input {
     border: none;
 }
-input, a {
+textarea, input, a {
     cursor: pointer;
+}
+textarea {
+    background: none;
 }
 input {
     background-color: initial;
