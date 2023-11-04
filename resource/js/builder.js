@@ -13,13 +13,13 @@ const makeToast = message => {
     scan("#toast").innerText = message;
     scan("#toast").animate([{
         backgroundColor: "blue",
-        zIndex: 1,
+        zIndex: 2,
         opacity: 0
     }, {
         backgroundColor: "red",
         opacity: 1
     }, {
-        zIndex: 1,
+        zIndex: 2,
         backgroundColor: "blue",
         opacity: 0
     }], 1000)
@@ -100,7 +100,7 @@ firebase.auth().onAuthStateChanged(async user => {
                         idx: `a${index}`
                     }).add(
                         $("textarea", {
-                            style: "height: 100px",
+                            style: "position: relative; z-index: 1; height: 100px",
                             class: "detail",
                             spellcheck: "false",
                             value: memo

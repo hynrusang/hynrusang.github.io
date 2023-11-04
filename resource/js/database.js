@@ -248,7 +248,7 @@ const current = new LiveDataManager({
                                     }),
                                     $("hr"),
                                     $("textarea", {
-                                        style: "height: 100px",
+                                        style: "position: relative; z-index: 1; height: 100px",
                                         class: "detail",
                                         spellcheck: "false",
                                         value: memo.data[1]
@@ -261,6 +261,16 @@ const current = new LiveDataManager({
                                             class: "chatButton",
                                             style: "background-image: url(resource/img/icon/edit.png)",
                                             onclick: async () => {
+                                                const temp = chatDB.value;
+                                                for (let data of temp.memo) {
+                                                    if (data.data[0] == memo.data[0]) {
+                                                        data.data[1] = scan(`[idx=a${index}] textarea`).value;
+                                                        break;
+                                                    }
+                                                }
+                                                chatDB.value = temp;
+                                                await notifyChatChange();
+                                                makeToast("해당 기억할 것의 내용이 변경되였습니다.");
                                             }
                                         }),
                                         $("input", {
@@ -268,6 +278,12 @@ const current = new LiveDataManager({
                                             class: "chatButton",
                                             style: "background-image: url(resource/img/icon/del.png)",
                                             onclick: async () => {
+                                                if (confirm("정말로 기억할 것을 삭제하시겠습니까?")) {
+                                                    let temp = chatDB.value;
+                                                    temp.memo = temp.memo.filter(data => data.data[0] !== memo.data[0])
+                                                    chatDB.value = temp;
+                                                    notifyChatChange();
+                                                }
                                             }
                                         })
                                     )
