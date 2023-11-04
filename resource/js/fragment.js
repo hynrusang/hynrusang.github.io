@@ -5,7 +5,10 @@ const menuFragment = {
             style: "background-image: url(resource/img/icon/userinfo.png); text-align: left; width: calc(100% - 20px)",
             type: "button",
             value: "마이 페이지",
-            onclick: () => current.value("tab", "main")
+            onclick: () => {
+                scan("[rid=menu]").removeAttribute("open");
+                current.value("tab", "main")
+            }
         }),
         $("div", {
             style: "width: 100%"

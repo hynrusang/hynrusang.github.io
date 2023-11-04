@@ -91,7 +91,7 @@ const current = new LiveDataManager({
                         if (chat.data[2] == chatDB.value.name) {
                             target.chat.add(
                                 $("div", {
-                                    class: "chat",
+                                    class: "itemBox",
                                     idx: `a${index}`
                                 }).add(
                                     $("span", {
@@ -99,15 +99,15 @@ const current = new LiveDataManager({
                                     }),
                                     $("hr"),
                                     $("input", {
-                                        style: "width: 100%; height: 40px; font-size: 16px",
+                                        style: "height: 40px;",
+                                        class: "detail",
                                         value: chat.data[1],
                                     }),
                                     $("div", {
-                                        class: "chatGroup"
+                                        class: "handler"
                                     }).add(
                                         $("input", {
                                             type: "button",
-                                            class: "chatButton",
                                             style: "background-image: url(resource/img/icon/edit.png)",
                                             onclick: async () => {
                                                 const temp = chatDB.value;
@@ -124,7 +124,6 @@ const current = new LiveDataManager({
                                         }),
                                         $("input", {
                                             type: "button",
-                                            class: "chatButton",
                                             style: "background-image: url(resource/img/icon/del.png)",
                                             onclick: async e => {
                                                 if (confirm("정말로 해당 채팅을 삭제하시겠습니까?")) {
@@ -141,14 +140,14 @@ const current = new LiveDataManager({
                         } else {
                             target.chat.add(
                                 $("div", {
-                                    class: "chat",
+                                    class: "itemBox",
                                 }).add(
                                     $("span", {
                                         text: chat.data[2]
                                     }),
                                     $("hr"),
                                     $("span", {
-                                        style: "display: inline-block; height: 72px; font-size: 16px",
+                                        class: "detail",
                                         innerText: chat.data[1],
                                     })
                                 )
@@ -168,7 +167,6 @@ const current = new LiveDataManager({
                     current.value("tab", "main");
                 })
             }
-            scan("[rid=menu]").removeAttribute("open");
         }
     }),
     tab: new LiveData("main", {

@@ -144,6 +144,7 @@ firebase.auth().onAuthStateChanged(async user => {
                         onclick: e => {
                             current.value("tab", "chatroom");
                             current.value("chatroom", e.target.value);
+                            scan("[rid=menu]").removeAttribute("open");
                         }
                     }))
                 )
