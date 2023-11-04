@@ -13,12 +13,13 @@ const makeToast = message => {
     scan("#toast").innerText = message;
     scan("#toast").animate([{
         backgroundColor: "blue",
+        zIndex: 1,
         opacity: 0
     }, {
-        zIndex: 1,
         backgroundColor: "red",
         opacity: 1
     }, {
+        zIndex: 1,
         backgroundColor: "blue",
         opacity: 0
     }], 1000)
@@ -52,7 +53,7 @@ firebase.auth().onAuthStateChanged(async user => {
                 }
                 template.link.forEach((link, index) => target.link.add(
                     $("div", {
-                        class: "chat",
+                        class: "itemBox",
                         idx: `a${index}`
                     }).add(
                         $("a", {
@@ -62,15 +63,15 @@ firebase.auth().onAuthStateChanged(async user => {
                         }),
                         $("hr"),
                         $("input", {
-                            style: "width: 100%; height: 40px",
+                            style: "height: 40px",
+                            class: "detail",
                             value: link.data[1]
                         }),
                         $("div", {
-                            class: "chatGroup"
+                            class: "handler"
                         }).add(
                             $("input", {
                                 type: "button",
-                                class: "chatButton",
                                 style: "background-image: url(resource/img/icon/edit.png)",
                                 onclick: async () => {
                                     template.link[index].data[1] = scan(`[idx=a${index}] input`).value;
@@ -81,7 +82,6 @@ firebase.auth().onAuthStateChanged(async user => {
                             }),
                             $("input", {
                                 type: "button",
-                                class: "chatButton",
                                 style: "background-image: url(resource/img/icon/del.png)",
                                 onclick: () => {
                                     if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) {
@@ -96,16 +96,17 @@ firebase.auth().onAuthStateChanged(async user => {
                 )
                 template.memo.forEach((memo, index) => target.memo.add(
                     $("div", {
-                        class: "chat",
+                        class: "itemBox",
                         idx: `a${index}`
                     }).add(
                         $("textarea", {
-                            style: "width: 100%; height: 120px",
+                            style: "height: 120px",
+                            class: "detail",
                             spellcheck: "false",
                             value: memo
                         }),
                         $("div", {
-                            class: "chatGroup"
+                            class: "handler"
                         }).add(
                             $("input", {
                                 type: "button",

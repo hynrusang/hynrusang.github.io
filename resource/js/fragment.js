@@ -226,16 +226,16 @@ const subFragment = {
 const mainFragment = {
     login: new Fragment("page",
         $("div", {
-            style: "left: 0px; position: absolute; width: 100%; height: 100%;"
+            class: "loginField"
         }).add(
             $("h1", {
-                class: "login_title",
+                style: "font-size: 50px; margin-top: 10vh",
                 text: "Chatting Site"
             }),
             $("form", {
                 onsubmit: async e => {
                     e.preventDefault();
-                    await firebase.auth().signInWithEmailAndPassword(e.target[1].value, e.target[2].value).then(async data => {
+                    await firebase.auth().signInWithEmailAndPassword(e.target[0].value, e.target[1].value).then(async data => {
                         if (!data.user.emailVerified) {
                             makeToast("이메일 인증이 되지 않은 계정은 사용하실 수 없습니다.\n(인증용 메일을 다시 보내드릴 테니, 해당 메일에서 이메일 인증을 해주세요.)");
                             await data.user.sendEmailVerification()
@@ -245,7 +245,7 @@ const mainFragment = {
                     }).catch(async err => {
                         if (err.code == "auth/user-not-found") {
                             makeToast("회원가입을 시도하는 중입니다.");
-                            await firebase.auth().createUserWithEmailAndPassword(e.target[1].value, e.target[2].value).then(async data => {
+                            await firebase.auth().createUserWithEmailAndPassword(e.target[0].value, e.target[1].value).then(async data => {
                                 makeToast("회원가입 인증을 위한 메일을 발송하는 중입니다.");
                                 await data.user.sendEmailVerification().then(() => {
                                     alert("회원가입이 완료되었습니다.\n(회원가입 때 사용하셨던 이메일 주소에서, 이메일 인증을 해주세요.)");
@@ -264,77 +264,65 @@ const mainFragment = {
                     });
                 }
             }).add(
-                $("fieldset", {
-                    class: "login_field"
-                }).add(
-                    $("legend", {
-                        class: "login_legend",
-                        text: "login field"
-                    }),
-                    $("input", {
-                        class: "login_input",
-                        style: "background-image: url(resource/img/icon/email.png)",
-                        type: "text",
-                        placeholder: "email",
-                        oninput: e => {
-                            const preValue = e.target.preValue ??  "";
-                            if (preValue.includes("@") && preValue.indexOf("@") == preValue.length - 1) {
-                                switch (e.data) {
-                                    case "g":
-                                        e.target.value += "mail.com";
-                                        break;
-                                    case "n":
-                                        e.target.value += "aver.com";
-                                        break;
-                                    case "d":
-                                        e.target.value += "aum.net";
-                                        break;
-                                }
-                            }
-                            e.target.preValue = e.target.value
-                        }, 
-                        onkeypress: e => {
-                            if (e.key === "Enter") {
-                                e.preventDefault();
-                                scan("!.login_input")[1].focus();
+                $("input", {
+                    style: "background-image: url(resource/img/icon/email.png)",
+                    class: "inputWidget",
+                    type: "text",
+                    placeholder: "email",
+                    oninput: e => {
+                        const preValue = e.target.preValue ??  "";
+                        if (preValue.includes("@") && preValue.indexOf("@") == preValue.length - 1) {
+                            switch (e.data) {
+                                case "g":
+                                    e.target.value += "mail.com";
+                                    break;
+                                case "n":
+                                    e.target.value += "aver.com";
+                                    break;
+                                case "d":
+                                    e.target.value += "aum.net";
+                                    break;
                             }
                         }
+                        e.target.preValue = e.target.value
+                    }, 
+                    onkeypress: e => {
+                        if (e.key === "Enter") {
+                            e.preventDefault();
+                            scan("!.loginField input")[1].focus();
+                        }
+                    }
+                }),
+                $("input", {
+                    style: "background-image: url(resource/img/icon/password.png)",
+                    class: "inputWidget",
+                    type: "password",
+                    placeholder: "password"
+                }),
+                $("br"),
+                $("div").add(
+                    $("input", {
+                        type: "submit",
+                        value: "login / regist"
                     }),
                     $("input", {
-                        class: "login_input",
-                        style: "background-image: url(resource/img/icon/password.png)",
-                        type: "password",
-                        placeholder: "password"
-                    }),
-                    $("br"),
-                    $("div", {
-                        class: "login_button_box"
-                    }).add(
-                        $("input", {
-                            class: "login_button",
-                            type: "submit",
-                            value: "login / regist"
-                        }),
-                        $("input", {
-                            class: "login_button",
-                            type: "button",
-                            value: "password reset",
-                            onclick: async () => {
-                                makeToast("이메일 주소로 비밀번호 초기화 메일을 보내기 시도하는 중입니다.");
-                                await firebase.auth().sendPasswordResetEmail(scan("form").children[0].children[1].value)
-                                    .then(() => makeToast("이메일 주소로 초기화 메일을 보냈습니다."))
-                                    .catch(e => {
-                                        if (e.code == "auth/invalid-email") makeToast("잘못된 이메일 주소입니다.");
-                                        else if (e.code == "auth/user-not-found") makeToast("해당 계정은 존재하지 않습니다.");
-                                })
-                            }
-                        })
-                    )
+                        type: "button",
+                        value: "password reset",
+                        onclick: async () => {
+                            makeToast("이메일 주소로 비밀번호 초기화 메일을 보내기 시도하는 중입니다.");
+                            await firebase.auth().sendPasswordResetEmail(scan("form").children[0].children[1].value)
+                                .then(() => makeToast("이메일 주소로 초기화 메일을 보냈습니다."))
+                                .catch(e => {
+                                    if (e.code == "auth/invalid-email") makeToast("잘못된 이메일 주소입니다.");
+                                    else if (e.code == "auth/user-not-found") makeToast("해당 계정은 존재하지 않습니다.");
+                            })
+                        }
+                    })
                 )
             )
         )
     ).registAction(() => {
-        scan(".login_input").focus();
+        scan(".loginField input").focus();
     }).launch(),
     main: new Fragment("page",
         $("fragment", {
