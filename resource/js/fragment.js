@@ -252,7 +252,6 @@ const mainFragment = {
             class: "loginField"
         }).add(
             $("h1", {
-                style: "font-size: 50px; margin-top: 10vh",
                 text: "Chatting Site"
             }),
             $("form", {
