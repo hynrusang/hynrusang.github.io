@@ -135,7 +135,7 @@ const subFragment = {
                     const data = chatDB.value;
                     data.chat.push({
                         data: [
-                            new Date().getTime(),
+                            new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000,
                             scan("#add-chat").value
                         ]
                     })
@@ -169,7 +169,7 @@ const subFragment = {
                     const data = chatDB.value;
                     data.link.push({
                         data: [
-                            new Date().getTime(),
+                            new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000,
                             scan("#add-link-href").value,
                             scan("#add-link-exp").value
                         ]
@@ -211,7 +211,7 @@ const subFragment = {
                     const data = chatDB.value;
                     data.memo.push({
                         data: [
-                            new Date().getTime(),
+                            new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000,
                             scan("#add-memo").value
                         ]
                     })
