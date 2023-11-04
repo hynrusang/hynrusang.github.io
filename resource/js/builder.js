@@ -42,14 +42,14 @@ firebase.auth().onAuthStateChanged(async user => {
                     memo: subFragment.main.메모.fragment[0].node.scrollTop,
                     info: subFragment.main.설정.fragment[0].node.scrollTop,
                     video: menuFragment.video.fragment[1].node.scrollTop,
-                    chatroom: menuFragment.main.fragment[1].node.scrollTop
+                    chatroom: menuFragment.main.fragment[0].children(1).node.scrollTop
                 }
                 const target = {
                     link: subFragment.main.링크.fragment[0].reset(),
                     memo: subFragment.main.메모.fragment[0].reset(),
                     info: subFragment.main.설정.fragment[0].reset(),
                     video: menuFragment.video.fragment[1].reset(),
-                    chatroom: menuFragment.main.fragment[1].reset()
+                    chatroom: menuFragment.main.fragment[0].children(1).reset()
                 }
                 template.link.forEach((link, index) => target.link.add(
                     $("div", {
@@ -136,7 +136,7 @@ firebase.auth().onAuthStateChanged(async user => {
                 )
                 template.chatroom.forEach((chatroom, index) => target.chatroom.add(
                     $("input", {
-                        style: "background-image: url(resource/img/icon/server.png); text-align: left; width: calc(100% - 20px)",
+                        style: "background-image: url(resource/img/icon/server.png);",
                         class: "inputWidget",
                         type: "button",
                         target: chatroom.data[0],

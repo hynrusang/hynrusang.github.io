@@ -1,18 +1,34 @@
 const menuFragment = {
     main: new Fragment("menu",
-        $("input", {
-            class: "inputWidget",
-            style: "background-image: url(resource/img/icon/userinfo.png); text-align: left; width: calc(100% - 20px)",
-            type: "button",
-            value: "마이 페이지",
-            onclick: () => {
-                scan("[rid=menu]").removeAttribute("open");
-                current.value("tab", "main")
-            }
-        }),
         $("div", {
-            style: "width: 100%"
-        })
+            class: "chatBox"
+        }).add(
+            $("input", {
+                style: "background-image: url(resource/img/icon/userinfo.png);",
+                class: "inputWidget",
+                type: "button",
+                value: "마이 페이지",
+                onclick: () => {
+                    scan("[rid=menu]").removeAttribute("open");
+                    current.value("tab", "main")
+                }
+            }),
+            $("div", {
+                style: "height: calc(100% - 180px);"
+            }),
+            $("div").add(
+                $("input", {
+                    class: "inputWidget",
+                    type: "button",
+                    value: "채팅방 새로 만들기"
+                }),
+                $("input", {
+                    class: "inputWidget",
+                    type: "button",
+                    value: "채팅방 추가하기"
+                })
+            )
+        )
     ),
     video: new Fragment("menu",
         $("form", {
