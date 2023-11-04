@@ -1,4 +1,4 @@
-*:not(li) {
+*:not(textarea) {
     box-sizing: border-box;
     overflow-x: hidden;
     transition: 0.3s all;
@@ -17,7 +17,7 @@ html, body {
     flex-direction: column;
     overscroll-behavior: contain;
 }
-fragment, footer, textarea {
+fragment, footer {
     width: 100%;
 }
 fragment:not([rid=main]), main {

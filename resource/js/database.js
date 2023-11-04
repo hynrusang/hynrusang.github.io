@@ -99,7 +99,7 @@ const current = new LiveDataManager({
                                     }),
                                     $("hr"),
                                     $("input", {
-                                        style: "height: 40px;",
+                                        style: "height: 30px;",
                                         class: "detail",
                                         value: chat.data[1],
                                     }),
@@ -113,7 +113,7 @@ const current = new LiveDataManager({
                                                 const temp = chatDB.value;
                                                 for (let data of temp.chat) {
                                                     if (data.data[0] == chat.data[0]) {
-                                                        data.data[1] =scan(`[idx=a${index}] input`).value;
+                                                        data.data[1] =scan(`[idx=a${index}] textarea`).value;
                                                         break;
                                                     }
                                                 }
@@ -147,8 +147,147 @@ const current = new LiveDataManager({
                                     }),
                                     $("hr"),
                                     $("span", {
+                                        style: "height: 30px;",
                                         class: "detail",
                                         innerText: chat.data[1],
+                                    })
+                                )
+                            )
+                        }
+                    })
+                    template.link.forEach((link, index) => {
+                        if (link.data[3] == chatDB.value.name) {
+                            target.link.add(
+                                $("div", {
+                                    class: "itemBox",
+                                    idx: `a${index}`
+                                }).add(
+                                    $("span", {
+                                        text: link.data[3]
+                                    }),
+                                    $("hr"),
+                                    $("a", {
+                                        href: link.data[1],
+                                        text: link.data[1],
+                                        target: "_blank"
+                                    }),
+                                    $("hr"),
+                                    $("input", {
+                                        style: "height: 30px",
+                                        class: "detail",
+                                        value: link.data[2]
+                                    }),
+                                    $("div", {
+                                        class: "handler"
+                                    }).add(
+                                        $("input", {
+                                            type: "button",
+                                            style: "background-image: url(resource/img/icon/edit.png)",
+                                            onclick: async () => {
+                                                const temp = chatDB.value;
+                                                for (let data of temp.link) {
+                                                    if (data.data[0] == link.data[0]) {
+                                                        data.data[2] = scan(`[idx=a${index}] input`).value;
+                                                        break;
+                                                    }
+                                                }
+                                                chatDB.value = temp;
+                                                await notifyChatChange();
+                                                makeToast("해당 링크의 설명이 변경되였습니다.");
+                                            }
+                                        }),
+                                        $("input", {
+                                            type: "button",
+                                            style: "background-image: url(resource/img/icon/del.png)",
+                                            onclick: async e => {
+                                                if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) {
+                                                    let temp = chatDB.value;
+                                                    temp.link = temp.link.filter(data => data.data[0] !== link.data[0])
+                                                    chatDB.value = temp;
+                                                    notifyChatChange();
+                                                }
+                                            }
+                                        })
+                                    )
+                                )
+                            )
+                        } else {
+                            target.link.add(
+                                $("div", {
+                                    class: "itemBox",
+                                    idx: `a${index}`
+                                }).add(
+                                    $("span", {
+                                        text: link.data[3]
+                                    }),
+                                    $("hr"),
+                                    $("a", {
+                                        href: link.data[1],
+                                        text: link.data[1],
+                                        target: "_blank"
+                                    }),
+                                    $("hr"),
+                                    $("span", {
+                                        style: "height: 30px;",
+                                        class: "detail",
+                                        text: link.data[2]
+                                    })
+                                )
+                            )
+                        }
+                    })
+                    template.memo.forEach((memo, index) => {
+                        if (memo.data[2] == chatDB.value.name) {
+                            target.memo.add(
+                                $("div", {
+                                    class: "itemBox",
+                                    idx: `a${index}`
+                                }).add(
+                                    $("span", {
+                                        text: memo.data[2]
+                                    }),
+                                    $("hr"),
+                                    $("textarea", {
+                                        style: "height: 100px",
+                                        class: "detail",
+                                        spellcheck: "false",
+                                        value: memo.data[1]
+                                    }),
+                                    $("div", {
+                                        class: "handler"
+                                    }).add(
+                                        $("input", {
+                                            type: "button",
+                                            class: "chatButton",
+                                            style: "background-image: url(resource/img/icon/edit.png)",
+                                            onclick: async () => {
+                                            }
+                                        }),
+                                        $("input", {
+                                            type: "button",
+                                            class: "chatButton",
+                                            style: "background-image: url(resource/img/icon/del.png)",
+                                            onclick: async () => {
+                                            }
+                                        })
+                                    )
+                                )
+                            )
+                        } else {
+                            target.memo.add(
+                                $("div", {
+                                    class: "itemBox",
+                                    idx: `a${index}`
+                                }).add(
+                                    $("span", {
+                                        text: memo.data[2]
+                                    }),
+                                    $("hr"),
+                                    $("textarea", {
+                                        style: "height: 100px",
+                                        class: "detail",
+                                        spellcheck: "false",
+                                        value: memo.data[1]
                                     })
                                 )
                             )

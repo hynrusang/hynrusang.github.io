@@ -67,25 +67,37 @@
     width: 120px;
 }
 
-.itemBox {
+.itemBox, .inputBox {
     position: relative;
+}
+.itemBox {
     background: aliceblue;
     border-radius: 20px;
     padding: 20px;
     margin-bottom: 16px;
     word-break: break-all;
 }
-.itemBox .detail {
-    width: calc(100% - 70px);
-    font-size: 16px;
+.inputBox {
+    height: 80px;
+    border: 1px solid black;
 }
-.itemBox .handler {
+
+span.detail {
+    padding-top: 5px;
+}
+.detail {
+    display: inline-block;
+    width: calc(100% - 70px);
+    font-size: 14px;
+    line-height: 20px;
+}
+.handler {
     display: flex;
     position: absolute;
     bottom: 10px;
     right: 10px;
 }
-.itemBox .handler * {
+.handler * {
     width: 40px;
     height: 40px;
     background-position: center center;

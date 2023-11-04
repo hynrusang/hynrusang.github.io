@@ -63,7 +63,7 @@ firebase.auth().onAuthStateChanged(async user => {
                         }),
                         $("hr"),
                         $("input", {
-                            style: "height: 40px",
+                            style: "height: 30px",
                             class: "detail",
                             value: link.data[1]
                         }),
@@ -100,7 +100,7 @@ firebase.auth().onAuthStateChanged(async user => {
                         idx: `a${index}`
                     }).add(
                         $("textarea", {
-                            style: "height: 120px",
+                            style: "height: 100px",
                             class: "detail",
                             spellcheck: "false",
                             value: memo
