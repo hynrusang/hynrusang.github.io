@@ -144,6 +144,7 @@ const current = new LiveDataManager({
                                         $("span", {
                                             exp: `${data.author}->{${data.author}}`
                                         }),
+                                        $("br"),
                                         $("a", {
                                             href: data.link,
                                             text: data.link,
