@@ -31,10 +31,6 @@
     box-shadow: rgba(0,0,0,0.5) 10px 6px;
 }
 
-.chatHandler {
-    
-}
-
 .loginField {
     left: 0px;
     position: absolute;
@@ -73,14 +69,28 @@
     width: 120px;
 }
 
+.userProfile {
+    display: flex;
+}
+.userProfile > img {
+    width: 40px;
+    height: 40px;
+}
+.userProfile > span {
+    display: inline-block;
+    height: 40px;
+    padding-top: 8px;
+    padding-left: 10px;
+}
+
 .itemBox, .inputBox {
     position: relative;
 }
 .itemBox {
     background: aliceblue;
-    border-radius: 20px;
-    padding: 20px;
-    margin-bottom: 16px;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
     word-break: break-all;
 }
 .inputBox {

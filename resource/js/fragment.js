@@ -117,7 +117,7 @@ const subFragment = {
                     class: "detail",
                     required: "",
                     spellcheck: "false",
-                    style: "height: 70px",
+                    style: "height: 72px",
                     placeholder: "기억해야 할 것"
                 }),
                 $("div", {
@@ -222,7 +222,7 @@ const subFragment = {
                     class: "detail",
                     required: "",
                     spellcheck: "false",
-                    style: "height: 70px",
+                    style: "height: 72px",
                     placeholder: "기억해야 할 것"
                 }),
                 $("div", {

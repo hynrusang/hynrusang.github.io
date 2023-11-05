@@ -261,13 +261,14 @@ firebase.auth().onAuthStateChanged(async user => {
                     target.video.add(listcase)
                 }
                 target.info.add(
-                    $("img", {
-                        style: "width: 40px; height: 40px"
-                    }),
-                    $("span", {
-                        style: "display: inline-block; height: 40px; padding-top: 9px; padding-left: 16px",
-                        html: `uid: <span style="color: red; font-weight: bold;">${firebase.auth().currentUser.uid}`
-                    }),
+                    $("div", {
+                        class: "userProfile"
+                    }).add(
+                        $("img"),
+                        $("span", {
+                            html: `uid: <span style="color: red; font-weight: bold;">${firebase.auth().currentUser.uid}`
+                        })
+                    ),
                     $("hr"),
                     $("input", { 
                         type: "button",

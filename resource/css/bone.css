@@ -1,8 +1,10 @@
-*:not(textarea) {
+* {
     box-sizing: border-box;
     overflow-x: hidden;
-    transition: 0.3s all;
     text-decoration: none;
+}
+*:not(textarea) {
+    transition: 0.3s all;
 }
 *::-webkit-scrollbar {
     width: 8px;

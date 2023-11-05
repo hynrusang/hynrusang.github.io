@@ -80,9 +80,14 @@ const current = new LiveDataManager({
                                         class: "itemBox",
                                         iden: `i${chatdata.id}`
                                     }).add(
-                                        $("span", {
-                                            exp: `${data.author}->{${data.author}}`
-                                        }),
+                                        $("div", {
+                                            class: "userProfile"
+                                        }).add(
+                                            $("img"),
+                                            $("span", {
+                                                exp: `${data.author}->{${data.author}}`
+                                            })
+                                        ),
                                         $("input", {
                                             style: "height: 30px;",
                                             class: "detail",
@@ -116,9 +121,14 @@ const current = new LiveDataManager({
                                     $("div", {
                                         class: "itemBox",
                                     }).add(
-                                        $("span", {
-                                            exp: `${data.author}->{${data.author}}`
-                                        }),
+                                        $("div", {
+                                            class: "userProfile"
+                                        }).add(
+                                            $("img"),
+                                            $("span", {
+                                                exp: `${data.author}->{${data.author}}`
+                                            })
+                                        ),
                                         $("span", {
                                             style: "height: 30px;",
                                             class: "detail",
@@ -141,10 +151,14 @@ const current = new LiveDataManager({
                                         class: "itemBox",
                                         iden: `i${chatdata.id}`
                                     }).add(
-                                        $("span", {
-                                            exp: `${data.author}->{${data.author}}`
-                                        }),
-                                        $("br"),
+                                        $("div", {
+                                            class: "userProfile"
+                                        }).add(
+                                            $("img"),
+                                            $("span", {
+                                                exp: `${data.author}->{${data.author}}`
+                                            })
+                                        ),
                                         $("a", {
                                             href: data.link,
                                             text: data.link,
@@ -186,9 +200,14 @@ const current = new LiveDataManager({
                                         class: "itemBox",
                                         iden: chatdata.id
                                     }).add(
-                                        $("span", {
-                                            exp: `${data.author}->{${data.author}}`
-                                        }),
+                                        $("div", {
+                                            class: "userProfile"
+                                        }).add(
+                                            $("img"),
+                                            $("span", {
+                                                exp: `${data.author}->{${data.author}}`
+                                            })
+                                        ),
                                         $("a", {
                                             href: data.link,
                                             text: data.link,
@@ -217,9 +236,14 @@ const current = new LiveDataManager({
                                         class: "itemBox",
                                         iden: `i${chatdata.id}`
                                     }).add(
-                                        $("span", {
-                                            exp: `${data.author}->{${data.author}}`
-                                        }),
+                                        $("div", {
+                                            class: "userProfile"
+                                        }).add(
+                                            $("img"),
+                                            $("span", {
+                                                exp: `${data.author}->{${data.author}}`
+                                            })
+                                        ),
                                         $("textarea", {
                                             style: "height: 100px",
                                             class: "detail",
@@ -255,9 +279,14 @@ const current = new LiveDataManager({
                                         class: "itemBox",
                                         iden: chatdata.id
                                     }).add(
-                                        $("span", {
-                                            exp: `${data.author}->{${data.author}}`
-                                        }),
+                                        $("div", {
+                                            class: "userProfile"
+                                        }).add(
+                                            $("img"),
+                                            $("span", {
+                                                exp: `${data.author}->{${data.author}}`
+                                            })
+                                        ),
                                         $("textarea", {
                                             style: "height: 100px",
                                             class: "detail",
