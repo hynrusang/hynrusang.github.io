@@ -17,13 +17,13 @@ const makeToast = message => {
     scan("#toast").innerText = message;
     scan("#toast").animate([{
         backgroundColor: "blue",
-        zIndex: 2,
+        zIndex: 3,
         opacity: 0
     }, {
         backgroundColor: "red",
         opacity: 1
     }, {
-        zIndex: 2,
+        zIndex: 3,
         backgroundColor: "blue",
         opacity: 0
     }], 1000)
