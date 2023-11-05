@@ -83,7 +83,6 @@ const current = new LiveDataManager({
                                         $("span", {
                                             exp: `${data.author}->{${data.author}}`
                                         }),
-                                        $("hr"),
                                         $("input", {
                                             style: "height: 30px;",
                                             class: "detail",
@@ -120,7 +119,6 @@ const current = new LiveDataManager({
                                         $("span", {
                                             exp: `${data.author}->{${data.author}}`
                                         }),
-                                        $("hr"),
                                         $("span", {
                                             style: "height: 30px;",
                                             class: "detail",
