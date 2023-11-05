@@ -1,4 +1,3 @@
-console.log(new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000)
 const menuFragment = {
     main: new Fragment("menu",
         $("input", {
