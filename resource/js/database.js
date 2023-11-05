@@ -118,7 +118,7 @@ const current = new LiveDataManager({
                                         class: "itemBox",
                                     }).add(
                                         $("span", {
-                                            text: `${data.author}->{${data.author}}`
+                                            exp: `${data.author}->{${data.author}}`
                                         }),
                                         $("hr"),
                                         $("span", {
