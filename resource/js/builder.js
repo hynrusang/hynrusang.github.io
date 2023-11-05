@@ -143,7 +143,7 @@ firebase.auth().onAuthStateChanged(async user => {
                         style: "position: relative"
                     }).add(
                         $("input", {
-                            style: "background-image: url(resource/img/icon/server.png); width: calc(100% - 20px)",
+                            style: "background-image: url(resource/img/icon/server.png); width: calc(100% - 100px)",
                             class: "inputWidget",
                             type: "button",
                             target: chatroom.data[0],
@@ -153,7 +153,7 @@ firebase.auth().onAuthStateChanged(async user => {
                                 current.value("chatroom", e.target.value);
                                 scan("[rid=menu]").removeAttribute("open");
                             }
-                        })),
+                        }),
                         $("div", {
                             class: "handler"
                         }).add(
@@ -161,32 +161,16 @@ firebase.auth().onAuthStateChanged(async user => {
                                 type: "button",
                                 style: "background-image: url(resource/img/icon/edit.png)",
                                 onclick: async () => {
-                                    const temp = chatDB.value;
-                                    for (let data of temp.link) {
-                                        if (data.data[0] == link.data[0]) {
-                                            data.data[2] = scan(`[idx=a${index}] input`).value;
-                                            break;
-                                        }
-                                    }
-                                    chatDB.value = temp;
-                                    await notifyChatChange();
-                                    makeToast("해당 링크의 설명이 변경되였습니다.");
                                 }
                             }),
                             $("input", {
                                 type: "button",
                                 style: "background-image: url(resource/img/icon/del.png)",
                                 onclick: async e => {
-                                    if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) {
-                                        let temp = chatDB.value;
-                                        temp.link = temp.link.filter(data => data.data[0] !== link.data[0])
-                                        chatDB.value = temp;
-                                        notifyChatChange();
-                                    }
                                 }
                             })
                         )
-                    )
+                    ))
                 )
                 for (let key of Object.keys(template.playlist).sort()) {
                     const listcase = $("fieldset", {
