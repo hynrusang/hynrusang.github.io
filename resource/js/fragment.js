@@ -1,33 +1,32 @@
+console.log(new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000)
 const menuFragment = {
     main: new Fragment("menu",
+        $("input", {
+            style: "background-image: url(resource/img/icon/userinfo.png); width: calc(100% - 20px)",
+            class: "inputWidget",
+            type: "button",
+            value: "마이 페이지",
+            onclick: () => {
+                scan("[rid=menu]").removeAttribute("open");
+                current.value("tab", "main")
+            }
+        }),
         $("div", {
-            class: "chatBox"
+            style: "height: calc(100% - 180px);"
+        }),
+        $("div", {
+            style: "display: flex; flex-direction: column;"
         }).add(
             $("input", {
-                style: "background-image: url(resource/img/icon/userinfo.png);",
                 class: "inputWidget",
                 type: "button",
-                value: "마이 페이지",
-                onclick: () => {
-                    scan("[rid=menu]").removeAttribute("open");
-                    current.value("tab", "main")
-                }
+                value: "채팅방 새로 만들기"
             }),
-            $("div", {
-                style: "height: calc(100% - 180px);"
-            }),
-            $("div").add(
-                $("input", {
-                    class: "inputWidget",
-                    type: "button",
-                    value: "채팅방 새로 만들기"
-                }),
-                $("input", {
-                    class: "inputWidget",
-                    type: "button",
-                    value: "채팅방 추가하기"
-                })
-            )
+            $("input", {
+                class: "inputWidget",
+                type: "button",
+                value: "채팅방 추가하기"
+            })
         )
     ),
     video: new Fragment("menu",
@@ -148,16 +147,10 @@ const subFragment = {
                 class: "inputBox",
                 onsubmit: async e => {
                     e.preventDefault();
-                    const data = chatDB.value;
-                    data.chat.push({
-                        data: [
-                            new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000,
-                            scan("#add-chat").value
-                        ]
-                    })
+                    pushChatData("chat", {
+                        text: scan("#add-chat").value
+                    });
                     scan("#add-chat").value = "";
-                    chatDB.value = data;
-                    notifyChatChange();
                 }
             }).add(
                 $("input", {

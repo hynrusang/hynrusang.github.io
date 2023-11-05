@@ -54,9 +54,80 @@ const current = new LiveDataManager({
     chatroom: new LiveData("", {
         type: String,
         observer: function () {
-            if (this.unsubscribe) this.unsubscribe();
+            if (this.unsubscribe) {
+                for (unsubscribeListener of this.unsubscribe) unsubscribeListener();
+            };
             if (this.value) {
-                this.unsubscribe = firebase.firestore().collection("chat").doc(this.value).collection("enroll").onSnapshot(snapshot => {
+                this.unsubscribe = [
+                    firebase.firestore().collection("chat").doc(this.value).collection("enroll").onSnapshot(snapshot => {
+                        snapshot.forEach(username => Binder.define(username.id, username.data().name))
+                    }),
+                    firebase.firestore().collection("chat").doc(this.value).collection("chat").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+                        const scrollInfo = subFragment.chatroom.채팅.fragment[0].node.scrollTop;
+                        const target = subFragment.chatroom.채팅.fragment[0].reset();
+                        snapshot.forEach((chatdata) => {
+                            const data = chatdata.data();
+                            if (data.author == firebase.auth().currentUser.uid) {
+                                target.add(
+                                    $("div", {
+                                        class: "itemBox",
+                                        iden: chatdata.id
+                                    }).add(
+                                        $("span", {
+                                            exp: `${data.author}->{${data.author}}`
+                                        }),
+                                        $("hr"),
+                                        $("input", {
+                                            style: "height: 30px;",
+                                            class: "detail",
+                                            value: data.text,
+                                        }),
+                                        $("div", {
+                                            class: "handler"
+                                        }).add(
+                                            $("input", {
+                                                type: "button",
+                                                style: "background-image: url(resource/img/icon/edit.png)",
+                                                onclick: async () => {
+                                                    const temp = data;
+                                                    data.text = scan(`[iden=${chatdata.id}] input`).value;
+                                                    chatdata.ref.set(temp);
+                                                    makeToast("해당 채팅의 내용이 변경되였습니다.");
+                                                }
+                                            }),
+                                            $("input", {
+                                                type: "button",
+                                                style: "background-image: url(resource/img/icon/del.png)",
+                                                onclick: async e => {
+                                                    if (confirm("정말로 해당 채팅을 삭제하시겠습니까?")) chatdata.ref.delete();
+                                                }
+                                            })
+                                        )
+                                    )
+                                )
+                            } else {
+                                target.add(
+                                    $("div", {
+                                        class: "itemBox",
+                                    }).add(
+                                        $("span", {
+                                            text: data.author
+                                        }),
+                                        $("hr"),
+                                        $("span", {
+                                            style: "height: 30px;",
+                                            class: "detail",
+                                            innerText: data.text,
+                                        })
+                                    )
+                                )
+                            }
+                        })
+                        target.node.scrollTop = scrollInfo;
+                    })
+                ]
+                /*
+                firebase.firestore().collection("chat").doc(this.value).collection("enroll").onSnapshot(snapshot => {
                     const template = {
                         chat: [],
                         link: [],
@@ -321,7 +392,8 @@ const current = new LiveDataManager({
                     }
                     current.value("tab", "main");
                 })
-            }
+                */
+            }       
         }
     }),
     tab: new LiveData("main", {
