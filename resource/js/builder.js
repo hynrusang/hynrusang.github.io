@@ -150,7 +150,7 @@ firebase.auth().onAuthStateChanged(async user => {
                             value: chatroom.data[1],
                             onclick: e => {
                                 current.value("tab", "chatroom");
-                                current.value("chatroom", e.target.value);
+                                current.value("chatroom", e.target.attributes.target.value);
                                 scan("[rid=menu]").removeAttribute("open");
                             }
                         }),
@@ -161,6 +161,13 @@ firebase.auth().onAuthStateChanged(async user => {
                                 type: "button",
                                 style: "background-image: url(resource/img/icon/edit.png)",
                                 onclick: async () => {
+                                    const newName = prompt("해당 채팅방의 이름으로 설정할 새로운 이름을 입력해주세요.");
+                                    if (newName) {
+                                        const temp = DB.value("chatroom");
+                                        temp[index].data[1] = newName;
+                                        DB.value("chatroom", temp);
+                                        notifyDataChange();
+                                    }
                                 }
                             }),
                             $("input", {
