@@ -175,18 +175,12 @@ const subFragment = {
                 class: "inputBox",
                 onsubmit: async e => {
                     e.preventDefault();
-                    const data = chatDB.value;
-                    data.link.push({
-                        data: [
-                            new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000,
-                            scan("#add-link-href").value,
-                            scan("#add-link-exp").value
-                        ]
-                    })
+                    pushChatData("link", {
+                        link: scan("#add-link-href").value,
+                        exp: scan("#add-link-exp").value
+                    });
                     scan("#add-link-href").value = "";
                     scan("#add-link-exp").value = "";
-                    chatDB.value = data;
-                    notifyChatChange();
                 }
             }).add(
                 $("input", {
@@ -217,16 +211,10 @@ const subFragment = {
                 class: "inputBox",
                 onsubmit: async e => {
                     e.preventDefault();
-                    const data = chatDB.value;
-                    data.memo.push({
-                        data: [
-                            new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000,
-                            scan("#add-memo").value
-                        ]
-                    })
+                    pushChatData("memo", {
+                        text: scan("#add-memo").value
+                    });
                     scan("#add-memo").value = "";
-                    chatDB.value = data;
-                    notifyChatChange();
                 }
             }).add(
                 $("textarea", {

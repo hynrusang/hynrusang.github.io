@@ -61,6 +61,13 @@ const current = new LiveDataManager({
                 this.unsubscribe = [
                     firebase.firestore().collection("chat").doc(this.value).collection("enroll").onSnapshot(snapshot => {
                         snapshot.forEach(username => Binder.define(username.id, username.data().name))
+                    }, err => {
+                        if (confirm("해당 채팅방은 관리자의 승인이 필요합니다.\n지금 해당 채팅방에 승인 요청을 보내시겠습니까?")) {
+                            firebase.firestore().collection("chat").doc(this.value).collection("enroll").doc(firebase.auth().currentUser.uid).set({
+                                name: firebase.auth().currentUser.email
+                            }).catch(e => alert("이미 해당 채팅방에 승인 요청을 보냈습니다.\n또는, 해당 채팅방은 존재하지 않습니다."))
+                        }
+                        current.value("tab", "main");
                     }),
                     firebase.firestore().collection("chat").doc(this.value).collection("chat").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                         const scrollInfo = subFragment.chatroom.채팅.fragment[0].node.scrollTop;
@@ -71,7 +78,7 @@ const current = new LiveDataManager({
                                 target.add(
                                     $("div", {
                                         class: "itemBox",
-                                        iden: chatdata.id
+                                        iden: `i${chatdata.id}`
                                     }).add(
                                         $("span", {
                                             exp: `${data.author}->{${data.author}}`
@@ -90,7 +97,7 @@ const current = new LiveDataManager({
                                                 style: "background-image: url(resource/img/icon/edit.png)",
                                                 onclick: async () => {
                                                     const temp = data;
-                                                    data.text = scan(`[iden=${chatdata.id}] input`).value;
+                                                    data.text = scan(`[iden=i${chatdata.id}] input`).value;
                                                     chatdata.ref.set(temp);
                                                     makeToast("해당 채팅의 내용이 변경되였습니다.");
                                                 }
@@ -124,189 +131,153 @@ const current = new LiveDataManager({
                             }
                         })
                         target.node.scrollTop = scrollInfo;
+                    }),
+                    firebase.firestore().collection("chat").doc(this.value).collection("link").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+                        const scrollInfo = subFragment.chatroom.링크.fragment[0].node.scrollTop;
+                        const target = subFragment.chatroom.링크.fragment[0].reset();
+                        snapshot.forEach((chatdata) => {
+                            const data = chatdata.data();
+                            if (data.author == firebase.auth().currentUser.uid) {
+                                target.add(
+                                    $("div", {
+                                        class: "itemBox",
+                                        iden: `i${chatdata.id}`
+                                    }).add(
+                                        $("span", {
+                                            exp: `${data.author}->{${data.author}}`
+                                        }),
+                                        $("hr"),
+                                        $("a", {
+                                            href: data.link,
+                                            text: data.link,
+                                            target: "_blank"
+                                        }),
+                                        $("hr"),
+                                        $("input", {
+                                            style: "height: 30px",
+                                            class: "detail",
+                                            value: data.exp
+                                        }),
+                                        $("div", {
+                                            class: "handler"
+                                        }).add(
+                                            $("input", {
+                                                type: "button",
+                                                style: "background-image: url(resource/img/icon/edit.png)",
+                                                onclick: async () => {
+                                                    const temp = data;
+                                                    console.log(`[iden=${chatdata.id}] input`)
+                                                    data.exp = scan(`[iden=i${chatdata.id}] input`).value;
+                                                    chatdata.ref.set(temp);
+                                                    makeToast("해당 링크의 설명이 변경되였습니다.");
+                                                }
+                                            }),
+                                            $("input", {
+                                                type: "button",
+                                                style: "background-image: url(resource/img/icon/del.png)",
+                                                onclick: async e => {
+                                                    if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) chatdata.ref.delete();
+                                                }
+                                            })
+                                        )
+                                    )
+                                )
+                            } else {
+                                target.add(
+                                    $("div", {
+                                        class: "itemBox",
+                                        iden: chatdata.id
+                                    }).add(
+                                        $("span", {
+                                            exp: `${data.author}->{${data.author}}`
+                                        }),
+                                        $("hr"),
+                                        $("a", {
+                                            href: data.link,
+                                            text: data.link,
+                                            target: "_blank"
+                                        }),
+                                        $("hr"),
+                                        $("span", {
+                                            style: "height: 30px",
+                                            class: "detail",
+                                            innerText: data.exp
+                                        })
+                                    )
+                                )
+                            }
+                        })
+                        target.node.scrollTop = scrollInfo;
+                    }),
+                    firebase.firestore().collection("chat").doc(this.value).collection("memo").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+                        const scrollInfo = subFragment.chatroom.메모.fragment[0].node.scrollTop;
+                        const target = subFragment.chatroom.메모.fragment[0].reset();
+                        snapshot.forEach((chatdata) => {
+                            const data = chatdata.data();
+                            if (data.author == firebase.auth().currentUser.uid) {
+                                target.add(
+                                    $("div", {
+                                        class: "itemBox",
+                                        iden: `i${chatdata.id}`
+                                    }).add(
+                                        $("span", {
+                                            exp: `${data.author}->{${data.author}}`
+                                        }),
+                                        $("hr"),
+                                        $("textarea", {
+                                            style: "height: 100px",
+                                            class: "detail",
+                                            spellcheck: "false",
+                                            value: data.text
+                                        }),
+                                        $("div", {
+                                            class: "handler"
+                                        }).add(
+                                            $("input", {
+                                                type: "button",
+                                                style: "background-image: url(resource/img/icon/edit.png)",
+                                                onclick: async () => {
+                                                    const temp = data;
+                                                    data.text = scan(`[iden=i${chatdata.id}] textarea`).value;
+                                                    chatdata.ref.set(temp);
+                                                    makeToast("해당 기억할 것의 내용이 변경되였습니다.");
+                                                }
+                                            }),
+                                            $("input", {
+                                                type: "button",
+                                                style: "background-image: url(resource/img/icon/del.png)",
+                                                onclick: async e => {
+                                                    if (confirm("정말로 기억할 것을 삭제하시겠습니까?")) chatdata.ref.delete();
+                                                }
+                                            })
+                                        )
+                                    )
+                                )
+                            } else {
+                                target.add(
+                                    $("div", {
+                                        class: "itemBox",
+                                        iden: chatdata.id
+                                    }).add(
+                                        $("span", {
+                                            exp: `${data.author}->{${data.author}}`
+                                        }),
+                                        $("hr"),
+                                        $("textarea", {
+                                            style: "height: 100px",
+                                            class: "detail",
+                                            spellcheck: "false",
+                                            value: data.text
+                                        })
+                                    )
+                                )
+                            }
+                        })
+                        target.node.scrollTop = scrollInfo;
                     })
                 ]
                 /*
                 firebase.firestore().collection("chat").doc(this.value).collection("enroll").onSnapshot(snapshot => {
-                    const template = {
-                        chat: [],
-                        link: [],
-                        memo: []
-                    };
-                    const scrollInfo = {
-                        chat: subFragment.chatroom.채팅.fragment[0].node.scrollTop,
-                        link: subFragment.chatroom.링크.fragment[0].node.scrollTop,
-                        memo: subFragment.chatroom.메모.fragment[0].node.scrollTop,
-                    }
-                    const target = {
-                        chat: subFragment.chatroom.채팅.fragment[0].reset(),
-                        link: subFragment.chatroom.링크.fragment[0].reset(),
-                        memo: subFragment.chatroom.메모.fragment[0].reset(),
-                    }
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        if (doc.id == firebase.auth().currentUser.uid) {
-                            chatDB.value = {
-                                name: data.name,
-                                chat: JSON.parse(JSON.stringify(data.chat)),
-                                link: JSON.parse(JSON.stringify(data.link)),
-                                memo: JSON.parse(JSON.stringify(data.memo))
-                            }
-                        }
-                        ["chat", "link", "memo"].forEach(key => {
-                            data[key].forEach(token => token.data.push(data.name));
-                            template[key] = template[key].concat(data[key]).sort((a, b) => b.data[0] - a.data[0])
-                        })
-                    });
-                    template.chat.forEach((chat, index) => {
-                        if (chat.data[2] == chatDB.value.name) {
-                            target.chat.add(
-                                $("div", {
-                                    class: "itemBox",
-                                    idx: `a${index}`
-                                }).add(
-                                    $("span", {
-                                        text: chat.data[2]
-                                    }),
-                                    $("hr"),
-                                    $("input", {
-                                        style: "height: 30px;",
-                                        class: "detail",
-                                        value: chat.data[1],
-                                    }),
-                                    $("div", {
-                                        class: "handler"
-                                    }).add(
-                                        $("input", {
-                                            type: "button",
-                                            style: "background-image: url(resource/img/icon/edit.png)",
-                                            onclick: async () => {
-                                                const temp = chatDB.value;
-                                                for (let data of temp.chat) {
-                                                    if (data.data[0] == chat.data[0]) {
-                                                        data.data[1] =scan(`[idx=a${index}] textarea`).value;
-                                                        break;
-                                                    }
-                                                }
-                                                chatDB.value = temp;
-                                                await notifyChatChange();
-                                                makeToast("해당 채팅의 내용이 변경되였습니다.");
-                                            }
-                                        }),
-                                        $("input", {
-                                            type: "button",
-                                            style: "background-image: url(resource/img/icon/del.png)",
-                                            onclick: async e => {
-                                                if (confirm("정말로 해당 채팅을 삭제하시겠습니까?")) {
-                                                    let temp = chatDB.value;
-                                                    temp.chat = temp.chat.filter(data => data.data[0] !== chat.data[0])
-                                                    chatDB.value = temp;
-                                                    notifyChatChange();
-                                                }
-                                            }
-                                        })
-                                    )
-                                )
-                            )
-                        } else {
-                            target.chat.add(
-                                $("div", {
-                                    class: "itemBox",
-                                }).add(
-                                    $("span", {
-                                        text: chat.data[2]
-                                    }),
-                                    $("hr"),
-                                    $("span", {
-                                        style: "height: 30px;",
-                                        class: "detail",
-                                        innerText: chat.data[1],
-                                    })
-                                )
-                            )
-                        }
-                    })
-                    template.link.forEach((link, index) => {
-                        if (link.data[3] == chatDB.value.name) {
-                            target.link.add(
-                                $("div", {
-                                    class: "itemBox",
-                                    idx: `a${index}`
-                                }).add(
-                                    $("span", {
-                                        text: link.data[3]
-                                    }),
-                                    $("hr"),
-                                    $("a", {
-                                        href: link.data[1],
-                                        text: link.data[1],
-                                        target: "_blank"
-                                    }),
-                                    $("hr"),
-                                    $("input", {
-                                        style: "height: 30px",
-                                        class: "detail",
-                                        value: link.data[2]
-                                    }),
-                                    $("div", {
-                                        class: "handler"
-                                    }).add(
-                                        $("input", {
-                                            type: "button",
-                                            style: "background-image: url(resource/img/icon/edit.png)",
-                                            onclick: async () => {
-                                                const temp = chatDB.value;
-                                                for (let data of temp.link) {
-                                                    if (data.data[0] == link.data[0]) {
-                                                        data.data[2] = scan(`[idx=a${index}] input`).value;
-                                                        break;
-                                                    }
-                                                }
-                                                chatDB.value = temp;
-                                                await notifyChatChange();
-                                                makeToast("해당 링크의 설명이 변경되였습니다.");
-                                            }
-                                        }),
-                                        $("input", {
-                                            type: "button",
-                                            style: "background-image: url(resource/img/icon/del.png)",
-                                            onclick: async e => {
-                                                if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) {
-                                                    let temp = chatDB.value;
-                                                    temp.link = temp.link.filter(data => data.data[0] !== link.data[0])
-                                                    chatDB.value = temp;
-                                                    notifyChatChange();
-                                                }
-                                            }
-                                        })
-                                    )
-                                )
-                            )
-                        } else {
-                            target.link.add(
-                                $("div", {
-                                    class: "itemBox",
-                                    idx: `a${index}`
-                                }).add(
-                                    $("span", {
-                                        text: link.data[3]
-                                    }),
-                                    $("hr"),
-                                    $("a", {
-                                        href: link.data[1],
-                                        text: link.data[1],
-                                        target: "_blank"
-                                    }),
-                                    $("hr"),
-                                    $("span", {
-                                        style: "height: 30px;",
-                                        class: "detail",
-                                        text: link.data[2]
-                                    })
-                                )
-                            )
-                        }
-                    })
                     template.memo.forEach((memo, index) => {
                         if (memo.data[2] == chatDB.value.name) {
                             target.memo.add(

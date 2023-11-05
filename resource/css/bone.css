@@ -57,6 +57,8 @@ textarea, input, a {
     cursor: pointer;
 }
 textarea {
+    position: relative;
+    z-index: 1;
     background: none;
 }
 input {
