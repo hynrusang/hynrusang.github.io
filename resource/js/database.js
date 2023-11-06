@@ -126,7 +126,7 @@ const current = new LiveDataManager({
                                                             ref.collection("chat").where("author", "==", username.id).get().then(data => data.forEach(doc => doc.ref.delete()))
                                                             ref.collection("link").where("author", "==", username.id).get().then(data => data.forEach(doc => doc.ref.delete()))
                                                             ref.collection("memo").where("author", "==", username.id).get().then(data => data.forEach(doc => doc.ref.delete()))
-                                                            ref.collection("enroll").doc(username.id).delete()
+                                                            username.ref.delete();
                                                         }
                                                     }
                                                 })
@@ -139,7 +139,7 @@ const current = new LiveDataManager({
                                             style: "position: relative;"
                                         }).add(
                                             $("div", {
-                                                style: "width: calc(100% - 50px)",
+                                                style: "width: calc(100% - 100px)",
                                                 class: "userProfile"
                                             }).add(
                                                 $("img"),
@@ -160,6 +160,13 @@ const current = new LiveDataManager({
                                                                 name: data.name
                                                             })
                                                         }
+                                                    }
+                                                }),
+                                                $("input", {
+                                                    type: "button",
+                                                    style: "background-image: url(resource/img/icon/del.png)",
+                                                    onclick: () => {
+                                                        if (confirm("정말로 해당 신청을 거절하시겠습니까?")) username.ref.delete();
                                                     }
                                                 })
                                             )
