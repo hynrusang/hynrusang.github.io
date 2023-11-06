@@ -77,8 +77,7 @@ const current = new LiveDataManager({
                             if (data.author == firebase.auth().currentUser.uid) {
                                 target.add(
                                     $("div", {
-                                        style: "width: 80%; left: 20%; background: antiquewhite",
-                                        class: "itemBox",
+                                        class: "itemBox chatOwner",
                                         iden: `i${chatdata.id}`
                                     }).add(
                                         $("input", {
@@ -112,8 +111,7 @@ const current = new LiveDataManager({
                             } else {
                                 target.add(
                                     $("div", {
-                                        style: "width: 80%;",
-                                        class: "itemBox",
+                                        class: "itemBox chatItem",
                                     }).add(
                                         $("div", {
                                             class: "userProfile"
@@ -142,17 +140,9 @@ const current = new LiveDataManager({
                             if (data.author == firebase.auth().currentUser.uid) {
                                 target.add(
                                     $("div", {
-                                        class: "itemBox",
+                                        class: "itemBox chatOwner",
                                         iden: `i${chatdata.id}`
                                     }).add(
-                                        $("div", {
-                                            class: "userProfile"
-                                        }).add(
-                                            $("img"),
-                                            $("span", {
-                                                exp: `${data.author}->{${data.author}}`
-                                            })
-                                        ),
                                         $("a", {
                                             href: data.link,
                                             text: data.link,
@@ -191,7 +181,7 @@ const current = new LiveDataManager({
                             } else {
                                 target.add(
                                     $("div", {
-                                        class: "itemBox",
+                                        class: "itemBox chatItem",
                                         iden: chatdata.id
                                     }).add(
                                         $("div", {
@@ -227,17 +217,9 @@ const current = new LiveDataManager({
                             if (data.author == firebase.auth().currentUser.uid) {
                                 target.add(
                                     $("div", {
-                                        class: "itemBox",
+                                        class: "itemBox chatOwner",
                                         iden: `i${chatdata.id}`
                                     }).add(
-                                        $("div", {
-                                            class: "userProfile"
-                                        }).add(
-                                            $("img"),
-                                            $("span", {
-                                                exp: `${data.author}->{${data.author}}`
-                                            })
-                                        ),
                                         $("textarea", {
                                             style: "height: 100px",
                                             class: "detail",
@@ -270,7 +252,7 @@ const current = new LiveDataManager({
                             } else {
                                 target.add(
                                     $("div", {
-                                        class: "itemBox",
+                                        class: "itemBox chatItem",
                                         iden: chatdata.id
                                     }).add(
                                         $("div", {
