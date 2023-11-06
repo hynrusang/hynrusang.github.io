@@ -342,7 +342,7 @@ const mainFragment = {
                         value: "password reset",
                         onclick: async () => {
                             makeToast("이메일 주소로 비밀번호 초기화 메일을 보내기 시도하는 중입니다.");
-                            await firebase.auth().sendPasswordResetEmail(scan("form").children[0].children[1].value)
+                            await firebase.auth().sendPasswordResetEmail(scan("form").children[0].value)
                                 .then(() => makeToast("이메일 주소로 초기화 메일을 보냈습니다."))
                                 .catch(e => {
                                     if (e.code == "auth/invalid-email") makeToast("잘못된 이메일 주소입니다.");
