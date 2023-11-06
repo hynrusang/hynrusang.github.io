@@ -1,8 +1,10 @@
-*:not(li) {
+* {
     box-sizing: border-box;
     overflow-x: hidden;
-    transition: 0.3s all;
     text-decoration: none;
+}
+*:not(textarea) {
+    transition: 0.3s all;
 }
 *::-webkit-scrollbar {
     width: 8px;
@@ -17,7 +19,7 @@ html, body {
     flex-direction: column;
     overscroll-behavior: contain;
 }
-fragment, footer, textarea {
+fragment, footer {
     width: 100%;
 }
 fragment:not([rid=main]), main {
@@ -44,7 +46,7 @@ footer {
     height: 40px;
     display: flex;
     justify-content: space-between;
-    z-index: 3;
+    z-index: 2;
 }
 main, summary {
     display: none;
@@ -53,29 +55,25 @@ main, summary {
 iframe, textarea, input {
     border: none;
 }
-input, a {
+textarea, input, a {
     cursor: pointer;
+}
+textarea {
+    position: relative;
+    z-index: 1;
+    background: none;
 }
 input {
     background-color: initial;
     background-repeat: no-repeat;
 }
-[type=button], [type=submit] {
-    height: 100%;
+[type="button"], [type="submit"] {
+    border-radius: 30px;
+}
+:is(footer, #current-main) input {
     padding-left: 0px;
     background-size: 0px;
     background-position: 5px 10px;
-    border-radius: 30px;
-}
-
-li {
-    list-style: decimal-leading-zero;
-    word-break: break-all;
-    margin: 10px;
-}
-:is(a, .inputWidget, input[type=submit]):hover {
-    background-color: rgba(0, 255, 255, 0.5);
-    box-shadow: 10px 5px rgba(0, 200, 200, 0.5);
 }
 
 @media screen and (max-width: 1000px) {

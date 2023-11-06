@@ -8,16 +8,22 @@ firebase.initializeApp({
     measurementId: "G-QL8R6QQHGF"
 });
 const notifyDataChange = async () => firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).set(DB.toObject());
+const pushChatData = async (target, data) => firebase.firestore().collection("chat").doc(current.value("chatroom")).collection(target).doc().set({
+    author: firebase.auth().currentUser.uid,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    ...data
+});
 const makeToast = message => {
     scan("#toast").innerText = message;
     scan("#toast").animate([{
         backgroundColor: "blue",
+        zIndex: 3,
         opacity: 0
     }, {
-        zIndex: 1,
         backgroundColor: "red",
         opacity: 1
     }, {
+        zIndex: 3,
         backgroundColor: "blue",
         opacity: 0
     }], 1000)
@@ -35,51 +41,57 @@ firebase.auth().onAuthStateChanged(async user => {
         if (user.emailVerified) {
             firebase.firestore().collection("user").doc(user.uid).onSnapshot(snapshot => {
                 const template = snapshot.data() ? snapshot.data() : DB.toObject();
+                const scrollInfo = {
+                    link: subFragment.main.링크.fragment[0].node.scrollTop,
+                    memo: subFragment.main.메모.fragment[0].node.scrollTop,
+                    info: subFragment.main.설정.fragment[0].node.scrollTop,
+                    video: menuFragment.video.fragment[1].node.scrollTop,
+                    chatroom: menuFragment.main.fragment[1].node.scrollTop
+                }
                 const target = {
                     link: subFragment.main.링크.fragment[0].reset(),
                     memo: subFragment.main.메모.fragment[0].reset(),
                     info: subFragment.main.설정.fragment[0].reset(),
-                    video: menuFragment.video.fragment[1].reset()
+                    video: menuFragment.video.fragment[1].reset(),
+                    chatroom: menuFragment.main.fragment[1].reset()
                 }
                 template.link.forEach((link, index) => target.link.add(
                     $("div", {
-                        class: "chat",
+                        class: "itemBox",
                         idx: `a${index}`
                     }).add(
                         $("a", {
                             href: link.data[0],
                             text: link.data[0],
-                            target: "_blank()"
+                            target: "_blank"
                         }),
                         $("hr"),
                         $("input", {
-                            style: "width: 100%; height: 40px",
+                            style: "height: 30px",
+                            class: "detail",
                             value: link.data[1]
                         }),
                         $("div", {
-                            class: "chatGroup"
+                            class: "handler"
                         }).add(
                             $("input", {
                                 type: "button",
-                                class: "chatButton",
                                 style: "background-image: url(resource/img/icon/edit.png)",
-                                onclick: async e => {
+                                onclick: async () => {
                                     template.link[index].data[1] = scan(`[idx=a${index}] input`).value;
                                     DB.value("link", template.link);
                                     await notifyDataChange();
-                                    makeToast("해당 링크의 설명을 성공적으로 변경하였습니다.");
+                                    makeToast("해당 링크의 설명이 변경되었습니다.")
                                 }
                             }),
                             $("input", {
                                 type: "button",
-                                class: "chatButton",
                                 style: "background-image: url(resource/img/icon/del.png)",
-                                onclick: async e => {
+                                onclick: () => {
                                     if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) {
                                         template.link.splice(index, 1);
                                         DB.value("link", template.link);
-                                        await notifyDataChange();
-                                        makeToast("해당 링크를 성공적으로 삭제하였습니다.");
+                                        notifyDataChange();
                                     }
                                 }
                             })
@@ -88,38 +100,97 @@ firebase.auth().onAuthStateChanged(async user => {
                 )
                 template.memo.forEach((memo, index) => target.memo.add(
                     $("div", {
-                        class: "chat",
+                        class: "itemBox",
                         idx: `a${index}`
                     }).add(
                         $("textarea", {
-                            style: "width: 100%; height: 120px",
+                            style: "position: relative; z-index: 1; height: 100px",
+                            class: "detail",
                             spellcheck: "false",
                             value: memo
                         }),
                         $("div", {
-                            class: "chatGroup"
+                            class: "handler"
                         }).add(
                             $("input", {
                                 type: "button",
                                 class: "chatButton",
                                 style: "background-image: url(resource/img/icon/edit.png)",
-                                onclick: async e => {
+                                onclick: async () => {
                                     template.memo[index] = scan(`[idx=a${index}] textarea`).value;
                                     DB.value("memo", template.memo);
                                     await notifyDataChange();
-                                    makeToast("해당 기억할 것을 성공적으로 변경하였습니다.");
+                                    makeToast("해당 기억할 것의 내용이 변경되었습니다.")
                                 }
                             }),
                             $("input", {
                                 type: "button",
                                 class: "chatButton",
                                 style: "background-image: url(resource/img/icon/del.png)",
-                                onclick: async e => {
+                                onclick: async () => {
                                     if (confirm("정말로 해당 기억할 것을 삭제하시겠습니까?")) {
                                         template.memo.splice(index, 1);
                                         DB.value("memo", template.memo);
-                                        await notifyDataChange(db);
-                                        makeToast("해당 기억할 것을 성공적으로 삭제하였습니다.");
+                                        await notifyDataChange();
+                                    }
+                                }
+                            })
+                        )
+                    ))
+                )
+                template.chatroom.forEach((chatroom, index) => target.chatroom.add(
+                    $("div", {
+                        style: "position: relative",
+                        idx: `a${index}`
+                    }).add(
+                        $("input", {
+                            style: "background-image: url(resource/img/icon/server.png); width: calc(100% - 100px)",
+                            class: "inputWidget",
+                            type: "button",
+                            target: chatroom.data[0],
+                            value: chatroom.data[1],
+                            onclick: e => {
+                                current.value("tab", "chatroom");
+                                current.value("chatroom", e.target.attributes.target.value);
+                                scan("[rid=menu]").removeAttribute("open");
+                            }
+                        }),
+                        $("div", {
+                            class: "handler"
+                        }).add(
+                            $("input", {
+                                type: "button",
+                                style: "background-image: url(resource/img/icon/edit.png)",
+                                onclick: async () => {
+                                    const newName = prompt("해당 채팅방의 이름으로 설정할 새로운 이름을 입력해주세요.");
+                                    if (newName) {
+                                        template.chatroom[index].data[1] = newName;
+                                        DB.value("chatroom", template.chatroom);
+                                        notifyDataChange();
+                                    }
+                                }
+                            }),
+                            $("input", {
+                                type: "button",
+                                style: "background-image: url(resource/img/icon/del.png)",
+                                onclick: () => {
+                                    if (confirm("정말 해당 채팅방에서 나가시겠습니까?\n데이터는 자동으로 삭제되지 않으며,\n추후 다시 들어올 시 신청을 다시 해야합니다.")) {
+                                        firebase.firestore().collection("chat").doc(scan(`[idx=a${index}] input`).attributes.target.value).get().then(async data => {
+                                            const owner = data.data().owner;
+                                            if (owner == firebase.auth().currentUser.uid) alert("채팅방 관리자는 채팅방에서 나갈 수 없습니다.\n채팅방 메뉴에서 채팅방 삭제를 해야 합니다.");
+                                            else {
+                                                await data.ref.collection("enroll").doc(firebase.auth().currentUser.uid).delete();
+                                                template.chatroom.splice(index, 1);
+                                                DB.value("chatroom", template.chatroom);
+                                                notifyDataChange();
+                                                current.value("tab", "main");
+                                            }
+                                        }).catch(() => {
+                                            template.chatroom.splice(index, 1);
+                                            DB.value("chatroom", template.chatroom);
+                                            notifyDataChange();
+                                            current.value("tab", "main");
+                                        });
                                     }
                                 }
                             })
@@ -154,6 +225,7 @@ firebase.auth().onAuthStateChanged(async user => {
                         $("input", {
                             type: "button",
                             name: key,
+                            style: "padding-left: 0px;",
                             class: "inputWidget",
                             value: "해당 재생목록 바구니 삭제",
                             onclick: e => {
@@ -184,6 +256,7 @@ firebase.auth().onAuthStateChanged(async user => {
                                 }),
                                 $("input", {
                                     type: "button",
+                                    style: "padding-left: 0px;",
                                     class: "inputWidget",
                                     value: "이름 수정",
                                     onclick: () => {
@@ -193,19 +266,20 @@ firebase.auth().onAuthStateChanged(async user => {
                                             template.playlist[key][name] = template.playlist[key][value];
                                             delete template.playlist[key][value];
                                             DB.value("playlist", template.playlist);
-                                            notifyDataChange(data);
+                                            notifyDataChange();
                                         }
                                     }
                                 }),
                                 $("input", {
                                     type: "button",
+                                    style: "padding-left: 0px;",
                                     class: "inputWidget",
                                     value: "재생목록 삭제",
                                     onclick: () => {
                                         if (confirm("정말 해당 재생목록을 삭제하시겠습니까?\n(해당 결정은 되돌릴 수 없습니다.)")) {
                                             delete template.playlist[key][value];
                                             DB.value("playlist", template.playlist);
-                                            notifyDataChange(data);
+                                            notifyDataChange();
                                         }
                                     }
                                 })
@@ -215,17 +289,12 @@ firebase.auth().onAuthStateChanged(async user => {
                     target.video.add(listcase)
                 }
                 target.info.add(
-                    $("img", {
-                        style: "width: 60px; height: 60px"
-                    }),
-                    $("input", {
-                        style: "height: 60px; position: absolute; padding-left: 10px",
-                        spellcheck: "false",
-                        value: template.name
-                    }),
-                    $("div").add(
+                    $("div", {
+                        class: "userProfile"
+                    }).add(
+                        $("img"),
                         $("span", {
-                            html: `당신의 uid는 <span style="color: red; font-weight: bold;">${firebase.auth().currentUser.uid}</span>입니다.<br><span style="color: red">절대 가볍게 다른 사람들에게 알려주지 마세요.</span>`
+                            html: `uid: <span style="color: red; font-weight: bold;">${firebase.auth().currentUser.uid}`
                         })
                     ),
                     $("hr"),
@@ -277,8 +346,9 @@ firebase.auth().onAuthStateChanged(async user => {
                         }
                     })
                 )
+                Object.keys(target).forEach(key => target[key].node.scrollTop = scrollInfo[key])
                 for (let key of Object.keys(template)) DB.value(key, template[key]);
-            }),
+            });
             await firebase.firestore().collection("dat").doc("surface").get()
                 .then(async data => {
                     const temp = SDB.value;
@@ -296,6 +366,7 @@ firebase.auth().onAuthStateChanged(async user => {
                 .catch(e => null);
             menuFragment.main.launch();
             mainFragment.main.launch();
+            scan("[rid=menu]").setAttribute("open", "");
             scan("!footer div input").forEach(obj => obj.onclick = e => current.value("tab", e.target.attributes.target.value));
         } else firebase.auth().signOut();
     }
