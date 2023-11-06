@@ -324,6 +324,44 @@ const current = new LiveDataManager({
                                         )
                                     )
                                 )
+                            } else if (owner == firebase.auth().currentUser.uid) {
+                                target.add(
+                                    $("div", {
+                                        class: "itemBox chatItem",
+                                        iden: chatdata.id
+                                    }).add(
+                                        $("div", {
+                                            class: "userProfile"
+                                        }).add(
+                                            $("img"),
+                                            $("span", {
+                                                exp: `${data.author}->{${data.author}}`
+                                            })
+                                        ),
+                                        $("a", {
+                                            href: data.link,
+                                            text: data.link,
+                                            target: "_blank"
+                                        }),
+                                        $("hr"),
+                                        $("span", {
+                                            style: "height: 30px",
+                                            class: "detail",
+                                            innerText: data.exp
+                                        }),
+                                        $("div", {
+                                            class: "handler"
+                                        }).add(
+                                            $("input", {
+                                                type: "button",
+                                                style: "background-image: url(resource/img/icon/del.png)",
+                                                onclick: async e => {
+                                                    if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) chatdata.ref.delete();
+                                                }
+                                            })
+                                        )
+                                    )
+                                )
                             } else {
                                 target.add(
                                     $("div", {
@@ -389,7 +427,40 @@ const current = new LiveDataManager({
                                                 type: "button",
                                                 style: "background-image: url(resource/img/icon/del.png)",
                                                 onclick: async e => {
-                                                    if (confirm("정말로 기억할 것을 삭제하시겠습니까?")) chatdata.ref.delete();
+                                                    if (confirm("정말로 해당 기억할 것을 삭제하시겠습니까?")) chatdata.ref.delete();
+                                                }
+                                            })
+                                        )
+                                    )
+                                )
+                            } else if (owner == firebase.auth().currentUser.uid) { 
+                                target.add(
+                                    $("div", {
+                                        class: "itemBox chatItem",
+                                        iden: chatdata.id
+                                    }).add(
+                                        $("div", {
+                                            class: "userProfile"
+                                        }).add(
+                                            $("img"),
+                                            $("span", {
+                                                exp: `${data.author}->{${data.author}}`
+                                            })
+                                        ),
+                                        $("textarea", {
+                                            style: "height: 100px",
+                                            class: "detail",
+                                            spellcheck: "false",
+                                            value: data.text
+                                        }),
+                                        $("div", {
+                                            class: "handler"
+                                        }).add(
+                                            $("input", {
+                                                type: "button",
+                                                style: "background-image: url(resource/img/icon/del.png)",
+                                                onclick: async e => {
+                                                    if (confirm("정말로 해당 기억할 것을 삭제하시겠습니까?")) chatdata.ref.delete();
                                                 }
                                             })
                                         )

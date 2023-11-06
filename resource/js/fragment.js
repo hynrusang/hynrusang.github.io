@@ -242,7 +242,7 @@ const subFragment = {
                     class: "handler"
                 }).add(
                     $("input", {
-                        style: "background-image: url(resource/img/icon/save.png)",
+                        style: "background-image: url(resource/img/icon/plus.png)",
                         type: "submit",
                         value: ""
                     })
