@@ -188,6 +188,9 @@ const subFragment = {
                 class: "inputBox",
                 onsubmit: async e => {
                     e.preventDefault();
+                    pushChatData("chat", {
+                        text: "링크에 새로운 데이터를 추가했습니다."
+                    });
                     pushChatData("link", {
                         link: scan("#add-link-href").value,
                         exp: scan("#add-link-exp").value
@@ -224,6 +227,9 @@ const subFragment = {
                 class: "inputBox",
                 onsubmit: async e => {
                     e.preventDefault();
+                    pushChatData("chat", {
+                        text: "메모에 새로운 데이터를 추가했습니다."
+                    });
                     pushChatData("memo", {
                         text: scan("#add-memo").value
                     });
