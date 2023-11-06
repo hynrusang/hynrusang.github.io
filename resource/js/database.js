@@ -243,7 +243,7 @@ const current = new LiveDataManager({
                             }
                         })
                         target.node.scrollTop = scrollInfo;
-                    }),
+                    }, () => null),
                     firebase.firestore().collection("chat").doc(this.value).collection("link").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                         const scrollInfo = subFragment.chatroom.링크.fragment[0].node.scrollTop;
                         const target = subFragment.chatroom.링크.fragment[0].reset();
@@ -320,7 +320,7 @@ const current = new LiveDataManager({
                             }
                         })
                         target.node.scrollTop = scrollInfo;
-                    }),
+                    }, () => null),
                     firebase.firestore().collection("chat").doc(this.value).collection("memo").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                         const scrollInfo = subFragment.chatroom.메모.fragment[0].node.scrollTop;
                         const target = subFragment.chatroom.메모.fragment[0].reset();
@@ -386,7 +386,7 @@ const current = new LiveDataManager({
                             }
                         })
                         target.node.scrollTop = scrollInfo;
-                    })
+                    }, () => null)
                 ]
             }       
         }
