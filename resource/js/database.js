@@ -82,6 +82,26 @@ const current = new LiveDataManager({
                                 $("span", {
                                     html: `채팅방 아이디: <span style="color: red; font-weight: bold;">${this.value}</span>`
                                 }),
+                                $("input", {
+                                    style: "background-image: url(/resource/img/icon/del.png)",
+                                    class: "inputWidget",
+                                    type: "button",
+                                    value: "이 채팅방 삭제하기",
+                                    onclick: async () => {
+                                        if (confirm("정말로 이 채팅방을 삭제하시겠습니까?\n(이 결정은 번복되지 않습니다.)\n(추가로 다시 한 번 물어보는 절차도 없습니다.)")) {
+                                            const roomRef = await firebase.firestore().collection("chat").doc(this.value);
+                                            const roomId = roomRef.id;
+                                            roomRef.collection("enroll").get().then(docs => docs.forEach(doc => doc.ref.delete()));
+                                            roomRef.collection("chat").get().then(docs => docs.forEach(doc => doc.ref.delete()));
+                                            roomRef.collection("link").get().then(docs => docs.forEach(doc => doc.ref.delete()));
+                                            await roomRef.collection("memo").get().then(docs => docs.forEach(doc => doc.ref.delete()));
+                                            roomRef.delete();
+                                            DB.value("chatroom", DB.value("chatroom").filter(room => room.data[0] != roomId));
+                                            current.value("tab", "main");
+                                            notifyDataChange();
+                                        }
+                                    }
+                                }),
                                 $("hr"),
                                 userBox[0],
                                 $("hr"),

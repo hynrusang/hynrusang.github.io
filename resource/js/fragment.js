@@ -19,7 +19,28 @@ const menuFragment = {
             $("input", {
                 class: "inputWidget",
                 type: "button",
-                value: "채팅방 새로 만들기"
+                value: "채팅방 새로 만들기",
+                onclick: () => {
+                    if (confirm("정말로 채팅방을 새로 만드시겠습니까?")) {
+                        firebase.firestore().collection("chat").add({
+                            owner: firebase.auth().currentUser.uid
+                        }).then(doc => {
+                            doc.collection("enroll").doc(firebase.auth().currentUser.uid).set({
+                                accept: true,
+                                name: firebase.auth().currentUser.email
+                            })
+                            const temp = DB.value("chatroom");
+                            temp.unshift({
+                                data: [
+                                    doc.id,
+                                    doc.id
+                                ]
+                            })
+                            DB.value("chatroom", temp);
+                            notifyDataChange();
+                        })
+                    }
+                }
             }),
             $("input", {
                 class: "inputWidget",
