@@ -54,11 +54,11 @@ const current = new LiveDataManager({
     chatroom: new LiveData("", {
         type: String,
         observer: async function () {
-            let owner;
             if (this.unsubscribe) {
                 for (unsubscribeListener of this.unsubscribe) unsubscribeListener();
             };
             if (this.value) {
+                let owner;
                 this.unsubscribe = [
                     firebase.firestore().collection("chat").doc(this.value).collection("enroll").onSnapshot(snapshot => {
                         firebase.firestore().collection("chat").doc(this.value).get().then(data => owner = data.data().owner);
