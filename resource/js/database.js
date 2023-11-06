@@ -122,10 +122,10 @@ const current = new LiveDataManager({
                                                     style: "background-image: url(resource/img/icon/del.png)",
                                                     onclick: () => {
                                                         if (confirm("정말로 해당 유저를 강퇴하시겠습니까?")) {
-                                                            const ref = firebase.firestore().collection("chat").doc(this.value);
-                                                            ref.collection("chat").where("author", "==", username.id).get().then(data => data.forEach(doc => doc.ref.delete()))
-                                                            ref.collection("link").where("author", "==", username.id).get().then(data => data.forEach(doc => doc.ref.delete()))
-                                                            ref.collection("memo").where("author", "==", username.id).get().then(data => data.forEach(doc => doc.ref.delete()))
+                                                            const parentRef = username.ref.parent.parent;
+                                                            parentRef.collection("chat").where("author", "==", username.id).get().then(data => data.forEach(doc => doc.ref.delete()))
+                                                            parentRef.collection("link").where("author", "==", username.id).get().then(data => data.forEach(doc => doc.ref.delete()))
+                                                            parentRef.collection("memo").where("author", "==", username.id).get().then(data => data.forEach(doc => doc.ref.delete()))
                                                             username.ref.delete();
                                                         }
                                                     }
