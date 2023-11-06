@@ -60,12 +60,15 @@ const current = new LiveDataManager({
             if (this.value) {
                 this.unsubscribe = [
                     firebase.firestore().collection("chat").doc(this.value).collection("enroll").onSnapshot(snapshot => {
-                        snapshot.forEach(username => Binder.define(username.id, username.data().name))
-                    }, err => {
+                        snapshot.forEach(username => {
+                            Binder.define(username.id, username.data().name)
+                        })
+                    }, () => {
                         if (confirm("해당 채팅방은 관리자의 승인이 필요합니다.\n지금 해당 채팅방에 승인 요청을 보내시겠습니까?")) {
                             firebase.firestore().collection("chat").doc(this.value).collection("enroll").doc(firebase.auth().currentUser.uid).set({
-                                name: firebase.auth().currentUser.email
-                            }).catch(e => alert("이미 해당 채팅방에 승인 요청을 보냈습니다.\n또는, 해당 채팅방은 존재하지 않습니다."))
+                                name: firebase.auth().currentUser.email,
+                                accept: false
+                            }).catch(() => alert("이미 해당 채팅방에 승인 요청을 보냈습니다.\n또는, 해당 채팅방은 존재하지 않습니다."))
                         }
                         current.value("tab", "main");
                     }),

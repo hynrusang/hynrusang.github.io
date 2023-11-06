@@ -24,7 +24,21 @@ const menuFragment = {
             $("input", {
                 class: "inputWidget",
                 type: "button",
-                value: "채팅방 추가하기"
+                value: "채팅방 추가하기",
+                onclick: () => {
+                    const name = prompt("추가하길 원하는 채팅방의 id를 입력해주세요.");
+                    if (name) {
+                        const temp = DB.value("chatroom");
+                        temp.unshift({
+                            data: [
+                                name,
+                                name
+                            ]
+                        })
+                        DB.value("chatroom", temp);
+                        notifyDataChange();
+                    }
+                }
             })
         )
     ),
