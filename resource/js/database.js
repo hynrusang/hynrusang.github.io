@@ -60,6 +60,13 @@ const current = new LiveDataManager({
             if (this.value) {
                 this.unsubscribe = [
                     firebase.firestore().collection("chat").doc(this.value).collection("enroll").onSnapshot(snapshot => {
+                        const target = subFragment.chatroom.설정.fragment[0].reset();
+                        target.add(
+                            $("span", {
+                                html: `채팅방 아이디: <span style="color: red; font-weight: bold;">${this.value}</span>`
+                            }),
+                            $("hr")
+                        )
                         snapshot.forEach(username => {
                             Binder.define(username.id, username.data().name)
                         })
