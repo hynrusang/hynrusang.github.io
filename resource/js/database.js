@@ -145,9 +145,13 @@ const current = new LiveDataManager({
                                             }).add(
                                                 $("input", {
                                                     type: "button",
-                                                    style: "background-image: url(resource/img/icon/del.png)",
+                                                    style: "background-image: url(resource/img/icon/plus.png)",
                                                     onclick: async e => {
-                                                        if (confirm("정말로 해당 신청을 거부하시겠습니까?")) {
+                                                        if (confirm("정말로 해당 신청을 승낙하시겠습니까?")) {
+                                                            username.ref.set({
+                                                                accept: true,
+                                                                name: data.name
+                                                            })
                                                         }
                                                     }
                                                 })
@@ -239,7 +243,7 @@ const current = new LiveDataManager({
                             }
                         })
                         target.node.scrollTop = scrollInfo;
-                    }),
+                    }, () => null),
                     firebase.firestore().collection("chat").doc(this.value).collection("link").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                         const scrollInfo = subFragment.chatroom.링크.fragment[0].node.scrollTop;
                         const target = subFragment.chatroom.링크.fragment[0].reset();
@@ -316,7 +320,7 @@ const current = new LiveDataManager({
                             }
                         })
                         target.node.scrollTop = scrollInfo;
-                    }),
+                    }, () => null),
                     firebase.firestore().collection("chat").doc(this.value).collection("memo").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                         const scrollInfo = subFragment.chatroom.메모.fragment[0].node.scrollTop;
                         const target = subFragment.chatroom.메모.fragment[0].reset();
@@ -382,7 +386,7 @@ const current = new LiveDataManager({
                             }
                         })
                         target.node.scrollTop = scrollInfo;
-                    })
+                    }, () => null)
                 ]
             }       
         }
