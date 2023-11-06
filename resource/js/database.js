@@ -53,22 +53,120 @@ const current = new LiveDataManager({
     }),
     chatroom: new LiveData("", {
         type: String,
-        observer: function () {
+        observer: async function () {
             if (this.unsubscribe) {
                 for (unsubscribeListener of this.unsubscribe) unsubscribeListener();
             };
             if (this.value) {
+                let owner = await firebase.firestore().collection("chat").doc(this.value).get();
+                owner = owner.data().owner;
                 this.unsubscribe = [
                     firebase.firestore().collection("chat").doc(this.value).collection("enroll").onSnapshot(snapshot => {
                         const target = subFragment.chatroom.설정.fragment[0].reset();
-                        target.add(
-                            $("span", {
-                                html: `채팅방 아이디: <span style="color: red; font-weight: bold;">${this.value}</span>`
-                            }),
-                            $("hr")
-                        )
+                        const userBox = [
+                            $("div").add(
+                                $("span", {
+                                    text: "유저 목록"
+                                })
+                            ),
+                            $("div").add(
+                                $("span", {
+                                    text: "수락 대기 목록"
+                                })
+                            )
+                        ];
+                        if (owner == firebase.auth().currentUser.uid) {
+                            target.add(
+                                $("span", {
+                                    html: `채팅방 아이디: <span style="color: red; font-weight: bold;">${this.value}</span>`
+                                }),
+                                $("hr"),
+                                userBox[0],
+                                $("hr"),
+                                userBox[1]
+                            )
+                        } else {
+                            target.add(
+                                $("span", {
+                                    html: `채팅방 아이디: <span style="color: red; font-weight: bold;">${this.value}</span>`
+                                }),
+                                $("hr"),
+                                userBox[0]
+                            )
+                        }
                         snapshot.forEach(username => {
-                            Binder.define(username.id, username.data().name)
+                            const data = username.data();
+                            Binder.define(username.id, data.name)
+                            if (owner == firebase.auth().currentUser.uid && owner != username.id) {
+                                if (data.accept) {
+                                    userBox[0].add(
+                                        $("div", {
+                                            style: "position: relative;"
+                                        }).add(
+                                            $("div", {
+                                                style: "width: calc(100% - 50px)",
+                                                class: "userProfile"
+                                            }).add(
+                                                $("img"),
+                                                $("span", {
+                                                    text: data.name
+                                                })
+                                            ),
+                                            $("div", {
+                                                class: "handler"
+                                            }).add(
+                                                $("input", {
+                                                    type: "button",
+                                                    style: "background-image: url(resource/img/icon/del.png)",
+                                                    onclick: async e => {
+                                                        if (confirm("정말로 해당 유저를 강퇴하시겠습니까?")) {
+                                                        }
+                                                    }
+                                                })
+                                            )
+                                        )
+                                    )
+                                } else {
+                                    userBox[1].add(
+                                        $("div", {
+                                            style: "position: relative;"
+                                        }).add(
+                                            $("div", {
+                                                style: "width: calc(100% - 50px)",
+                                                class: "userProfile"
+                                            }).add(
+                                                $("img"),
+                                                $("span", {
+                                                    text: data.name
+                                                })
+                                            ),
+                                            $("div", {
+                                                class: "handler"
+                                            }).add(
+                                                $("input", {
+                                                    type: "button",
+                                                    style: "background-image: url(resource/img/icon/del.png)",
+                                                    onclick: async e => {
+                                                        if (confirm("정말로 해당 신청을 거부하시겠습니까?")) {
+                                                        }
+                                                    }
+                                                })
+                                            )
+                                        )
+                                    )
+                                }
+                            } else if (data.accept) {
+                                userBox[0].add(
+                                    $("div", {
+                                        class: "userProfile"
+                                    }).add(
+                                        $("img"),
+                                        $("span", {
+                                            text: data.name
+                                        })
+                                    )
+                                )
+                            }
                         })
                     }, () => {
                         if (confirm("해당 채팅방은 관리자의 승인이 필요합니다.\n지금 해당 채팅방에 승인 요청을 보내시겠습니까?")) {
