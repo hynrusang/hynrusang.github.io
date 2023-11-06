@@ -77,17 +77,10 @@ const current = new LiveDataManager({
                             if (data.author == firebase.auth().currentUser.uid) {
                                 target.add(
                                     $("div", {
+                                        style: "width: 80%; left: 20%; background: antiquewhite",
                                         class: "itemBox",
                                         iden: `i${chatdata.id}`
                                     }).add(
-                                        $("div", {
-                                            class: "userProfile"
-                                        }).add(
-                                            $("img"),
-                                            $("span", {
-                                                exp: `${data.author}->{${data.author}}`
-                                            })
-                                        ),
                                         $("input", {
                                             style: "height: 30px;",
                                             class: "detail",
@@ -119,6 +112,7 @@ const current = new LiveDataManager({
                             } else {
                                 target.add(
                                     $("div", {
+                                        style: "width: 80%;",
                                         class: "itemBox",
                                     }).add(
                                         $("div", {
