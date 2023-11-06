@@ -58,10 +58,12 @@ const current = new LiveDataManager({
                 for (unsubscribeListener of this.unsubscribe) unsubscribeListener();
             };
             if (this.value) {
-                let owner;
+                let owner = firebase.firestore().collection("chat").doc(this.value);
+                await owner.get()
+                    .then(data => owner = data.data().owner)
+                    .catch(() => null);
                 this.unsubscribe = [
                     firebase.firestore().collection("chat").doc(this.value).collection("enroll").onSnapshot(snapshot => {
-                        firebase.firestore().collection("chat").doc(this.value).get().then(data => owner = data.data().owner);
                         const target = subFragment.chatroom.설정.fragment[0].reset();
                         const userBox = [
                             $("div").add(
