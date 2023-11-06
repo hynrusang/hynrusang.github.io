@@ -142,6 +142,9 @@ const current = new LiveDataManager({
                                                     style: "background-image: url(resource/img/icon/del.png)",
                                                     onclick: () => {
                                                         if (confirm("정말로 해당 유저를 강퇴하시겠습니까?")) {
+                                                            pushChatData("chat", {
+                                                                text: `${data.name}님을 채팅방에서 퇴장시켰습니다.`
+                                                            })
                                                             const parentRef = username.ref.parent.parent;
                                                             parentRef.collection("chat").where("author", "==", username.id).get().then(data => data.forEach(doc => doc.ref.delete()))
                                                             parentRef.collection("link").where("author", "==", username.id).get().then(data => data.forEach(doc => doc.ref.delete()))
@@ -175,6 +178,9 @@ const current = new LiveDataManager({
                                                     style: "background-image: url(resource/img/icon/plus.png)",
                                                     onclick: async e => {
                                                         if (confirm("정말로 해당 신청을 승낙하시겠습니까?")) {
+                                                            pushChatData("chat", {
+                                                                text: `${data.name}님이 채팅방에 입장했습니다.`
+                                                            })
                                                             username.ref.set({
                                                                 accept: true,
                                                                 name: data.name
