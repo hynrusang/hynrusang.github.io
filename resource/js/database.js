@@ -86,7 +86,7 @@ const current = new LiveDataManager({
                                     style: "background-image: url(/resource/img/icon/del.png)",
                                     class: "inputWidget",
                                     type: "button",
-                                    value: "이 채팅방 삭제하기",
+                                    value: "채팅방 삭제하기",
                                     onclick: async () => {
                                         if (confirm("정말로 이 채팅방을 삭제하시겠습니까?\n(이 결정은 번복되지 않습니다.)\n(추가로 다시 한 번 물어보는 절차도 없습니다.)")) {
                                             const roomRef = await firebase.firestore().collection("chat").doc(this.value);
