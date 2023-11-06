@@ -140,7 +140,8 @@ firebase.auth().onAuthStateChanged(async user => {
                 )
                 template.chatroom.forEach((chatroom, index) => target.chatroom.add(
                     $("div", {
-                        style: "position: relative"
+                        style: "position: relative",
+                        idx: `a${index}`
                     }).add(
                         $("input", {
                             style: "background-image: url(resource/img/icon/server.png); width: calc(100% - 100px)",
@@ -163,9 +164,8 @@ firebase.auth().onAuthStateChanged(async user => {
                                 onclick: async () => {
                                     const newName = prompt("해당 채팅방의 이름으로 설정할 새로운 이름을 입력해주세요.");
                                     if (newName) {
-                                        const temp = DB.value("chatroom");
-                                        temp[index].data[1] = newName;
-                                        DB.value("chatroom", temp);
+                                        template.chatroom[index].data[1] = newName;
+                                        DB.value("chatroom", template.chatroom);
                                         notifyDataChange();
                                     }
                                 }
@@ -174,6 +174,12 @@ firebase.auth().onAuthStateChanged(async user => {
                                 type: "button",
                                 style: "background-image: url(resource/img/icon/del.png)",
                                 onclick: async e => {
+                                    if (confirm("정말 해당 채팅방에서 나가시겠습니까?\n데이터는 자동으로 삭제되지 않으며,\n추후 다시 들어올 시 신청을 다시 해야합니다.")) {
+                                        firebase.firestore().collection("chat").doc(scan(`[idx=a${index}] input`).attributes.target.value).collection("enroll").doc(firebase.auth().currentUser.uid).delete().catch(() => null)
+                                        template.chatroom.splice(index, 1);
+                                        DB.value("chatroom", template.chatroom);
+                                        notifyDataChange();
+                                    }
                                 }
                             })
                         )
