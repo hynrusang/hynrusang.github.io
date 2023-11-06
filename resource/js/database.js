@@ -222,6 +222,38 @@ const current = new LiveDataManager({
                                         )
                                     )
                                 )
+                            } else if (owner == firebase.auth().currentUser.uid) {
+                                target.add(
+                                    $("div", {
+                                        class: "itemBox chatItem",
+                                        iden: `i${chatdata.id}`
+                                    }).add(
+                                        $("div", {
+                                            class: "userProfile"
+                                        }).add(
+                                            $("img"),
+                                            $("span", {
+                                                exp: `${data.author}->{${data.author}}`
+                                            })
+                                        ),
+                                        $("span", {
+                                            style: "height: 30px;",
+                                            class: "detail",
+                                            innerText: data.text,
+                                        }),
+                                        $("div", {
+                                            class: "handler"
+                                        }).add(
+                                            $("input", {
+                                                type: "button",
+                                                style: "background-image: url(resource/img/icon/del.png)",
+                                                onclick: async e => {
+                                                    if (confirm("정말로 해당 채팅을 삭제하시겠습니까?")) chatdata.ref.delete();
+                                                }
+                                            })
+                                        )
+                                    )
+                                )
                             } else {
                                 target.add(
                                     $("div", {
