@@ -178,9 +178,9 @@ firebase.auth().onAuthStateChanged(async user => {
                                         await firebase.firestore().collection("chat").doc(scan(`[idx=a${index}] input`).attributes.target.value).get().then(roomdata => {
                                             console.log(roomdata)
                                         }).catch(() => null)
-                                        //template.chatroom.splice(index, 1);
-                                        //DB.value("chatroom", template.chatroom);
-                                        //notifyDataChange();
+                                        template.chatroom.splice(index, 1);
+                                        DB.value("chatroom", template.chatroom);
+                                        notifyDataChange();
                                     }
                                 }
                             })
