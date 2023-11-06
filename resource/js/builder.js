@@ -183,11 +183,13 @@ firebase.auth().onAuthStateChanged(async user => {
                                                 template.chatroom.splice(index, 1);
                                                 DB.value("chatroom", template.chatroom);
                                                 notifyDataChange();
+                                                current.value("tab", "main");
                                             }
                                         }).catch(() => {
                                             template.chatroom.splice(index, 1);
                                             DB.value("chatroom", template.chatroom);
                                             notifyDataChange();
+                                            current.value("tab", "main");
                                         });
                                     }
                                 }
