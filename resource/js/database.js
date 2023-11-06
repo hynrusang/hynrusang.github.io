@@ -54,14 +54,14 @@ const current = new LiveDataManager({
     chatroom: new LiveData("", {
         type: String,
         observer: async function () {
+            let owner;
             if (this.unsubscribe) {
                 for (unsubscribeListener of this.unsubscribe) unsubscribeListener();
             };
             if (this.value) {
-                let owner = await firebase.firestore().collection("chat").doc(this.value).get();
-                owner = owner.data().owner;
                 this.unsubscribe = [
                     firebase.firestore().collection("chat").doc(this.value).collection("enroll").onSnapshot(snapshot => {
+                        firebase.firestore().collection("chat").doc(this.value).get().then(data => owner = data.data().owner);
                         const target = subFragment.chatroom.설정.fragment[0].reset();
                         const userBox = [
                             $("div").add(
@@ -243,7 +243,7 @@ const current = new LiveDataManager({
                             }
                         })
                         target.node.scrollTop = scrollInfo;
-                    }, () => null),
+                    }),
                     firebase.firestore().collection("chat").doc(this.value).collection("link").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                         const scrollInfo = subFragment.chatroom.링크.fragment[0].node.scrollTop;
                         const target = subFragment.chatroom.링크.fragment[0].reset();
@@ -320,7 +320,7 @@ const current = new LiveDataManager({
                             }
                         })
                         target.node.scrollTop = scrollInfo;
-                    }, () => null),
+                    }),
                     firebase.firestore().collection("chat").doc(this.value).collection("memo").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                         const scrollInfo = subFragment.chatroom.메모.fragment[0].node.scrollTop;
                         const target = subFragment.chatroom.메모.fragment[0].reset();
@@ -386,7 +386,7 @@ const current = new LiveDataManager({
                             }
                         })
                         target.node.scrollTop = scrollInfo;
-                    }, () => null)
+                    })
                 ]
             }       
         }
