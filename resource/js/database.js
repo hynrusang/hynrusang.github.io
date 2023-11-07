@@ -215,7 +215,7 @@ const current = new LiveDataManager({
                             firebase.firestore().collection("chat").doc(this.value).collection("enroll").doc(firebase.auth().currentUser.uid).set({
                                 name: firebase.auth().currentUser.email,
                                 accept: false
-                            }).catch(() => alert("이미 해당 채팅방에 승인 요청을 보냈습니다.\n또는, 해당 채팅방은 존재하지 않습니다."))
+                            }).catch(() => alert("이미 해당 채팅방에 승인 요청을 보냈습니다."))
                         }
                         current.value("tab", "main");
                     }),

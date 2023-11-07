@@ -51,12 +51,13 @@ const menuFragment = {
                     if (name) {
                         firebase.firestore().collection("chat").doc(name).get().then(data => {
                             if (data.data()) {
-                                DB.value("chatroom", DB.value("chatroom").unshift({
+                                const temp = DB.value("chatroom");
+                                temp.unshift({
                                     data: [
                                         name,
                                         name
                                     ]
-                                }))
+                                })
                                 DB.value("chatroom", temp);
                                 notifyDataChange();
                             } else alert("해당 채팅방은 존재하지 않습니다.")
