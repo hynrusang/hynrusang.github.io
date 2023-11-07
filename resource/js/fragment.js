@@ -49,15 +49,18 @@ const menuFragment = {
                 onclick: () => {
                     const name = prompt("추가하길 원하는 채팅방의 id를 입력해주세요.");
                     if (name) {
-                        const temp = DB.value("chatroom");
-                        temp.unshift({
-                            data: [
-                                name,
-                                name
-                            ]
+                        firebase.firestore().collection("chat").doc(name).get().then(data => {
+                            if (data.data()) {
+                                DB.value("chatroom", DB.value("chatroom").unshift({
+                                    data: [
+                                        name,
+                                        name
+                                    ]
+                                }))
+                                DB.value("chatroom", temp);
+                                notifyDataChange();
+                            } else alert("해당 채팅방은 존재하지 않습니다.")
                         })
-                        DB.value("chatroom", temp);
-                        notifyDataChange();
                     }
                 }
             })

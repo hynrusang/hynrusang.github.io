@@ -59,9 +59,7 @@ const current = new LiveDataManager({
             };
             if (this.value) {
                 let owner = firebase.firestore().collection("chat").doc(this.value);
-                await owner.get()
-                    .then(data => owner = data.data().owner)
-                    .catch(() => null);
+                await owner.get().then(data => owner = data.data().owner)
                 this.unsubscribe = [
                     firebase.firestore().collection("chat").doc(this.value).collection("enroll").onSnapshot(snapshot => {
                         const target = subFragment.chatroom.설정.fragment[0].reset();
