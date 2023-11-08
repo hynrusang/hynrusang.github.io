@@ -8,10 +8,10 @@ const chatDB = new LiveData({
     type: Object
 });
 const DB = new LiveDataManager({
-    link: new LiveData([], {
+    chat: new LiveData([], {
         type: Array
     }),
-    memo: new LiveData([], {
+    link: new LiveData([], {
         type: Array
     }),
     playlist: new LiveData({}, {
@@ -35,7 +35,7 @@ const SDB = new LiveData({}, {
     type: Object
 })
 const current = new LiveDataManager({
-    main: new LiveData("링크", {
+    main: new LiveData("채팅", {
         type: String,
         observer: function () {
             scan("#current-main .current").classList.remove("current");
@@ -91,8 +91,7 @@ const current = new LiveDataManager({
                                             const roomId = roomRef.id;
                                             roomRef.collection("enroll").get().then(docs => docs.forEach(doc => doc.ref.delete()));
                                             roomRef.collection("chat").get().then(docs => docs.forEach(doc => doc.ref.delete()));
-                                            roomRef.collection("link").get().then(docs => docs.forEach(doc => doc.ref.delete()));
-                                            await roomRef.collection("memo").get().then(docs => docs.forEach(doc => doc.ref.delete()));
+                                            await roomRef.collection("link").get().then(docs => docs.forEach(doc => doc.ref.delete()));
                                             roomRef.delete();
                                             DB.value("chatroom", DB.value("chatroom").filter(room => room.data[0] != roomId));
                                             current.value("tab", "main");
@@ -224,17 +223,19 @@ const current = new LiveDataManager({
                         const target = subFragment.chatroom.채팅.fragment[0].reset();
                         snapshot.forEach((chatdata) => {
                             const data = chatdata.data();
+                            const detail = $("textarea", {
+                                rows: "1",
+                                class: "detail",
+                                spellcheck: "false",
+                                value: data.text,
+                            });
                             if (data.author == firebase.auth().currentUser.uid) {
                                 target.add(
                                     $("div", {
                                         class: "itemBox chatOwner",
                                         iden: `i${chatdata.id}`
                                     }).add(
-                                        $("input", {
-                                            style: "height: 30px;",
-                                            class: "detail",
-                                            value: data.text,
-                                        }),
+                                        detail,
                                         $("div", {
                                             class: "handler"
                                         }).add(
@@ -243,7 +244,7 @@ const current = new LiveDataManager({
                                                 style: "background-image: url(resource/img/icon/edit.png)",
                                                 onclick: async () => {
                                                     const temp = data;
-                                                    data.text = scan(`[iden=i${chatdata.id}] input`).value;
+                                                    data.text = scan(`[iden=i${chatdata.id}] textarea`).value;
                                                     chatdata.ref.set(temp);
                                                     makeToast("해당 채팅의 내용이 변경되였습니다.");
                                                 }
@@ -258,6 +259,7 @@ const current = new LiveDataManager({
                                         )
                                     )
                                 )
+                                detail.node.style.height = detail.node.value.split('\n').length * 20 + 'px';
                             } else if (owner == firebase.auth().currentUser.uid) {
                                 target.add(
                                     $("div", {
@@ -273,7 +275,6 @@ const current = new LiveDataManager({
                                             })
                                         ),
                                         $("span", {
-                                            style: "height: 30px;",
                                             class: "detail",
                                             innerText: data.text,
                                         }),
@@ -422,105 +423,6 @@ const current = new LiveDataManager({
                                             style: "height: 30px",
                                             class: "detail",
                                             innerText: data.exp
-                                        })
-                                    )
-                                )
-                            }
-                        })
-                        target.node.scrollTop = scrollInfo;
-                    }, () => null),
-                    firebase.firestore().collection("chat").doc(this.value).collection("memo").orderBy("timestamp", "desc").onSnapshot(snapshot => {
-                        const scrollInfo = subFragment.chatroom.메모.fragment[0].node.scrollTop;
-                        const target = subFragment.chatroom.메모.fragment[0].reset();
-                        snapshot.forEach((chatdata) => {
-                            const data = chatdata.data();
-                            if (data.author == firebase.auth().currentUser.uid) {
-                                target.add(
-                                    $("div", {
-                                        class: "itemBox chatOwner",
-                                        iden: `i${chatdata.id}`
-                                    }).add(
-                                        $("textarea", {
-                                            style: "height: 100px",
-                                            class: "detail",
-                                            spellcheck: "false",
-                                            value: data.text
-                                        }),
-                                        $("div", {
-                                            class: "handler"
-                                        }).add(
-                                            $("input", {
-                                                type: "button",
-                                                style: "background-image: url(resource/img/icon/edit.png)",
-                                                onclick: async () => {
-                                                    const temp = data;
-                                                    data.text = scan(`[iden=i${chatdata.id}] textarea`).value;
-                                                    chatdata.ref.set(temp);
-                                                    makeToast("해당 기억할 것의 내용이 변경되였습니다.");
-                                                }
-                                            }),
-                                            $("input", {
-                                                type: "button",
-                                                style: "background-image: url(resource/img/icon/del.png)",
-                                                onclick: async e => {
-                                                    if (confirm("정말로 해당 기억할 것을 삭제하시겠습니까?")) chatdata.ref.delete();
-                                                }
-                                            })
-                                        )
-                                    )
-                                )
-                            } else if (owner == firebase.auth().currentUser.uid) { 
-                                target.add(
-                                    $("div", {
-                                        class: "itemBox chatItem",
-                                        iden: chatdata.id
-                                    }).add(
-                                        $("div", {
-                                            class: "userProfile"
-                                        }).add(
-                                            $("img"),
-                                            $("span", {
-                                                exp: `${data.author}->{${data.author}}`
-                                            })
-                                        ),
-                                        $("textarea", {
-                                            style: "height: 100px",
-                                            class: "detail",
-                                            spellcheck: "false",
-                                            value: data.text
-                                        }),
-                                        $("div", {
-                                            class: "handler"
-                                        }).add(
-                                            $("input", {
-                                                type: "button",
-                                                style: "background-image: url(resource/img/icon/del.png)",
-                                                onclick: async e => {
-                                                    if (confirm("정말로 해당 기억할 것을 삭제하시겠습니까?")) chatdata.ref.delete();
-                                                }
-                                            })
-                                        )
-                                    )
-                                )
-                            } else {
-                                target.add(
-                                    $("div", {
-                                        class: "itemBox chatItem",
-                                        iden: chatdata.id
-                                    }).add(
-                                        $("div", {
-                                            class: "userProfile"
-                                        }).add(
-                                            $("img"),
-                                            $("span", {
-                                                exp: `${data.author}->{${data.author}}`
-                                            })
-                                        ),
-                                        $("textarea", {
-                                            style: "height: 100px",
-                                            class: "detail",
-                                            spellcheck: "false",
-                                            value: data.text
                                         })
                                     )
                                 )

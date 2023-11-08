@@ -94,6 +94,40 @@ const menuFragment = {
 }
 const subFragment = {
     main: {
+        채팅: new Fragment("main",
+            $("fieldset", {
+                style: "height: calc(100vh - 160px); background: rgba(0,0,0,0.1); overflow-y: scroll"
+            }),
+            $("form", {
+                class: "inputBox",
+                onsubmit: async e => {
+                    e.preventDefault();
+                    const data = DB.value("chat");
+                    data.unshift(scan("#add-chat").value);
+                    DB.value("chat", data);
+                    scan("#add-chat").value = "";
+                    await notifyDataChange();
+                }
+            }).add(
+                $("textarea", {
+                    id: "add-chat",
+                    class: "detail",
+                    required: "",
+                    spellcheck: "false",
+                    style: "height: 70px",
+                    placeholder: "|"
+                }),
+                $("div", {
+                    class: "handler"
+                }).add(
+                    $("input", {
+                        style: "background-image: url(resource/img/icon/plus.png)",
+                        type: "submit",
+                        value: ""
+                    })
+                )
+            )
+        ),
         링크: new Fragment("main",
             $("fieldset", {
                 style: "height: calc(100vh - 160px); background: rgba(0,0,0,0.1); overflow-y: scroll"
@@ -135,7 +169,14 @@ const subFragment = {
                 })
             )
         ),
-        메모: new Fragment("main",
+        설정: new Fragment("main",
+            $("fieldset", {
+                style: "height: calc(100vh - 80px); background: rgba(0,0,0,0.1);"
+            })
+        )
+    },
+    chatroom: {
+        채팅: new Fragment("main",
             $("fieldset", {
                 style: "height: calc(100vh - 160px); background: rgba(0,0,0,0.1); overflow-y: scroll"
             }),
@@ -143,20 +184,19 @@ const subFragment = {
                 class: "inputBox",
                 onsubmit: async e => {
                     e.preventDefault();
-                    const data = DB.value("memo");
-                    data.unshift(scan("#add-memo").value);
-                    DB.value("memo", data);
-                    scan("#add-memo").value = "";
-                    await notifyDataChange();
+                    pushChatData("chat", {
+                        text: scan("#add-chat").value
+                    });
+                    scan("#add-chat").value = "";
                 }
             }).add(
                 $("textarea", {
-                    id: "add-memo",
+                    id: "add-chat",
                     class: "detail",
                     required: "",
                     spellcheck: "false",
-                    style: "height: 72px",
-                    placeholder: "기억해야 할 것"
+                    style: "height: 70px",
+                    placeholder: "|",
                 }),
                 $("div", {
                     class: "handler"
@@ -167,42 +207,6 @@ const subFragment = {
                         value: ""
                     })
                 )
-            )
-        ),
-        설정: new Fragment("main",
-            $("fieldset", {
-                style: "height: calc(100vh - 80px); background: rgba(0,0,0,0.1);"
-            })
-        )
-    },
-    chatroom: {
-        채팅: new Fragment("main",
-            $("fieldset", {
-                style: "height: calc(100vh - 120px); background: rgba(0,0,0,0.1); overflow-y: scroll"
-            }),
-            $("form", {
-                style: "height: 40px;",
-                class: "inputBox",
-                onsubmit: async e => {
-                    e.preventDefault();
-                    pushChatData("chat", {
-                        text: scan("#add-chat").value
-                    });
-                    scan("#add-chat").value = "";
-                }
-            }).add(
-                $("input", {
-                    id: "add-chat",
-                    style: "width: 100%; height: 30px",
-                    required: "",
-                    autocomplete: "off",
-                    placeholder: "|"
-                }),
-                $("input", {
-                    style: "display: none",
-                    type: "submit",
-                    value: ""
-                })
             )
         ),
         링크: new Fragment("main",
@@ -242,42 +246,6 @@ const subFragment = {
                     style: "display: none",
                     type: "submit"
                 })
-            )
-        ),
-        메모: new Fragment("main",
-            $("fieldset", {
-                style: "height: calc(100vh - 160px); background: rgba(0,0,0,0.1); overflow-y: scroll"
-            }),
-            $("form", {
-                class: "inputBox",
-                onsubmit: async e => {
-                    e.preventDefault();
-                    pushChatData("chat", {
-                        text: "새 메모를 추가했습니다."
-                    });
-                    pushChatData("memo", {
-                        text: scan("#add-memo").value
-                    });
-                    scan("#add-memo").value = "";
-                }
-            }).add(
-                $("textarea", {
-                    id: "add-memo",
-                    class: "detail",
-                    required: "",
-                    spellcheck: "false",
-                    style: "height: 72px",
-                    placeholder: "기억해야 할 것"
-                }),
-                $("div", {
-                    class: "handler"
-                }).add(
-                    $("input", {
-                        style: "background-image: url(resource/img/icon/plus.png)",
-                        type: "submit",
-                        value: ""
-                    })
-                )
             )
         ),
         설정: new Fragment("main",
@@ -391,23 +359,23 @@ const mainFragment = {
         $("fragment", {
             rid: "main"
         }).add(
-            subFragment.main.링크.fragment,
+            subFragment.main.채팅.fragment,
         ),
         $("div", {
             id: "current-main",
             style: "display: flex; width: 100%; height: 40px"
         }).add(
             $("input", {
-                style: "width: 30%; height: 100%; background-image: url(resource/img/icon/link.png)",
+                style: "width: 30%; height: 100%; background-image: url(resource/img/icon/chat.png)",
                 class: "current",
                 type: "button",
-                value: "링크",
+                value: "채팅",
                 onclick: e => current.value("main", e.target.value)
             }),
             $("input", {
-                style: "width: 30%; height: 100%; background-image: url(resource/img/icon/memo.png)",
+                style: "width: 30%; height: 100%; background-image: url(resource/img/icon/link.png)",
                 type: "button",
-                value: "메모",
+                value: "링크",
                 onclick: e => current.value("main", e.target.value)
             }),
             $("input", {
@@ -429,7 +397,7 @@ const mainFragment = {
             style: "display: flex; width: 100%; height: 40px"
         }).add(
             $("input", {
-                style: "width: 30%; height: 100%; background-image: url(resource/img/icon/link.png)",
+                style: "width: 30%; height: 100%; background-image: url(resource/img/icon/chat.png)",
                 class: "current",
                 type: "button",
                 value: "채팅",
@@ -439,12 +407,6 @@ const mainFragment = {
                 style: "width: 30%; height: 100%; background-image: url(resource/img/icon/link.png)",
                 type: "button",
                 value: "링크",
-                onclick: e => current.value("chat", e.target.value)
-            }),
-            $("input", {
-                style: "width: 30%; height: 100%; background-image: url(resource/img/icon/memo.png)",
-                type: "button",
-                value: "메모",
                 onclick: e => current.value("chat", e.target.value)
             }),
             $("input", {
