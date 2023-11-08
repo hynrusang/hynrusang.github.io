@@ -304,7 +304,6 @@ const current = new LiveDataManager({
                                             })
                                         ),
                                         $("span", {
-                                            style: "height: 30px;",
                                             class: "detail",
                                             innerText: data.text,
                                         })
