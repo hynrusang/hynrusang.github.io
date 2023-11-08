@@ -145,7 +145,6 @@ const current = new LiveDataManager({
                                                             const parentRef = username.ref.parent.parent;
                                                             parentRef.collection("chat").where("author", "==", username.id).get().then(data => data.forEach(doc => doc.ref.delete()))
                                                             parentRef.collection("link").where("author", "==", username.id).get().then(data => data.forEach(doc => doc.ref.delete()))
-                                                            parentRef.collection("memo").where("author", "==", username.id).get().then(data => data.forEach(doc => doc.ref.delete()))
                                                             username.ref.delete();
                                                         }
                                                     }
