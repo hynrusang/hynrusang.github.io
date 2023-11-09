@@ -258,7 +258,7 @@ const current = new LiveDataManager({
                                         )
                                     )
                                 )
-                                detail.node.style.height = detail.node.value.split('\n').length * 20 + 'px';
+                                detail.node.style.height = detail.node.scrollHeight + "px";
                             } else if (owner == firebase.auth().currentUser.uid) {
                                 target.add(
                                     $("div", {

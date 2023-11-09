@@ -101,18 +101,17 @@ firebase.auth().onAuthStateChanged(async user => {
                     )
                 })
                 template.chat.forEach((chat, index) => {
-                    const detail = $("textarea", {
-                        rows: "1",
-                        class: "detail",
-                        spellcheck: "false",
-                        value: chat,
-                    })
                     target.chat.add(
                         $("div", {
                             class: "itemBox",
                             idx: `a${index}`
                         }).add(
-                            detail,
+                            $("textarea", {
+                                style: "height: 100px",
+                                class: "detail",
+                                spellcheck: "false",
+                                value: chat,
+                            }),
                             $("div", {
                                 class: "handler"
                             }).add(
@@ -142,7 +141,6 @@ firebase.auth().onAuthStateChanged(async user => {
                             )
                         )
                     );
-                    detail.node.style.height = detail.node.value.split('\n').length * 20 + 'px';
                 })
                 template.chatroom.forEach((chatroom, index) => {
                     target.chatroom.add(
