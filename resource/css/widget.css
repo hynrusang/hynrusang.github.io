@@ -105,14 +105,13 @@
     height: 80px;
     border: 1px solid black;
 }
-.chatItem {}
 
 span.detail {
     padding-top: 5px;
 }
 .detail {
     display: inline-block;
-    width: calc(100% - 70px);
+    width: calc(100% - 80px);
     font-size: 14px;
     line-height: 20px;
 }
