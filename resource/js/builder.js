@@ -142,18 +142,17 @@ firebase.auth().onAuthStateChanged(async user => {
                         )
                     )
                 });
-                template.chatroom.forEach((room, index) => {
+                template.chatroom.forEach((chatroom, index) => {
                     target.chatroom.add(
                         $("div", {
                             style: "position: relative",
-                            idx: `r${index}`
                         }).add(
                             $("input", {
                                 style: "background-image: url(resource/img/icon/server.png); width: calc(100% - 100px)",
                                 class: "inputWidget",
                                 type: "button",
-                                target: room.data[0],
-                                value: room.data[1],
+                                target: chatroom.data[0],
+                                value: chatroom.data[1],
                                 onclick: e => {
                                     current.value("tab", "chatroom");
                                     current.value("chatroom", e.target.attributes.target.value);
