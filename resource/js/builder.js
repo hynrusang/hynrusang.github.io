@@ -55,56 +55,11 @@ firebase.auth().onAuthStateChanged(async user => {
                     video: menuFragment.video.fragment[1].reset(),
                     chatroom: menuFragment.main.fragment[1].reset()
                 }
-                template.link.forEach((link, index) => {
-                    target.link.add(
-                        $("div", {
-                            class: "itemBox",
-                            idx: `a${index}`
-                        }).add(
-                            $("a", {
-                                href: link.data[0],
-                                text: link.data[0],
-                                target: "_blank"
-                            }),
-                            $("hr"),
-                            $("input", {
-                                style: "height: 30px",
-                                class: "detail",
-                                value: link.data[1]
-                            }),
-                            $("div", {
-                                class: "handler"
-                            }).add(
-                                $("input", {
-                                    type: "button",
-                                    style: "background-image: url(resource/img/icon/edit.png)",
-                                    onclick: async () => {
-                                        template.link[index].data[1] = scan(`[idx=a${index}] input`).value;
-                                        DB.value("link", template.link);
-                                        await notifyDataChange();
-                                        makeToast("해당 링크의 설명이 변경되었습니다.")
-                                    }
-                                }),
-                                $("input", {
-                                    type: "button",
-                                    style: "background-image: url(resource/img/icon/del.png)",
-                                    onclick: () => {
-                                        if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) {
-                                            template.link.splice(index, 1);
-                                            DB.value("link", template.link);
-                                            notifyDataChange();
-                                        }
-                                    }
-                                })
-                            )
-                        )
-                    )
-                })
                 template.chat.forEach((chat, index) => {
                     target.chat.add(
                         $("div", {
                             class: "itemBox",
-                            idx: `a${index}`
+                            idx: `c${index}`
                         }).add(
                             $("textarea", {
                                 style: "height: 100px",
@@ -120,7 +75,7 @@ firebase.auth().onAuthStateChanged(async user => {
                                     class: "chatButton",
                                     style: "background-image: url(resource/img/icon/edit.png)",
                                     onclick: async () => {
-                                        template.chat[index] = scan(`[idx=a${index}] textarea`).value;
+                                        template.chat[index] = scan(`[idx=c${index}] textarea`).value;
                                         DB.value("chat", template.chat);
                                         await notifyDataChange();
                                         makeToast("해당 채팅의 내용이 변경되었습니다.")
@@ -142,18 +97,63 @@ firebase.auth().onAuthStateChanged(async user => {
                         )
                     );
                 })
-                template.chatroom.forEach((chatroom, index) => {
+                template.link.forEach((link, index) => {
+                    target.link.add(
+                        $("div", {
+                            class: "itemBox",
+                            idx: `l${index}`
+                        }).add(
+                            $("a", {
+                                href: link.data[0],
+                                text: link.data[0],
+                                target: "_blank"
+                            }),
+                            $("hr"),
+                            $("input", {
+                                style: "height: 30px",
+                                class: "detail",
+                                value: link.data[1]
+                            }),
+                            $("div", {
+                                class: "handler"
+                            }).add(
+                                $("input", {
+                                    type: "button",
+                                    style: "background-image: url(resource/img/icon/edit.png)",
+                                    onclick: async () => {
+                                        template.link[index].data[1] = scan(`[idx=l${index}] input`).value;
+                                        DB.value("link", template.link);
+                                        await notifyDataChange();
+                                        makeToast("해당 링크의 설명이 변경되었습니다.")
+                                    }
+                                }),
+                                $("input", {
+                                    type: "button",
+                                    style: "background-image: url(resource/img/icon/del.png)",
+                                    onclick: () => {
+                                        if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) {
+                                            template.link.splice(index, 1);
+                                            DB.value("link", template.link);
+                                            notifyDataChange();
+                                        }
+                                    }
+                                })
+                            )
+                        )
+                    )
+                });
+                template.chatroom.forEach((room, index) => {
                     target.chatroom.add(
                         $("div", {
                             style: "position: relative",
-                            idx: `a${index}`
+                            idx: `r${index}`
                         }).add(
                             $("input", {
                                 style: "background-image: url(resource/img/icon/server.png); width: calc(100% - 100px)",
                                 class: "inputWidget",
                                 type: "button",
-                                target: chatroom.data[0],
-                                value: chatroom.data[1],
+                                target: room.data[0],
+                                value: room.data[1],
                                 onclick: e => {
                                     current.value("tab", "chatroom");
                                     current.value("chatroom", e.target.attributes.target.value);
