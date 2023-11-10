@@ -105,16 +105,17 @@
     height: 80px;
     border: 1px solid black;
 }
-.chatItem {}
 
-span.detail {
-    padding-top: 5px;
-}
 .detail {
-    display: inline-block;
-    width: calc(100% - 70px);
+    display: block;
+    width: calc(100% - 80px);
+    min-height: 25px;
+    max-height: 50vh;
     font-size: 14px;
     line-height: 20px;
+}
+span.detail {
+    width: 100%;
 }
 .handler {
     display: flex;

@@ -8,10 +8,10 @@ const chatDB = new LiveData({
     type: Object
 });
 const DB = new LiveDataManager({
-    link: new LiveData([], {
+    chat: new LiveData([], {
         type: Array
     }),
-    memo: new LiveData([], {
+    link: new LiveData([], {
         type: Array
     }),
     playlist: new LiveData({}, {
@@ -35,7 +35,7 @@ const SDB = new LiveData({}, {
     type: Object
 })
 const current = new LiveDataManager({
-    main: new LiveData("링크", {
+    main: new LiveData("채팅", {
         type: String,
         observer: function () {
             scan("#current-main .current").classList.remove("current");
@@ -59,9 +59,7 @@ const current = new LiveDataManager({
             };
             if (this.value) {
                 let owner = firebase.firestore().collection("chat").doc(this.value);
-                await owner.get()
-                    .then(data => owner = data.data().owner)
-                    .catch(() => null);
+                await owner.get().then(data => owner = data.data().owner)
                 this.unsubscribe = [
                     firebase.firestore().collection("chat").doc(this.value).collection("enroll").onSnapshot(snapshot => {
                         const target = subFragment.chatroom.설정.fragment[0].reset();
@@ -93,8 +91,7 @@ const current = new LiveDataManager({
                                             const roomId = roomRef.id;
                                             roomRef.collection("enroll").get().then(docs => docs.forEach(doc => doc.ref.delete()));
                                             roomRef.collection("chat").get().then(docs => docs.forEach(doc => doc.ref.delete()));
-                                            roomRef.collection("link").get().then(docs => docs.forEach(doc => doc.ref.delete()));
-                                            await roomRef.collection("memo").get().then(docs => docs.forEach(doc => doc.ref.delete()));
+                                            await roomRef.collection("link").get().then(docs => docs.forEach(doc => doc.ref.delete()));
                                             roomRef.delete();
                                             DB.value("chatroom", DB.value("chatroom").filter(room => room.data[0] != roomId));
                                             current.value("tab", "main");
@@ -142,10 +139,12 @@ const current = new LiveDataManager({
                                                     style: "background-image: url(resource/img/icon/del.png)",
                                                     onclick: () => {
                                                         if (confirm("정말로 해당 유저를 강퇴하시겠습니까?")) {
+                                                            pushChatData("chat", {
+                                                                text: `${data.name}님을 채팅방에서 퇴장시켰습니다.`
+                                                            })
                                                             const parentRef = username.ref.parent.parent;
                                                             parentRef.collection("chat").where("author", "==", username.id).get().then(data => data.forEach(doc => doc.ref.delete()))
                                                             parentRef.collection("link").where("author", "==", username.id).get().then(data => data.forEach(doc => doc.ref.delete()))
-                                                            parentRef.collection("memo").where("author", "==", username.id).get().then(data => data.forEach(doc => doc.ref.delete()))
                                                             username.ref.delete();
                                                         }
                                                     }
@@ -175,6 +174,9 @@ const current = new LiveDataManager({
                                                     style: "background-image: url(resource/img/icon/plus.png)",
                                                     onclick: async e => {
                                                         if (confirm("정말로 해당 신청을 승낙하시겠습니까?")) {
+                                                            pushChatData("chat", {
+                                                                text: `${data.name}님이 채팅방에 입장했습니다.`
+                                                            })
                                                             username.ref.set({
                                                                 accept: true,
                                                                 name: data.name
@@ -211,7 +213,7 @@ const current = new LiveDataManager({
                             firebase.firestore().collection("chat").doc(this.value).collection("enroll").doc(firebase.auth().currentUser.uid).set({
                                 name: firebase.auth().currentUser.email,
                                 accept: false
-                            }).catch(() => alert("이미 해당 채팅방에 승인 요청을 보냈습니다.\n또는, 해당 채팅방은 존재하지 않습니다."))
+                            }).catch(() => alert("이미 해당 채팅방에 승인 요청을 보냈습니다."))
                         }
                         current.value("tab", "main");
                     }),
@@ -224,13 +226,14 @@ const current = new LiveDataManager({
                                 target.add(
                                     $("div", {
                                         class: "itemBox chatOwner",
-                                        iden: `i${chatdata.id}`
+                                        id: `c${chatdata.id}`
                                     }).add(
-                                        $("input", {
-                                            style: "height: 30px;",
-                                            class: "detail",
-                                            value: data.text,
-                                        }),
+                                        $("div").add(
+                                            $("span", {
+                                                class: "detail",
+                                                text: data.text,
+                                            })
+                                        ),
                                         $("div", {
                                             class: "handler"
                                         }).add(
@@ -238,10 +241,31 @@ const current = new LiveDataManager({
                                                 type: "button",
                                                 style: "background-image: url(resource/img/icon/edit.png)",
                                                 onclick: async () => {
-                                                    const temp = data;
-                                                    data.text = scan(`[iden=i${chatdata.id}] input`).value;
-                                                    chatdata.ref.set(temp);
-                                                    makeToast("해당 채팅의 내용이 변경되였습니다.");
+                                                    let editor = snipe(`#c${chatdata.id} div *`);
+                                                    if (editor.node.nodeName == "SPAN") {
+                                                        editor = $("textarea", {
+                                                            style: `height: ${editor.node.offsetHeight}px`,
+                                                            class: "detail",
+                                                            spellcheck: "false",
+                                                            rows: "1",
+                                                            onfocus: e => e.target.value = data.text,
+                                                            oninput: e => {
+                                                                e.target.style.height = "auto";
+                                                                e.target.style.height = e.target.scrollHeight + "px";
+                                                            }
+                                                        })
+                                                    } else {
+                                                        const text = editor.node.value;
+                                                        editor = $("span", {
+                                                            class: "detail",
+                                                            text: data.text,
+                                                        })
+                                                        data.text = text;
+                                                        chatdata.ref.set(data);
+                                                        makeToast("해당 채팅의 내용이 변경되었습니다.");
+                                                    }
+                                                    snipe(`#c${chatdata.id} div`).reset(editor);
+                                                    editor.node.focus();
                                                 }
                                             }),
                                             $("input", {
@@ -258,7 +282,6 @@ const current = new LiveDataManager({
                                 target.add(
                                     $("div", {
                                         class: "itemBox chatItem",
-                                        iden: `i${chatdata.id}`
                                     }).add(
                                         $("div", {
                                             class: "userProfile"
@@ -269,7 +292,6 @@ const current = new LiveDataManager({
                                             })
                                         ),
                                         $("span", {
-                                            style: "height: 30px;",
                                             class: "detail",
                                             innerText: data.text,
                                         }),
@@ -300,7 +322,6 @@ const current = new LiveDataManager({
                                             })
                                         ),
                                         $("span", {
-                                            style: "height: 30px;",
                                             class: "detail",
                                             innerText: data.text,
                                         })
@@ -319,19 +340,16 @@ const current = new LiveDataManager({
                                 target.add(
                                     $("div", {
                                         class: "itemBox chatOwner",
-                                        iden: `i${chatdata.id}`
+                                        id: `l${chatdata.id}`
                                     }).add(
-                                        $("a", {
-                                            href: data.link,
-                                            text: data.link,
-                                            target: "_blank"
-                                        }),
-                                        $("hr"),
-                                        $("input", {
-                                            style: "height: 30px",
-                                            class: "detail",
-                                            value: data.exp
-                                        }),
+                                        $("div").add(
+                                            $("a", {
+                                                class: "detail",
+                                                href: data.link,
+                                                text: data.exp,
+                                                target: "_blank"
+                                            })
+                                        ),
                                         $("div", {
                                             class: "handler"
                                         }).add(
@@ -339,11 +357,30 @@ const current = new LiveDataManager({
                                                 type: "button",
                                                 style: "background-image: url(resource/img/icon/edit.png)",
                                                 onclick: async () => {
-                                                    const temp = data;
-                                                    console.log(`[iden=${chatdata.id}] input`)
-                                                    data.exp = scan(`[iden=i${chatdata.id}] input`).value;
-                                                    chatdata.ref.set(temp);
-                                                    makeToast("해당 링크의 설명이 변경되였습니다.");
+                                                    let editor = snipe(`#l${chatdata.id} div *`);
+                                                    if (editor.node.nodeName == "A") {
+                                                        editor = $("input", {
+                                                            class: "detail",
+                                                            spellcheck: "false",
+                                                            onfocus: e => e.target.value = data.exp,
+                                                            onkeyup: e => {
+                                                                if (e.code == "Enter") scan(`#l${chatdata.id} .handler input`).click();
+                                                            }
+                                                        })
+                                                    } else {
+                                                        const text = editor.node.value
+                                                        editor = $("a", {
+                                                            class: "detail",
+                                                            href: data.link,
+                                                            text: text,
+                                                            target: "_blank"
+                                                        })
+                                                        data.exp = text;
+                                                        chatdata.ref.set(data);
+                                                        makeToast("해당 링크의 설명이 변경되었습니다.");
+                                                    }
+                                                    snipe(`#l${chatdata.id} div`).reset(editor);
+                                                    editor.node.focus();
                                                 }
                                             }),
                                             $("input", {
@@ -372,14 +409,8 @@ const current = new LiveDataManager({
                                         ),
                                         $("a", {
                                             href: data.link,
-                                            text: data.link,
+                                            text: data.exp,
                                             target: "_blank"
-                                        }),
-                                        $("hr"),
-                                        $("span", {
-                                            style: "height: 30px",
-                                            class: "detail",
-                                            innerText: data.exp
                                         }),
                                         $("div", {
                                             class: "handler"
@@ -410,113 +441,8 @@ const current = new LiveDataManager({
                                         ),
                                         $("a", {
                                             href: data.link,
-                                            text: data.link,
+                                            text: data.exp,
                                             target: "_blank"
-                                        }),
-                                        $("hr"),
-                                        $("span", {
-                                            style: "height: 30px",
-                                            class: "detail",
-                                            innerText: data.exp
-                                        })
-                                    )
-                                )
-                            }
-                        })
-                        target.node.scrollTop = scrollInfo;
-                    }, () => null),
-                    firebase.firestore().collection("chat").doc(this.value).collection("memo").orderBy("timestamp", "desc").onSnapshot(snapshot => {
-                        const scrollInfo = subFragment.chatroom.메모.fragment[0].node.scrollTop;
-                        const target = subFragment.chatroom.메모.fragment[0].reset();
-                        snapshot.forEach((chatdata) => {
-                            const data = chatdata.data();
-                            if (data.author == firebase.auth().currentUser.uid) {
-                                target.add(
-                                    $("div", {
-                                        class: "itemBox chatOwner",
-                                        iden: `i${chatdata.id}`
-                                    }).add(
-                                        $("textarea", {
-                                            style: "height: 100px",
-                                            class: "detail",
-                                            spellcheck: "false",
-                                            value: data.text
-                                        }),
-                                        $("div", {
-                                            class: "handler"
-                                        }).add(
-                                            $("input", {
-                                                type: "button",
-                                                style: "background-image: url(resource/img/icon/edit.png)",
-                                                onclick: async () => {
-                                                    const temp = data;
-                                                    data.text = scan(`[iden=i${chatdata.id}] textarea`).value;
-                                                    chatdata.ref.set(temp);
-                                                    makeToast("해당 기억할 것의 내용이 변경되였습니다.");
-                                                }
-                                            }),
-                                            $("input", {
-                                                type: "button",
-                                                style: "background-image: url(resource/img/icon/del.png)",
-                                                onclick: async e => {
-                                                    if (confirm("정말로 해당 기억할 것을 삭제하시겠습니까?")) chatdata.ref.delete();
-                                                }
-                                            })
-                                        )
-                                    )
-                                )
-                            } else if (owner == firebase.auth().currentUser.uid) { 
-                                target.add(
-                                    $("div", {
-                                        class: "itemBox chatItem",
-                                        iden: chatdata.id
-                                    }).add(
-                                        $("div", {
-                                            class: "userProfile"
-                                        }).add(
-                                            $("img"),
-                                            $("span", {
-                                                exp: `${data.author}->{${data.author}}`
-                                            })
-                                        ),
-                                        $("textarea", {
-                                            style: "height: 100px",
-                                            class: "detail",
-                                            spellcheck: "false",
-                                            value: data.text
-                                        }),
-                                        $("div", {
-                                            class: "handler"
-                                        }).add(
-                                            $("input", {
-                                                type: "button",
-                                                style: "background-image: url(resource/img/icon/del.png)",
-                                                onclick: async e => {
-                                                    if (confirm("정말로 해당 기억할 것을 삭제하시겠습니까?")) chatdata.ref.delete();
-                                                }
-                                            })
-                                        )
-                                    )
-                                )
-                            } else {
-                                target.add(
-                                    $("div", {
-                                        class: "itemBox chatItem",
-                                        iden: chatdata.id
-                                    }).add(
-                                        $("div", {
-                                            class: "userProfile"
-                                        }).add(
-                                            $("img"),
-                                            $("span", {
-                                                exp: `${data.author}->{${data.author}}`
-                                            })
-                                        ),
-                                        $("textarea", {
-                                            style: "height: 100px",
-                                            class: "detail",
-                                            spellcheck: "false",
-                                            value: data.text
                                         })
                                     )
                                 )

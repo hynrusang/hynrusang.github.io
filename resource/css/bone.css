@@ -1,9 +1,7 @@
-* {
+*:not(textarea) {
     box-sizing: border-box;
     overflow-x: hidden;
     text-decoration: none;
-}
-*:not(textarea) {
     transition: 0.3s all;
 }
 *::-webkit-scrollbar {
