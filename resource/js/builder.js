@@ -59,7 +59,7 @@ firebase.auth().onAuthStateChanged(async user => {
                     target.chat.add(
                         $("div", {
                             class: "itemBox",
-                            idx: `c${index}`
+                            id: `c${index}`
                         }).add(
                             $("div").add(
                                 $("span", {
@@ -75,7 +75,7 @@ firebase.auth().onAuthStateChanged(async user => {
                                     class: "chatButton",
                                     style: "background-image: url(resource/img/icon/edit.png)",
                                     onclick: async () => {
-                                        let editor = snipe(`[idx=c${index}] div *`);
+                                        let editor = snipe(`#c${index} div *`);
                                         if (editor.node.nodeName == "SPAN") {
                                             editor = $("textarea", {
                                                 style: `height: ${editor.node.offsetHeight}px`,
@@ -99,7 +99,7 @@ firebase.auth().onAuthStateChanged(async user => {
                                             notifyDataChange();
                                             makeToast("해당 채팅의 내용이 변경되었습니다.");
                                         }
-                                        snipe(`[idx=c${index}] div`).reset(editor);
+                                        snipe(`#c${index} div`).reset(editor);
                                         editor.node.focus();
                                     }
                                 }),
@@ -123,7 +123,7 @@ firebase.auth().onAuthStateChanged(async user => {
                     target.link.add(
                         $("div", {
                             class: "itemBox",
-                            idx: `l${index}`
+                            id: `l${index}`
                         }).add(
                             $("div").add(
                                 $("a", {
@@ -140,7 +140,7 @@ firebase.auth().onAuthStateChanged(async user => {
                                     type: "button",
                                     style: "background-image: url(resource/img/icon/edit.png)",
                                     onclick: async () => {
-                                        let editor = snipe(`[idx=l${index}] div *`);
+                                        let editor = snipe(`#l${index} div *`);
                                         if (editor.node.nodeName == "A") {
                                             editor = $("input", {
                                                 style: `height: ${editor.node.offsetHeight}px`,
@@ -148,7 +148,7 @@ firebase.auth().onAuthStateChanged(async user => {
                                                 spellcheck: "false",
                                                 onfocus: e => e.target.value = link.data[1],
                                                 onkeyup: e => {
-                                                    if (e.code == "Enter") scan(`[idx=l${index}] .handler input`).click();
+                                                    if (e.code == "Enter") scan(`#l${index} .handler input`).click();
                                                 }
                                             })
                                         } else {
@@ -164,7 +164,7 @@ firebase.auth().onAuthStateChanged(async user => {
                                             notifyDataChange();
                                             makeToast("해당 링크의 설명이 변경되었습니다.");
                                         }
-                                        snipe(`[idx=l${index}] div`).reset(editor);
+                                        snipe(`#l${index} div`).reset(editor);
                                         editor.node.focus();
                                     }
                                 }),
