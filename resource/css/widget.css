@@ -106,14 +106,16 @@
     border: 1px solid black;
 }
 
-span.detail {
-    padding-top: 5px;
-}
 .detail {
-    display: inline-block;
+    display: block;
     width: calc(100% - 80px);
+    min-height: 25px;
+    max-height: 50vh;
     font-size: 14px;
     line-height: 20px;
+}
+span.detail {
+    width: 100%;
 }
 .handler {
     display: flex;

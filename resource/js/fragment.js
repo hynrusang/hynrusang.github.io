@@ -140,7 +140,7 @@ const subFragment = {
                     data.unshift({
                         data: [
                             scan("#add-link-href").value,
-                            scan("#add-link-exp").value
+                            scan("#add-link-exp").value ? scan("#add-link-exp").value : scan("#add-link-href").value
                         ]
                     })
                     DB.value("link", data);
@@ -222,7 +222,7 @@ const subFragment = {
                     });
                     pushChatData("link", {
                         link: scan("#add-link-href").value,
-                        exp: scan("#add-link-exp").value
+                        exp: scan("#add-link-exp").value ? scan("#add-link-exp").value : scan("#add-link-href").value
                     });
                     scan("#add-link-href").value = "";
                     scan("#add-link-exp").value = "";

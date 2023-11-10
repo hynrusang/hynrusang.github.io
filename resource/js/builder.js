@@ -61,12 +61,12 @@ firebase.auth().onAuthStateChanged(async user => {
                             class: "itemBox",
                             idx: `c${index}`
                         }).add(
-                            $("textarea", {
-                                style: "height: 100px",
-                                class: "detail",
-                                spellcheck: "false",
-                                value: chat,
-                            }),
+                            $("div").add(
+                                $("span", {
+                                    class: "detail",
+                                    text: chat,
+                                })
+                            ),
                             $("div", {
                                 class: "handler"
                             }).add(
@@ -75,10 +75,32 @@ firebase.auth().onAuthStateChanged(async user => {
                                     class: "chatButton",
                                     style: "background-image: url(resource/img/icon/edit.png)",
                                     onclick: async () => {
-                                        template.chat[index] = scan(`[idx=c${index}] textarea`).value;
-                                        DB.value("chat", template.chat);
-                                        await notifyDataChange();
-                                        makeToast("해당 채팅의 내용이 변경되었습니다.")
+                                        let editor = snipe(`[idx=c${index}] div *`);
+                                        if (editor.node.nodeName == "SPAN") {
+                                            editor = $("textarea", {
+                                                style: `height: ${editor.node.offsetHeight}px`,
+                                                class: "detail",
+                                                spellcheck: "false",
+                                                rows: "1",
+                                                onfocus: e => e.target.value = chat,
+                                                oninput: e => {
+                                                    e.target.style.height = "auto";
+                                                    e.target.style.height = e.target.scrollHeight + "px";
+                                                }
+                                            })
+                                        } else {
+                                            const text = editor.node.value;
+                                            editor = $("span", {
+                                                class: "detail",
+                                                text: text,
+                                            })
+                                            template.chat[index] = text;
+                                            DB.value("chat", template.chat);
+                                            notifyDataChange();
+                                            makeToast("해당 채팅의 내용이 변경되었습니다.");
+                                        }
+                                        snipe(`[idx=c${index}] div`).reset(editor);
+                                        editor.node.focus();
                                     }
                                 }),
                                 $("input", {
@@ -103,17 +125,14 @@ firebase.auth().onAuthStateChanged(async user => {
                             class: "itemBox",
                             idx: `l${index}`
                         }).add(
-                            $("a", {
-                                href: link.data[0],
-                                text: link.data[0],
-                                target: "_blank"
-                            }),
-                            $("hr"),
-                            $("input", {
-                                style: "height: 30px",
-                                class: "detail",
-                                value: link.data[1]
-                            }),
+                            $("div").add(
+                                $("a", {
+                                    class: "detail",
+                                    href: link.data[0],
+                                    text: link.data[1],
+                                    target: "_blank"
+                                })
+                            ),
                             $("div", {
                                 class: "handler"
                             }).add(
@@ -121,10 +140,32 @@ firebase.auth().onAuthStateChanged(async user => {
                                     type: "button",
                                     style: "background-image: url(resource/img/icon/edit.png)",
                                     onclick: async () => {
-                                        template.link[index].data[1] = scan(`[idx=l${index}] input`).value;
-                                        DB.value("link", template.link);
-                                        await notifyDataChange();
-                                        makeToast("해당 링크의 설명이 변경되었습니다.")
+                                        let editor = snipe(`[idx=l${index}] div *`);
+                                        if (editor.node.nodeName == "A") {
+                                            editor = $("input", {
+                                                style: `height: ${editor.node.offsetHeight}px`,
+                                                class: "detail",
+                                                spellcheck: "false",
+                                                onfocus: e => e.target.value = link.data[1],
+                                                onkeyup: e => {
+                                                    if (e.code == "Enter") scan(`[idx=l${index}] .handler input`).click();
+                                                }
+                                            })
+                                        } else {
+                                            const text = editor.node.value
+                                            editor = $("a", {
+                                                class: "detail",
+                                                href: link.data[0],
+                                                text: text,
+                                                target: "_blank"
+                                            })
+                                            template.link[index].data[1] = text;
+                                            DB.value("link", template.link);
+                                            notifyDataChange();
+                                            makeToast("해당 링크의 설명이 변경되었습니다.");
+                                        }
+                                        snipe(`[idx=l${index}] div`).reset(editor);
+                                        editor.node.focus();
                                     }
                                 }),
                                 $("input", {

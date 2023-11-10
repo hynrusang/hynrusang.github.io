@@ -222,19 +222,18 @@ const current = new LiveDataManager({
                         const target = subFragment.chatroom.채팅.fragment[0].reset();
                         snapshot.forEach((chatdata) => {
                             const data = chatdata.data();
-                            const detail = $("textarea", {
-                                rows: "1",
-                                class: "detail",
-                                spellcheck: "false",
-                                value: data.text,
-                            });
                             if (data.author == firebase.auth().currentUser.uid) {
                                 target.add(
                                     $("div", {
                                         class: "itemBox chatOwner",
-                                        iden: `i${chatdata.id}`
+                                        idx: `c${chatdata.id}`
                                     }).add(
-                                        detail,
+                                        $("div").add(
+                                            $("span", {
+                                                class: "detail",
+                                                text: data.text,
+                                            })
+                                        ),
                                         $("div", {
                                             class: "handler"
                                         }).add(
@@ -242,10 +241,31 @@ const current = new LiveDataManager({
                                                 type: "button",
                                                 style: "background-image: url(resource/img/icon/edit.png)",
                                                 onclick: async () => {
-                                                    const temp = data;
-                                                    data.text = scan(`[iden=i${chatdata.id}] textarea`).value;
-                                                    chatdata.ref.set(temp);
-                                                    makeToast("해당 채팅의 내용이 변경되였습니다.");
+                                                    let editor = snipe(`[idx=c${chatdata.id}] div *`);
+                                                    if (editor.node.nodeName == "SPAN") {
+                                                        editor = $("textarea", {
+                                                            style: `height: ${editor.node.offsetHeight}px`,
+                                                            class: "detail",
+                                                            spellcheck: "false",
+                                                            rows: "1",
+                                                            onfocus: e => e.target.value = data.text,
+                                                            oninput: e => {
+                                                                e.target.style.height = "auto";
+                                                                e.target.style.height = e.target.scrollHeight + "px";
+                                                            }
+                                                        })
+                                                    } else {
+                                                        const text = editor.node.value;
+                                                        editor = $("span", {
+                                                            class: "detail",
+                                                            text: data.text,
+                                                        })
+                                                        data.text = text;
+                                                        chatdata.ref.set(data);
+                                                        makeToast("해당 채팅의 내용이 변경되었습니다.");
+                                                    }
+                                                    snipe(`[idx=c${chatdata.id}] div`).reset(editor);
+                                                    editor.node.focus();
                                                 }
                                             }),
                                             $("input", {
@@ -258,7 +278,6 @@ const current = new LiveDataManager({
                                         )
                                     )
                                 )
-                                detail.node.style.height = detail.node.scrollHeight + "px";
                             } else if (owner == firebase.auth().currentUser.uid) {
                                 target.add(
                                     $("div", {
@@ -322,19 +341,16 @@ const current = new LiveDataManager({
                                 target.add(
                                     $("div", {
                                         class: "itemBox chatOwner",
-                                        iden: `i${chatdata.id}`
+                                        idx: `l${chatdata.id}`
                                     }).add(
-                                        $("a", {
-                                            href: data.link,
-                                            text: data.link,
-                                            target: "_blank"
-                                        }),
-                                        $("hr"),
-                                        $("input", {
-                                            style: "height: 30px",
-                                            class: "detail",
-                                            value: data.exp
-                                        }),
+                                        $("div").add(
+                                            $("a", {
+                                                class: "detail",
+                                                href: data.link,
+                                                text: data.exp,
+                                                target: "_blank"
+                                            })
+                                        ),
                                         $("div", {
                                             class: "handler"
                                         }).add(
@@ -342,11 +358,30 @@ const current = new LiveDataManager({
                                                 type: "button",
                                                 style: "background-image: url(resource/img/icon/edit.png)",
                                                 onclick: async () => {
-                                                    const temp = data;
-                                                    console.log(`[iden=${chatdata.id}] input`)
-                                                    data.exp = scan(`[iden=i${chatdata.id}] input`).value;
-                                                    chatdata.ref.set(temp);
-                                                    makeToast("해당 링크의 설명이 변경되였습니다.");
+                                                    let editor = snipe(`[idx=l${chatdata.id}] div *`);
+                                                    if (editor.node.nodeName == "A") {
+                                                        editor = $("input", {
+                                                            class: "detail",
+                                                            spellcheck: "false",
+                                                            onfocus: e => e.target.value = data.exp,
+                                                            onkeyup: e => {
+                                                                if (e.code == "Enter") scan(`[idx=l${chatdata.id}] .handler input`).click();
+                                                            }
+                                                        })
+                                                    } else {
+                                                        const text = editor.node.value
+                                                        editor = $("a", {
+                                                            class: "detail",
+                                                            href: data.link,
+                                                            text: text,
+                                                            target: "_blank"
+                                                        })
+                                                        data.exp = text;
+                                                        chatdata.ref.set(data);
+                                                        makeToast("해당 링크의 설명이 변경되었습니다.");
+                                                    }
+                                                    snipe(`[idx=l${chatdata.id}] div`).reset(editor);
+                                                    editor.node.focus();
                                                 }
                                             }),
                                             $("input", {
@@ -375,14 +410,8 @@ const current = new LiveDataManager({
                                         ),
                                         $("a", {
                                             href: data.link,
-                                            text: data.link,
+                                            text: data.exp,
                                             target: "_blank"
-                                        }),
-                                        $("hr"),
-                                        $("span", {
-                                            style: "height: 30px",
-                                            class: "detail",
-                                            innerText: data.exp
                                         }),
                                         $("div", {
                                             class: "handler"
@@ -413,14 +442,8 @@ const current = new LiveDataManager({
                                         ),
                                         $("a", {
                                             href: data.link,
-                                            text: data.link,
+                                            text: data.exp,
                                             target: "_blank"
-                                        }),
-                                        $("hr"),
-                                        $("span", {
-                                            style: "height: 30px",
-                                            class: "detail",
-                                            innerText: data.exp
                                         })
                                     )
                                 )
