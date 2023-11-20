@@ -187,6 +187,7 @@ firebase.auth().onAuthStateChanged(async user => {
                     target.chatroom.add(
                         $("div", {
                             style: "position: relative",
+                            id: `r${index}`
                         }).add(
                             $("input", {
                                 style: "background-image: url(resource/img/icon/server.png); width: calc(100% - 100px)",
@@ -220,7 +221,7 @@ firebase.auth().onAuthStateChanged(async user => {
                                     style: "background-image: url(resource/img/icon/del.png)",
                                     onclick: () => {
                                         if (confirm("정말 해당 채팅방에서 나가시겠습니까?\n데이터는 자동으로 삭제되지 않으며,\n추후 다시 들어올 시 신청을 다시 해야합니다.")) {
-                                            firebase.firestore().collection("chat").doc(scan(`[idx=a${index}] input`).attributes.target.value).get().then(async data => {
+                                            firebase.firestore().collection("chat").doc(scan(`[idx=r${index}] input`).attributes.target.value).get().then(async data => {
                                                 const owner = data.data().owner;
                                                 if (owner == firebase.auth().currentUser.uid) alert("채팅방 관리자는 채팅방에서 나갈 수 없습니다.\n채팅방 메뉴에서 채팅방 삭제를 해야 합니다.");
                                                 else {
