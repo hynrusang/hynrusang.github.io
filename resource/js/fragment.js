@@ -47,7 +47,7 @@ const menuFragment = {
                 type: "button",
                 value: "채팅방 추가하기",
                 onclick: () => {
-                    const name = prompt("추가하길 원하는 채팅방의 id를 입력해주세요.");
+                    const name = prompt("추가하길 원하는 채팅방 아이디를 입력해주세요.");
                     if (name) {
                         firebase.firestore().collection("chat").doc(name).get().then(data => {
                             if (data.data()) {
