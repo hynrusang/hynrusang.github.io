@@ -1,7 +1,7 @@
 const menuFragment = {
     main: new Fragment("menu",
         $("input", {
-            style: "background-image: url(resource/img/icon/data.png); width: calc(100% - 20px)",
+            style: "background-image: url(resource/img/icon/data.png)",
             class: "inputWidget",
             type: "button",
             value: "마이 페이지",

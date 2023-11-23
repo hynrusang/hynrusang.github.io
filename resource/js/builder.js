@@ -264,7 +264,7 @@ firebase.auth().onAuthStateChanged(async user => {
                         }).add(
                             $("input", {
                                 type: "text",
-                                style: "width: 100%; background-image: url(/resource/img/icon/plus.png)",
+                                style: "background-image: url(/resource/img/icon/plus.png)",
                                 class: "inputWidget",
                                 placeholder: "재생목록(또는 동영상) 링크"
                             })
@@ -348,7 +348,7 @@ firebase.auth().onAuthStateChanged(async user => {
                     $("input", { 
                         type: "button",
                         class: "inputWidget",
-                        style: "display: block; background-image: url('/resource/img/icon/lock.png')", 
+                        style: "background-image: url('/resource/img/icon/lock.png')", 
                         value: "비밀번호 변경 이메일 보내기", 
                         onclick: async () => {
                             makeToast("이메일 주소로 비밀번호 초기화 메일을 보내기 시도하는 중입니다.");
@@ -363,7 +363,7 @@ firebase.auth().onAuthStateChanged(async user => {
                     $("input", { 
                         type: "button",
                         class: "inputWidget",
-                        style: "display: block; background-image: url('/resource/img/icon/setting.png')", 
+                        style: "background-image: url('/resource/img/icon/setting.png')", 
                         value: "로그아웃", 
                         onclick: async () => {
                             await firebase.auth().signOut().then(() => {
@@ -375,7 +375,7 @@ firebase.auth().onAuthStateChanged(async user => {
                     $("input", { 
                         type: "button",
                         class: "inputWidget",
-                        style: "display: block; background-image: url('/resource/img/icon/del.png')", 
+                        style: "background-image: url('/resource/img/icon/del.png')", 
                         value: "회원 탈퇴", 
                         onclick: async () => {
                             if (confirm("정말로 이 계정을 삭제하시겠습니까?\n(이 결정은 번복되지 않습니다.)\n(추가로 다시 한 번 물어보는 절차도 없습니다.)")) {
