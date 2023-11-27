@@ -272,7 +272,6 @@ firebase.auth().onAuthStateChanged(async user => {
                         $("input", {
                             type: "button",
                             name: key,
-                            style: "padding-left: 0px;",
                             class: "inputWidget",
                             value: "해당 재생목록 바구니 삭제",
                             onclick: e => {
@@ -303,7 +302,7 @@ firebase.auth().onAuthStateChanged(async user => {
                                 }),
                                 $("input", {
                                     type: "button",
-                                    style: "padding-left: 0px;",
+                                    style: "width: auto; padding-left: 0px;",
                                     class: "inputWidget",
                                     value: "이름 수정",
                                     onclick: () => {
@@ -319,7 +318,7 @@ firebase.auth().onAuthStateChanged(async user => {
                                 }),
                                 $("input", {
                                     type: "button",
-                                    style: "padding-left: 0px;",
+                                    style: "width: auto; padding-left: 0px;",
                                     class: "inputWidget",
                                     value: "재생목록 삭제",
                                     onclick: () => {
