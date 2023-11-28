@@ -23,10 +23,10 @@ const _SComponent = {
     ),
 
     /**
-     * @type {(props: {idx: string, field: Dom, fedit: Function, fdelete: Function}) => Dom}
+     * @type {(props: {idx: string, field: Dom, cls: string?, fedit: Function?, fdelete: Function?}) => Dom}
      */
-    UFrame: ({idx, field, fedit, fdelete}) => $("div", {
-        class: "itemBox",
+    UFrame: ({idx, field, cls = "itemBox", fedit, fdelete}) => $("div", {
+        class: cls,
         id: idx
     }).add(
         $("div").add(field),
@@ -135,5 +135,48 @@ const UComponent = {
                 }
             }
         })
+    },
+    RoomBox: ({id, dataset}) => {
+        const field = $("input", {
+            style: "background-image: url(resource/img/icon/server.png); width: calc(100% - 100px)",
+            class: "inputWidget",
+            type: "button",
+            target: dataset[id].data[0],
+            value: dataset[id].data[1],
+            onclick: e => {
+                scan("[rid=menu]").removeAttribute("open");
+                current.value("tab", "chatroom");
+                current.value("chatroom", e.target.attributes.target.value);
+            }
+        });
+
+        return _SComponent.UFrame({
+            idx: `r${id}`,
+            field: field,
+            cls: null,
+            fedit: () => {
+                const newName = prompt("해당 채팅방의 이름으로 설정할 새로운 이름을 입력해주세요.");
+                if (newName) {
+                    dataset[id].data[1] = newName;
+                    DB.value("chatroom", dataset);
+                    notifyDataChange();
+                }
+            },
+            fdelete: () => {
+                if (confirm("정말 해당 채팅방에서 나가시겠습니까?\n데이터는 자동으로 삭제되지 않으며,\n추후 다시 들어올 시 신청을 다시 해야합니다.")) {
+                    firebase.firestore().collection("chat").doc(field.node.attributes.target.value).get().then(async data => {
+                        const owner = data.data().owner;
+                        if (owner == firebase.auth().currentUser.uid) alert("채팅방 관리자는 채팅방에서 나갈 수 없습니다.\n채팅방 메뉴에서 채팅방 삭제를 해야 합니다.");
+                        else {
+                            await data.ref.collection("enroll").doc(firebase.auth().currentUser.uid).delete();
+                            dataset.splice(id, 1);
+                            DB.value("chatroom", dataset);
+                            notifyDataChange();
+                            current.value("tab", "main");
+                        }
+                    })
+                }
+            }
+        })  
     }
 }
