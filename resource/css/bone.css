@@ -70,9 +70,3 @@ input {
     background-size: 0px;
     background-position: 5px 10px;
 }
-
-@media screen and (max-width: 1000px) {
-    fragment[rid=page] {
-        padding-left: 0px;
-    }
-}
