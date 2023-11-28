@@ -43,7 +43,7 @@ const _SComponent = {
  */
 const UComponent = {
     /**
-     * @type {(dataset: string[]) => Dom}
+     * @type {(dataset: string[]) => Dom[]}
      */
     ChatBox: dataset => dataset.map((data, index) => {
         let field = $("span", {
@@ -91,7 +91,7 @@ const UComponent = {
     }),
 
     /**
-     * @type {(dataset: object[]) => Dom}
+     * @type {(dataset: object[]) => Dom[]}
      */
     LinkBox: dataset => dataset.map((data, index) => {
         let field = $("a", {
@@ -139,7 +139,7 @@ const UComponent = {
     }),
 
     /**
-     * @type {(dataset: object[]) => Dom}
+     * @type {(dataset: object[]) => Dom[]}
      */
     RoomBox: dataset => dataset.map((data, index) => {
         const field = $("input", {
