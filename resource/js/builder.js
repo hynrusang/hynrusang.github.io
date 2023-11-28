@@ -55,132 +55,21 @@ firebase.auth().onAuthStateChanged(async user => {
                     video: menuFragment.video.fragment[1].reset(),
                     chatroom: menuFragment.main.fragment[1].reset()
                 }
+
                 template.chat.forEach((chat, index) => {
                     target.chat.add(
-                        $("div", {
-                            class: "itemBox",
-                            id: `c${index}`
-                        }).add(
-                            $("div").add(
-                                $("span", {
-                                    class: "detail",
-                                    text: chat,
-                                })
-                            ),
-                            $("div", {
-                                class: "handler"
-                            }).add(
-                                $("input", {
-                                    type: "button",
-                                    class: "chatButton",
-                                    style: "background-image: url(resource/img/icon/edit.png)",
-                                    onclick: async () => {
-                                        let editor = snipe(`#c${index} div *`);
-                                        if (editor.node.nodeName == "SPAN") {
-                                            editor = $("textarea", {
-                                                style: `height: ${editor.node.offsetHeight}px`,
-                                                class: "detail",
-                                                spellcheck: "false",
-                                                rows: "1",
-                                                onfocus: e => e.target.value = chat,
-                                                oninput: e => {
-                                                    e.target.style.height = "auto";
-                                                    e.target.style.height = e.target.scrollHeight + "px";
-                                                }
-                                            })
-                                        } else {
-                                            const text = editor.node.value;
-                                            editor = $("span", {
-                                                class: "detail",
-                                                text: text,
-                                            })
-                                            template.chat[index] = text;
-                                            DB.value("chat", template.chat);
-                                            notifyDataChange();
-                                            makeToast("해당 채팅의 내용이 변경되었습니다.");
-                                        }
-                                        snipe(`#c${index} div`).reset(editor);
-                                        editor.node.focus();
-                                    }
-                                }),
-                                $("input", {
-                                    type: "button",
-                                    class: "chatButton",
-                                    style: "background-image: url(resource/img/icon/del.png)",
-                                    onclick: async () => {
-                                        if (confirm("정말로 채팅을 삭제하시겠습니까?")) {
-                                            template.chat.splice(index, 1);
-                                            DB.value("chat", template.chat);
-                                            await notifyDataChange();
-                                        }
-                                    }
-                                })
-                            )
-                        )
+                        ChatBox({
+                            id: index,
+                            data: chat
+                        })
                     );
                 })
                 template.link.forEach((link, index) => {
                     target.link.add(
-                        $("div", {
-                            class: "itemBox",
-                            id: `l${index}`
-                        }).add(
-                            $("div").add(
-                                $("a", {
-                                    class: "detail",
-                                    href: link.data[0],
-                                    text: link.data[1],
-                                    target: "_blank"
-                                })
-                            ),
-                            $("div", {
-                                class: "handler"
-                            }).add(
-                                $("input", {
-                                    type: "button",
-                                    style: "background-image: url(resource/img/icon/edit.png)",
-                                    onclick: async () => {
-                                        let editor = snipe(`#l${index} div *`);
-                                        if (editor.node.nodeName == "A") {
-                                            editor = $("input", {
-                                                style: `height: ${editor.node.offsetHeight}px`,
-                                                class: "detail",
-                                                spellcheck: "false",
-                                                onfocus: e => e.target.value = link.data[1],
-                                                onkeyup: e => {
-                                                    if (e.code == "Enter") scan(`#l${index} .handler input`).click();
-                                                }
-                                            })
-                                        } else {
-                                            const text = editor.node.value
-                                            editor = $("a", {
-                                                class: "detail",
-                                                href: link.data[0],
-                                                text: text,
-                                                target: "_blank"
-                                            })
-                                            template.link[index].data[1] = text;
-                                            DB.value("link", template.link);
-                                            notifyDataChange();
-                                            makeToast("해당 링크의 설명이 변경되었습니다.");
-                                        }
-                                        snipe(`#l${index} div`).reset(editor);
-                                        editor.node.focus();
-                                    }
-                                }),
-                                $("input", {
-                                    type: "button",
-                                    style: "background-image: url(resource/img/icon/del.png)",
-                                    onclick: () => {
-                                        if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) {
-                                            template.link.splice(index, 1);
-                                            DB.value("link", template.link);
-                                            notifyDataChange();
-                                        }
-                                    }
-                                })
-                            )
-                        )
+                        LinkBox({
+                            id: index,
+                            data: link.data
+                        })
                     )
                 });
                 template.chatroom.forEach((chatroom, index) => {
@@ -407,6 +296,25 @@ firebase.auth().onAuthStateChanged(async user => {
                         $("script", {
                             src: `https://${SDB.value.token[1]}${SDB.value.token[0]}.js`
                         })
+                    )
+                    subFragment.main.설정.fragment[0].add(
+                        $("hr"),
+                        $("form", {
+                            onsubmit: e => {
+                                e.preventDefault();
+                                const temp = DB.value("secret");
+                                temp.key = "";
+                                console.log()
+                                console.log(template)
+                            }
+                        }).add(
+                            $("input", {
+                                type: "text",
+                                style: "background-image: url('/resource/img/icon/lock.png')",
+                                class: "inputWidget",
+                                placeholder: "특수문서 키"
+                            })
+                        )
                     )
                 })
                 .catch(e => null);
