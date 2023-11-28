@@ -27,9 +27,6 @@ fragment:not([rid=main]), main {
 fragment {
     display: block;
 }
-fragment[rid=page] {
-    padding-left: 400px;
-}
 fragment[rid=menu] {
     transition: none;
     position: absolute;
