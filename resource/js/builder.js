@@ -58,17 +58,17 @@ firebase.auth().onAuthStateChanged(async user => {
 
                 template.chat.forEach((chat, index) => {
                     target.chat.add(
-                        ChatBox({
+                        UComponent.ChatBox({
                             id: index,
-                            data: chat
+                            dataset: template.chat
                         })
                     );
                 })
                 template.link.forEach((link, index) => {
                     target.link.add(
-                        LinkBox({
+                        UComponent.LinkBox({
                             id: index,
-                            data: link.data
+                            dataset: template.link
                         })
                     )
                 });

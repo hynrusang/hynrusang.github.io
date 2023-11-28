@@ -377,6 +377,7 @@ const current = new LiveDataManager({
                                                         })
                                                         data.exp = text;
                                                         chatdata.ref.set(data);
+                                                        console.dir(chatdata.ref)
                                                         makeToast("해당 링크의 설명이 변경되었습니다.");
                                                     }
                                                     snipe(`#l${chatdata.id} div`).reset(editor);
