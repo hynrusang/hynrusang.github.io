@@ -136,6 +136,10 @@ const UComponent = {
             }
         })
     },
+
+    /**
+     * @type {(props: {id: number, dataset: object[]}) => Dom}
+     */
     RoomBox: ({id, dataset}) => {
         const field = $("input", {
             style: "background-image: url(resource/img/icon/server.png); width: calc(100% - 100px)",
@@ -177,6 +181,6 @@ const UComponent = {
                     })
                 }
             }
-        })  
+        })
     }
 }
