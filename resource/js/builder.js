@@ -56,30 +56,9 @@ firebase.auth().onAuthStateChanged(async user => {
                     chatroom: menuFragment.main.fragment[1].reset()
                 }
 
-                template.chat.forEach((temp, index) => {
-                    target.chat.add(
-                        UComponent.ChatBox({
-                            id: index,
-                            dataset: template.chat
-                        })
-                    );
-                })
-                template.link.forEach((temp, index) => {
-                    target.link.add(
-                        UComponent.LinkBox({
-                            id: index,
-                            dataset: template.link
-                        })
-                    )
-                });
-                template.chatroom.forEach((temp, index) => {
-                    target.chatroom.add(
-                        UComponent.RoomBox({
-                            id: index,
-                            dataset: template.chatroom
-                        })
-                    )
-                })
+                target.chat.add(UComponent.ChatBox(template.chat));
+                target.link.add(UComponent.LinkBox(template.link));
+                target.chatroom.add(UComponent.RoomBox(template.chatroom));
                 for (let key of Object.keys(template.playlist).sort()) {
                     const listcase = $("fieldset", {
                         style: "width: 100%; margin-left: 0px;"
@@ -267,7 +246,6 @@ firebase.auth().onAuthStateChanged(async user => {
                 .catch(e => null);
             menuFragment.main.launch();
             mainFragment.main.launch();
-            scan("[rid=menu]").setAttribute("open", "");
             scan("!footer div input").forEach(obj => obj.onclick = e => current.value("tab", e.target.attributes.target.value));
         } else firebase.auth().signOut();
     }
