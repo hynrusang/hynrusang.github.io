@@ -28,12 +28,12 @@ const _SComponent = {
             type: "button",
             style: "background-image: url(resource/img/icon/edit.png)",
             onclick: fedit
-        }) : fedit,
+        }) : null,
         fdelete ? $("input", {
             type: "button",
             style: "background-image: url(resource/img/icon/del.png)",
             onclick: fdelete
-        }) : fdelete
+        }) : null
     ),
 
     /**
