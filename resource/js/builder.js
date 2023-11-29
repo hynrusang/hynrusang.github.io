@@ -49,7 +49,7 @@ firebase.auth().onAuthStateChanged(async user => {
                     SDB.value = temp;
                 })
                 .catch(e => null);
-            firebase.firestore().collection("user").doc(user.uid).onSnapshot(snapshot => {
+            await firebase.firestore().collection("user").doc(user.uid).onSnapshot(snapshot => {
                 const template = snapshot.data() ? snapshot.data() : DB.toObject();
                 const scrollInfo = {
                     chat: subFragment.main.채팅.fragment[0].node.scrollTop,
