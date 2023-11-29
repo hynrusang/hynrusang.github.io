@@ -1,17 +1,22 @@
 const menuFragment = {
     main: new Fragment("menu",
-        $("input", {
-            style: "background-image: url(resource/img/icon/data.png)",
-            class: "inputWidget",
-            type: "button",
-            value: "마이 페이지",
-            onclick: () => {
-                scan("[rid=menu]").removeAttribute("open");
-                current.value("tab", "main")
-            }
-        }),
         $("div", {
-            style: "height: calc(100% - 180px);"
+            class: "itemBox",
+            style: "padding: 0px;"
+        }).add(
+            $("input", {
+                style: "background-image: url(resource/img/icon/data.png); background-color: aliceblue",
+                class: "inputWidget",
+                type: "button",
+                value: "마이 페이지",
+                onclick: () => {
+                    scan("[rid=menu]").removeAttribute("open");
+                    current.value("tab", "main")
+                }
+            })
+        ),
+        $("div", {
+            style: "height: calc(100% - 190px);"
         }),
         $("div", {
             style: "display: flex; flex-direction: column;"

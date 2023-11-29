@@ -158,7 +158,7 @@ const UComponent = {
         return _SComponent.UFrame({
             idx: `r${index}`,
             field: field,
-            style: "padding: 0px; background-color: inherit;",
+            style: "padding: 0px;",
             fedit: () => {
                 const newName = prompt("해당 채팅방의 이름으로 설정할 새로운 이름을 입력해주세요.");
                 if (newName) {
