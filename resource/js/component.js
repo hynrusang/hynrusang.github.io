@@ -186,6 +186,9 @@ const UComponent = {
     }),
 
     Youtube: {
+        /**
+         * @type {(dataset: object[]) => Dom[]}
+         */
         Frame: dataset => Object.keys(dataset).sort().map(data => $("fieldset", {
             style: "width: 100%; margin-left: 0px;"
         }).add(
@@ -227,6 +230,9 @@ const UComponent = {
             $("div").add(UComponent.Youtube.Item(dataset, data))
         )),
 
+        /**
+         * @type {(dataset: object[], key: string) => Dom[]}
+         */
         Item: (dataset, key) => Object.keys(dataset[key]).sort().map(data => _SComponent.UFrame({
             field: $("a", {
                 text: data,
