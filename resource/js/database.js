@@ -189,7 +189,9 @@ const current = new LiveDataManager({
                                         )
                                     )
                                 }
-                            } else if (data.accept) userBox[0].add(_SComponent.UserProfile(data.name))
+                            } else if (data.accept) userBox[0].add(_SComponent.UserProfile({
+                                name: data.name
+                            }))
                         })
                     }, () => {
                         if (confirm("해당 채팅방은 관리자의 승인이 필요합니다.\n지금 해당 채팅방에 승인 요청을 보내시겠습니까?")) {
