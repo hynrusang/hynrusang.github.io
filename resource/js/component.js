@@ -139,7 +139,7 @@ const UComponent = {
     }),
 
     /**
-     * @type {(dataset: object) => Dom[]}
+     * @type {(dataset: object[]) => Dom[]}
      */
     RoomBox: dataset => dataset.map((data, index) => {
         const field = $("input", {
@@ -231,7 +231,7 @@ const UComponent = {
         )),
 
         /**
-         * @type {(dataset: object[], key: string) => Dom[]}
+         * @type {(dataset: object, key: string) => Dom[]}
          */
         Item: (dataset, key) => Object.keys(dataset[key]).sort().map(data => _SComponent.UFrame({
             field: $("a", {
