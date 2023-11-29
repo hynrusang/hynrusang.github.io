@@ -59,7 +59,7 @@ firebase.auth().onAuthStateChanged(async user => {
                 target.chat.add(UComponent.ChatBox(template.chat));
                 target.link.add(UComponent.LinkBox(template.link));
                 target.chatroom.add(UComponent.RoomBox(template.chatroom));
-                target.video.add(UComponent.Youtube.Frame(template.playlist))
+                target.video.add(UComponent.Youtube.Frame(template.playlist));
                 target.info.add(
                     $("div", {
                         class: "userProfile"
