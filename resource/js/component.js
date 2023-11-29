@@ -139,7 +139,7 @@ const UComponent = {
     }),
 
     /**
-     * @type {(dataset: object[]) => Dom[]}
+     * @type {(dataset: object) => Dom[]}
      */
     RoomBox: dataset => dataset.map((data, index) => {
         const field = $("input", {
@@ -187,7 +187,7 @@ const UComponent = {
 
     Youtube: {
         /**
-         * @type {(dataset: object[]) => Dom[]}
+         * @type {(dataset: object) => Dom[]}
          */
         Frame: dataset => Object.keys(dataset).sort().map(data => $("fieldset", {
             style: "width: 100%; margin-left: 0px;"
