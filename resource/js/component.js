@@ -37,14 +37,15 @@ const _SComponent = {
     ),
 
     /**
-     * @type {(name: string) => Dom}
+     * @type {(props: {name: string, exp: string}) => Dom}
      */
-    UserProfile: name => $("div", {
+    UserProfile: ({name, exp}) => $("div", {
         class: "userProfile"
     }).add(
         $("img"),
         $("span", {
-            html: `uid: <span style="color: red; font-weight: bold;">${name}`
+            text: name,
+            exp: exp
         })
     ),
 
@@ -294,7 +295,9 @@ const UComponent = {
      */
     InfoBox: dataset => {
         let element = [
-            _SComponent.UserProfile(firebase.auth().currentUser.uid),
+            _SComponent.UserProfile({
+                name: firebase.auth().currentUser.uid
+            }),
             _WComponent.WidgetButton({
                 icon: "password",
                 text: "비밀번호 변경 이메일 보내기",

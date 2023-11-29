@@ -157,15 +157,7 @@ const current = new LiveDataManager({
                                         $("div", {
                                             style: "position: relative;"
                                         }).add(
-                                            $("div", {
-                                                style: "width: calc(100% - 100px)",
-                                                class: "userProfile"
-                                            }).add(
-                                                $("img"),
-                                                $("span", {
-                                                    text: data.name
-                                                })
-                                            ),
+                                            _SComponent.UserProfile(data.name),
                                             $("div", {
                                                 class: "handler"
                                             }).add(
@@ -195,18 +187,7 @@ const current = new LiveDataManager({
                                         )
                                     )
                                 }
-                            } else if (data.accept) {
-                                userBox[0].add(
-                                    $("div", {
-                                        class: "userProfile"
-                                    }).add(
-                                        $("img"),
-                                        $("span", {
-                                            text: data.name
-                                        })
-                                    )
-                                )
-                            }
+                            } else if (data.accept) userBox[0].add(_SComponent.UserProfile(data.name))
                         })
                     }, () => {
                         if (confirm("해당 채팅방은 관리자의 승인이 필요합니다.\n지금 해당 채팅방에 승인 요청을 보내시겠습니까?")) {
@@ -283,14 +264,9 @@ const current = new LiveDataManager({
                                     $("div", {
                                         class: "itemBox chatItem",
                                     }).add(
-                                        $("div", {
-                                            class: "userProfile"
-                                        }).add(
-                                            $("img"),
-                                            $("span", {
-                                                exp: `${data.author}->{${data.author}}`
-                                            })
-                                        ),
+                                        _SComponent.UserProfile({
+                                            exp: `${data.author}->{${data.author}}`
+                                        }),
                                         $("span", {
                                             class: "detail",
                                             innerText: data.text,
@@ -313,14 +289,9 @@ const current = new LiveDataManager({
                                     $("div", {
                                         class: "itemBox chatItem",
                                     }).add(
-                                        $("div", {
-                                            class: "userProfile"
-                                        }).add(
-                                            $("img"),
-                                            $("span", {
-                                                exp: `${data.author}->{${data.author}}`
-                                            })
-                                        ),
+                                        _SComponent.UserProfile({
+                                            exp: `${data.author}->{${data.author}}`
+                                        }),
                                         $("span", {
                                             class: "detail",
                                             innerText: data.text,
@@ -400,14 +371,9 @@ const current = new LiveDataManager({
                                         class: "itemBox chatItem",
                                         iden: chatdata.id
                                     }).add(
-                                        $("div", {
-                                            class: "userProfile"
-                                        }).add(
-                                            $("img"),
-                                            $("span", {
-                                                exp: `${data.author}->{${data.author}}`
-                                            })
-                                        ),
+                                        _SComponent.UserProfile({
+                                            exp: `${data.author}->{${data.author}}`
+                                        }),
                                         $("a", {
                                             href: data.link,
                                             text: data.exp,
@@ -432,14 +398,9 @@ const current = new LiveDataManager({
                                         class: "itemBox chatItem",
                                         iden: chatdata.id
                                     }).add(
-                                        $("div", {
-                                            class: "userProfile"
-                                        }).add(
-                                            $("img"),
-                                            $("span", {
-                                                exp: `${data.author}->{${data.author}}`
-                                            })
-                                        ),
+                                        _SComponent.UserProfile({
+                                            exp: `${data.author}->{${data.author}}`
+                                        }),
                                         $("a", {
                                             href: data.link,
                                             text: data.exp,
