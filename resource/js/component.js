@@ -183,5 +183,81 @@ const UComponent = {
                 }
             }
         })
-    })
+    }),
+
+    Youtube: {
+        Frame: dataset => Object.keys(dataset).sort().map(data => $("fieldset", {
+            style: "width: 100%; margin-left: 0px;"
+        }).add(
+            $("legend", {
+                text: data
+            }),
+            $("form", {
+                onsubmit: e => {
+                    e.preventDefault();
+                    if (Object.values(dataset[data]).includes(e.target[0].value)) makeToast("해당 재생목록은 이미 재생목록 바구니 내에 존재합니다.");
+                    else if (e.target[0].value) {
+                        dataset[data][e.target[0].value] = e.target[0].value;
+                        DB.value("playlist", dataset);
+                        notifyDataChange();
+                    }
+                }
+            }).add(
+                $("input", {
+                    type: "text",
+                    style: "background-image: url(/resource/img/icon/plus.png)",
+                    class: "inputWidget",
+                    placeholder: "재생목록(또는 동영상) 링크"
+                })
+            ),
+            $("input", {
+                type: "button",
+                style: "padding-left: 0px; width: auto;",
+                class: "inputWidget",
+                value: "해당 재생목록 바구니 삭제",
+                onclick: e => {
+                    e.preventDefault();
+                    if (confirm("정말 해당 재생목록 바구니를 삭제하시겠습니까?")) {
+                        delete dataset[data];
+                        DB.value("playlist", dataset);
+                        notifyDataChange();
+                    }
+                }
+            }),
+            $("div").add(UComponent.Youtube.Item(dataset, data))
+        )),
+
+        Item: (dataset, key) => Object.keys(dataset[key]).sort().map(data => _SComponent.UFrame({
+            field: $("a", {
+                text: data,
+                style: "width: 100%; display: inline-block;",
+                href: dataset[key][data],
+                onclick: e => {
+                    e.preventDefault();
+                    const href = e.target.href.includes("list=") ? `${e.target.href.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : e.target.href.replace("m.", "www.").replace("watch?v=", "embed/").split("&")[0];
+                    scan("main iframe").src = href;
+                    scan("main span").innerText = `${key}: ${data}`;
+                    scan("[rid=menu]").removeAttribute("open");
+                }
+            }),
+            style: "background-color: inherit",
+            fedit: () => {
+                const name = prompt("재생목록의 이름을 뭘로 변경하시겠습니까?");
+                if (dataset[key][name]) makeToast("해당 이름은 이미 재생목록 바구니 내에 존재합니다.");
+                else if (name) {
+                    dataset[key][name] = dataset[key][data];
+                    delete dataset[key][data];
+                    DB.value("playlist", dataset);
+                    notifyDataChange();
+                }
+            },
+            fdelete: () => {
+                if (confirm("정말 해당 재생목록을 삭제하시겠습니까?\n(해당 결정은 되돌릴 수 없습니다.)")) {
+                    delete dataset[key][data];
+                    DB.value("playlist", dataset);
+                    notifyDataChange();
+                }
+            }
+        }))
+    }
 }
