@@ -246,7 +246,6 @@ const UComponent = {
                     scan("[rid=menu]").removeAttribute("open");
                 }
             }),
-            style: "background-color: inherit",
             fedit: () => {
                 const name = prompt("재생목록의 이름을 뭘로 변경하시겠습니까?");
                 if (dataset[key][name]) makeToast("해당 이름은 이미 재생목록 바구니 내에 존재합니다.");
