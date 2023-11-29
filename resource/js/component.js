@@ -189,9 +189,7 @@ const UComponent = {
         /**
          * @type {(dataset: object) => Dom[]}
          */
-        Frame: dataset => Object.keys(dataset).sort().map(data => $("fieldset", {
-            style: "width: 100%; margin-left: 0px;"
-        }).add(
+        Frame: dataset => Object.keys(dataset).sort().map(data => $("fieldset").add(
             $("legend", {
                 text: data
             }),
