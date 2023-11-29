@@ -266,3 +266,10 @@ const UComponent = {
         }))
     }
 }
+
+/**
+ * about global interface component
+ */
+const GComponent = {
+
+}
