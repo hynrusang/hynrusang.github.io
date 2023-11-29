@@ -157,7 +157,9 @@ const current = new LiveDataManager({
                                         $("div", {
                                             style: "position: relative;"
                                         }).add(
-                                            _SComponent.UserProfile(data.name),
+                                            _SComponent.UserProfile({
+                                                name: data.name
+                                            }),
                                             $("div", {
                                                 class: "handler"
                                             }).add(
