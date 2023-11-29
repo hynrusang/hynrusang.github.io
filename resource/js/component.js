@@ -156,7 +156,6 @@ const UComponent = {
         });
 
         return _SComponent.UFrame({
-            idx: `r${index}`,
             field: field,
             style: "padding: 0px;",
             fedit: () => {
