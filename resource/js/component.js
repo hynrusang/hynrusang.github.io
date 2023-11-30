@@ -50,7 +50,7 @@ const _SComponent = {
     ),
 
     /**
-     * @type {(props: {idx: string, field: Dom, style: string?, fedit: Function?, fdelete: Function?}) => Dom}
+     * @type {(props: {idx: string?, field: Dom, style: string?, fedit: Function?, fdelete: Function?}) => Dom}
      */
     UFrame: ({idx, field, style, fedit, fdelete}) => $("div", {
         class: "itemBox",
