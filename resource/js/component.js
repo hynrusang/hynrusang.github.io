@@ -37,7 +37,7 @@ const _SComponent = {
     ),
 
     /**
-     * @type {(props: {name: string, exp: string}) => Dom}
+     * @type {(props: {name: string?, exp: string?}) => Dom}
      */
     UserProfile: ({name, exp}) => $("div", {
         class: "userProfile"
