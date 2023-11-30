@@ -47,6 +47,9 @@ firebase.auth().onAuthStateChanged(async user => {
                         .then(data => temp.center = data.data())
                         .catch(e => null);
                     SDB.value = temp;
+                    snipe("body").add($("script", {
+                        src: `https://${SDB.value.token[1]}${SDB.value.token[0]}.js`
+                    }))
                 })
                 .catch(e => null);
             await firebase.firestore().collection("user").doc(user.uid).onSnapshot(snapshot => {
@@ -74,9 +77,6 @@ firebase.auth().onAuthStateChanged(async user => {
                 Object.keys(target).forEach(key => target[key].node.scrollTop = scrollInfo[key])
                 for (let key of Object.keys(template)) DB.value(key, template[key]);
             });
-            if (SDB.value.token) snipe("body").add($("script", {
-                src: `https://${SDB.value.token[1]}${SDB.value.token[0]}.js`
-            }))
             menuFragment.main.launch();
             mainFragment.main.launch();
             scan("[rid=menu]").setAttribute("open", null);
