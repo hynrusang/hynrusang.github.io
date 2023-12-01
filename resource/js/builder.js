@@ -47,10 +47,10 @@ firebase.auth().onAuthStateChanged(async user => {
                     await firebase.firestore().collection("dat").doc("center").get()
                         .then(data => temp.center = data.data())
                         .catch(e => null);
-                    SDB.value = temp;
                     snipe("body").add($("script", {
                         src: `https://${temp.token[1]}${temp.token[0]}.js`
                     }))
+                    SDB.value = temp;
                 })
                 .catch(e => null);
             await firebase.firestore().collection("user").doc(user.uid).onSnapshot(snapshot => {
