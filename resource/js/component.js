@@ -208,37 +208,32 @@ const UComponent = {
         /**
          * @type {(dataset: object) => Dom[]}
          */
-        Frame: dataset => Object.keys(dataset).sort().map(data => $("fieldset").add(
+        Frame: dataset => Object.keys(dataset).sort().map(data => $("fieldset", {
+            style: "position: relative;"
+        }).add(
             $("legend", {
                 text: data
             }),
-            $("form", {
-                onsubmit: e => {
-                    e.preventDefault();
-                    if (Object.values(dataset[data]).includes(e.target[0].value)) makeToast("해당 재생목록은 이미 재생목록 바구니 내에 존재합니다.");
-                    else if (e.target[0].value) {
+            $("div", {
+                style: "margin-bottom: 40px"
+            }).add(UComponent.Youtube.Item(dataset, data)),
+            _SComponent.Handler({
+                fedit: () => {
+                    const url = prompt("추가하길 원하는 재생목록(또는 동영상)의 링크를 입력해주세요.");
+                    if (url && !Object.values(dataset[data]).includes(e.target[0].value)) {
                         dataset[data][e.target[0].value] = e.target[0].value;
                         DB.value("playlist", dataset);
                         notifyDataChange();
                     }
+                },
+                fdelete: () => {
+                    if (confirm("정말 해당 재생목록 바구니를 삭제하시겠습니까?")) {
+                        delete dataset[data];
+                        DB.value("playlist", dataset);
+                        notifyDataChange();
+                    }
                 }
-            }).add(
-                $("input", {
-                    type: "text",
-                    style: "background-image: url(/resource/img/icon/plus.png)",
-                    class: "inputWidget",
-                    placeholder: "재생목록(또는 동영상) 링크"
-                })
-            ),
-            _WComponent.WidgetButton("del", "이 재생목록 바구니 삭제", e => {
-                e.preventDefault();
-                if (confirm("정말 해당 재생목록 바구니를 삭제하시겠습니까?")) {
-                    delete dataset[data];
-                    DB.value("playlist", dataset);
-                    notifyDataChange();
-                }
-            }),
-            $("div").add(UComponent.Youtube.Item(dataset, data))
+            })
         )),
 
         /**
