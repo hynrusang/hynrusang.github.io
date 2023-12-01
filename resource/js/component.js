@@ -47,12 +47,17 @@ const SComponent = {
             text: name,
             exp: exp
         })
-    ),
+    )
+}
 
+/**
+ * about user interface component
+ */
+const UComponent = {
     /**
      * @type {(props: {idx: string?, field: Dom, style: string?, fedit: Function?, fdelete: Function?}) => Dom}
      */
-    UFrame: ({idx, field, style, fedit, fdelete}) => $("div", {
+    Frame: ({idx, field, style, fedit, fdelete}) => $("div", {
         class: "itemBox",
         style: style,
         id: idx
@@ -62,13 +67,8 @@ const SComponent = {
             fedit: fedit,
             fdelete: fdelete
         })
-    )
-}
-
-/**
- * about user interface component
- */
-const UComponent = {
+    ),
+    
     /**
      * @type {(dataset: string[]) => Dom[]}
      */
@@ -78,7 +78,7 @@ const UComponent = {
             text: data,
         });
 
-        return SComponent.UFrame({
+        return UComponent.Frame({
             idx: `c${index}`,
             field: field,
             fedit: () => {
@@ -128,7 +128,7 @@ const UComponent = {
             target: "_blank"
         });
 
-        return SComponent.UFrame({
+        return UComponent.Frame({
             idx: `l${index}`,
             field: field,
             fedit: () => {
@@ -175,7 +175,7 @@ const UComponent = {
             current.value("chatroom", data.data[0]);
         });
 
-        return SComponent.UFrame({
+        return UComponent.Frame({
             field: field,
             style: "padding: 0px;",
             fedit: () => {
@@ -239,7 +239,7 @@ const UComponent = {
         /**
          * @type {(dataset: object, key: string) => Dom[]}
          */
-        Item: (dataset, key) => Object.keys(dataset[key]).sort().map(data => SComponent.UFrame({
+        Item: (dataset, key) => Object.keys(dataset[key]).sort().map(data => UComponent.Frame({
             field: $("a", {
                 text: data,
                 style: "width: 100%; padding: 4px; display: inline-block;",
