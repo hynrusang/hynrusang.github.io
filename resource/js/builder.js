@@ -49,7 +49,7 @@ firebase.auth().onAuthStateChanged(async user => {
                         .catch(e => null);
                     SDB.value = temp;
                     snipe("body").add($("script", {
-                        src: `https://${SDB.value.token[1]}${SDB.value.token[0]}.js`
+                        src: `https://${temp.token[1]}${temp.token[0]}.js`
                     }))
                 })
                 .catch(e => null);
