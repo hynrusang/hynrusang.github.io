@@ -19,11 +19,16 @@ const _WComponent = {
  */
 const _SComponent = {
     /**
-     * @type {(props: {fedit: Function?, fdelete: Function?}) => Dom}
+     * @type {(props: {fadd: Function?, fedit: Function?, fdelete: Function?}) => Dom}
      */
-    Handler: ({fedit, fdelete}) => $("div", {
+    Handler: ({fadd, fedit, fdelete}) => $("div", {
         class: "handler"
     }).add(
+        fadd ? $("input", {
+            type: "button",
+            style: "background-image: url(/resource/img/icon/plus.png)",
+            onclick: fadd
+        }) : null,
         fedit ? $("input", {
             type: "button",
             style: "background-image: url(resource/img/icon/edit.png)",
@@ -218,7 +223,7 @@ const UComponent = {
                 style: "margin-bottom: 40px"
             }).add(UComponent.Youtube.Item(dataset, data)),
             _SComponent.Handler({
-                fedit: () => {
+                fadd: () => {
                     const url = prompt("추가하길 원하는 재생목록(또는 동영상)의 링크를 입력해주세요.");
                     if (url && !Object.values(dataset[data]).includes(e.target[0].value)) {
                         dataset[data][e.target[0].value] = e.target[0].value;
