@@ -230,7 +230,7 @@ const UComponent = {
                     placeholder: "재생목록(또는 동영상) 링크"
                 })
             ),
-            _WComponent.WidgetButton(null, "이 재생목록 바구니 삭제", e => {
+            _WComponent.WidgetButton("del", "이 재생목록 바구니 삭제", e => {
                 e.preventDefault();
                 if (confirm("정말 해당 재생목록 바구니를 삭제하시겠습니까?")) {
                     delete dataset[data];
