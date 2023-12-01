@@ -241,9 +241,9 @@ const UComponent = {
          */
         Item: (dataset, key) => Object.keys(dataset[key]).sort().map(data => UComponent.Frame({
             field: $("a", {
-                text: data,
-                style: "width: 100%; padding: 4px; display: inline-block;",
+                class: "details",
                 href: dataset[key][data],
+                text: data,
                 onclick: e => {
                     e.preventDefault();
                     const href = e.target.href.includes("list=") ? `${e.target.href.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : e.target.href.replace("m.", "www.").replace("watch?v=", "embed/").split("&")[0];
