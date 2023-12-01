@@ -58,7 +58,7 @@ const SComponent = {
         id: idx
     }).add(
         $("div").add(field),
-        _SComponent.Handler({
+        SComponent.Handler({
             fedit: fedit,
             fdelete: fdelete
         })
