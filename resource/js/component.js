@@ -237,7 +237,7 @@ const UComponent = {
                     DB.value("playlist", dataset);
                     notifyDataChange();
                 }
-            ),
+            }),
             $("div").add(UComponent.Youtube.Item(dataset, data))
         )),
 
@@ -288,12 +288,12 @@ const UComponent = {
             _WComponent.WidgetButton("password", "비밀번호 변경 이메일 보내기", () => {
                 makeToast("이메일 주소로 비밀번호 초기화 메일을 보내기 시도하는 중입니다.");
                 firebase.auth().sendPasswordResetEmail(firebase.auth().currentUser.email)
-                    .then(() => makeToast("이메일 주소로 초기화 메일을 보냈습니다."))
-                    .catch(e => {
-                        if (e.code == "auth/invalid-email") makeToast("잘못된 이메일 주소입니다.");
-                        else if (e.code == "auth/user-not-found") makeToast("해당 계정은 존재하지 않습니다.");
+                .then(() => makeToast("이메일 주소로 초기화 메일을 보냈습니다."))
+                .catch(e => {
+                    if (e.code == "auth/invalid-email") makeToast("잘못된 이메일 주소입니다.");
+                    else if (e.code == "auth/user-not-found") makeToast("해당 계정은 존재하지 않습니다.");
                 })
-            ),
+            }),
             _WComponent.WidgetButton("setting", "로그아웃", () => firebase.auth().signOut().then(() => location.reload())),
             _WComponent.WidgetButton("del", "회원 탈퇴", async () => {
                 if (confirm("정말로 이 계정을 삭제하시겠습니까?\n(이 결정은 번복되지 않습니다.)\n(추가로 다시 한 번 물어보는 절차도 없습니다.)")) {
@@ -304,7 +304,7 @@ const UComponent = {
                         location.reload();
                     }).catch(e => alert(e.code == "auth/requires-recent-login" ? "사용자의 계정을 삭제하는데 실패했습니다.\n사유: 계정 삭제 작업은 중요하므로 최근 인증이 필요합니다.\n재 로그인한 후, 다시 계정 삭제를 진행해주세요." : "알 수 없는 이유로 회원 탈퇴에 실패하였습니다. 다시 한 번 시도해주세요."));
                 }
-            )
+            })
         ]
         if (SDB.value.token) element = element.concat([
             $("hr"),
