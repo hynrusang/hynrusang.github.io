@@ -3,9 +3,9 @@
  */
 const _WComponent = {
     /**
-     * @type {(props: {icon: string, text: string, fonclick: Function}) => Dom}
+     * @type {(icon: string, text: string, fonclick: Function) => Dom}
      */
-    WidgetButton: ({icon, text, fonclick}) => $("input", { 
+    WidgetButton: (icon, text, fonclick) => $("input", { 
         type: "button",
         class: "inputWidget",
         style: `background-image: url('/resource/img/icon/${icon}.png')`, 
@@ -169,17 +169,10 @@ const UComponent = {
      * @type {(dataset: object[]) => Dom[]}
      */
     RoomBox: dataset => dataset.map((data, index) => {
-        const field = $("input", {
-            style: "background-image: url(resource/img/icon/server.png); width: calc(100% - 100px)",
-            class: "inputWidget",
-            type: "button",
-            target: data.data[0],
-            value: data.data[1],
-            onclick: e => {
-                scan("[rid=menu]").removeAttribute("open");
-                current.value("tab", "chatroom");
-                current.value("chatroom", e.target.attributes.target.value);
-            }
+        const field = _WComponent.WidgetButton("server", data.data[1], e => {
+            scan("[rid=menu]").removeAttribute("open");
+            current.value("tab", "chatroom");
+            current.value("chatroom", data.data[0]);
         });
 
         return _SComponent.UFrame({
@@ -237,20 +230,14 @@ const UComponent = {
                     placeholder: "재생목록(또는 동영상) 링크"
                 })
             ),
-            $("input", {
-                type: "button",
-                style: "padding-left: 0px; width: auto;",
-                class: "inputWidget",
-                value: "해당 재생목록 바구니 삭제",
-                onclick: e => {
-                    e.preventDefault();
-                    if (confirm("정말 해당 재생목록 바구니를 삭제하시겠습니까?")) {
-                        delete dataset[data];
-                        DB.value("playlist", dataset);
-                        notifyDataChange();
-                    }
+            _WComponent.WidgetButton(null, "이 재생목록 바구니 삭제", e => {
+                e.preventDefault();
+                if (confirm("정말 해당 재생목록 바구니를 삭제하시겠습니까?")) {
+                    delete dataset[data];
+                    DB.value("playlist", dataset);
+                    notifyDataChange();
                 }
-            }),
+            ),
             $("div").add(UComponent.Youtube.Item(dataset, data))
         )),
 
@@ -298,39 +285,26 @@ const UComponent = {
             _SComponent.UserProfile({
                 name: firebase.auth().currentUser.uid
             }),
-            _WComponent.WidgetButton({
-                icon: "password",
-                text: "비밀번호 변경 이메일 보내기",
-                fonclick: async () => {
-                    makeToast("이메일 주소로 비밀번호 초기화 메일을 보내기 시도하는 중입니다.");
-                    await firebase.auth().sendPasswordResetEmail(firebase.auth().currentUser.email)
-                        .then(() => makeToast("이메일 주소로 초기화 메일을 보냈습니다."))
-                        .catch(e => {
-                            if (e.code == "auth/invalid-email") makeToast("잘못된 이메일 주소입니다.");
-                            else if (e.code == "auth/user-not-found") makeToast("해당 계정은 존재하지 않습니다.");
-                    })
+            _WComponent.WidgetButton("password", "비밀번호 변경 이메일 보내기", () => {
+                makeToast("이메일 주소로 비밀번호 초기화 메일을 보내기 시도하는 중입니다.");
+                firebase.auth().sendPasswordResetEmail(firebase.auth().currentUser.email)
+                    .then(() => makeToast("이메일 주소로 초기화 메일을 보냈습니다."))
+                    .catch(e => {
+                        if (e.code == "auth/invalid-email") makeToast("잘못된 이메일 주소입니다.");
+                        else if (e.code == "auth/user-not-found") makeToast("해당 계정은 존재하지 않습니다.");
+                })
+            ),
+            _WComponent.WidgetButton("setting", "로그아웃", () => firebase.auth().signOut().then(() => location.reload())),
+            _WComponent.WidgetButton("del", "회원 탈퇴", async () => {
+                if (confirm("정말로 이 계정을 삭제하시겠습니까?\n(이 결정은 번복되지 않습니다.)\n(추가로 다시 한 번 물어보는 절차도 없습니다.)")) {
+                    makeToast("잠시만 기다려 주십시오. 정보가 곧 삭제됩니다.");
+                    await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).delete().then(() => makeToast("사용자의 데이터를 모두 삭제하는데 성공하였습니다."));
+                    firebase.auth().currentUser.delete().then(() => {
+                        alert("사이트에서 당신의 정보를 삭제했습니다.\n(다음에 뵙기를 믿습니다.)");
+                        location.reload();
+                    }).catch(e => alert(e.code == "auth/requires-recent-login" ? "사용자의 계정을 삭제하는데 실패했습니다.\n사유: 계정 삭제 작업은 중요하므로 최근 인증이 필요합니다.\n재 로그인한 후, 다시 계정 삭제를 진행해주세요." : "알 수 없는 이유로 회원 탈퇴에 실패하였습니다. 다시 한 번 시도해주세요."));
                 }
-            }),
-            _WComponent.WidgetButton({
-                icon: "setting",
-                text: "로그아웃",
-                fonclick: () => firebase.auth().signOut().then(() => location.reload())
-            }),
-            _WComponent.WidgetButton({
-                icon: "del",
-                text: "외원 탈퇴",
-                fonclick: async () => {
-                    if (confirm("정말로 이 계정을 삭제하시겠습니까?\n(이 결정은 번복되지 않습니다.)\n(추가로 다시 한 번 물어보는 절차도 없습니다.)")) {
-                        makeToast("잠시만 기다려 주십시오. 정보가 곧 삭제됩니다.");
-                        await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).delete().then(() => makeToast("사용자의 데이터를 모두 삭제하는데 성공하였습니다."));
-                        await firebase.auth().currentUser.delete().then(() => {
-                            alert("사이트에서 당신의 정보를 삭제했습니다.\n(다음에 뵙기를 믿습니다.)");
-                            location.reload();
-                        })
-                        .catch(e => alert(e.code == "auth/requires-recent-login" ? "사용자의 계정을 삭제하는데 실패했습니다.\n사유: 계정 삭제 작업은 중요하므로 최근 인증이 필요합니다.\n재 로그인한 후, 다시 계정 삭제를 진행해주세요." : "알 수 없는 이유로 회원 탈퇴에 실패하였습니다. 다시 한 번 시도해주세요."));
-                    }
-                }
-            })
+            )
         ]
         if (SDB.value.token) element = element.concat([
             $("hr"),
