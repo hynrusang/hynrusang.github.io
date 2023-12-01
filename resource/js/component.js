@@ -1,7 +1,7 @@
 /**
- * about widget interface component
+ * about shared interface component
  */
-const _WComponent = {
+const SComponent = {
     /**
      * @type {(icon: string, text: string, fonclick: Function) => Dom}
      */
@@ -11,13 +11,8 @@ const _WComponent = {
         style: `background-image: url('/resource/img/icon/${icon}.png')`, 
         value: text,
         onclick: fonclick
-    })
-}
-
-/**
- * about shared interface component
- */
-const _SComponent = {
+    }),
+    
     /**
      * @type {(props: {fadd: Function?, fedit: Function?, fdelete: Function?}) => Dom}
      */
@@ -83,7 +78,7 @@ const UComponent = {
             text: data,
         });
 
-        return _SComponent.UFrame({
+        return SComponent.UFrame({
             idx: `c${index}`,
             field: field,
             fedit: () => {
@@ -133,7 +128,7 @@ const UComponent = {
             target: "_blank"
         });
 
-        return _SComponent.UFrame({
+        return SComponent.UFrame({
             idx: `l${index}`,
             field: field,
             fedit: () => {
@@ -174,13 +169,13 @@ const UComponent = {
      * @type {(dataset: object[]) => Dom[]}
      */
     RoomBox: dataset => dataset.map((data, index) => {
-        const field = _WComponent.WidgetButton("server", data.data[1], e => {
+        const field = SComponent.WidgetButton("server", data.data[1], e => {
             scan("[rid=menu]").removeAttribute("open");
             current.value("tab", "chatroom");
             current.value("chatroom", data.data[0]);
         });
 
-        return _SComponent.UFrame({
+        return SComponent.UFrame({
             field: field,
             style: "padding: 0px;",
             fedit: () => {
@@ -222,7 +217,7 @@ const UComponent = {
             $("div", {
                 style: "margin-bottom: 40px"
             }).add(UComponent.Youtube.Item(dataset, data)),
-            _SComponent.Handler({
+            SComponent.Handler({
                 fadd: () => {
                     const url = prompt("추가하길 원하는 재생목록(또는 동영상)의 링크를 입력해주세요.");
                     if (url && !Object.values(dataset[data]).includes(url)) {
@@ -282,10 +277,10 @@ const UComponent = {
      */
     InfoBox: dataset => {
         let element = [
-            _SComponent.UserProfile({
+            SComponent.UserProfile({
                 name: firebase.auth().currentUser.uid
             }),
-            _WComponent.WidgetButton("password", "비밀번호 변경 이메일 보내기", () => {
+            SComponent.WidgetButton("password", "비밀번호 변경 이메일 보내기", () => {
                 makeToast("이메일 주소로 비밀번호 초기화 메일을 보내기 시도하는 중입니다.");
                 firebase.auth().sendPasswordResetEmail(firebase.auth().currentUser.email)
                 .then(() => makeToast("이메일 주소로 초기화 메일을 보냈습니다."))
@@ -294,8 +289,8 @@ const UComponent = {
                     else if (e.code == "auth/user-not-found") makeToast("해당 계정은 존재하지 않습니다.");
                 })
             }),
-            _WComponent.WidgetButton("setting", "로그아웃", () => firebase.auth().signOut().then(() => location.reload())),
-            _WComponent.WidgetButton("del", "회원 탈퇴", async () => {
+            SComponent.WidgetButton("setting", "로그아웃", () => firebase.auth().signOut().then(() => location.reload())),
+            SComponent.WidgetButton("del", "회원 탈퇴", async () => {
                 if (confirm("정말로 이 계정을 삭제하시겠습니까?\n(이 결정은 번복되지 않습니다.)\n(추가로 다시 한 번 물어보는 절차도 없습니다.)")) {
                     makeToast("잠시만 기다려 주십시오. 정보가 곧 삭제됩니다.");
                     await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).delete().then(() => makeToast("사용자의 데이터를 모두 삭제하는데 성공하였습니다."));
