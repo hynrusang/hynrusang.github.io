@@ -28,6 +28,7 @@ const makeToast = message => {
         opacity: 0
     }], 1000)
 };
+const makeModal = null;
 scan(".menuicon").onclick = () => {
     if (!scan("[rid=menu]").attributes.open) scan("[rid=menu]").setAttribute("open", null);
     else scan("[rid=menu]").removeAttribute("open");
