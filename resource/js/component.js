@@ -239,7 +239,7 @@ const UComponent = {
         /**
          * @type {(dataset: object, key: string) => Dom[]}
          */
-        Item: (dataset, key) => Object.keys(dataset[key]).sort().map(data => _SComponent.UFrame({
+        Item: (dataset, key) => Object.keys(dataset[key]).sort().map(data => SComponent.UFrame({
             field: $("a", {
                 text: data,
                 style: "width: 100%; padding: 4px; display: inline-block;",
