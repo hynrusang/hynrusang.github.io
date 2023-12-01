@@ -15,53 +15,44 @@ const menuFragment = {
         $("div", {
             style: "display: flex; flex-direction: column;"
         }).add(
-            $("input", {
-                class: "inputWidget",
-                type: "button",
-                value: "채팅방 새로 만들기",
-                onclick: () => {
-                    if (confirm("정말로 채팅방을 새로 만드시겠습니까?")) {
-                        firebase.firestore().collection("chat").add({
-                            owner: firebase.auth().currentUser.uid
-                        }).then(doc => {
-                            doc.collection("enroll").doc(firebase.auth().currentUser.uid).set({
-                                accept: true,
-                                name: firebase.auth().currentUser.email
-                            })
+            SComponent.WidgetButton("plus", "채팅방 새로 만들기", () => {
+                if (confirm("정말로 채팅방을 새로 만드시겠습니까?")) {
+                    firebase.firestore().collection("chat").add({
+                        owner: firebase.auth().currentUser.uid
+                    })
+                    .then(doc => {
+                        doc.collection("enroll").doc(firebase.auth().currentUser.uid).set({
+                            accept: true,
+                            name: firebase.auth().currentUser.email
+                        })
+                        const temp = DB.value("chatroom");
+                        temp.unshift({
+                            data: [
+                                doc.id,
+                                doc.id
+                            ]
+                        })
+                        DB.value("chatroom", temp);
+                        notifyDataChange();
+                    })
+                }
+            }),
+            Scomponent.WidgetButton("plus", "채팅방 추가하기", () => {
+                const name = prompt("추가하길 원하는 채팅방 아이디를 입력해주세요.");
+                if (name) {
+                    firebase.firestore().collection("chat").doc(name).get().then(data => {
+                        if (data.data()) {
                             const temp = DB.value("chatroom");
                             temp.unshift({
                                 data: [
-                                    doc.id,
-                                    doc.id
+                                    name,
+                                    name
                                 ]
                             })
                             DB.value("chatroom", temp);
                             notifyDataChange();
-                        })
-                    }
-                }
-            }),
-            $("input", {
-                class: "inputWidget",
-                type: "button",
-                value: "채팅방 추가하기",
-                onclick: () => {
-                    const name = prompt("추가하길 원하는 채팅방 아이디를 입력해주세요.");
-                    if (name) {
-                        firebase.firestore().collection("chat").doc(name).get().then(data => {
-                            if (data.data()) {
-                                const temp = DB.value("chatroom");
-                                temp.unshift({
-                                    data: [
-                                        name,
-                                        name
-                                    ]
-                                })
-                                DB.value("chatroom", temp);
-                                notifyDataChange();
-                            } else alert("해당 채팅방은 존재하지 않습니다.")
-                        })
-                    }
+                        } else alert("해당 채팅방은 존재하지 않습니다.")
+                    })
                 }
             })
         )
