@@ -37,7 +37,7 @@ const menuFragment = {
                     })
                 }
             }),
-            Scomponent.WidgetButton("plus", "채팅방 추가하기", () => {
+            SComponent.WidgetButton("plus", "채팅방 추가하기", () => {
                 const name = prompt("추가하길 원하는 채팅방 아이디를 입력해주세요.");
                 if (name) {
                     firebase.firestore().collection("chat").doc(name).get().then(data => {
