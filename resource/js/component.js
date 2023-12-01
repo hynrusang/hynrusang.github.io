@@ -242,7 +242,7 @@ const UComponent = {
         Item: (dataset, key) => Object.keys(dataset[key]).sort().map(data => _SComponent.UFrame({
             field: $("a", {
                 text: data,
-                style: "width: 100%; display: inline-block;",
+                style: "width: 100%; padding: 4px; display: inline-block;",
                 href: dataset[key][data],
                 onclick: e => {
                     e.preventDefault();
