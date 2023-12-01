@@ -4,7 +4,7 @@ const menuFragment = {
             class: "itemBox",
             style: "padding: 0px;"
         }).add(
-            _WComponent.WidgetButton("data", "마이 페이지", () => {
+            SComponent.WidgetButton("data", "마이 페이지", () => {
                 scan("[rid=menu]").removeAttribute("open");
                 current.value("tab", "main");
             })
