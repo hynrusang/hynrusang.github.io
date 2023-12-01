@@ -4,15 +4,9 @@ const menuFragment = {
             class: "itemBox",
             style: "padding: 0px;"
         }).add(
-            $("input", {
-                style: "background-image: url(resource/img/icon/data.png); background-color: aliceblue",
-                class: "inputWidget",
-                type: "button",
-                value: "마이 페이지",
-                onclick: () => {
-                    scan("[rid=menu]").removeAttribute("open");
-                    current.value("tab", "main")
-                }
+            _WComponent.WidgetButton("data", "마이 페이지", () => {
+                scan("[rid=menu]").removeAttribute("open");
+                current.value("tab", "main");
             })
         ),
         $("div", {
