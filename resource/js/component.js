@@ -241,7 +241,7 @@ const UComponent = {
          */
         Item: (dataset, key) => Object.keys(dataset[key]).sort().map(data => UComponent.Frame({
             field: $("a", {
-                class: "details",
+                class: "detail",
                 href: dataset[key][data],
                 text: data,
                 onclick: e => {
