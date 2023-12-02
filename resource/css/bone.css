@@ -44,7 +44,7 @@ modal {
     border: 1px solid black;
     margin: 10%;
     width: 80%;
-    height: 80%;
+    height: 450px;
     z-index: 3;
 }
 modal > * {
