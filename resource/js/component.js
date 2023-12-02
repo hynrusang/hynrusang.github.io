@@ -209,8 +209,7 @@ R.User = {
                 fedit: () => {
                     if (field.node.nodeName == "A") {
                         field = $("input", {
-                            style: `height: ${field.node.offsetHeight}px`,
-                            class: "detail",
+                            style: `background-image: url(/resource/img/icon/edit.png); margin: 0px; height: 25px;`,
                             spellcheck: "false",
                             onfocus: e => e.target.value = data,
                             onkeyup: e => (e.code == "Enter") ? scan(`#l${index} .handler input`).click() : null
@@ -249,7 +248,7 @@ R.User = {
         Items: dataset => Object.keys(dataset).sort().map((data, index) => {
             let field = $("input", {
                 type: "button",
-                style: "background-image: url(/resource/img/icon/server.png",
+                style: "background-image: url(/resource/img/icon/server.png)",
                 value: data,
                 onfocus: e => e.target.value = data,
                 onclick: () => {
@@ -258,6 +257,7 @@ R.User = {
                     current.value("chatroom", data);
                 }
             });
+
             return R.User.Frame.Item({
                 idx: `r${index}`,
                 field: field,
@@ -356,8 +356,7 @@ R.User = {
                 fedit: () => {
                     if (field.node.nodeName == "A") {
                         field = $("input", {
-                            style: `height: ${field.node.offsetHeight}px`,
-                            class: "detail",
+                            style: `background-image: url(/resource/img/icon/edit.png); margin: 0px; height: 25px;`,
                             spellcheck: "false",
                             onfocus: e => e.target.value = data,
                             onkeyup: e => (e.code == "Enter") ? scan(`#y${index} .handler input`).click() : null
