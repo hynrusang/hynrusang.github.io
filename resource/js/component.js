@@ -380,6 +380,9 @@ R.User = {
                         notifyDataChange();
                         makeToast("해당 재생목록의 이름이 변경되었습니다.");
                     }
+                    console.log(field.node);
+                    console.log(field.node.parentElement);
+                    console.log(snipe(field.node.parentElement));
                     snipe(field.node.parentElement).reset(field);
                     field.node.focus();
                 },
