@@ -341,7 +341,7 @@ R.User = {
                 text: data,
                 onclick: e => {
                     e.preventDefault();
-                    const href = e.target.href.includes("list=") ? `https://www.youtube.com/embed/videoseries/?list=${dataset[key][data].match(/[?&]list=([^&]+)/)}&amp;loop=1&autoplay=1` : `https://www.youtube.com/embed/${dataset[key][data].match(/[?&]v=([^&]+)/)[1]}`;
+                    const href = "https://www.youtube.com/embed/" + e.target.href.includes("list=") ? `videoseries/?list=${dataset[key][data].match(/[?&]list=([^&]+)/)[1]}&amp;loop=1&autoplay=1` : dataset[key][data].match(/[?&]v=([^&]+)/)[1];
                     scan("main iframe").src = href;
                     scan("main span").innerText = `${key}: ${data}`;
                     scan("[rid=menu]").removeAttribute("open");
