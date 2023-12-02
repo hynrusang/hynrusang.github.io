@@ -269,11 +269,7 @@ const mainFragment = {
                                 makeToast("회원가입을 시도하는 중입니다.");
                                 await firebase.auth().createUserWithEmailAndPassword(e.target[0].value, e.target[1].value).then(async data => {
                                     makeToast("회원가입 인증을 위한 메일을 발송하는 중입니다.");
-                                    await data.user.sendEmailVerification().then(() => {
-                                        alert("회원가입이 완료되었습니다.\n(회원가입 때 사용하셨던 이메일 주소에서, 이메일 인증을 해주세요.)");
-                                        firebase.auth().signOut();
-                                        location.reload();
-                                    });
+                                    await data.user.sendEmailVerification().then(() => makeToast("회원가입이 완료되었습니다.\n(회원가입 때 사용하셨던 이메일 주소에서, 이메일 인증을 해주세요.)"));
                                 }).catch(e => {
                                     if (e.code == "auth/weak-password") makeToast("비밀번호는 최소 6자리 이상이여야만 합니다.");
                                     else console.log(e);
