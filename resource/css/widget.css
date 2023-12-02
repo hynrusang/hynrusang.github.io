@@ -48,7 +48,6 @@
 .loginField :is([type="text"], [type="password"]) {
     width: 300px;
     margin-left: calc(50% - 150px);
-    margin-bottom: 10px;
 }
 .loginField :is([type="button"], [type="submit"]) {
     cursor: pointer;

@@ -14,39 +14,10 @@ const menuFragment = {
                 }
             })
         ),
-        $("div", {
-            style: "height: calc(100% - 190px);"
-        }),
+        $("div"),
         R.Shared.Handler({
-            fadd: () => makeModal(R.Modal.Room.AddRoom)
-        }),
-        $("div", {
-            style: "display: flex; flex-direction: column;"
-        }).add(
-            $("input", {
-                type: "button",
-                style: "background-image: url(/resource/img/icon/plus.png)",
-                value: "채팅방 추가하기",
-                onclick: () => {
-                    const name = prompt("추가하길 원하는 채팅방 아이디를 입력해주세요.");
-                    if (name) {
-                        firebase.firestore().collection("chat").doc(name).get().then(data => {
-                            if (data.data()) {
-                                const temp = DB.value("chatroom");
-                                temp.unshift({
-                                    data: [
-                                        name,
-                                        name
-                                    ]
-                                })
-                                DB.value("chatroom", temp);
-                                notifyDataChange();
-                            } else alert("해당 채팅방은 존재하지 않습니다.")
-                        })
-                    }
-                }
-            })
-        )
+            fadd: () => makeModal(R.Modal.Room.Add())
+        })
     ),
     video: new Fragment("menu",
         $("form", {

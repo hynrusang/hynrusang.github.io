@@ -46,13 +46,13 @@ R.Modal = {
                 type: "button",
                 style: "background-image: url(/resource/img/icon/plus.png)",
                 value: "채팅방 새로 만들기",
-                onclick: () => makeModal(R.Modal.Room.MakeRoom)
+                onclick: () => makeModal(R.Modal.Room.Make())
             }),
             $("input", {
                 type: "button",
                 style: "background-image: url(/resource/img/icon/data.png)",
                 value: "기존 채팅방 들어가기",
-                onclick: () => makeModal(R.Modal.Room.EnterRoom)
+                onclick: () => makeModal(R.Modal.Room.Enter())
             })
         ],
         Make: () => [
@@ -63,7 +63,7 @@ R.Modal = {
                 type: "button",
                 style: "background-image: url(/resource/img/icon/accept.png)",
                 value: "예",
-                onclick: () => () => {
+                onclick: () => {
                     firebase.firestore().collection("chat").add({
                         owner: firebase.auth().currentUser.uid
                     })
@@ -73,9 +73,7 @@ R.Modal = {
                             name: firebase.auth().currentUser.email
                         })
                         const temp = DB.value("chatroom");
-                        temp.unshift({
-                            data: [doc.id, doc.id]
-                        })
+                        temp[doc.id] = doc.id;
                         DB.value("chatroom", temp);
                         notifyDataChange();
                         scan("modal").removeAttribute("open");
@@ -90,7 +88,7 @@ R.Modal = {
             })
         ],
         Enter: () => {
-            const input = $("input", {
+            const field = $("input", {
                 type: "text",
                 style: "background-image: url(/resource/img/icon/password.png)",
                 placeholder: "roomid"
@@ -100,12 +98,30 @@ R.Modal = {
                 $("p", {
                     text: "들어가고 싶은 채팅방의 아이디를 입력해주세요."
                 }),
-                input,
+                field,
                 $("input", {
-                    type: "button"
+                    type: "button",
+                    style: "background-image: url(/resource/img/icon/accept.png)",
+                    value: "확인",
+                    onclick: () => {
+                        if (field.node.value) {
+                            firebase.firestore().collection("chat").doc(field.node.value).get().then(data => {
+                                if (data.data()) {
+                                    const temp = DB.value("chatroom");
+                                    temp[field.node.value] = field.node.value;
+                                    DB.value("chatroom", temp);
+                                    notifyDataChange();
+                                    scan("modal").removeAttribute("open");
+                                } else makeModal(R.Modal.Room.NotExist())
+                            })
+                        }
+                    }
                 })
             ]
-        }
+        },
+        NotExist: () => $("p", {
+            text: "해당 채팅방은 존재하지 않습니다."
+        })
     }
 }
 R.User = {
@@ -219,17 +235,17 @@ R.User = {
     }),
 
     /**
-     * @type {(dataset: object[]) => Dom[]}
+     * @type {(dataset: object) => Dom[]}
      */
-    RoomBox: dataset => dataset.map((data, index) => {
+    RoomBox: dataset => Object.keys(dataset).sort().map((key, index) => {
         const field = $("input", {
             type: "button",
             style: "background-image: url(/resource/img/icon/server.png",
-            value: data.data[1],
+            value: dataset[key],
             onclick: e => {
                 scan("[rid=menu]").removeAttribute("open");
                 current.value("tab", "chatroom");
-                current.value("chatroom", data.data[0]);
+                current.value("chatroom", key);
             }
         });
         return R.User.Frame({
@@ -238,19 +254,19 @@ R.User = {
             fedit: () => {
                 const newName = prompt("해당 채팅방의 이름으로 설정할 새로운 이름을 입력해주세요.");
                 if (newName) {
-                    dataset[index].data[1] = newName;
+                    dataset[key] = newName;
                     DB.value("chatroom", dataset);
                     notifyDataChange();
                 }
             },
             fdelete: () => {
                 if (confirm("정말 해당 채팅방에서 나가시겠습니까?\n데이터는 자동으로 삭제되지 않으며,\n추후 다시 들어올 시 신청을 다시 해야합니다.")) {
-                    firebase.firestore().collection("chat").doc(data.data[0]).get().then(async data => {
+                    firebase.firestore().collection("chat").doc(key).get().then(async data => {
                         const owner = data.data().owner;
                         if (owner == firebase.auth().currentUser.uid) alert("채팅방 관리자는 채팅방에서 나갈 수 없습니다.\n채팅방 메뉴에서 채팅방 삭제를 해야 합니다.");
                         else {
                             await data.ref.collection("enroll").doc(firebase.auth().currentUser.uid).delete();
-                            dataset.splice(index, 1);
+                            delete dataset[key];
                             DB.value("chatroom", dataset);
                             notifyDataChange();
                             current.value("tab", "main");

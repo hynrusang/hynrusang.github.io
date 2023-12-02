@@ -27,8 +27,8 @@ const DB = new LiveDataManager({
     }, {
         type: Object
     }),
-    chatroom: new LiveData([], {
-        type: Array
+    chatroom: new LiveData({}, {
+        type: Object
     })
 }, false);
 const SDB = new LiveData({}, {
@@ -86,13 +86,16 @@ const current = new LiveDataManager({
                                     value: "채팅방 삭제하기",
                                     onclick: async () => {
                                         if (confirm("정말로 이 채팅방을 삭제하시겠습니까?\n(이 결정은 번복되지 않습니다.)\n(추가로 다시 한 번 물어보는 절차도 없습니다.)")) {
+                                            makeToast("해당 채팅방을 삭제하고 있습니다.\n잠시만 기다려 주십시오.");
                                             const roomRef = await firebase.firestore().collection("chat").doc(this.value);
+                                            const temp = DB.value("chatroom");
                                             const roomId = roomRef.id;
-                                            roomRef.collection("enroll").get().then(docs => docs.forEach(doc => doc.ref.delete()));
-                                            roomRef.collection("chat").get().then(docs => docs.forEach(doc => doc.ref.delete()));
+                                            await roomRef.collection("enroll").get().then(docs => docs.forEach(doc => doc.ref.delete()));
+                                            await roomRef.collection("chat").get().then(docs => docs.forEach(doc => doc.ref.delete()));
                                             await roomRef.collection("link").get().then(docs => docs.forEach(doc => doc.ref.delete()));
                                             roomRef.delete();
-                                            DB.value("chatroom", DB.value("chatroom").filter(room => room.data[0] != roomId));
+                                            delete temp[roomId];
+                                            DB.value("chatroom", temp);
                                             current.value("tab", "main");
                                             notifyDataChange();
                                         }
