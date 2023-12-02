@@ -83,11 +83,11 @@ firebase.auth().onAuthStateChanged(async user => {
                     chatroom: menuFragment.main.fragment[1].reset()
                 }
 
-                target.chat.add(R.User.ChatBox(template.chat));
-                target.link.add(R.User.LinkBox(template.link));
-                target.chatroom.add(R.User.RoomBox(template.chatroom));
-                target.video.add(R.User.Youtube.Frame(template.playlist));
-                target.info.add(R.User.InfoBox(template.secret));
+                target.chat.add(R.User.Chat.Items(template.chat));
+                target.link.add(R.User.Link.Items(template.link));
+                target.chatroom.add(R.User.Room.Items(template.chatroom));
+                target.video.add(R.User.Youtube.Container(template.playlist));
+                target.info.add(R.User.Info(template.secret));
                 Object.keys(target).forEach(key => target[key].node.scrollTop = scrollInfo[key])
             });
             menuFragment.main.launch();

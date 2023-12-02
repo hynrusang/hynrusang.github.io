@@ -34,7 +34,7 @@ R.Shared = {
             text: name,
             exp: exp
         })
-    )
+    ),
 };
 R.Modal = {
     Room: {
@@ -125,163 +125,173 @@ R.Modal = {
     }
 }
 R.User = {
-    /**
-     * @type {(props: {idx: string?, field: Dom, fedit: Function?, fdelete: Function?}) => Dom}
-     */
-    Frame: ({idx, field, fedit, fdelete}) => $("div", {
-        class: "itemBox",
-        id: idx
-    }).add(
-        $("div").add(field),
-        R.Shared.Handler({
-            fedit: fedit,
-            fdelete: fdelete
-        })
-    ),
-    
-    /**
-     * @type {(dataset: string[]) => Dom[]}
-     */
-    ChatBox: dataset => dataset.map((data, index) => {
-        let field = $("span", {
-            class: "detail",
-            text: data,
-        });
-        return R.User.Frame({
-            idx: `c${index}`,
-            field: field,
-            fedit: () => {
-                if (field.node.nodeName == "SPAN") {
-                    field = $("textarea", {
-                        style: `height: ${field.node.offsetHeight}px`,
-                        class: "detail",
-                        spellcheck: "false",
-                        rows: "1",
-                        onfocus: e => e.target.value = data,
-                        oninput: e => {
-                            e.target.style.height = "auto";
-                            e.target.style.height = e.target.scrollHeight + "px";
-                        }
-                    })
-                } else {
-                    dataset[index] = field.node.value;
-                    field = $("span", {
-                        class: "detail",
-                        text: dataset[index],
-                    })
-                    DB.value("chat", dataset);
-                    notifyDataChange();
-                    makeToast("해당 채팅의 내용이 변경되었습니다.");
-                }
-                snipe(`#c${index} div`).reset(field);
-                field.node.focus();
-            },
-            fdelete: () => {
-                if (confirm("정말로 채팅을 삭제하시겠습니까?")) {
-                    dataset.splice(index, 1);
-                    DB.value("chat", dataset);
-                    notifyDataChange();
-                }
-            }
-        })
-    }),
-    
-    /**
-     * @type {(dataset: object[]) => Dom[]}
-     */
-    LinkBox: dataset => Object.keys(dataset).sort().map((key, index) => {
-        let field = $("a", {
-            class: "detail",
-            href: dataset[key],
-            text: key,
-            target: "_blank"
-        });
-        return R.User.Frame({
-            idx: `l${index}`,
-            field: field,
-            fedit: () => {
-                if (field.node.nodeName == "A") {
-                    field = $("input", {
-                        style: `height: ${field.node.offsetHeight}px`,
-                        class: "detail",
-                        spellcheck: "false",
-                        onfocus: e => e.target.value = key,
-                        onkeyup: e => (e.code == "Enter") ? scan(`#l${index} .handler input`).click() : null
-                    })
-                } else if (field.node.value) {
-                    dataset[field.node.value] = dataset[key];
-                    if (field.node.value != key) delete dataset[key];
-                    field = $("a", {
-                        class: "detail",
-                        href: dataset[field.node.value],
-                        text: field.node.value,
-                        target: "_blank"
-                    })
-                    DB.value("link", dataset);
-                    notifyDataChange();
-                    makeToast("해당 링크의 설명이 변경되었습니다.");
-                }
-                snipe(`#l${index} div`).reset(field);
-                field.node.focus();
-            },
-            fdelete: () => {
-                if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) {
-                    delete dataset[key];
-                    DB.value("link", dataset);
-                    notifyDataChange();
-                }
-            }
-        })
-    }),
+    Frame: {
+        /**
+         * @type {(props: {idx: string?, field: Dom, fedit: Function?, fdelete: Function?}) => Dom}
+         */
+        Item: ({idx, field, fedit, fdelete}) => $("div", {
+            class: "itemBox",
+            id: idx
+        }).add(
+            $("div").add(field),
+            R.Shared.Handler({
+                fedit: fedit,
+                fdelete: fdelete
+            })
+        ),
+    },
 
-    /**
-     * @type {(dataset: object) => Dom[]}
-     */
-    RoomBox: dataset => Object.keys(dataset).sort().map(key => {
-        const field = $("input", {
-            type: "button",
-            style: "background-image: url(/resource/img/icon/server.png",
-            value: key,
-            onclick: e => {
-                scan("[rid=menu]").removeAttribute("open");
-                current.value("tab", "chatroom");
-                current.value("chatroom", dataset[key]);
-            }
-        });
-        return R.User.Frame({
-            field: field,
-            fedit: () => {
-                const newName = prompt("해당 채팅방의 이름으로 설정할 새로운 이름을 입력해주세요.");
-                if (newName && newName != key) {
-                    dataset[newName] = dataset[key];
-                    delete dataset[key];
-                    DB.value("chatroom", dataset);
-                    notifyDataChange();
+    Chat: {
+        /**
+         * @type {(dataset: string[]) => Dom[]}
+         */
+        Items: dataset => dataset.map((data, index) => {
+            let field = $("span", {
+                class: "detail",
+                text: data,
+            });
+    
+            return R.User.Frame.Item({
+                idx: `c${index}`,
+                field: field,
+                fedit: () => {
+                    if (field.node.nodeName == "SPAN") {
+                        field = $("textarea", {
+                            style: `height: ${field.node.offsetHeight}px`,
+                            class: "detail",
+                            spellcheck: "false",
+                            rows: "1",
+                            onfocus: e => e.target.value = data,
+                            oninput: e => {
+                                e.target.style.height = "auto";
+                                e.target.style.height = e.target.scrollHeight + "px";
+                            }
+                        })
+                    } else {
+                        dataset[index] = field.node.value;
+                        field = $("span", {
+                            class: "detail",
+                            text: dataset[index],
+                        })
+                        DB.value("chat", dataset);
+                        notifyDataChange();
+                        makeToast("해당 채팅의 내용이 변경되었습니다.");
+                    }
+                    snipe(`#c${index} div`).reset(field);
+                    field.node.focus();
+                },
+                fdelete: () => {
+                    if (confirm("정말로 채팅을 삭제하시겠습니까?")) {
+                        dataset.splice(index, 1);
+                        DB.value("chat", dataset);
+                        notifyDataChange();
+                    }
                 }
-            },
-            fdelete: () => {
-                if (confirm("정말 해당 채팅방에서 나가시겠습니까?\n데이터는 자동으로 삭제되지 않으며,\n추후 다시 들어올 시 신청을 다시 해야합니다.")) {
-                    firebase.firestore().collection("chat").doc(dataset[key]).get().then(async data => {
-                        const owner = data.data().owner;
-                        if (owner == firebase.auth().currentUser.uid) alert("채팅방 관리자는 채팅방에서 나갈 수 없습니다.\n채팅방 메뉴에서 채팅방 삭제를 해야 합니다.");
-                        else {
-                            await data.ref.collection("enroll").doc(firebase.auth().currentUser.uid).delete();
-                            delete dataset[key];
-                            DB.value("chatroom", dataset);
-                            notifyDataChange();
-                            current.value("tab", "main");
-                        }
-                    })
-                }
-            }
+            })
         })
-    }),
+    },
+    
+    Link: {
+        /**
+         * @type {(dataset: object[]) => Dom[]}
+         */
+        Items: dataset => Object.keys(dataset).sort().map((key, index) => {
+            let field = $("a", {
+                class: "detail",
+                href: dataset[key],
+                text: key,
+                target: "_blank"
+            });
+    
+            return R.User.Frame.Item({
+                idx: `l${index}`,
+                field: field,
+                fedit: () => {
+                    if (field.node.nodeName == "A") {
+                        field = $("input", {
+                            style: `height: ${field.node.offsetHeight}px`,
+                            class: "detail",
+                            spellcheck: "false",
+                            onfocus: e => e.target.value = key,
+                            onkeyup: e => (e.code == "Enter") ? scan(`#l${index} .handler input`).click() : null
+                        })
+                    } else if (field.node.value) {
+                        dataset[field.node.value] = dataset[key];
+                        if (field.node.value != key) delete dataset[key];
+                        field = $("a", {
+                            class: "detail",
+                            href: dataset[field.node.value],
+                            text: field.node.value,
+                            target: "_blank"
+                        })
+                        DB.value("link", dataset);
+                        notifyDataChange();
+                        makeToast("해당 링크의 설명이 변경되었습니다.");
+                    }
+                    snipe(`#l${index} div`).reset(field);
+                    field.node.focus();
+                },
+                fdelete: () => {
+                    if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) {
+                        delete dataset[key];
+                        DB.value("link", dataset);
+                        notifyDataChange();
+                    }
+                }
+            })
+        })
+    },
+
+    Room: {
+        /**
+         * @type {(dataset: object) => Dom[]}
+         */
+        Items: dataset => Object.keys(dataset).sort().map(key => {
+            const field = $("input", {
+                type: "button",
+                style: "background-image: url(/resource/img/icon/server.png",
+                value: key,
+                onclick: e => {
+                    scan("[rid=menu]").removeAttribute("open");
+                    current.value("tab", "chatroom");
+                    current.value("chatroom", key);
+                }
+            });
+            return R.User.Frame.Item({
+                field: field,
+                fedit: () => {
+                    const newName = prompt("해당 채팅방의 이름으로 설정할 새로운 이름을 입력해주세요.");
+                    if (newName && newName != key) {
+                        dataset[newName] = dataset[key];
+                        delete dataset[key];
+                        DB.value("chatroom", dataset);
+                        notifyDataChange();
+                    }
+                },
+                fdelete: () => {
+                    if (confirm("정말 해당 채팅방에서 나가시겠습니까?\n데이터는 자동으로 삭제되지 않으며,\n추후 다시 들어올 시 신청을 다시 해야합니다.")) {
+                        firebase.firestore().collection("chat").doc(dataset[key]).get().then(async data => {
+                            const owner = data.data().owner;
+                            if (owner == firebase.auth().currentUser.uid) alert("채팅방 관리자는 채팅방에서 나갈 수 없습니다.\n채팅방 메뉴에서 채팅방 삭제를 해야 합니다.");
+                            else {
+                                await data.ref.collection("enroll").doc(firebase.auth().currentUser.uid).delete();
+                                delete dataset[key];
+                                DB.value("chatroom", dataset);
+                                notifyDataChange();
+                                current.value("tab", "main");
+                            }
+                        })
+                    }
+                }
+            })
+        })
+    },
 
     Youtube: {
         /**
          * @type {(dataset: object) => Dom[]}
          */
-        Frame: dataset => Object.keys(dataset).sort().map(data => $("fieldset", {
+        Container: dataset => Object.keys(dataset).sort().map(data => $("fieldset", {
             style: "position: relative;"
         }).add(
             $("legend", {
@@ -289,7 +299,7 @@ R.User = {
             }),
             $("div", {
                 style: "margin-bottom: 40px"
-            }).add(R.User.Youtube.Item(dataset, data)),
+            }).add(R.User.Youtube.Items(dataset, data)),
             R.Shared.Handler({
                 fadd: () => {
                     const url = prompt("추가하길 원하는 재생목록(또는 동영상)의 링크를 입력해주세요.");
@@ -312,7 +322,7 @@ R.User = {
         /**
          * @type {(dataset: object, key: string) => Dom[]}
          */
-        Item: (dataset, key) => Object.keys(dataset[key]).sort().map(data => R.User.Frame({
+        Items: (dataset, key) => Object.keys(dataset[key]).sort().map(data => R.User.Frame.Item({
             field: $("a", {
                 class: "detail",
                 href: dataset[key][data],
@@ -348,7 +358,7 @@ R.User = {
     /**
      * @type {(dataset: object) => Dom}
      */
-    InfoBox: dataset => {
+    Info: dataset => {
         let element = [
             R.Shared.UserProfile({
                 name: firebase.auth().currentUser.uid

@@ -58,10 +58,10 @@ const current = new LiveDataManager({
                 for (unsubscribeListener of this.unsubscribe) unsubscribeListener();
             };
             if (this.value) {
-                let owner = firebase.firestore().collection("chat").doc(this.value);
+                let owner = firebase.firestore().collection("chat").doc(DB.value("chatroom")[this.value]);
                 await owner.get().then(data => owner = data.data().owner)
                 this.unsubscribe = [
-                    firebase.firestore().collection("chat").doc(this.value).collection("enroll").onSnapshot(snapshot => {
+                    firebase.firestore().collection("chat").doc(DB.value("chatroom")[this.value]).collection("enroll").onSnapshot(snapshot => {
                         const target = subFragment.chatroom.설정.fragment[0].reset();
                         const userBox = [
                             $("div").add(
@@ -78,7 +78,7 @@ const current = new LiveDataManager({
                         if (owner == firebase.auth().currentUser.uid) {
                             target.add(
                                 $("span", {
-                                    html: `채팅방 아이디: <span style="color: red; font-weight: bold;">${this.value}</span>`
+                                    html: `채팅방 아이디: <span style="color: red; font-weight: bold;">${DB.value("chatroom")[this.value]}</span>`
                                 }),
                                 $("input", {
                                     style: "background-image: url(/resource/img/icon/del.png)",
@@ -87,14 +87,15 @@ const current = new LiveDataManager({
                                     onclick: async () => {
                                         if (confirm("정말로 이 채팅방을 삭제하시겠습니까?\n(이 결정은 번복되지 않습니다.)\n(추가로 다시 한 번 물어보는 절차도 없습니다.)")) {
                                             makeToast("해당 채팅방을 삭제하고 있습니다.\n잠시만 기다려 주십시오.");
-                                            const roomRef = await firebase.firestore().collection("chat").doc(this.value);
+                                            const roomRef = await firebase.firestore().collection("chat").doc(DB.value("chatroom")[this.value]);
                                             const temp = DB.value("chatroom");
-                                            const roomId = roomRef.id;
+
                                             await roomRef.collection("enroll").get().then(docs => docs.forEach(doc => doc.ref.delete()));
                                             await roomRef.collection("chat").get().then(docs => docs.forEach(doc => doc.ref.delete()));
                                             await roomRef.collection("link").get().then(docs => docs.forEach(doc => doc.ref.delete()));
                                             roomRef.delete();
-                                            delete temp[roomId];
+
+                                            delete temp[this.value];
                                             DB.value("chatroom", temp);
                                             current.value("tab", "main");
                                             notifyDataChange();
@@ -109,7 +110,7 @@ const current = new LiveDataManager({
                         } else {
                             target.add(
                                 $("span", {
-                                    html: `채팅방 아이디: <span style="color: red; font-weight: bold;">${this.value}</span>`
+                                    html: `채팅방 아이디: <span style="color: red; font-weight: bold;">${DB.value("chatroom")[this.value]}</span>`
                                 }),
                                 $("hr"),
                                 userBox[0]
@@ -197,14 +198,14 @@ const current = new LiveDataManager({
                         })
                     }, () => {
                         if (confirm("해당 채팅방은 관리자의 승인이 필요합니다.\n지금 해당 채팅방에 승인 요청을 보내시겠습니까?")) {
-                            firebase.firestore().collection("chat").doc(this.value).collection("enroll").doc(firebase.auth().currentUser.uid).set({
+                            firebase.firestore().collection("chat").doc(DB.value("chatroom")[this.value]).collection("enroll").doc(firebase.auth().currentUser.uid).set({
                                 name: firebase.auth().currentUser.email,
                                 accept: false
                             }).catch(() => alert("이미 해당 채팅방에 승인 요청을 보냈습니다."))
                         }
                         current.value("tab", "main");
                     }),
-                    firebase.firestore().collection("chat").doc(this.value).collection("chat").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+                    firebase.firestore().collection("chat").doc(DB.value("chatroom")[this.value]).collection("chat").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                         const scrollInfo = subFragment.chatroom.채팅.fragment[0].node.scrollTop;
                         const target = subFragment.chatroom.채팅.fragment[0].reset();
                         snapshot.forEach((chatdata) => {
@@ -308,7 +309,7 @@ const current = new LiveDataManager({
                         })
                         target.node.scrollTop = scrollInfo;
                     }, () => null),
-                    firebase.firestore().collection("chat").doc(this.value).collection("link").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+                    firebase.firestore().collection("chat").doc(DB.value("chatroom")[this.value]).collection("link").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                         const scrollInfo = subFragment.chatroom.링크.fragment[0].node.scrollTop;
                         const target = subFragment.chatroom.링크.fragment[0].reset();
                         snapshot.forEach((chatdata) => {

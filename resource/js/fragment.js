@@ -44,7 +44,7 @@ const menuFragment = {
 }
 const subFragment = {
     main: {
-        채팅: new Fragment("main",
+        채팅: new Fragment("main", 
             $("fieldset", {
                 style: "height: calc(100vh - 160px); background: rgba(0,0,0,0.1); overflow-y: scroll"
             }),
