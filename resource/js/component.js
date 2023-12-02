@@ -380,7 +380,7 @@ R.User = {
                         notifyDataChange();
                         makeToast("해당 재생목록의 이름이 변경되었습니다.");
                     }
-                    snipe(`#y${index} div`).reset(field);
+                    snipe(field.node.parentElement).reset(field);
                     field.node.focus();
                 },
                 fdelete: () => {
