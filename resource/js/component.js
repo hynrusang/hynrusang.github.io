@@ -126,11 +126,10 @@ R.Modal = {
 }
 R.User = {
     /**
-     * @type {(props: {idx: string?, field: Dom, style: string?, fedit: Function?, fdelete: Function?}) => Dom}
+     * @type {(props: {idx: string?, field: Dom, fedit: Function?, fdelete: Function?}) => Dom}
      */
-    Frame: ({idx, field, style, fedit, fdelete}) => $("div", {
+    Frame: ({idx, field, fedit, fdelete}) => $("div", {
         class: "itemBox",
-        style: style,
         id: idx
     }).add(
         $("div").add(field),
@@ -251,7 +250,6 @@ R.User = {
         });
         return R.User.Frame({
             field: field,
-            style: "padding: 0px;",
             fedit: () => {
                 const newName = prompt("해당 채팅방의 이름으로 설정할 새로운 이름을 입력해주세요.");
                 if (newName && newName != key) {

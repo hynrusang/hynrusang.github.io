@@ -2,7 +2,6 @@ const menuFragment = {
     main: new Fragment("menu",
         $("div", {
             class: "itemBox",
-            style: "padding: 0px;"
         }).add(
             $("input", {
                 type: "button",
