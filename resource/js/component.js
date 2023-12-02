@@ -303,8 +303,7 @@ const UComponent = {
                 }
             })
         ]
-        if (SDB.value.token) element = element.concat([
-            $("hr"),
+        if (SDB.value.key) element = element.concat([
             $("form", {
                 onsubmit: async e => {
                     e.preventDefault();

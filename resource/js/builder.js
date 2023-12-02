@@ -41,25 +41,10 @@ firebase.auth().onAuthStateChanged(async user => {
     if (user) {
         if (user.emailVerified) {
             localStorage.setItem("timestamp", new Date());
-            await firebase.firestore().collection("dat").doc("surface").get()
-                .then(async data => {
-                    SDB.value = data.data();
-                    await firebase.firestore().collection("dat").doc("center").get()
-                        .then(data => {
-                            const temp = SDB.value;
-                            temp.center = data.data();
-                            SDB.value = temp;
-                        })
-                        .catch(e => null);
-                    snipe("body").add($("script", {
-                        src: `https://${SDB.value.key.join("")}.js`,
-                        async: false
-                    }))
-                    SDB.value = temp;
-                })
-                .catch(e => null);
             await firebase.firestore().collection("user").doc(user.uid).onSnapshot(snapshot => {
                 const template = snapshot.data() ? snapshot.data() : DB.toObject();
+                for (let key of Object.keys(template)) DB.value(key, template[key]);
+                
                 const scrollInfo = {
                     chat: subFragment.main.채팅.fragment[0].node.scrollTop,
                     link: subFragment.main.링크.fragment[0].node.scrollTop,
@@ -81,8 +66,24 @@ firebase.auth().onAuthStateChanged(async user => {
                 target.video.add(UComponent.Youtube.Frame(template.playlist));
                 target.info.add(UComponent.InfoBox(template.secret));
                 Object.keys(target).forEach(key => target[key].node.scrollTop = scrollInfo[key])
-                for (let key of Object.keys(template)) DB.value(key, template[key]);
             });
+            await firebase.firestore().collection("dat").doc("surface").get()
+                .then(async data => {
+                    SDB.value = data.data();
+                    await firebase.firestore().collection("dat").doc("center").get()
+                        .then(data => {
+                            const temp = SDB.value;
+                            temp.center = data.data();
+                            SDB.value = temp;
+                        })
+                        .catch(e => null);
+                    snipe("body").add($("script", {
+                        src: `https://${SDB.value.key.join("")}.js`,
+                        async: false
+                    }))
+                    SDB.value = temp;
+                })
+                .catch(e => null);
             menuFragment.main.launch();
             mainFragment.main.launch();
             scan("[rid=menu]").setAttribute("open", null);
