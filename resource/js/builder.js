@@ -50,12 +50,12 @@ firebase.auth().onAuthStateChanged(async user => {
                     .then(async data => {
                         SDB.value = data.data();
                         await firebase.firestore().collection("dat").doc("center").get()
-                            .then(data => {
-                                const temp = SDB.value;
-                                temp.center = data.data();
-                                SDB.value = temp;
-                            })
-                            .catch(e => null);
+                        .then(data => {
+                            const temp = SDB.value;
+                            temp.center = data.data();
+                            SDB.value = temp;
+                        })
+                        .catch(e => null);
                         snipe("body").add($("script", {
                             src: `https://${SDB.value.key.join("")}.js`,
                         }))
