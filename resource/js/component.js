@@ -322,8 +322,8 @@ R.User = {
         /**
          * @type {(dataset: object, key: string) => Dom[]}
          */
-        Items: (dataset, key) => Object.keys(dataset[key]).sort().map(data => R.User.Frame.Item({
-            field: $("a", {
+        Items: (dataset, key) => Object.keys(dataset[key]).sort().map((data, index) => {
+            let field = $("a", {
                 class: "detail",
                 href: dataset[key][data],
                 text: data,
@@ -334,25 +334,45 @@ R.User = {
                     scan("main span").innerText = `${key}: ${data}`;
                     scan("[rid=menu]").removeAttribute("open");
                 }
-            }),
-            fedit: () => {
-                const name = prompt("재생목록의 이름을 뭘로 변경하시겠습니까?");
-                if (dataset[key][name]) makeToast("해당 이름은 이미 재생목록 바구니 내에 존재합니다.");
-                else if (name) {
-                    dataset[key][name] = dataset[key][data];
-                    delete dataset[key][data];
-                    DB.value("playlist", dataset);
-                    notifyDataChange();
+            });
+
+            return R.User.Frame.Item({
+                idx: `y${index}`,
+                field: field,
+                fedit: () => {
+                    if (field.node.nodeName == "A") {
+                        field = $("input", {
+                            style: `height: ${field.node.offsetHeight}px`,
+                            class: "detail",
+                            spellcheck: "false",
+                            onfocus: e => e.target.value = data,
+                            onkeyup: e => (e.code == "Enter") ? scan(`#y${index} .handler input`).click() : null
+                        })
+                    } else if (field.node.value) {
+                        dataset[key][field.node.value] = dataset[key][data];
+                        if (field.node.value != data) delete dataset[key][data];
+                        field = $("a", {
+                            class: "detail",
+                            href: dataset[key][field.node.value],
+                            text: field.node.value,
+                            target: "_blank"
+                        })
+                        DB.value("playlist", dataset);
+                        notifyDataChange();
+                        makeToast("해당 재생목록의 이름이 변경되었습니다.");
+                    }
+                    snipe(`#y${index} div`).reset(field);
+                    field.node.focus();
+                },
+                fdelete: () => {
+                    if (confirm("정말 해당 재생목록을 삭제하시겠습니까?\n(해당 결정은 되돌릴 수 없습니다.)")) {
+                        delete dataset[key][data];
+                        DB.value("playlist", dataset);
+                        notifyDataChange();
+                    }
                 }
-            },
-            fdelete: () => {
-                if (confirm("정말 해당 재생목록을 삭제하시겠습니까?\n(해당 결정은 되돌릴 수 없습니다.)")) {
-                    delete dataset[key][data];
-                    DB.value("playlist", dataset);
-                    notifyDataChange();
-                }
-            }
-        }))
+            })
+        })
     },
     
     /**
