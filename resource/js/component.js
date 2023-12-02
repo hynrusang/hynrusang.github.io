@@ -277,7 +277,6 @@ R.User = {
                         notifyDataChange();
                         makeToast("해당 채팅방의 이름이 변경되었습니다.");
                     }
-                    container.reset(field);
                     field.node.value = "";
                     field.node.focus();
                 },
