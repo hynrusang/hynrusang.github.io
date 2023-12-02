@@ -88,12 +88,7 @@ const subFragment = {
                 onsubmit: async e => {
                     e.preventDefault();
                     const data = DB.value("link");
-                    data.unshift({
-                        data: [
-                            scan("#add-link-href").value,
-                            scan("#add-link-exp").value ? scan("#add-link-exp").value : scan("#add-link-href").value
-                        ]
-                    })
+                    data[scan("#add-link-exp").value ? scan("#add-link-exp").value : scan("#add-link-href").value] = scan("#add-link-href").value;
                     DB.value("link", data);
                     scan("#add-link-href").value = "";
                     scan("#add-link-exp").value = "";
@@ -104,14 +99,14 @@ const subFragment = {
                     id: "add-link-href",
                     autocomplete: "off",
                     required: "",
-                    style: "width: 100%; height: 30px",
+                    style: "width: 100%; height: 30px; margin: 0px;",
                     placeholder: "링크의 주소 (https://...)"
                 }),
                 $("hr"),
                 $("input", {
                     id: "add-link-exp",
                     autocomplete: "off",
-                    style: "width: 100%; height: 30px",
+                    style: "width: 100%; height: 30px; margin: 0px;",
                     placeholder: "링크의 설명"
                 }),
                 $("input", {

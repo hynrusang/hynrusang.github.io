@@ -190,11 +190,11 @@ R.User = {
     /**
      * @type {(dataset: object[]) => Dom[]}
      */
-    LinkBox: dataset => dataset.map((data, index) => {
+    LinkBox: dataset => Object.keys(dataset).sort().map((key, index) => {
         let field = $("a", {
             class: "detail",
-            href: data.data[0],
-            text: data.data[1],
+            href: dataset[key],
+            text: key,
             target: "_blank"
         });
         return R.User.Frame({
@@ -206,15 +206,16 @@ R.User = {
                         style: `height: ${field.node.offsetHeight}px`,
                         class: "detail",
                         spellcheck: "false",
-                        onfocus: e => e.target.value = data.data[1],
+                        onfocus: e => e.target.value = key,
                         onkeyup: e => (e.code == "Enter") ? scan(`#l${index} .handler input`).click() : null
                     })
-                } else {
-                    dataset[index].data[1] = field.node.value;
+                } else if (field.node.value) {
+                    dataset[field.node.value] = dataset[key];
+                    if (field.node.value != key) delete dataset[key];
                     field = $("a", {
                         class: "detail",
-                        href: dataset[index].data[0],
-                        text: dataset[index].data[1],
+                        href: dataset[field.node.value],
+                        text: field.node.value,
                         target: "_blank"
                     })
                     DB.value("link", dataset);
@@ -226,7 +227,7 @@ R.User = {
             },
             fdelete: () => {
                 if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) {
-                    dataset.splice(index, 1);
+                    delete dataset[key];
                     DB.value("link", dataset);
                     notifyDataChange();
                 }
@@ -237,15 +238,15 @@ R.User = {
     /**
      * @type {(dataset: object) => Dom[]}
      */
-    RoomBox: dataset => Object.keys(dataset).sort().map((key, index) => {
+    RoomBox: dataset => Object.keys(dataset).sort().map(key => {
         const field = $("input", {
             type: "button",
             style: "background-image: url(/resource/img/icon/server.png",
-            value: dataset[key],
+            value: key,
             onclick: e => {
                 scan("[rid=menu]").removeAttribute("open");
                 current.value("tab", "chatroom");
-                current.value("chatroom", key);
+                current.value("chatroom", dataset[key]);
             }
         });
         return R.User.Frame({
@@ -253,15 +254,16 @@ R.User = {
             style: "padding: 0px;",
             fedit: () => {
                 const newName = prompt("해당 채팅방의 이름으로 설정할 새로운 이름을 입력해주세요.");
-                if (newName) {
-                    dataset[key] = newName;
+                if (newName && newName != key) {
+                    dataset[newName] = dataset[key];
+                    delete dataset[key];
                     DB.value("chatroom", dataset);
                     notifyDataChange();
                 }
             },
             fdelete: () => {
                 if (confirm("정말 해당 채팅방에서 나가시겠습니까?\n데이터는 자동으로 삭제되지 않으며,\n추후 다시 들어올 시 신청을 다시 해야합니다.")) {
-                    firebase.firestore().collection("chat").doc(key).get().then(async data => {
+                    firebase.firestore().collection("chat").doc(dataset[key]).get().then(async data => {
                         const owner = data.data().owner;
                         if (owner == firebase.auth().currentUser.uid) alert("채팅방 관리자는 채팅방에서 나갈 수 없습니다.\n채팅방 메뉴에서 채팅방 삭제를 해야 합니다.");
                         else {

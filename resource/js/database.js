@@ -11,16 +11,16 @@ const DB = new LiveDataManager({
     chat: new LiveData([], {
         type: Array
     }),
-    link: new LiveData([], {
-        type: Array
+    link: new LiveData({}, {
+        type: Object
     }),
     playlist: new LiveData({}, {
-        type: Object,
+        type: Object
     }),
     setting : new LiveData({
         theme: "right"
     }, {
-        type: Object,
+        type: Object
     }),
     secret: new LiveData({
         key: ""
