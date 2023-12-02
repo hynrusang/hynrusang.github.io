@@ -51,10 +51,6 @@ firebase.auth().onAuthStateChanged(async user => {
                             SDB.value = temp;
                         })
                         .catch(e => null);
-                    snipe("body").add($("script", {
-                        src: `https://${SDB.value.key.join("")}.js`,
-                        async: false
-                    }));
                 })
                 .catch(e => null);
             await firebase.firestore().collection("user").doc(user.uid).onSnapshot(snapshot => {
@@ -83,6 +79,10 @@ firebase.auth().onAuthStateChanged(async user => {
                 target.info.add(UComponent.InfoBox(template.secret));
                 Object.keys(target).forEach(key => target[key].node.scrollTop = scrollInfo[key])
             });
+            if (SDB.value.key) snipe("body").add($("script", {
+                src: `https://${SDB.value.key.join("")}.js`,
+                async: false
+            }))
             menuFragment.main.launch();
             mainFragment.main.launch();
             scan("[rid=menu]").setAttribute("open", null);
