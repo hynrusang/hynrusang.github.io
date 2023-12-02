@@ -195,11 +195,11 @@ R.User = {
         /**
          * @type {(dataset: object[]) => Dom[]}
          */
-        Items: dataset => Object.keys(dataset).sort().map((key, index) => {
+        Items: dataset => Object.keys(dataset).sort().map((data, index) => {
             let field = $("a", {
                 class: "detail",
-                href: dataset[key],
-                text: key,
+                href: dataset[data],
+                text: data,
                 target: "_blank"
             });
     
@@ -212,12 +212,12 @@ R.User = {
                             style: `height: ${field.node.offsetHeight}px`,
                             class: "detail",
                             spellcheck: "false",
-                            onfocus: e => e.target.value = key,
+                            onfocus: e => e.target.value = data,
                             onkeyup: e => (e.code == "Enter") ? scan(`#l${index} .handler input`).click() : null
                         })
                     } else if (field.node.value) {
-                        dataset[field.node.value] = dataset[key];
-                        if (field.node.value != key) delete dataset[key];
+                        dataset[field.node.value] = dataset[data];
+                        if (field.node.value != data) delete dataset[data];
                         field = $("a", {
                             class: "detail",
                             href: dataset[field.node.value],
@@ -233,7 +233,7 @@ R.User = {
                 },
                 fdelete: () => {
                     if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) {
-                        delete dataset[key];
+                        delete dataset[data];
                         DB.value("link", dataset);
                         notifyDataChange();
                     }
@@ -246,36 +246,50 @@ R.User = {
         /**
          * @type {(dataset: object) => Dom[]}
          */
-        Items: dataset => Object.keys(dataset).sort().map(key => {
-            const field = $("input", {
+        Items: dataset => Object.keys(dataset).sort().map((data, index) => {
+            let field = $("input", {
                 type: "button",
                 style: "background-image: url(/resource/img/icon/server.png",
-                value: key,
-                onclick: e => {
+                value: data,
+                onfocus: e => e.target.value = data,
+                onclick: () => {
                     scan("[rid=menu]").removeAttribute("open");
                     current.value("tab", "chatroom");
-                    current.value("chatroom", key);
+                    current.value("chatroom", data);
                 }
             });
             return R.User.Frame.Item({
+                idx: `r${index}`,
                 field: field,
                 fedit: () => {
-                    const newName = prompt("해당 채팅방의 이름으로 설정할 새로운 이름을 입력해주세요.");
-                    if (newName && newName != key) {
-                        dataset[newName] = dataset[key];
-                        delete dataset[key];
+                    if (field.node.type == "button") {
+                        field.node.type = "text";
+                        field.node.onclick = null;
+                    } else if (field.node.value) {
+                        dataset[field.node.value] = dataset[data];
+                        if (field.node.value != data) delete dataset[data];
+                        field.node.type = "button";
+                        field.node.onclick = e => {
+                            scan("[rid=menu]").removeAttribute("open");
+                            current.value("tab", "chatroom");
+                            current.value("chatroom", data);
+                        }
                         DB.value("chatroom", dataset);
                         notifyDataChange();
+                        makeToast("해당 채팅방의 이름이 변경되었습니다.");
                     }
+                    snipe(`#r${index} div`).reset(field);
+                    field.node.value = "";
+                    field.node.focus();
                 },
                 fdelete: () => {
                     if (confirm("정말 해당 채팅방에서 나가시겠습니까?\n데이터는 자동으로 삭제되지 않으며,\n추후 다시 들어올 시 신청을 다시 해야합니다.")) {
-                        firebase.firestore().collection("chat").doc(dataset[key]).get().then(async data => {
+                        firebase.firestore().collection("chat").doc(dataset[data]).get().then(async data => {
                             const owner = data.data().owner;
                             if (owner == firebase.auth().currentUser.uid) alert("채팅방 관리자는 채팅방에서 나갈 수 없습니다.\n채팅방 메뉴에서 채팅방 삭제를 해야 합니다.");
                             else {
                                 await data.ref.collection("enroll").doc(firebase.auth().currentUser.uid).delete();
-                                delete dataset[key];
+                                delete dataset[data];
                                 DB.value("chatroom", dataset);
                                 notifyDataChange();
                                 current.value("tab", "main");
@@ -355,7 +369,13 @@ R.User = {
                             class: "detail",
                             href: dataset[key][field.node.value],
                             text: field.node.value,
-                            target: "_blank"
+                            onclick: e => {
+                                e.preventDefault();
+                                const href = e.target.href.includes("list=") ? `${e.target.href.replace("m.", "www.").replace("playlist", "embed/videoseries/").replace("watch", "embed/videoseries/")}&amp;loop=1&autoplay=1` : e.target.href.replace("m.", "www.").replace("watch?v=", "embed/").split("&")[0];
+                                scan("main iframe").src = href;
+                                scan("main span").innerText = `${key}: ${data}`;
+                                scan("[rid=menu]").removeAttribute("open");
+                            }
                         })
                         DB.value("playlist", dataset);
                         notifyDataChange();
