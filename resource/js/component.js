@@ -127,13 +127,12 @@ R.Modal = {
 R.User = {
     Frame: {
         /**
-         * @type {(props: {idx: string, field: Dom, fedit: Function?, fdelete: Function?}) => Dom}
+         * @type {(props: {container: Dom, fedit: Function?, fdelete: Function?}) => Dom}
          */
-        Item: ({idx, field, fedit, fdelete}) => $("div", {
+        Item: ({container, fedit, fdelete}) => $("div", {
             class: "itemBox",
-            id: idx
         }).add(
-            $("div").add(field),
+            container,
             R.Shared.Handler({
                 fedit: fedit,
                 fdelete: fdelete
@@ -150,10 +149,10 @@ R.User = {
                 class: "detail",
                 text: data,
             });
+            const container = $("div").add(field);
     
             return R.User.Frame.Item({
-                idx: `c${index}`,
-                field: field,
+                container: container,
                 fedit: () => {
                     if (field.node.nodeName == "SPAN") {
                         field = $("textarea", {
@@ -177,7 +176,7 @@ R.User = {
                         notifyDataChange();
                         makeToast("해당 채팅의 내용이 변경되었습니다.");
                     }
-                    snipe(`#c${index} div`).reset(field);
+                    container.reset(field);
                     field.node.focus();
                 },
                 fdelete: () => {
@@ -202,10 +201,10 @@ R.User = {
                 text: data,
                 target: "_blank"
             });
+            const container = $("div").add(field);
     
             return R.User.Frame.Item({
-                idx: `l${index}`,
-                field: field,
+                container: container,
                 fedit: () => {
                     if (field.node.nodeName == "A") {
                         field = $("input", {
@@ -227,7 +226,7 @@ R.User = {
                         notifyDataChange();
                         makeToast("해당 링크의 설명이 변경되었습니다.");
                     }
-                    snipe(`#l${index} div`).reset(field);
+                    container.reset(field);
                     field.node.focus();
                 },
                 fdelete: () => {
@@ -257,10 +256,10 @@ R.User = {
                     current.value("chatroom", data);
                 }
             });
+            const container = $("div").add(field);
 
             return R.User.Frame.Item({
-                idx: `r${index}`,
-                field: field,
+                container: container,
                 fedit: () => {
                     if (field.node.type == "button") {
                         field.node.type = "text";
@@ -278,7 +277,7 @@ R.User = {
                         notifyDataChange();
                         makeToast("해당 채팅방의 이름이 변경되었습니다.");
                     }
-                    snipe(`#r${index} div`).reset(field);
+                    container.reset(field);
                     field.node.value = "";
                     field.node.focus();
                 },
@@ -349,10 +348,10 @@ R.User = {
                     scan("[rid=menu]").removeAttribute("open");
                 }
             });
+            const container = $("div").add(field);
 
             return R.User.Frame.Item({
-                idx: `y${index}`,
-                field: field,
+                container: container,
                 fedit: () => {
                     if (field.node.nodeName == "A") {
                         field = $("input", {
@@ -380,10 +379,7 @@ R.User = {
                         notifyDataChange();
                         makeToast("해당 재생목록의 이름이 변경되었습니다.");
                     }
-                    console.log(field.node);
-                    console.log(field.node.parentElement);
-                    console.log(snipe(field.node.parentElement));
-                    snipe(field.node.parentElement).reset(field);
+                    container.reset(field);
                     field.node.focus();
                 },
                 fdelete: () => {
