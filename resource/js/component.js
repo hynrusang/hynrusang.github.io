@@ -1,18 +1,5 @@
-/**
- * about shared interface component
- */
-const SComponent = {
-    /**
-     * @type {(icon: string, text: string, fonclick: Function) => Dom}
-     */
-    WidgetButton: (icon, text, fonclick) => $("input", { 
-        type: "button",
-        class: "inputWidget",
-        style: `background-image: url('/resource/img/icon/${icon}.png')`, 
-        value: text,
-        onclick: fonclick
-    }),
-    
+const R = {};
+R.Shared = {
     /**
      * @type {(props: {fadd: Function?, fedit: Function?, fdelete: Function?}) => Dom}
      */
@@ -35,7 +22,7 @@ const SComponent = {
             onclick: fdelete
         }) : null
     ),
-
+    
     /**
      * @type {(props: {name: string?, exp: string?}) => Dom}
      */
@@ -48,12 +35,80 @@ const SComponent = {
             exp: exp
         })
     )
-}
+};
+R.Modal = {
+    Room: {
+        Add: () => [
+            $("p", {
+                text: "어떤 동작을 수행하시겠습니까?"
+            }),
+            $("input", {
+                type: "button",
+                style: "background-image: url(/resource/img/icon/plus.png)",
+                value: "채팅방 새로 만들기",
+                onclick: () => makeModal(R.Modal.Room.MakeRoom)
+            }),
+            $("input", {
+                type: "button",
+                style: "background-image: url(/resource/img/icon/data.png)",
+                value: "기존 채팅방 들어가기",
+                onclick: () => makeModal(R.Modal.Room.EnterRoom)
+            })
+        ],
+        Make: () => [
+            $("p", {
+                text: "정말로 새로운 채팅방을 만드시겠습니까?"
+            }),
+            $("input", {
+                type: "button",
+                style: "background-image: url(/resource/img/icon/accept.png)",
+                value: "예",
+                onclick: () => () => {
+                    firebase.firestore().collection("chat").add({
+                        owner: firebase.auth().currentUser.uid
+                    })
+                    .then(doc => {
+                        doc.collection("enroll").doc(firebase.auth().currentUser.uid).set({
+                            accept: true,
+                            name: firebase.auth().currentUser.email
+                        })
+                        const temp = DB.value("chatroom");
+                        temp.unshift({
+                            data: [doc.id, doc.id]
+                        })
+                        DB.value("chatroom", temp);
+                        notifyDataChange();
+                        scan("modal").removeAttribute("open");
+                    })
+                }
+            }),
+            $("input", {
+                type: "button",
+                style: "background-image: url(/resource/img/icon/del.png)",
+                value: "아니오",
+                onclick: () => scan("modal").removeAttribute("open")
+            })
+        ],
+        Enter: () => {
+            const input = $("input", {
+                type: "text",
+                style: "background-image: url(/resource/img/icon/password.png)",
+                placeholder: "roomid"
+            })
 
-/**
- * about user interface component
- */
-const UComponent = {
+            return [
+                $("p", {
+                    text: "들어가고 싶은 채팅방의 아이디를 입력해주세요."
+                }),
+                input,
+                $("input", {
+                    type: "button"
+                })
+            ]
+        }
+    }
+}
+R.User = {
     /**
      * @type {(props: {idx: string?, field: Dom, style: string?, fedit: Function?, fdelete: Function?}) => Dom}
      */
@@ -63,7 +118,7 @@ const UComponent = {
         id: idx
     }).add(
         $("div").add(field),
-        SComponent.Handler({
+        R.Shared.Handler({
             fedit: fedit,
             fdelete: fdelete
         })
@@ -77,8 +132,7 @@ const UComponent = {
             class: "detail",
             text: data,
         });
-
-        return UComponent.Frame({
+        return R.User.Frame({
             idx: `c${index}`,
             field: field,
             fedit: () => {
@@ -116,7 +170,7 @@ const UComponent = {
             }
         })
     }),
-
+    
     /**
      * @type {(dataset: object[]) => Dom[]}
      */
@@ -127,8 +181,7 @@ const UComponent = {
             text: data.data[1],
             target: "_blank"
         });
-
-        return UComponent.Frame({
+        return R.User.Frame({
             idx: `l${index}`,
             field: field,
             fedit: () => {
@@ -169,13 +222,17 @@ const UComponent = {
      * @type {(dataset: object[]) => Dom[]}
      */
     RoomBox: dataset => dataset.map((data, index) => {
-        const field = SComponent.WidgetButton("server", data.data[1], e => {
-            scan("[rid=menu]").removeAttribute("open");
-            current.value("tab", "chatroom");
-            current.value("chatroom", data.data[0]);
+        const field = $("input", {
+            type: "button",
+            style: "background-image: url(/resource/img/icon/server.png",
+            value: data.data[1],
+            onclick: e => {
+                scan("[rid=menu]").removeAttribute("open");
+                current.value("tab", "chatroom");
+                current.value("chatroom", data.data[0]);
+            }
         });
-
-        return UComponent.Frame({
+        return R.User.Frame({
             field: field,
             style: "padding: 0px;",
             fedit: () => {
@@ -188,7 +245,7 @@ const UComponent = {
             },
             fdelete: () => {
                 if (confirm("정말 해당 채팅방에서 나가시겠습니까?\n데이터는 자동으로 삭제되지 않으며,\n추후 다시 들어올 시 신청을 다시 해야합니다.")) {
-                    firebase.firestore().collection("chat").doc(field.node.attributes.target.value).get().then(async data => {
+                    firebase.firestore().collection("chat").doc(data.data[0]).get().then(async data => {
                         const owner = data.data().owner;
                         if (owner == firebase.auth().currentUser.uid) alert("채팅방 관리자는 채팅방에서 나갈 수 없습니다.\n채팅방 메뉴에서 채팅방 삭제를 해야 합니다.");
                         else {
@@ -216,8 +273,8 @@ const UComponent = {
             }),
             $("div", {
                 style: "margin-bottom: 40px"
-            }).add(UComponent.Youtube.Item(dataset, data)),
-            SComponent.Handler({
+            }).add(R.User.Youtube.Item(dataset, data)),
+            R.Shared.Handler({
                 fadd: () => {
                     const url = prompt("추가하길 원하는 재생목록(또는 동영상)의 링크를 입력해주세요.");
                     if (url && !Object.values(dataset[data]).includes(url)) {
@@ -239,7 +296,7 @@ const UComponent = {
         /**
          * @type {(dataset: object, key: string) => Dom[]}
          */
-        Item: (dataset, key) => Object.keys(dataset[key]).sort().map(data => UComponent.Frame({
+        Item: (dataset, key) => Object.keys(dataset[key]).sort().map(data => R.User.Frame({
             field: $("a", {
                 class: "detail",
                 href: dataset[key][data],
@@ -271,35 +328,50 @@ const UComponent = {
             }
         }))
     },
-
+    
     /**
      * @type {(dataset: object) => Dom}
      */
     InfoBox: dataset => {
         let element = [
-            SComponent.UserProfile({
+            R.Shared.UserProfile({
                 name: firebase.auth().currentUser.uid
             }),
-            SComponent.WidgetButton("password", "비밀번호 변경 이메일 보내기", () => {
-                makeToast("이메일 주소로 비밀번호 초기화 메일을 보내기 시도하는 중입니다.");
-                firebase.auth().sendPasswordResetEmail(firebase.auth().currentUser.email)
-                .then(() => makeToast("이메일 주소로 초기화 메일을 보냈습니다."))
-                .catch(e => {
-                    if (e.code == "auth/invalid-email") makeToast("잘못된 이메일 주소입니다.");
-                    else if (e.code == "auth/user-not-found") makeToast("해당 계정은 존재하지 않습니다.");
-                })
-            }),
-            SComponent.WidgetButton("setting", "로그아웃", () => firebase.auth().signOut().then(() => location.reload())),
-            SComponent.WidgetButton("del", "회원 탈퇴", async () => {
-                if (confirm("정말로 이 계정을 삭제하시겠습니까?\n(이 결정은 번복되지 않습니다.)\n(추가로 다시 한 번 물어보는 절차도 없습니다.)")) {
-                    makeToast("잠시만 기다려 주십시오. 정보가 곧 삭제됩니다.");
-                    await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).delete().then(() => makeToast("사용자의 데이터를 모두 삭제하는데 성공하였습니다."));
-                    firebase.auth().currentUser.delete()
-                    .then(() => {
-                        alert("사이트에서 당신의 정보를 삭제했습니다.\n(다음에 뵙기를 믿습니다.)");
-                        location.reload();
+            $("input", {
+                type: "button",
+                style: "background-image: url(/resource/img/icon/password.png",
+                value: "비밀번호 변경 이메일 보내기",
+                onclick: () => {
+                    makeToast("이메일 주소로 비밀번호 초기화 메일을 보내기 시도하는 중입니다.");
+                    firebase.auth().sendPasswordResetEmail(firebase.auth().currentUser.email)
+                    .then(() => makeToast("이메일 주소로 초기화 메일을 보냈습니다."))
+                    .catch(e => {
+                        if (e.code == "auth/invalid-email") makeToast("잘못된 이메일 주소입니다.");
+                        else if (e.code == "auth/user-not-found") makeToast("해당 계정은 존재하지 않습니다.");
                     })
-                    .catch(e => alert(e.code == "auth/requires-recent-login" ? "사용자의 계정을 삭제하는데 실패했습니다.\n사유: 계정 삭제 작업은 중요하므로 최근 인증이 필요합니다.\n재 로그인한 후, 다시 계정 삭제를 진행해주세요." : "알 수 없는 이유로 회원 탈퇴에 실패하였습니다. 다시 한 번 시도해주세요."));
+                }
+            }),
+            $("input", {
+                type: "button",
+                style: "background-image: url(/resource/img/icon/setting.png",
+                value: "로그아웃",
+                onclick: () => firebase.auth().signOut().then(() => location.reload())
+            }),
+            $("input", {
+                type: "button",
+                style: "background-image: url(/resource/img/icon/del.png",
+                value: "회원 탈퇴",
+                onclick: () => async () => {
+                    if (confirm("정말로 이 계정을 삭제하시겠습니까?\n(이 결정은 번복되지 않습니다.)\n(추가로 다시 한 번 물어보는 절차도 없습니다.)")) {
+                        makeToast("잠시만 기다려 주십시오. 정보가 곧 삭제됩니다.");
+                        await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).delete().then(() => makeToast("사용자의 데이터를 모두 삭제하는데 성공하였습니다."));
+                        firebase.auth().currentUser.delete()
+                        .then(() => {
+                            alert("사이트에서 당신의 정보를 삭제했습니다.\n(다음에 뵙기를 믿습니다.)");
+                            location.reload();
+                        })
+                        .catch(e => alert(e.code == "auth/requires-recent-login" ? "사용자의 계정을 삭제하는데 실패했습니다.\n사유: 계정 삭제 작업은 중요하므로 최근 인증이 필요합니다.\n재 로그인한 후, 다시 계정 삭제를 진행해주세요." : "알 수 없는 이유로 회원 탈퇴에 실패하였습니다. 다시 한 번 시도해주세요."));
+                    }
                 }
             })
         ]
@@ -315,19 +387,11 @@ const UComponent = {
             }).add(
                 $("input", {
                     type: "text",
-                    style: "background-image: url('/resource/img/icon/lock.png')",
-                    class: "inputWidget",
+                    style: "background-image: url('/resource/img/icon/password.png')",
                     placeholder: "특수문서 키"
                 })
             )
         ])
         return element;
     }
-}
-
-/**
- * about global interface component
- */
-const GComponent = {
-
-}
+};

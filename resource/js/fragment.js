@@ -4,55 +4,46 @@ const menuFragment = {
             class: "itemBox",
             style: "padding: 0px;"
         }).add(
-            SComponent.WidgetButton("data", "마이 페이지", () => {
-                scan("[rid=menu]").removeAttribute("open");
-                current.value("tab", "main");
+            $("input", {
+                type: "button",
+                style: "background-image: url(/resource/img/icon/data.png)",
+                value: "마이 페이지",
+                onclick: () => {
+                    scan("[rid=menu]").removeAttribute("open");
+                    current.value("tab", "main");
+                }
             })
         ),
         $("div", {
             style: "height: calc(100% - 190px);"
         }),
+        R.Shared.Handler({
+            fadd: () => makeModal(R.Modal.Room.AddRoom)
+        }),
         $("div", {
             style: "display: flex; flex-direction: column;"
         }).add(
-            SComponent.WidgetButton("plus", "채팅방 새로 만들기", () => {
-                if (confirm("정말로 채팅방을 새로 만드시겠습니까?")) {
-                    firebase.firestore().collection("chat").add({
-                        owner: firebase.auth().currentUser.uid
-                    })
-                    .then(doc => {
-                        doc.collection("enroll").doc(firebase.auth().currentUser.uid).set({
-                            accept: true,
-                            name: firebase.auth().currentUser.email
+            $("input", {
+                type: "button",
+                style: "background-image: url(/resource/img/icon/plus.png)",
+                value: "채팅방 추가하기",
+                onclick: () => {
+                    const name = prompt("추가하길 원하는 채팅방 아이디를 입력해주세요.");
+                    if (name) {
+                        firebase.firestore().collection("chat").doc(name).get().then(data => {
+                            if (data.data()) {
+                                const temp = DB.value("chatroom");
+                                temp.unshift({
+                                    data: [
+                                        name,
+                                        name
+                                    ]
+                                })
+                                DB.value("chatroom", temp);
+                                notifyDataChange();
+                            } else alert("해당 채팅방은 존재하지 않습니다.")
                         })
-                        const temp = DB.value("chatroom");
-                        temp.unshift({
-                            data: [
-                                doc.id,
-                                doc.id
-                            ]
-                        })
-                        DB.value("chatroom", temp);
-                        notifyDataChange();
-                    })
-                }
-            }),
-            SComponent.WidgetButton("plus", "채팅방 추가하기", () => {
-                const name = prompt("추가하길 원하는 채팅방 아이디를 입력해주세요.");
-                if (name) {
-                    firebase.firestore().collection("chat").doc(name).get().then(data => {
-                        if (data.data()) {
-                            const temp = DB.value("chatroom");
-                            temp.unshift({
-                                data: [
-                                    name,
-                                    name
-                                ]
-                            })
-                            DB.value("chatroom", temp);
-                            notifyDataChange();
-                        } else alert("해당 채팅방은 존재하지 않습니다.")
-                    })
+                    }
                 }
             })
         )
@@ -73,8 +64,7 @@ const menuFragment = {
         }).add(
             $("input", {
                 type: "text",
-                class: "inputWidget",
-                style: "background-image: url(/resource/img/icon/plus.png); width: 100%; margin-top: 22px;",
+                style: "background-image: url(/resource/img/icon/plus.png); margin-top: 22px;",
                 placeholder: "재생목록 바구니 이름",
             })
         ),
@@ -285,7 +275,6 @@ const mainFragment = {
             }).add(
                 $("input", {
                     style: "background-image: url(resource/img/icon/email.png)",
-                    class: "inputWidget",
                     type: "text",
                     placeholder: "email",
                     oninput: e => {
@@ -314,7 +303,6 @@ const mainFragment = {
                 }),
                 $("input", {
                     style: "background-image: url(resource/img/icon/password.png)",
-                    class: "inputWidget",
                     type: "password",
                     placeholder: "password"
                 }),

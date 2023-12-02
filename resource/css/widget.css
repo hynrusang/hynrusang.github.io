@@ -15,22 +15,6 @@
     background-position: center center !important;
     background-size: contain !important;
 }
-.current {
-    background-size: 20px !important;
-    padding-left: 20px !important;
-}
-.inputWidget {
-    width: calc(100% - 20px);
-    height: 40px;
-    text-align: left;
-    background-size: 30px;
-    background-position: 5px;
-    margin: 10px;
-    padding-left: 40px;
-}
-.inputWidget:hover {
-    box-shadow: rgba(0,0,0,0.5) 10px 6px;
-}
 
 .loginField {
     left: 0px;
@@ -64,10 +48,13 @@
 .loginField :is([type="text"], [type="password"]) {
     width: 300px;
     margin-left: calc(50% - 150px);
+    margin-bottom: 10px;
 }
 .loginField :is([type="button"], [type="submit"]) {
     cursor: pointer;
-    width: 120px;
+    width: 130px;
+    padding-left: 0px;
+    text-align: center;
 }
 
 .userProfile {
@@ -121,8 +108,8 @@ span.detail {
 .handler {
     display: flex;
     position: absolute;
-    bottom: 10px;
-    right: 10px;
+    bottom: 0px;
+    right: 0px;
 }
 .handler * {
     width: 40px;

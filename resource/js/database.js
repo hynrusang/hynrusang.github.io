@@ -82,7 +82,6 @@ const current = new LiveDataManager({
                                 }),
                                 $("input", {
                                     style: "background-image: url(/resource/img/icon/del.png)",
-                                    class: "inputWidget",
                                     type: "button",
                                     value: "채팅방 삭제하기",
                                     onclick: async () => {
@@ -157,7 +156,7 @@ const current = new LiveDataManager({
                                         $("div", {
                                             style: "position: relative;"
                                         }).add(
-                                            _SComponent.UserProfile({
+                                            R.Shared.UserProfile({
                                                 name: data.name
                                             }),
                                             $("div", {
@@ -189,7 +188,7 @@ const current = new LiveDataManager({
                                         )
                                     )
                                 }
-                            } else if (data.accept) userBox[0].add(_SComponent.UserProfile({
+                            } else if (data.accept) userBox[0].add(R.Shared.UserProfile({
                                 name: data.name
                             }))
                         })
@@ -268,7 +267,7 @@ const current = new LiveDataManager({
                                     $("div", {
                                         class: "itemBox chatItem",
                                     }).add(
-                                        _SComponent.UserProfile({
+                                        R.Shared.UserProfile({
                                             exp: `${data.author}->{${data.author}}`
                                         }),
                                         $("span", {
@@ -293,7 +292,7 @@ const current = new LiveDataManager({
                                     $("div", {
                                         class: "itemBox chatItem",
                                     }).add(
-                                        _SComponent.UserProfile({
+                                        R.Shared.UserProfile({
                                             exp: `${data.author}->{${data.author}}`
                                         }),
                                         $("span", {
@@ -375,7 +374,7 @@ const current = new LiveDataManager({
                                         class: "itemBox chatItem",
                                         iden: chatdata.id
                                     }).add(
-                                        _SComponent.UserProfile({
+                                        R.Shared.UserProfile({
                                             exp: `${data.author}->{${data.author}}`
                                         }),
                                         $("a", {
@@ -402,7 +401,7 @@ const current = new LiveDataManager({
                                         class: "itemBox chatItem",
                                         iden: chatdata.id
                                     }).add(
-                                        _SComponent.UserProfile({
+                                        R.Shared.UserProfile({
                                             exp: `${data.author}->{${data.author}}`
                                         }),
                                         $("a", {

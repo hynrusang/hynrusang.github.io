@@ -28,11 +28,15 @@ const makeToast = message => {
         opacity: 0
     }], 1000)
 };
-const makeModal = null;
+const makeModal = component => {
+    snipe("modal container").reset(component);
+    scan("modal").setAttribute("open", null);
+};
 scan(".menuicon").onclick = () => {
     if (!scan("[rid=menu]").attributes.open) scan("[rid=menu]").setAttribute("open", null);
     else scan("[rid=menu]").removeAttribute("open");
 }
+scan("modal input").onclick = () => scan("modal").removeAttribute("open")
 if (localStorage.getItem("timestamp") && new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime() >= 259200000) {
     localStorage.clear();
     firebase.auth().signOut();
@@ -79,11 +83,11 @@ firebase.auth().onAuthStateChanged(async user => {
                     chatroom: menuFragment.main.fragment[1].reset()
                 }
 
-                target.chat.add(UComponent.ChatBox(template.chat));
-                target.link.add(UComponent.LinkBox(template.link));
-                target.chatroom.add(UComponent.RoomBox(template.chatroom));
-                target.video.add(UComponent.Youtube.Frame(template.playlist));
-                target.info.add(UComponent.InfoBox(template.secret));
+                target.chat.add(R.User.ChatBox(template.chat));
+                target.link.add(R.User.LinkBox(template.link));
+                target.chatroom.add(R.User.RoomBox(template.chatroom));
+                target.video.add(R.User.Youtube.Frame(template.playlist));
+                target.info.add(R.User.InfoBox(template.secret));
                 Object.keys(target).forEach(key => target[key].node.scrollTop = scrollInfo[key])
             });
             menuFragment.main.launch();
