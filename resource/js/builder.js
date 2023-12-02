@@ -40,6 +40,7 @@ if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localS
 firebase.auth().onAuthStateChanged(async user => {
     if (user) {
         if (user.emailVerified) {
+            localStorage.setItem("timestamp", new Date());
             await firebase.firestore().collection("dat").doc("surface").get()
                 .then(async data => {
                     const temp = SDB.value;
