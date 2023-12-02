@@ -127,7 +127,7 @@ R.Modal = {
 R.User = {
     Frame: {
         /**
-         * @type {(props: {idx: string?, field: Dom, fedit: Function?, fdelete: Function?}) => Dom}
+         * @type {(props: {idx: string, field: Dom, fedit: Function?, fdelete: Function?}) => Dom}
          */
         Item: ({idx, field, fedit, fdelete}) => $("div", {
             class: "itemBox",
