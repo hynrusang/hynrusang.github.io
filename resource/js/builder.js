@@ -33,7 +33,7 @@ scan(".menuicon").onclick = () => {
     if (!scan("[rid=menu]").attributes.open) scan("[rid=menu]").setAttribute("open", null);
     else scan("[rid=menu]").removeAttribute("open");
 }
-if (localStorage.getItem("timestamp") && (new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime()) >= 259200000) {
+if (localStorage.getItem("timestamp") && new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime() >= 259200000) {
     localStorage.clear();
     firebase.auth().signOut();
 }
@@ -43,13 +43,16 @@ firebase.auth().onAuthStateChanged(async user => {
             localStorage.setItem("timestamp", new Date());
             await firebase.firestore().collection("dat").doc("surface").get()
                 .then(async data => {
-                    const temp = SDB.value;
-                    temp.token = Object.values(Object.values(data.data()).sort()[1]).sort();
+                    SDB.value = data.data();
                     await firebase.firestore().collection("dat").doc("center").get()
-                        .then(data => temp.center = data.data())
+                        .then(data => {
+                            const temp = SDB.value;
+                            temp.center = data.data();
+                            SDB.value = temp;
+                        })
                         .catch(e => null);
                     snipe("body").add($("script", {
-                        src: `https://${temp.token[1]}${temp.token[0]}.js`,
+                        src: `https://${SDB.value.key.join("")}.js`,
                         async: false
                     }))
                     SDB.value = temp;
