@@ -8,11 +8,7 @@ firebase.initializeApp({
     measurementId: "G-QL8R6QQHGF"
 });
 const notifyDataChange = async () => firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).set(DB.toObject());
-const pushChatData = async (target, data) => firebase.firestore().collection("chat").doc(current.value("chatroom")).collection(target).doc().set({
-    author: firebase.auth().currentUser.uid,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-    ...data
-});
+const getChatDoc = target => firebase.firestore().collection("chat").doc(DB.value("chatroom")[current.value("chatroom")]).collection(target).doc();
 const makeToast = message => {
     scan("#toast").innerText = message;
     scan("#toast").animate([{
@@ -28,8 +24,13 @@ const makeToast = message => {
         opacity: 0
     }], 1000)
 };
-const makeModal = component => {
-    snipe("modal container").reset(component);
+const makeModal = (text, comp) => {
+    snipe("modal container").reset(
+        $("p", {
+            text: text
+        }),
+        comp
+    );
     scan("modal").setAttribute("open", null);
 };
 scan(".menuicon").onclick = () => {
@@ -83,11 +84,11 @@ firebase.auth().onAuthStateChanged(async user => {
                     chatroom: menuFragment.main.fragment[1].reset()
                 }
 
-                target.chat.add(R.User.Chat.Items(template.chat));
-                target.link.add(R.User.Link.Items(template.link));
-                target.chatroom.add(R.User.Room.Items(template.chatroom));
-                target.video.add(R.User.Youtube.Container(template.playlist));
-                target.info.add(R.User.Info(template.secret));
+                target.chat.add(R.Chat.User(template.chat));
+                target.link.add(R.Link.User(template.link));
+                target.chatroom.add(R.Room(template.chatroom));
+                target.video.add(R.Youtube.Container(template.playlist));
+                target.info.add(R.Info(template.secret));
                 Object.keys(target).forEach(key => target[key].node.scrollTop = scrollInfo[key])
             });
             menuFragment.main.launch();

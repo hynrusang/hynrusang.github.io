@@ -70,10 +70,10 @@
     padding-top: 8px;
     padding-left: 10px;
 }
-.chatOwner, .chatItem {
+.owner, .general {
     width: 80%;
 }
-.chatOwner {
+.owner {
     left: 20%; 
     background: antiquewhite !important;
 }
@@ -89,20 +89,19 @@
     word-break: break-all;
 }
 .inputBox {
+    display: flex;
+    flex-direction: column;
     height: 80px;
     border: 1px solid black;
 }
 
 .detail {
     display: block;
-    width: calc(100% - 80px);
+    width: calc(100% - 4px);
     min-height: 25px;
     max-height: 300px;
     font-size: 14px;
     line-height: 20px;
-}
-span.detail {
-    width: 100%;
 }
 .handler {
     display: flex;

@@ -213,7 +213,7 @@ const current = new LiveDataManager({
                             if (data.author == firebase.auth().currentUser.uid) {
                                 target.add(
                                     $("div", {
-                                        class: "itemBox chatOwner",
+                                        class: "itemBox owner",
                                         id: `c${chatdata.id}`
                                     }).add(
                                         $("div").add(
@@ -269,7 +269,7 @@ const current = new LiveDataManager({
                             } else if (owner == firebase.auth().currentUser.uid) {
                                 target.add(
                                     $("div", {
-                                        class: "itemBox chatItem",
+                                        class: "itemBox general",
                                     }).add(
                                         R.Shared.UserProfile({
                                             exp: `${data.author}->{${data.author}}`
@@ -294,7 +294,7 @@ const current = new LiveDataManager({
                             } else {
                                 target.add(
                                     $("div", {
-                                        class: "itemBox chatItem",
+                                        class: "itemBox general",
                                     }).add(
                                         R.Shared.UserProfile({
                                             exp: `${data.author}->{${data.author}}`
@@ -317,7 +317,7 @@ const current = new LiveDataManager({
                             if (data.author == firebase.auth().currentUser.uid) {
                                 target.add(
                                     $("div", {
-                                        class: "itemBox chatOwner",
+                                        class: "itemBox owner",
                                         id: `l${chatdata.id}`
                                     }).add(
                                         $("div").add(
@@ -375,7 +375,7 @@ const current = new LiveDataManager({
                             } else if (owner == firebase.auth().currentUser.uid) {
                                 target.add(
                                     $("div", {
-                                        class: "itemBox chatItem",
+                                        class: "itemBox general",
                                         iden: chatdata.id
                                     }).add(
                                         R.Shared.UserProfile({
@@ -402,7 +402,7 @@ const current = new LiveDataManager({
                             } else {
                                 target.add(
                                     $("div", {
-                                        class: "itemBox chatItem",
+                                        class: "itemBox general",
                                         iden: chatdata.id
                                     }).add(
                                         R.Shared.UserProfile({

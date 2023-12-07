@@ -83,7 +83,6 @@ textarea, input, a {
 }
 textarea {
     position: relative;
-    z-index: 1;
     background: none;
 }
 input {

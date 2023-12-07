@@ -15,7 +15,7 @@ const menuFragment = {
         ),
         $("div"),
         R.Shared.Handler({
-            fadd: () => makeModal(R.Modal.Room.Add())
+            fadd: () => makeModal("어떤 동작을 수행하시겠습니까?", R.Modal.Room.Add())
         })
     ),
     video: new Fragment("menu",
@@ -44,76 +44,8 @@ const menuFragment = {
 }
 const subFragment = {
     main: {
-        채팅: new Fragment("main", 
-            $("fieldset", {
-                style: "height: calc(100vh - 160px); background: rgba(0,0,0,0.1); overflow-y: scroll"
-            }),
-            $("form", {
-                class: "inputBox",
-                onsubmit: async e => {
-                    e.preventDefault();
-                    const data = DB.value("chat");
-                    data.unshift(scan("#add-chat").value);
-                    DB.value("chat", data);
-                    scan("#add-chat").value = "";
-                    await notifyDataChange();
-                }
-            }).add(
-                $("textarea", {
-                    id: "add-chat",
-                    class: "detail",
-                    required: "",
-                    spellcheck: "false",
-                    style: "height: 70px",
-                    placeholder: "|"
-                }),
-                $("div", {
-                    class: "handler"
-                }).add(
-                    $("input", {
-                        style: "background-image: url(resource/img/icon/plus.png)",
-                        type: "submit",
-                        value: ""
-                    })
-                )
-            )
-        ),
-        링크: new Fragment("main",
-            $("fieldset", {
-                style: "height: calc(100vh - 160px); background: rgba(0,0,0,0.1); overflow-y: scroll"
-            }),
-            $("form", {
-                class: "inputBox",
-                onsubmit: async e => {
-                    e.preventDefault();
-                    const data = DB.value("link");
-                    data[scan("#add-link-exp").value ? scan("#add-link-exp").value : scan("#add-link-href").value] = scan("#add-link-href").value;
-                    DB.value("link", data);
-                    scan("#add-link-href").value = "";
-                    scan("#add-link-exp").value = "";
-                    await notifyDataChange();
-                }
-            }).add(
-                $("input", {
-                    id: "add-link-href",
-                    autocomplete: "off",
-                    required: "",
-                    style: "width: 100%; height: 30px; margin: 0px;",
-                    placeholder: "링크의 주소 (https://...)"
-                }),
-                $("hr"),
-                $("input", {
-                    id: "add-link-exp",
-                    autocomplete: "off",
-                    style: "width: 100%; height: 30px; margin: 0px;",
-                    placeholder: "링크의 설명"
-                }),
-                $("input", {
-                    style: "display: none",
-                    type: "submit"
-                })
-            )
-        ),
+        채팅: new Fragment("main", ...R.Chat.Form(false)),
+        링크: new Fragment("main", ...R.Link.Form(false)),
         설정: new Fragment("main",
             $("fieldset", {
                 style: "height: calc(100vh - 80px); background: rgba(0,0,0,0.1);"
@@ -121,78 +53,8 @@ const subFragment = {
         )
     },
     chatroom: {
-        채팅: new Fragment("main",
-            $("fieldset", {
-                style: "height: calc(100vh - 160px); background: rgba(0,0,0,0.1); overflow-y: scroll"
-            }),
-            $("form", {
-                class: "inputBox",
-                onsubmit: async e => {
-                    e.preventDefault();
-                    pushChatData("chat", {
-                        text: scan("#add-chat").value
-                    });
-                    scan("#add-chat").value = "";
-                }
-            }).add(
-                $("textarea", {
-                    id: "add-chat",
-                    class: "detail",
-                    required: "",
-                    spellcheck: "false",
-                    style: "height: 70px",
-                    placeholder: "|",
-                }),
-                $("div", {
-                    class: "handler"
-                }).add(
-                    $("input", {
-                        style: "background-image: url(resource/img/icon/plus.png)",
-                        type: "submit",
-                        value: ""
-                    })
-                )
-            )
-        ),
-        링크: new Fragment("main",
-            $("fieldset", {
-                style: "height: calc(100vh - 160px); background: rgba(0,0,0,0.1); overflow-y: scroll"
-            }),
-            $("form", {
-                class: "inputBox",
-                onsubmit: async e => {
-                    e.preventDefault();
-                    pushChatData("chat", {
-                        text: "새 링크를 추가했습니다."
-                    });
-                    pushChatData("link", {
-                        link: scan("#add-link-href").value,
-                        exp: scan("#add-link-exp").value ? scan("#add-link-exp").value : scan("#add-link-href").value
-                    });
-                    scan("#add-link-href").value = "";
-                    scan("#add-link-exp").value = "";
-                }
-            }).add(
-                $("input", {
-                    id: "add-link-href",
-                    autocomplete: "off",
-                    required: "",
-                    style: "width: 100%; height: 30px",
-                    placeholder: "링크의 주소 (https://...)"
-                }),
-                $("hr"),
-                $("input", {
-                    id: "add-link-exp",
-                    autocomplete: "off",
-                    style: "width: 100%; height: 30px",
-                    placeholder: "링크의 설명"
-                }),
-                $("input", {
-                    style: "display: none",
-                    type: "submit"
-                })
-            )
-        ),
+        채팅: new Fragment("main", ...R.Chat.Form(true)),
+        링크: new Fragment("main", ...R.Link.Form(true)),
         설정: new Fragment("main",
             $("fieldset", {
                 style: "height: calc(100vh - 80px); background: rgba(0,0,0,0.1);"
