@@ -68,7 +68,7 @@ const mainFragment = {
             class: "loginField"
         }).add(
             $("h1", {
-                text: "Chatting Site"
+                text: "Necronomicon"
             }),
             $("form", {
                 onsubmit: async e => {
