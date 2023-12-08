@@ -68,7 +68,7 @@ const mainFragment = {
             class: "loginField"
         }).add(
             $("h1", {
-                text: "Micron"
+                text: "Login or Regist"
             }),
             $("form", {
                 onsubmit: async e => {
