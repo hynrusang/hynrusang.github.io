@@ -104,7 +104,7 @@ R.Shared = {
             }).add(
                 comp,
                 $("div", {
-                    style: !showSubmitIcon ? `display: none` : null,
+                    style: !showSubmitIcon ? "display: none" : null,
                     class: "handler"
                 }).add(
                     $("input", {
