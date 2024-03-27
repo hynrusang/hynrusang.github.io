@@ -1,0 +1,14 @@
+body {
+    background-color: #141414;
+}
+
+.form > h1 {
+    color: #9393FFCC
+}
+.form > p {
+    color: #636363
+}
+
+.inputBox > label {
+    color: #d9d9d9
+}
