@@ -4,41 +4,34 @@
     <title>Necronomicon</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
-    <meta name="author" content="김민기">
     <meta name="theme-color" content="#ffffff">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <link rel="icon" href="/favicon.ico">
     <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" href="/resource/css/bone.css">
-    <link rel="stylesheet" href="/resource/css/widget.css">
-    <link id="theme" rel="stylesheet" href="/resource/css/theme/right.css">
+    <link rel="stylesheet" href="/resource/css/init.css">
+    <link id="theme_selector" rel="stylesheet" href="/resource/css/dark/init.css">
 </head>
 <body>
-    <h1 id="toast">사이트를 로드중입니다.</h1>
-    <fragment rid="menu"></fragment>
-    <fragment rid="page"></fragment>
-    <main player>
-        <iframe style="width: 100%; height: 60vw; min-height: 300px; max-height: 100%" allowfullscreen></iframe>
-        <span style="padding: 10px; font-size: x-large;"></span>
+    <snackbar></snackbar>
+    <main>
+        <fragment rid="main"></fragment>
+        <fragment rid="player" style="display: none;"></fragment>
     </main>
     <footer>
-        <input class="menuicon" type="button">
-        <div style="display: flex; min-width: 310px; width: calc(50% - 50px);">
-            <input type="button" style="width: 100%; background-image: url(favicon.ico)" class="current" target="main" value="메인">
-            <input type="button" style="width: 100%; background-image: url(https://www.google.com/s2/favicons?domain=https://youtube.com/)" target="video" value="플레이어">
-            <input type="button" style="width: 100%; background-image: url(/resource/img/icon/lock.png)" target="secret" value="특수문서">
+        <div>
+            <input style="background-image: url(/resource/img/icon/navigator.png);" id="navigator_icon" class="iconX" type="button">
+            <input style="background-image: url(/resource/img/icon/dark.png);" id="theme_icon" class="iconX" type="button">
         </div>
+        <div id="router"></div>
     </footer>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-storage.js"></script>
     <script src="https://hynrusang.github.io/lib/js/jade.js">
-        dynamic, prerelease;
+        dynamic, developer;
         livedata, developer;
     </script>
-    <jade src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></jade>
-    <jade src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></jade>
-    <jade src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></jade>
-    <jade src="https://www.gstatic.com/firebasejs/8.6.5/firebase-storage.js"></jade>
-    <jade src="/resource/js/builder.js"></jade>
-    <jade src="/resource/js/database.js"></jade>
-    <jade src="/resource/js/fragment.js"></jade>
+    <jade type="module" src="/resource/js/init.js"></jade>
 </body>
 </html>
