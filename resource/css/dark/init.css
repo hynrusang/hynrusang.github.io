@@ -10,7 +10,7 @@ p {
     color: #636363
 }
 
-main::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-thumb {
     background: cyan;
     border: none;
 }
@@ -23,7 +23,6 @@ textarea {
 [type=button], [type=submit] {
     color: white;
     background-color: #6262F5;
-    cursor: pointer;
 }
 
 .inputBox > label {

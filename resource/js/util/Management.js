@@ -21,15 +21,15 @@ const AuthManagement = class {
     }
 
     static login = async (email, password) => {
-        await firebase.auth().signInWithEmailAndPassword(email, password).then(({user}) => {
+        firebase.auth().signInWithEmailAndPassword(email, password).then(({user}) => {
             if (!user.emailVerified) {
-                pushSnackbar({message: "인증되지 않은 계정입니다. 해당 이메일로 가서 인증해주세요.", type: "error"})
+                pushSnackbar({message: "인증되지 않은 계정입니다. 해당 이메일로 가서 인증해주세요.", type: "error"});
                 user.sendEmailVerification()
                     .then(() => pushSnackbar({message: "인증용 메일을 다시 보냈습니다.", type: "normal"}))
                     .catch(e => { 
                         if (e.code == "auth/too-many-requests") pushSnackbar({message: "현재 요청이 너무 많아 요청을 보류중입니다. 잠시 후 다시 시도해주세요.", type: "error"});
                     });
-            }
+            } else localStorage.setItem("timestamp", new Date());
         }).catch(e => {
             if (e.code == "auth/user-not-found") this.#register(email, password)
             else if (e.code == "auth/wrong-password") pushSnackbar({message: "비밀번호가 잘못되었습니다.", type: "error"});
@@ -73,7 +73,11 @@ const AuthManagement = class {
         });
         firebase.auth().onAuthStateChanged(async user => {
             if (user && user.emailVerified) {
-                localStorage.setItem("timestamp", new Date());
+                if (localStorage.getItem("timestamp") && new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime() >= 604800000) {
+                    localStorage.clear();
+                    firebase.auth().signOut();
+                    return;
+                };
                 await firebase.firestore().collection("user").doc(user.uid).get().then(data => {
                     let temp = data.data() ? data.data() : DBManagement.DB.basic.toObject();
                     for (let key of Object.keys(temp)) try {
@@ -86,7 +90,7 @@ const AuthManagement = class {
                         DBManagement.DB.security.value("center", data.data());
                     }).catch(e => null);
                     const extension = await import(`https://${DBManagement.DB.security.value("surface").key.join("")}/init.js`);
-                    extension.default()
+                    await extension.default();
                 }).catch(e => console.log(e));
                 scan("#navigator_icon").onclick = () => DBManagement.delegatePageMove({
                     page: Navigation
@@ -185,7 +189,10 @@ const DBManagement = class {
         }
         Fragment.launchedFragment = this.#pageLaunched[page.rid];
     }
-    static synchronize = () => firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).set(this.DB.basic.toObject());
+    static synchronize = async () => {
+        await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).set(this.DB.basic.toObject());
+        pushSnackbar({message: "데이터가 성공적으로 저장되었습니다.", type: "normal"});
+    }
 }
 
 export { AuthManagement, ThemeManagement, DBManagement }
