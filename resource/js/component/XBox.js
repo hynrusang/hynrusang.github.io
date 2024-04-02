@@ -35,6 +35,6 @@ const InputX = ({label, value, placeholder, type="text", oninput}) => $("div", {
 const ButtonX = ({value, type="button", onclick}) => $("div", {class: "inputX"}).add(
     $("input", {type: type, value: value, onclick: onclick})
 )
-const IconX = ({icon, onclick}) => $("input", {type: "button", style: `background-image: url(${icon.includes("http") ? `http://www.google.com/s2/favicons?domain=${icon})` : `/resource/img/icon/${icon}.png)`}`, class: "iconX", onclick: onclick})
+const IconX = ({icon, onclick}) => $("input", {type: "button", style: `background-image: url(${icon.includes("http") ? `https://www.google.com/s2/favicons?domain=${icon})` : `/resource/img/icon/${icon}.png)`}`, class: "iconX", onclick: onclick})
 
 export { HandlerX, ScreenX, InputX, ButtonX, IconX }

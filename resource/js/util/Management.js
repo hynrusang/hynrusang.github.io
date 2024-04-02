@@ -1,6 +1,6 @@
-import Login from "../page/Login.js";
 import Navigation from "../page/Navigation.js";
-import { formParser, pushSnackbar } from "./Tools.js";
+import Randering from "../page/Randering.js";
+import { pushSnackbar } from "./Tools.js";
 
 const AuthManagement = class {
     static #logined = false;
@@ -78,6 +78,7 @@ const AuthManagement = class {
                     firebase.auth().signOut();
                     return;
                 };
+                Randering.launch();
                 await firebase.firestore().collection("user").doc(user.uid).get().then(data => {
                     let temp = data.data() ? data.data() : DBManagement.DB.basic.toObject();
                     for (let key of Object.keys(temp)) try {

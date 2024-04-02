@@ -2,7 +2,7 @@ import { ButtonX } from "../component/XBox.js";
 import { AuthManagement } from "../util/Management.js";
 import Navigation from "./Navigation.js";
 
-const Auth = new Fragment("main", 
+const Setting = new Fragment("main", 
     $("div", {class: "relative_full"}).add(
         $("h1", {text: "계정 설정"}),
         ButtonX({type: "button", value: "로그아웃", onclick: () => AuthManagement.logout()}),
@@ -12,4 +12,4 @@ const Auth = new Fragment("main",
     )
 ).registAnimation(FragAnimation.fade, 0.5)
 
-export default Auth;
+export default Setting;

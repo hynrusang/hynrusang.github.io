@@ -1,12 +1,3 @@
-/**
- * @type {(form: FormData) => object}
- */
-const formParser = form => {
-    let temp = {};
-    for (let [key,value] of form.entries()) temp[key] = value;
-    return temp;
-}
-
 const pushSnackbar = async ({message, type}) => {
     const snackbar = scan("snackbar");
     let color;
@@ -28,4 +19,4 @@ const pushSnackbar = async ({message, type}) => {
     ], {duration: 1000});
 }
 
-export { formParser, pushSnackbar }
+export { pushSnackbar }

@@ -25,10 +25,6 @@ textarea {
     background-color: #6262F5;
 }
 
-.inputBox > label {
-    color: #d9d9d9
-}
-.inputBox > input {
-    color: #d9d9d9;
-    border: 1px solid #636363;
+.handlerX {
+    background-color: #8080804d;
 }

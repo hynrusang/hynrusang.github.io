@@ -1,4 +1,4 @@
-import Auth from "./page/Auth.js";
+import Setting from "./page/Setting.js";
 import Login from "./page/Login.js";
 import Memo from "./page/Note/Memo.js";
 import Playlist from "./page/Player/Playlist.js";
@@ -9,7 +9,7 @@ AuthManagement.init();
 ThemeManagement.init();
 DBManagement.navigator.setting = {
     label: "계정 설정",
-    page: Auth
+    page: Setting
 }
 DBManagement.navigator.note = {
     label: "메모장",
