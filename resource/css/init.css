@@ -11,6 +11,7 @@
 }
 
 body {
+    overscroll-behavior-y: contain;
     transition: all 0.5s;
     display: flex;
     flex-direction: column;
@@ -82,12 +83,7 @@ select {
     background: none;
 }
 
-.relative_full {
-    position: relative;
-    width: 100%;
-    top: 10vh;
-}
-.loading_icon {
+#loading_icon {
     animation: spin 2s linear infinite;
     width: 50px;
     height: 50px;
@@ -96,7 +92,7 @@ select {
     border-radius: 50%;
     margin-bottom: 20px;
 }
-.loading_text {
+#loading_text {
     animation: fade-in 1.5s ease-out forwards;
     position: relative;
     font-size: 1.5em;
@@ -107,16 +103,17 @@ select {
     display: flex;
     flex-direction: column;
 }
+.screenX {
+    display: flex; 
+    flex-direction: column;
+    position: relative;
+    width: 100%; 
+    height: calc(100% - 4px);
+}
 .inputX {
     display: flex;
     flex-direction: column;
     margin: 10px;
-}
-.screenX {
-    display: flex; 
-    flex-direction: column;
-    width: 100%; 
-    height: calc(100% - 4px)
 }
 .iconX {
     background-color: unset !important;
@@ -136,9 +133,9 @@ select {
     background-color: initial !important;
 }
 
-@media screen and (min-width: 720px) {
-    .relative_full {
-        width: 720px;
-        left: calc(50% - 360px);
+@media screen and (min-width: 1040px) {
+    .screenX {
+        width: 1040px;
+        left: calc(50% - 520px);
     }
 }

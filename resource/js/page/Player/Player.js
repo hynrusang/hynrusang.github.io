@@ -7,7 +7,7 @@ const Player = new Fragment("player",
 ).registAction(playerInfo => {
     if (playerInfo) {
         snipe("#dynamic_player").reset(
-            $("iframe", {src: `https://www.youtube.com/embed/${playerInfo.url.includes("list=") ? `videoseries/?list=${playerInfo.url.match(/[?&]list=([^&]+)/)[1]}&amp;loop=1&autoplay=1` : playerInfo.url.match(/[?&]v=([^&]+)/)}`, class: "relative_full", style: "top: 0px;", allowfullscreen: null})
+            $("iframe", {src: `https://www.youtube.com/embed/${playerInfo.url.includes("list=") ? `videoseries/?list=${playerInfo.url.match(/[?&]list=([^&]+)/)[1]}&amp;loop=1&autoplay=1` : playerInfo.url.match(/[?&]v=([^&]+)/)}`, allowfullscreen: null})
         )
         scan("#title_player").innerText = playerInfo.title;
     }

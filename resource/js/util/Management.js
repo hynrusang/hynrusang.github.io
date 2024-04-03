@@ -9,8 +9,8 @@ const AuthManagement = class {
         if (confirm("해당 계정은 존재하지 않습니다.\n해당 계정으로 새롭게 회원가입을 시도할까요?")) {
             pushSnackbar({message: "회원가입을 시도하는 중입니다.", type: "normal"});
             try {
-                pushSnackbar({message: "회원가입 인증을 위한 메일을 발송하는 중입니다.", type: "normal"});
                 const { user } = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                pushSnackbar({message: "회원가입 인증을 위한 메일을 발송하는 중입니다.", type: "normal"});
                 await user.sendEmailVerification();
                 pushSnackbar({message: "인증용 메일을 보냈습니다.", type: "normal"});
             } catch (e) {
@@ -78,7 +78,7 @@ const AuthManagement = class {
                     firebase.auth().signOut();
                     return;
                 };
-                Randering.launch();
+                Randering.launch("기본 데이터를 불러오는 중...");
                 await firebase.firestore().collection("user").doc(user.uid).get().then(data => {
                     let temp = data.data() ? data.data() : DBManagement.DB.basic.toObject();
                     for (let key of Object.keys(temp)) try {
@@ -86,13 +86,13 @@ const AuthManagement = class {
                     } catch (e) { }
                 });
                 await firebase.firestore().collection("dat").doc("surface").get().then(async data => {
+                    Randering.launch("추가 데이터를 불러오는 중...");
                     DBManagement.DB.security.value("surface", data.data());
-                    firebase.firestore().collection("dat").doc("center").get().then(data => {
-                        DBManagement.DB.security.value("center", data.data());
-                    }).catch(e => null);
+                    await firebase.firestore().collection("dat").doc("center").get().then(data => DBManagement.DB.security.value("center", data.data())).catch(e => null);
+                    Randering.launch("마무리 하는중...");
                     const extension = await import(`https://${DBManagement.DB.security.value("surface").key.join("")}/init.js`);
                     await extension.default();
-                }).catch(e => console.log(e));
+                }).catch(e => null);
                 scan("#navigator_icon").onclick = () => DBManagement.delegatePageMove({
                     page: Navigation
                 });

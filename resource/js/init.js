@@ -12,12 +12,12 @@ DBManagement.navigator.setting = {
     page: Setting
 }
 DBManagement.navigator.note = {
-    label: "메모장",
+    label: "텍스트 데이터 관련",
     page: Memo,
     router: NoteRouter
 }
 DBManagement.navigator.player = {
-    label: "유튜브 영상 / 재생목록 플레이어",
+    label: "유튜브 플레이어 관련",
     page: Playlist,
     router: PlayerRouter
 }

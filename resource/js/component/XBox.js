@@ -26,7 +26,7 @@ const HandlerX = ({element, onedit, ondelete}) => {
     )
 }
 const ScreenX = screenId => $("div", {class: "screenX"}).add(
-    $("div", {id: screenId, style: `height: calc(100% - 150px); overflow-y: scroll;`})
+    $("div", {id: screenId, style: "height: calc(100% - 150px); overflow-y: scroll;"})
 )
 const InputX = ({label, value, placeholder, type="text", oninput}) => $("div", {class: "inputX"}).add(
     $("label", {text: label}),
