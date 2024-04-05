@@ -3,6 +3,7 @@ import Randering from "../page/Randering.js";
 import { pushSnackbar } from "./Tools.js";
 
 const AuthManagement = class {
+    static #isInited = false;
     static #logined = false;
 
     static #register = async (email, password) => {
@@ -62,6 +63,7 @@ const AuthManagement = class {
         })
     }
     static init = () => {
+        if (this.#isInited) return;
         firebase.initializeApp({
             apiKey: "AIzaSyAglJGn84cPu_YvRUdigYQFCBml-s6kcuo",
             authDomain: "necronomicon-7ba57.firebaseapp.com",
@@ -99,6 +101,7 @@ const AuthManagement = class {
                 Navigation.launch();
             } else firebase.auth().signOut();
         });
+        this.#isInited = true;
     }
 
     static get isLogined() {

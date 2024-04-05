@@ -10,7 +10,7 @@ const Link = new Fragment("main",
     Object.keys(temp).sort().forEach(key => {
         snipe("#dynamic_link").add(
             HandlerX({
-                element: $("input", {type: "button", style: "width: 100%;", value: key, onclick: () => window.open(temp[key], "_blank")}),
+                element: $("a", {text: key, href: temp[key], target: "_blank"}),
                 onedit: e => {
                     e.preventDefault();
                     temp[e.target[0].value] = temp[key];

@@ -20,7 +20,7 @@ textarea, input, select {
 textarea {
     border: 1px solid white;
 }
-[type=button], [type=submit] {
+a, [type=button], [type=submit] {
     color: white;
     background-color: #6262F5;
 }

@@ -2,7 +2,7 @@ import { ButtonX } from "../component/XBox.js";
 import { DBManagement } from "../util/Management.js";
 
 const Navigation = new Fragment("main", 
-    $("div", {id: "dynamic_navigation", class: "relative_full"})
+    $("div", {id: "dynamic_navigation", class: "screenX", style: "padding-top: 15vh;"})
 ).registAction(() => {
     snipe("#dynamic_navigation").reset($("h1", {text: "페이지 이동"}),);
     for (let navigation of Object.values(DBManagement.navigator)) {

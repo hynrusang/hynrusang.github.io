@@ -23,10 +23,13 @@ const Playlist = new Fragment("player",
                     }})
                 ),
                 Object.keys(temp[key]).sort().map(subkey => HandlerX({
-                    element: $("input", {type: "button", style: "width: 100%;", value: subkey, onclick: () => Player.launch({
-                        title: `${key}: ${subkey}`,
-                        url: temp[key][subkey]
-                    })}),
+                    element: $("a", {text: subkey, href: temp[key][subkey], onclick: e => {
+                        e.preventDefault();
+                        Player.launch({
+                            title: `${key}: ${subkey}`,
+                            url: temp[key][subkey]
+                        })
+                    }}),
                     onedit: e => {
                         e.preventDefault();
                         temp[key][e.target[0].value] = temp[key][subkey];

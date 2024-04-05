@@ -16,7 +16,7 @@ const HandlerX = ({element, onedit, ondelete}) => {
             IconX({icon: "edit", onclick: () => {
                 const isStatic = elementMode == "static";
                 if (isStatic) {
-                    elements.editer.node[0].value = elements.static.node.value ? elements.static.node.value : elements.static.node.innerText;
+                    elements.editer.node[0].value = elements.static.node.innerText;
                     elements.editer.node[0].style.height = `${elements.static.node.scrollHeight + 20}px`;
                 } else elements.editer.node[1].click();
                 elementMode = elementMode == "static" ? "editer" : "static";
