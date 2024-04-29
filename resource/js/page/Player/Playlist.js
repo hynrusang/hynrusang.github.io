@@ -18,31 +18,31 @@ const Playlist = new Fragment("player",
                             delete temp[key];
                             DBManagement.DB.basic.value("playlist", temp);
                             DBManagement.synchronize();
-                            Fragment.refreshFragment();
+                            FragmentBox.refresh();
                         }
                     }})
                 ),
                 Object.keys(temp[key]).sort().map(subkey => HandlerX({
                     element: $("a", {text: subkey, href: temp[key][subkey], onclick: e => {
                         e.preventDefault();
-                        Player.launch({
+                        FragmentBox.toggle(Player, {
                             title: `${key}: ${subkey}`,
                             url: temp[key][subkey]
-                        })
+                        });
                     }}),
                     onedit: e => {
                         e.preventDefault();
                         temp[key][e.target[0].value] = temp[key][subkey];
                         if (e.target[0].value != subkey) delete temp[key][subkey];
                         if (DBManagement.DB.basic.value("playlist", temp)) DBManagement.synchronize();
-                        Fragment.refreshFragment();
+                        FragmentBox.refresh();
                     },
                     ondelete: () => {
                         if (confirm("정말로 해당 영상 / 재생목록을 삭제하시겠습니까?")) {
                             delete temp[key][subkey];
                             DBManagement.DB.basic.value("playlist", temp);
                             DBManagement.synchronize();
-                            Fragment.refreshFragment();
+                            FragmentBox.refresh();
                         }
                     }
                 })),

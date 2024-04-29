@@ -16,14 +16,14 @@ const Link = new Fragment("main",
                     temp[e.target[0].value] = temp[key];
                     if (e.target[0].value != key) delete temp[key];
                     if (DBManagement.DB.basic.value("link", temp)) DBManagement.synchronize();
-                    Fragment.refreshFragment();
+                    FragmentBox.refresh();
                 },
                 ondelete: () => {
                     if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) {
                         delete temp[key];
                         DBManagement.DB.basic.value("link", temp);
                         DBManagement.synchronize();
-                        Fragment.refreshFragment();
+                        FragmentBox.refresh();
                     }
                 }
             })

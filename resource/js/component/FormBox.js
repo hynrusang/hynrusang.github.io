@@ -34,7 +34,7 @@ const MemoForm = $("form", {style: "display: flex; width: 100%; height: 150px;",
     temp.unshift(memo.value);
     DBManagement.DB.basic.value("memo", temp);
     DBManagement.synchronize();
-    Fragment.refreshFragment();
+    FragmentBox.refresh();
     memo.value = ""
 }}).add(
     $("textarea", {required: null, style: "width: 100%;"}),
@@ -46,7 +46,7 @@ const LinkForm = $("form", {style: "display: flex; width: 100%; height: 150px", 
     const temp = DBManagement.DB.basic.value("link");
     temp[title.value] = url.value;
     if (DBManagement.DB.basic.value("link", temp)) DBManagement.synchronize();
-    Fragment.refreshFragment();
+    FragmentBox.refresh();
     title.value = "";
     url.value = "";
 }}).add(
@@ -63,8 +63,7 @@ const PlaylistForm = $("form", {style: "display: flex; width: 100%; height: 150p
     if (!temp[title.value]) temp[title.value] = {};
     temp[title.value][url.value] = url.value;
     if (DBManagement.DB.basic.value("playlist", temp)) DBManagement.synchronize();
-    Fragment.refreshFragment();
-    title.value = "기본";
+    FragmentBox.refresh();
     url.value = "";
 }}).add(
     $("div", {style: "display: flex; flex-direction: column; width: 100%;"}).add(

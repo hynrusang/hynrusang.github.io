@@ -15,14 +15,14 @@ const Memo = new Fragment("main",
                     e.preventDefault();
                     temp[index] = e.target[0].value;
                     if (DBManagement.DB.basic.value("memo", temp)) DBManagement.synchronize();
-                    Fragment.refreshFragment();
+                    FragmentBox.refresh();
                 },
                 ondelete: () => {
                     if (confirm("정말로 해당 메모를 삭제하시겠습니까?")) {
                         temp.splice(index, 1);
                         DBManagement.DB.basic.value("memo", temp);
                         DBManagement.synchronize();
-                        Fragment.refreshFragment();
+                        FragmentBox.refresh();
                     }
                 }
             })

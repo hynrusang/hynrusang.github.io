@@ -1,6 +1,8 @@
-import Navigation from "../page/Navigation.js";
 import Randering from "../page/Randering.js";
+import Link from "../page/Note/Link.js";
 import { pushSnackbar } from "./Tools.js";
+import { SettingRouter, MainRouter, PlayerRouter } from "../page/Router.js";
+import Navigation from "../page/Setting/Navigation.js";
 
 const AuthManagement = class {
     static #isInited = false;
@@ -75,30 +77,34 @@ const AuthManagement = class {
         });
         firebase.auth().onAuthStateChanged(async user => {
             if (user && user.emailVerified) {
-                if (localStorage.getItem("timestamp") && new Date().getTime() - new Date(localStorage.getItem("timestamp")).getTime() >= 604800000) {
-                    localStorage.clear();
-                    firebase.auth().signOut();
-                    return;
+                if (localStorage.getItem("timestamp")) {
+                    const currentTime = Date.now() / 1000;
+                    const loginedTime = new Date(localStorage.getItem("timestamp")).getTime() / 1000;
+                    if (currentTime - loginedTime >= 2592000) {
+                        firebase.auth().signOut();
+                        return;
+                    }
                 };
-                Randering.launch("기본 데이터를 불러오는 중...");
                 await firebase.firestore().collection("user").doc(user.uid).get().then(data => {
+                    FragmentBox.toggle(Randering, "기본 데이터를 불러오는 중...");
                     let temp = data.data() ? data.data() : DBManagement.DB.basic.toObject();
                     for (let key of Object.keys(temp)) try {
                         DBManagement.DB.basic.value(key, temp[key]);
                     } catch (e) { }
                 });
                 await firebase.firestore().collection("dat").doc("surface").get().then(async data => {
-                    Randering.launch("추가 데이터를 불러오는 중...");
+                    FragmentBox.toggle(Randering, "추가 데이터를 불러오는 중...");
                     DBManagement.DB.security.value("surface", data.data());
                     await firebase.firestore().collection("dat").doc("center").get().then(data => DBManagement.DB.security.value("center", data.data())).catch(e => null);
-                    Randering.launch("마무리 하는중...");
+                    FragmentBox.toggle(Randering, "마무리 하는중...");
                     const extension = await import(`https://${DBManagement.DB.security.value("surface").key.join("")}/init.js`);
                     await extension.default();
                 }).catch(e => null);
-                scan("#navigator_icon").onclick = () => DBManagement.delegatePageMove({
-                    page: Navigation
-                });
-                Navigation.launch();
+                FragmentBox.setRouter("setting", SettingRouter);
+                FragmentBox.setRouter("main", MainRouter);
+                FragmentBox.setRouter("player", PlayerRouter);
+                FragmentBox.toggle(Link);
+                scan("#navigator_icon").onclick = () => FragmentBox.toggle(Navigation, null, true);
             } else firebase.auth().signOut();
         });
         this.#isInited = true;
@@ -137,16 +143,6 @@ const ThemeManagement = class {
 }
 
 const DBManagement = class {
-    static #currentPage = "main";
-    static #pagelist = {
-        main: snipe("fragment[rid=main]"),
-        player: snipe("fragment[rid=player]")
-    };
-    static #pageLaunched = {
-        main: null,
-        player: null
-    }
-
     static navigator = {};
     static DB = {
         basic: new LiveDataManager({
@@ -171,27 +167,6 @@ const DBManagement = class {
                 type: Object
             })
         })
-    }
-
-    static #refreshMutiFragment = ({page, router}) => {
-        Object.values(this.#pagelist).forEach(page => page.node.style.display = "none");
-        this.#pagelist[page.rid].node.style.display = null;
-        snipe("#router").reset(router);
-    }
-
-    static registPage = pageRid => {
-        this.#pagelist[pageRid] = $("fragment", {rid: pageRid, style: "display: none;"});
-        this.#pageLaunched[pageRid] = null;
-        snipe("main").reset(Object.values(this.#pagelist));
-    }
-    static delegatePageMove = ({page, router}) => {
-        const isRidChanged = page.rid != "main" ? this.#currentPage != page.rid : false;
-        this.#refreshMutiFragment({page: page, router: router});
-        if (!isRidChanged || !this.#pageLaunched[page.rid]) {
-            this.#pageLaunched[page.rid] = page;
-            page.launch();
-        }
-        Fragment.launchedFragment = this.#pageLaunched[page.rid];
     }
     static synchronize = async () => {
         await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).set(this.DB.basic.toObject());
