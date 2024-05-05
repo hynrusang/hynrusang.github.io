@@ -1,8 +1,9 @@
-import Randering from "../page/Randering.js";
-import Link from "../page/Note/Link.js";
-import { pushSnackbar } from "./Tools.js";
+import { Dynamic, LiveData } from "../init/module.js";
 import { SettingRouter, MainRouter, PlayerRouter } from "../page/Router.js";
+import { pushSnackbar } from "./Tools.js";
 import Navigation from "../page/Setting/Navigation.js";
+import Randering from "../page/Randering.js";
+import Memo from "../page/Note/Memo.js";
 
 const AuthManagement = class {
     static #isInited = false;
@@ -86,25 +87,27 @@ const AuthManagement = class {
                     }
                 };
                 await firebase.firestore().collection("user").doc(user.uid).get().then(data => {
-                    FragmentBox.toggle(Randering, "기본 데이터를 불러오는 중...");
+                    Dynamic.FragMutation.mutate(Randering, "기본 데이터를 불러오는 중...");
                     let temp = data.data() ? data.data() : DBManagement.DB.basic.toObject();
                     for (let key of Object.keys(temp)) try {
                         DBManagement.DB.basic.value(key, temp[key]);
                     } catch (e) { }
                 });
                 await firebase.firestore().collection("dat").doc("surface").get().then(async data => {
-                    FragmentBox.toggle(Randering, "추가 데이터를 불러오는 중...");
+                    Dynamic.FragMutation.mutate(Randering, "추가 데이터를 불러오는 중...");
                     DBManagement.DB.security.value("surface", data.data());
                     await firebase.firestore().collection("dat").doc("center").get().then(data => DBManagement.DB.security.value("center", data.data())).catch(e => null);
-                    FragmentBox.toggle(Randering, "마무리 하는중...");
-                    const extension = await import(`https://${DBManagement.DB.security.value("surface").key.join("")}/init.js`);
+                    Dynamic.FragMutation.mutate(Randering, "마무리 하는중...");
+                    //const extension = await import(`https://${DBManagement.DB.security.value("surface").key.join("")}/init.js`);
+                    const extension = await import("/ultiModule/init.js");
                     await extension.default();
                 }).catch(e => null);
-                FragmentBox.setRouter("setting", SettingRouter);
-                FragmentBox.setRouter("main", MainRouter);
-                FragmentBox.setRouter("player", PlayerRouter);
-                FragmentBox.toggle(Link);
-                scan("#navigator_icon").onclick = () => FragmentBox.toggle(Navigation, null, true);
+                Dynamic.FragMutation.setRouter("setting", SettingRouter);
+                Dynamic.FragMutation.setRouter("main", MainRouter);
+                Dynamic.FragMutation.setRouter("player", PlayerRouter);
+                Dynamic.FragMutation.mutate(Navigation);
+                Dynamic.scan("#navigator_icon").onclick = () => Dynamic.FragMutation.mutate(Navigation, null, true);
+                Dynamic.scan("fragment[rid=main]").remove();
             } else firebase.auth().signOut();
         });
         this.#isInited = true;
@@ -122,9 +125,9 @@ const ThemeManagement = class {
     static #selector;
 
     static init = () => {
-        this.#icon = scan("#theme_icon");
+        this.#icon = Dynamic.scan("#theme_icon");
         this.#icon.onclick = () => this.theme++;
-        this.#selector = scan("#theme_selector");
+        this.#selector = Dynamic.scan("#theme_selector");
         this.theme = parseInt(localStorage.getItem("theme"));
     }
 
@@ -145,25 +148,25 @@ const ThemeManagement = class {
 const DBManagement = class {
     static navigator = {};
     static DB = {
-        basic: new LiveDataManager({
-            memo: new LiveData([], {
+        basic: new LiveData.LiveManager({
+            memo: LiveData.$([], {
                 type: Array
             }),
-            link: new LiveData({}, {
+            link: LiveData.$({}, {
                 type: Object
             }),
-            playlist: new LiveData({}, {
+            playlist: LiveData.$({}, {
                 type: Object
             }),
-            secret: new LiveData({}, {
+            secret: LiveData.$({}, {
                 type: Object
             })
         }),
-        security: new LiveDataManager({
-            surface: new LiveData({}, {
+        security: new LiveData.LiveManager({
+            surface: LiveData.$({}, {
                 type: Object
             }),
-            center: new LiveData({}, {
+            center: LiveData.$({}, {
                 type: Object
             })
         })

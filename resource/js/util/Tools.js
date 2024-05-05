@@ -1,5 +1,7 @@
+import { Dynamic } from "../init/module.js";
+
 const pushSnackbar = async ({message, type}) => {
-    const snackbar = scan("snackbar");
+    const snackbar = Dynamic.scan("snackbar");
     let color;
     switch (type) {
         case "error":

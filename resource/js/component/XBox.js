@@ -1,17 +1,19 @@
+import { Dynamic } from "../init/module.js";
+
 const HandlerX = ({element, onedit, ondelete}) => {
     const elements = {
         static: element,
-        editer: $("form", {onsubmit: onedit}).add(
-            $("textarea", {required: null, style: "width: 100%;", spellcheck: "false"}),
-            $("input", {type: "submit", style: "display: none"})
+        editer: Dynamic.$("form", {onsubmit: onedit}).add(
+            Dynamic.$("textarea", {required: null, style: "width: 100%;", spellcheck: "false"}),
+            Dynamic.$("input", {type: "submit", style: "display: none"})
         )
     }
     let elementMode = "static";
-    const frame = $("div", {style: "width: 100%"}).add(elements[elementMode]);
+    const frame = Dynamic.$("div", {style: "width: 100%"}).add(elements[elementMode]);
 
-    return $("div", {class: "handlerX"}).add(
+    return Dynamic.$("div", {class: "handlerX"}).add(
         frame,
-        $("div", {style: "display: flex; flex-direction: row-reverse;"}).add(
+        Dynamic.$("div", {style: "display: flex; flex-direction: row-reverse;"}).add(
             IconX({icon: "delete", onclick: ondelete}),
             IconX({icon: "edit", onclick: () => {
                 const isStatic = elementMode == "static";
@@ -25,16 +27,16 @@ const HandlerX = ({element, onedit, ondelete}) => {
         )
     )
 }
-const ScreenX = screenId => $("div", {class: "screenX"}).add(
-    $("div", {id: screenId, style: "height: calc(100% - 150px); overflow-y: scroll;"})
+const ScreenX = screenId => Dynamic.$("div", {class: "screenX"}).add(
+    Dynamic.$("div", {id: screenId, style: "height: calc(100% - 150px); overflow-y: scroll;"})
 )
-const InputX = ({label, value, placeholder, type="text", oninput}) => $("div", {class: "inputX"}).add(
-    $("label", {text: label}),
-    $("input", {required: "", type: type, value: value, placeholder: placeholder, oninput: oninput})
+const InputX = ({label, value, placeholder, type="text", oninput}) => Dynamic.$("div", {class: "inputX"}).add(
+    Dynamic.$("label", {text: label}),
+    Dynamic.$("input", {required: "", type: type, value: value, placeholder: placeholder, oninput: oninput})
 )
-const ButtonX = ({value, type="button", onclick}) => $("div", {class: "inputX"}).add(
-    $("input", {type: type, value: value, onclick: onclick})
+const ButtonX = ({value, type="button", onclick}) => Dynamic.$("div", {class: "inputX"}).add(
+    Dynamic.$("input", {type: type, value: value, onclick: onclick})
 )
-const IconX = ({icon, onclick}) => $("input", {type: "button", style: `background-image: url(${icon.includes("http") ? `https://www.google.com/s2/favicons?domain=${icon})` : `/resource/img/icon/${icon}.png)`}`, class: "iconX", onclick: onclick})
+const IconX = ({icon, onclick}) => Dynamic.$("input", {type: "button", style: `background-image: url(${icon.includes("http") ? `https://www.google.com/s2/favicons?domain=${icon})` : `/resource/img/icon/${icon}.png)`}`, class: "iconX", onclick: onclick})
 
 export { HandlerX, ScreenX, InputX, ButtonX, IconX }
