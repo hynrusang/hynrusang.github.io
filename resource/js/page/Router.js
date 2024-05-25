@@ -9,7 +9,7 @@ import Player from "./Player/Player.js";
 
 const SettingRouter = [
     IconX({icon: "navigator", onclick: () => Dynamic.FragMutation.mutate(Navigation)}),
-    IconX({icon: "edit", onclick: () => Dynamic.FragMutation.mutate(Userinfo)})
+    IconX({icon: "user", onclick: () => Dynamic.FragMutation.mutate(Userinfo)})
 ]
 
 const MainRouter = [

@@ -1,11 +1,11 @@
 import { Dynamic } from "../init/module.js";
-import { AuthManagement, DBManagement } from "../util/Management.js";
+import DataResource from "../util/DataResource.js";
 import { ButtonX, InputX } from "./XBox.js";
 
 const LoginForm = Dynamic.$("form", {class: "formBox", onsubmit: e => {
     e.preventDefault();
-    const [email, password] = [e.target[0], e.target[1]];
-    AuthManagement.login(email.value, password.value)
+    const [email, password] = [e.target[0].value, e.target[1].value];
+    DataResource.Auth.authenticate(email, password);
 }}).add(
     InputX({label: "email", placeholder: "Enter your Email.", oninput: e => {
         const preValue = e.target.preValue ??  "";
@@ -26,15 +26,14 @@ const LoginForm = Dynamic.$("form", {class: "formBox", onsubmit: e => {
     }}),
     InputX({label: "password", type:"password", placeholder: "Enter your Password."}),
     ButtonX({label: "login / register", type: "submit", value: "로그인 / 회원가입"}),
-    ButtonX({label: "find password", type: "button", value: "비밀번호 초기화", onclick: () => AuthManagement.changePassword(scan("form")[0].value)})
+    ButtonX({label: "find password", type: "button", value: "비밀번호 초기화", onclick: () => DataResource.Auth.changePassword(Dynamic.scan("form")[0].value)})
 )
 const MemoForm = Dynamic.$("form", {style: "display: flex; width: 100%; height: 150px;", onsubmit: e => {
     e.preventDefault();
     const memo = e.target[0];
-    const temp = DBManagement.DB.basic.value("memo");
+    const temp = DataResource.Data.basic.memo;
     temp.unshift(memo.value);
-    DBManagement.DB.basic.value("memo", temp);
-    DBManagement.synchronize();
+    if (DataResource.Data.updateData({key: "memo", value: temp})) DataResource.Data.synchronize();
     Dynamic.FragMutation.refresh();
     memo.value = ""
 }}).add(
@@ -44,9 +43,9 @@ const MemoForm = Dynamic.$("form", {style: "display: flex; width: 100%; height: 
 const LinkForm = Dynamic.$("form", {style: "display: flex; width: 100%; height: 150px", onsubmit: e => {
     e.preventDefault();
     const [title, url] = [e.target[0], e.target[1]]
-    const temp = DBManagement.DB.basic.value("link");
+    const temp = DataResource.Data.basic.link;
     temp[title.value] = url.value;
-    if (DBManagement.DB.basic.value("link", temp)) DBManagement.synchronize();
+    if (DataResource.Data.updateData({key: "link", value: temp})) DataResource.Data.synchronize();
     Dynamic.FragMutation.refresh();
     title.value = "";
     url.value = "";
@@ -60,10 +59,10 @@ const LinkForm = Dynamic.$("form", {style: "display: flex; width: 100%; height: 
 const PlaylistForm = Dynamic.$("form", {style: "display: flex; width: 100%; height: 150px", onsubmit: e => {
     e.preventDefault();
     const [title, url] = [e.target[0], e.target[1]];
-    const temp = DBManagement.DB.basic.value("playlist");
+    const temp = DataResource.Data.basic.playlist
     if (!temp[title.value]) temp[title.value] = {};
     temp[title.value][url.value] = url.value;
-    if (DBManagement.DB.basic.value("playlist", temp)) DBManagement.synchronize();
+    if (DataResource.Data.updateData({key: "playlist", value: temp})) DataResource.Data.synchronize();
     Dynamic.FragMutation.refresh();
     url.value = "";
 }}).add(
