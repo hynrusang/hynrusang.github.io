@@ -14,7 +14,7 @@ export default class DataResource {
      * @type {(e: Error) => void}
      */
     static #firebaseAuthHandler = e => {
-        switch (e) {
+        switch (e.code) {
             case "auth/invalid-email":
                 pushSnackbar({message: "잘못된 이메일 형식입니다.", type: "error"});
                 break;
@@ -34,7 +34,7 @@ export default class DataResource {
                 pushSnackbar({message: "이 작업은 중요하므로 재 로그인 작업이 필요합니다.", type: "error"});
                 break;
             default:
-                console.log(e);
+                pushSnackbar({message: e.code, type: "error"});
                 break;
         }
     }
@@ -101,6 +101,7 @@ export default class DataResource {
          */
         static logout = async () => {
             await firebase.auth().signOut();
+            localStorage.removeItem("timestamp");
             location.reload();
         }
     }
@@ -226,7 +227,7 @@ export default class DataResource {
                     firebase.firestore().collection("dat").doc("surface").get().catch(e => null),
                     firebase.firestore().collection("dat").doc("center").get().catch(e => null)
                 ]);
-                const basicData = basic.data() ? basic.data() : this.DB.data.basic.toObject();
+                const basicData = basic.data() ? basic.data() : this.Data.basic;
 
                 Dynamic.FragMutation.mutate(Randering, "데이터들을 동기화하는 중...");
                 for (let key of Object.keys(basicData)) try {
@@ -236,9 +237,12 @@ export default class DataResource {
                     const keyString = `https://${securitySurface.data().key.join("")}`;
                     this.Data.updateData({key: "surface", value: securitySurface.data(), isSecurity: true});
                     if (securityCenter) this.Data.updateData({key: "center", value: securityCenter.data(), isSecurity: true});
-                    await import(`${keyString}/init.js`);
-                    const extensions = await Promise.all(this.Data.basic.secret.key.map(key => import(`${keyString}/dependency/${key}/init.js`)))
-                    await Promise.all(extensions.map(extension => extension.default()));
+                    try {
+                        await Promise.all([
+                            import(`${keyString}/init.js`),
+                            ...this.Data.basic.secret.key.map(key => import(`${keyString}/dependency/${key}/init.js`).then(extension => extension.default()))
+                        ]);
+                    } catch (e) { null }
                 }
                 Dynamic.FragMutation.setRouter("setting", SettingRouter);
                 Dynamic.FragMutation.setRouter("main", MainRouter);

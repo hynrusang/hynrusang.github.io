@@ -25,10 +25,7 @@ const Playlist = new Dynamic.Fragment("player",
                 Object.keys(temp[key]).sort().map(subkey => HandlerX({
                     element: Dynamic.$("a", {text: subkey, href: temp[key][subkey], onclick: e => {
                         e.preventDefault();
-                        Dynamic.FragMutation.mutate(Player, {
-                            title: `${key}: ${subkey}`,
-                            url: temp[key][subkey]
-                        });
+                        Dynamic.FragMutation.mutate(Player, temp[key][subkey]);
                     }}),
                     onedit: e => {
                         e.preventDefault();
