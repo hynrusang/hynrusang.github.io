@@ -213,9 +213,7 @@ export default class DataResource {
         });
         firebase.auth().onAuthStateChanged(async user => {
             if (user && user.emailVerified) {
-                const currentTime = Date.now() / 1000;
-                const loginedTime = new Date(localStorage.getItem("timestamp")).getTime() / 1000;
-                if (currentTime - loginedTime >= 2592000) {
+                if (Date.now() / 1000 - new Date(localStorage.getItem("timestamp")).getTime() / 1000 >= 2592000) {
                     localStorage.removeItem("timestamp");
                     firebase.auth().signOut();
                     return;
