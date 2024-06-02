@@ -225,7 +225,7 @@ export default class DataResource {
                     firebase.firestore().collection("dat").doc("surface").get().catch(e => null),
                     firebase.firestore().collection("dat").doc("center").get().catch(e => null)
                 ]);
-                const basicData = basic.data() ? basic.data() : this.Data.basic;
+                const basicData = basic.data() ?? this.Data.basic;
 
                 Dynamic.FragMutation.mutate(Randering, "데이터들을 동기화하는 중...");
                 for (let key of Object.keys(basicData)) try {
