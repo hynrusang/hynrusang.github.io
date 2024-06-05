@@ -7,6 +7,6 @@ const Login = new Dynamic.Fragment("main",
         Dynamic.$("p", {text: "이메일과 비밀번호를 입력해주세요."}),
         LoginForm
     )
-).registAnimation(Dynamic.FragAnimation.fade, 0.5)
+)
 
 export default Login;

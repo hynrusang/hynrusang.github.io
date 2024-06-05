@@ -76,8 +76,10 @@ export default class DataResource {
                 pushSnackbar({message: "잠시만 기다려 주십시오. 정보가 곧 삭제됩니다.", type: "normal"});
                 try {
                     await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).delete();
-                    pushSnackbar({message: "사용자의 데이터를 모두 삭제하는데 성공하였습니다.", type: "normal"});
-                    await firebase.auth().currentUser.delete();
+                    await Promise.all([
+                        pushSnackbar({message: "사용자의 데이터를 모두 삭제하는데 성공하였습니다.", type: "normal"}),
+                        firebase.auth().currentUser.delete()
+                    ]);
                     location.reload();
                 } catch (e) { DataResource.#firebaseAuthHandler(e); };
             }
@@ -213,9 +215,7 @@ export default class DataResource {
         });
         firebase.auth().onAuthStateChanged(async user => {
             if (user && user.emailVerified) {
-                const currentTime = Date.now() / 1000;
-                const loginedTime = new Date(localStorage.getItem("timestamp")).getTime() / 1000;
-                if (currentTime - loginedTime >= 2592000) {
+                if (Date.now() / 1000 - new Date(localStorage.getItem("timestamp")).getTime() / 1000 >= 2592000) {
                     localStorage.removeItem("timestamp");
                     firebase.auth().signOut();
                     return;
@@ -227,7 +227,7 @@ export default class DataResource {
                     firebase.firestore().collection("dat").doc("surface").get().catch(e => null),
                     firebase.firestore().collection("dat").doc("center").get().catch(e => null)
                 ]);
-                const basicData = basic.data() ? basic.data() : this.Data.basic;
+                const basicData = basic.data() ?? this.Data.basic;
 
                 Dynamic.FragMutation.mutate(Randering, "데이터들을 동기화하는 중...");
                 for (let key of Object.keys(basicData)) try {

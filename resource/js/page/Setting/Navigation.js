@@ -11,6 +11,6 @@ const Navigation = new Dynamic.Fragment("setting",
             ButtonX({value: navigation.label, onclick: () => Dynamic.FragMutation.mutate(navigation.page)})
         )
     }
-}).registAnimation(Dynamic.FragAnimation.fade, 0.5)
+}).registAnimation(Dynamic.FragAnimation.fade, 500)
 
 export default Navigation;

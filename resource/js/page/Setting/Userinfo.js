@@ -9,6 +9,6 @@ const Userinfo = new Dynamic.Fragment("setting",
         ButtonX({type: "button", value: "비밀번호 변경", onclick: () => DataResource.Auth.changePassword(firebase.auth().currentUser.email)}),
         ButtonX({type: "button", value: "회원 탈퇴", onclick: () => DataResource.Auth.deleteUser()})
     )
-).registAnimation(Dynamic.FragAnimation.fade, 0.5)
+).registAnimation(Dynamic.FragAnimation.fade, 500)
 
 export default Userinfo;

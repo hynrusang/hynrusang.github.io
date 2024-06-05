@@ -60,7 +60,7 @@ iframe {
     height: calc(100% - 6px);
     border: none;
 }
-textarea, input, a {
+textarea, input, button, a {
     background: none;
     border-radius: 10px;
     padding: 10px;
@@ -79,7 +79,7 @@ textarea {
     min-height: 40px;
     max-height: 320px;
 }
-[type=button], [type=submit] {
+button, [type=button], [type=submit] {
     cursor: pointer;
 }
 select {
