@@ -5,7 +5,6 @@ import { pushSnackbar } from "../../util/Tools.js";
 const Player = new Dynamic.Fragment("player",
     Dynamic.$("div", {id: "dynamic_player"})
 ).registAction(playerUrl => {
-    console.log(playerUrl)
     if (playerUrl) {
         let shuffleState = false;
         const parser = playerUrl.match(/list=([^&]+)/);
