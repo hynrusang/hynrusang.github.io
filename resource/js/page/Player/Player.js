@@ -31,6 +31,26 @@ const Player = new Dynamic.Fragment("player",
                         if (parser && shuffleState && e.target.getPlaylistIndex() === e.target.getPlaylist().length - 1) e.target.setShuffle(true);
                         e.target.playVideoAt(0);
                     } 
+                },
+                'onError': e => {
+                    switch (e.data) {
+                        case 2:
+                            pushSnackbar({message: "잘못된 동영상 ID입니다.", type: "error"});
+                            break;
+                        case 5:
+                            pushSnackbar({message: "이 브라우저는 플레이어를 실행할 수 없습니다.", type: "error"});
+                            break;
+                        case 100:
+                            pushSnackbar({message: "이 동영상은 삭제되거나 비공개 처리 되어있습니다.", type: "error"});
+                            break;
+                        case 101:
+                            pushSnackbar({message: "이 동영상은 유튜브 내부에서만 재생 가능합니다.", type: "error"});
+                            break;
+                        case 150:
+                            pushSnackbar({message: "이 동영상은 해당 국가에서 재생할 수 없습니다.", type: "error"});
+                            break;
+                    }
+                    if (parser) e.target.playVideoAt((e.target.getPlaylistIndex() + 1) % e.target.getPlaylist().length);
                 }
             }
         })
