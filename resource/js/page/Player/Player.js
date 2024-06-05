@@ -4,10 +4,11 @@ import { pushSnackbar } from "../../util/Tools.js";
 
 const Player = new Dynamic.Fragment("player",
     Dynamic.$("div", {id: "dynamic_player"}),
-    Dynamic.$("input", {id: "player_shuffle", class: "iconX", style: "position: absolute; left: 0px; bottom: 50%; background-image: url(/resource/img/icon/shuffle.png)", type: "button"})
+    Dynamic.$("input", {id: "player_shuffle", class: "iconX", style: "position: absolute; left: 0px; bottom: 50%; background-image: url(/resource/img/icon/shuffle.png); opacity: 0.5", type: "button"})
 ).registAction(playerUrl => {
     if (playerUrl) {
         let player;
+        let shuffleState = false;
         const parser = playerUrl.match(/list=([^&]+)/);
 
         if (parser) {
@@ -18,13 +19,20 @@ const Player = new Dynamic.Fragment("player",
                 },
                 events: {
                     'onStateChange': e => {
-                        if (e.data === YT.PlayerState.ENDED && player.getPlaylistIndex() === player.getPlaylist().length - 1) player.playVideoAt(0);
+                        if (e.data === YT.PlayerState.ENDED && player.getPlaylistIndex() === player.getPlaylist().length - 1) {
+                            if (shuffleState) player.setShuffle(true);
+                            player.playVideoAt(0);
+                        }
                     }
                 }
             })
-            Dynamic.scan("#player_shuffle").onclick = () => {
-                pushSnackbar({message: "재생목록을 섞었습니다.", type: "normal"})
-                player.setShuffle(true);
+            Dynamic.scan("#player_shuffle").onclick = e => {
+                player.setShuffle(shuffleState = !shuffleState);
+                pushSnackbar({message: `셔플 모드를 ${shuffleState ? "" : "비"}활성화 시켰습니다.`, type: "normal"});
+                if (shuffleState) {
+                    player.playVideoAt(0);
+                    Dynamic.scan("#player_shuffle").style.opacity = null;
+                } else Dynamic.scan("#player_shuffle").style.opacity = "0.5";
             }
         } else {
             player = new YT.Player("dynamic_player", {
