@@ -47,7 +47,7 @@ const Player = new Dynamic.Fragment("player",
                             pushSnackbar({message: "이 동영상은 유튜브 또는 특정 사이트가 아닌 곳에서 재생하지 못하도록 설정했습니다.", type: "error"});
                             break;
                         default:
-                            pushSnackbar({message: "알 수 없는 오류가 발생했습니다.", type: "error"});
+                            pushSnackbar({message: `알 수 없는 오류가 발생했습니다, ${e.data}`, type: "error"});
                     }
                     if (parser) e.target.playVideoAt((e.target.getPlaylistIndex() + 1) % e.target.getPlaylist().length);
                 }
