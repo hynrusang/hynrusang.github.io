@@ -19,8 +19,8 @@ const Player = new Dynamic.Fragment("player",
                 events: {
                     'onStateChange': e => {
                         if (e.data === YT.PlayerState.ENDED && player.getPlaylistIndex() === player.getPlaylist().length - 1) {
-                            if (shuffleState) player.setShuffle(true);
                             player.playVideoAt(0);
+                            if (shuffleState) player.setShuffle(true);
                         }
                     }
                 }
