@@ -15,36 +15,25 @@ const Player = new Dynamic.Fragment("player",
             e.target.style.opacity = shuffleState ? null : "0.5"
         }})
 
-        if (parser) {
-            new YT.Player("dynamic_player", {
-                playerVars: {
-                    listType: 'playlist',
-                    list: parser[1]
+        new YT.Player("dynamic_player", {
+            playerVars: parser ? {
+                listType: 'playlist',
+                list: parser[1]
+            } : null,
+            videoId: !parser ? playerUrl.match(/v=([^&]+)/)[1] : null,
+            events: {
+                'onReady': e => {
+                    e.target.playVideo();
+                    if (parser) Dynamic.snipe("fragment[rid=player]").add(createShuffleButton(e.target));
                 },
-                events: {
-                    'onReady': e => {
-                        e.target.playVideo();
-                        Dynamic.snipe("fragment[rid=player]").add(createShuffleButton(e.target));
-                    },
-                    'onStateChange': e => {
-                        if (e.data === YT.PlayerState.ENDED && e.target.getPlaylistIndex() === e.target.getPlaylist().length - 1) {
-                            if (shuffleState) e.target.setShuffle(true);
-                            e.target.playVideoAt(0);
-                        }
-                    }
+                'onStateChange': e => {
+                    if (e.data === YT.PlayerState.ENDED) {
+                        if (parser && shuffleState && e.target.getPlaylistIndex() === e.target.getPlaylist().length - 1) e.target.setShuffle(true);
+                        e.target.playVideoAt(0);
+                    } 
                 }
-            })
-        } else {
-            new YT.Player("dynamic_player", {
-                videoId: playerUrl.match(/v=([^&]+)/)[1],
-                events: {
-                    'onReady': e => e.target.playVideo(),
-                    'onStateChange': e => {
-                        if (e.data === YT.PlayerState.ENDED) e.target.playVideo();
-                    }
-                }
-            })
-        }
+            }
+        })
     }
 });
 
