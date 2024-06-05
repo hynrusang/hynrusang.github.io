@@ -49,6 +49,9 @@ const Player = new Dynamic.Fragment("player",
                         case 150:
                             pushSnackbar({message: "이 동영상은 해당 국가에서 재생할 수 없습니다.", type: "error"});
                             break;
+                        default:
+                            pushSnackbar({message: e.data, type: "error"});
+                            break;
                     }
                     if (parser) e.target.playVideoAt((e.target.getPlaylistIndex() + 1) % e.target.getPlaylist().length);
                 }

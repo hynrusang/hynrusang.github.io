@@ -1,5 +1,8 @@
 import { Dynamic } from "../init/module.js";
 
+/**
+ * @type {(props: {message: string, type: string}) => Promise<void>}
+ */
 const pushSnackbar = async ({message, type}) => {
     const colorCode = {
         error: "#880000",
