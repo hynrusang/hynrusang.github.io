@@ -10,7 +10,6 @@ const Player = new Dynamic.Fragment("player",
         const parser = playerUrl.match(/list=([^&]+)/);
         const createShuffleButton = YTPlayer => Dynamic.$("button", {class: "iconX", style: "position: absolute; left: 0px; bottom: 50%; background-image: url(/resource/img/icon/shuffle.png); opacity: 0.5", onclick: e => {
             YTPlayer.setShuffle(shuffleState = !shuffleState);
-            if (shuffleState) YTPlayer.playVideoAt(0);
             pushSnackbar({message: `셔플 모드를 ${shuffleState ? "" : "비"}활성화 시켰습니다.`, type: "normal"});
             e.target.style.opacity = shuffleState ? null : "0.5"
         }})
