@@ -17,6 +17,9 @@ p {
 textarea, input, select {
     color: cyan;
 }
+option {
+    color: black;
+}
 textarea {
     border: 1px solid white;
 }
