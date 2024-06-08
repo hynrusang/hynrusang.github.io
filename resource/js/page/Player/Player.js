@@ -32,22 +32,7 @@ const Player = new Dynamic.Fragment("player",
                     } 
                 },
                 'onError': e => {
-                    switch (e.data) {
-                        case 2:
-                            pushSnackbar({message: "잘못된 동영상 ID입니다. 동영상 URL을 확인하세요.", type: "error"});
-                            break;
-                        case 5:
-                            pushSnackbar({message: "이 브라우저는 HTML5 플레이어를 지원하지 않습니다.", type: "error"});
-                            break;
-                        case 100:
-                            pushSnackbar({message: "이 동영상은 삭제되었거나 비공개 처리되었습니다.", type: "error"});
-                            break;
-                        case 101: case 150:
-                            pushSnackbar({message: "이 동영상은 유튜브 또는 특정 사이트가 아닌 곳에서 재생하지 못하도록 설정했습니다.", type: "error"});
-                            break;
-                        default:
-                            pushSnackbar({message: `알 수 없는 오류가 발생했습니다, ${e.data}`, type: "error"});
-                    }
+                    pushSnackbar({message: parser ? "재생할 수 없는 동영상을 건너뛰었습니다." : "재생할 수 없는 동영상입니다.", type: "error"});
                     if (parser) e.target.playVideoAt((e.target.getPlaylistIndex() + 1) % e.target.getPlaylist().length);
                 }
             }
