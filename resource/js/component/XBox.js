@@ -28,7 +28,7 @@ const HandlerX = ({element, onedit, ondelete}) => {
     )
 }
 const ScreenX = screenId => Dynamic.$("div", {class: "screenX"}).add(
-    Dynamic.$("div", {id: screenId, style: "height: calc(100% - 150px); overflow-y: scroll;"})
+    Dynamic.$("div", {id: screenId, style: "height: 100%; overflow-y: scroll;"})
 )
 const InputX = ({label, value, placeholder, type="text", oninput}) => Dynamic.$("div", {class: "inputX"}).add(
     Dynamic.$("label", {text: label}),
