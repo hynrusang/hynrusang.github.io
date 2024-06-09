@@ -33,7 +33,7 @@ const MemoForm = Dynamic.$("form", {style: "display: flex; width: 100%; height: 
     const memo = e.target[0];
     const temp = DataResource.Data.basic.memo;
     temp.unshift(memo.value);
-    if (DataResource.Data.updateData({key: "memo", value: temp})) DataResource.Data.synchronize();
+    if (DataResource.Data.updateData("memo", temp)) DataResource.Data.synchronize();
     Dynamic.FragMutation.refresh();
     memo.value = ""
 }}).add(
@@ -45,7 +45,7 @@ const LinkForm = Dynamic.$("form", {style: "display: flex; width: 100%; height: 
     const [title, url] = [e.target[0], e.target[1]]
     const temp = DataResource.Data.basic.link;
     temp[title.value] = url.value;
-    if (DataResource.Data.updateData({key: "link", value: temp})) DataResource.Data.synchronize();
+    if (DataResource.Data.updateData("link", temp)) DataResource.Data.synchronize();
     Dynamic.FragMutation.refresh();
     title.value = "";
     url.value = "";
@@ -62,7 +62,7 @@ const PlaylistForm = Dynamic.$("form", {style: "display: flex; width: 100%; heig
     const temp = DataResource.Data.basic.playlist
     if (!temp[title.value]) temp[title.value] = {};
     temp[title.value][url.value] = url.value;
-    if (DataResource.Data.updateData({key: "playlist", value: temp})) DataResource.Data.synchronize();
+    if (DataResource.Data.updateData("playlist", temp)) DataResource.Data.synchronize();
     Dynamic.FragMutation.refresh();
     url.value = "";
 }}).add(

@@ -15,13 +15,13 @@ const Memo = new Dynamic.Fragment("main",
                 onedit: e => {
                     e.preventDefault();
                     temp[index] = e.target[0].value;
-                    if (DataResource.Data.updateData({key: "memo", value: temp})) DataResource.Data.synchronize();
+                    if (DataResource.Data.updateData("memo", temp)) DataResource.Data.synchronize();
                     Dynamic.FragMutation.refresh();
                 },
                 ondelete: () => {
                     if (confirm("정말로 해당 메모를 삭제하시겠습니까?")) {
                         temp.splice(index, 1);
-                        if (DataResource.Data.updateData({key: "memo", value: temp})) DataResource.Data.synchronize();
+                        if (DataResource.Data.updateData("memo", temp)) DataResource.Data.synchronize();
                         Dynamic.FragMutation.refresh();
                     }
                 }

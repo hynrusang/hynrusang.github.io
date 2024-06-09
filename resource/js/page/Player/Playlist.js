@@ -17,7 +17,7 @@ const Playlist = new Dynamic.Fragment("player",
                     IconX({icon: "delete", onclick: () => {
                         if (confirm("정말로 해당 큰 타이틀을 지우시겠습니까?")) {
                             delete temp[key];
-                            if (DataResource.Data.updateData({key: "playlist", value: temp})) DataResource.Data.synchronize();
+                            if (DataResource.Data.updateData("playlist", temp)) DataResource.Data.synchronize();
                             Dynamic.FragMutation.refresh();
                         }
                     }})
@@ -31,13 +31,13 @@ const Playlist = new Dynamic.Fragment("player",
                         e.preventDefault();
                         temp[key][e.target[0].value] = temp[key][subkey];
                         if (e.target[0].value != subkey) delete temp[key][subkey];
-                        if (DataResource.Data.updateData({key: "playlist", value: temp})) DataResource.Data.synchronize();
+                        if (DataResource.Data.updateData("playlist", temp)) DataResource.Data.synchronize();
                         Dynamic.FragMutation.refresh();
                     },
                     ondelete: () => {
                         if (confirm("정말로 해당 영상 / 재생목록을 삭제하시겠습니까?")) {
                             delete temp[key][subkey];
-                            if (DataResource.Data.updateData({key: "playlist", value: temp})) DataResource.Data.synchronize();
+                            if (DataResource.Data.updateData("playlist", temp)) DataResource.Data.synchronize();
                             Dynamic.FragMutation.refresh();
                         }
                     }
