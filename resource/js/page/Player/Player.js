@@ -28,7 +28,8 @@ const Player = new Dynamic.Fragment("player",
                 if (e.data === YT.PlayerState.ENDED) {
                     if (parser && shuffleState && e.target.getPlaylistIndex() === e.target.getPlaylist().length - 1) e.target.setShuffle(true);
                     e.target.playVideoAt(0);
-                } 
+                }
+                console.log(e)
             },
             'onError': e => {
                 pushSnackbar({message: parser ? "재생할 수 없는 동영상을 건너뛰었습니다." : "재생할 수 없는 동영상입니다.", type: "error"});
