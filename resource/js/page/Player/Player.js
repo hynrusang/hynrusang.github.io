@@ -16,7 +16,8 @@ const Player = new Dynamic.Fragment("player",
     new YT.Player("dynamic_player", {
         playerVars: parser ? {
             listType: 'playlist',
-            list: parser[1]
+            list: parser[1],
+            loop: 1
         } : null,
         loop: 1,
         videoId: !parser ? targetUrl.match(/v=([^&]+)/)[1] : null,
@@ -28,7 +29,6 @@ const Player = new Dynamic.Fragment("player",
             'onStateChange': e => {
                 if (e.data === YT.PlayerState.ENDED) {
                     if (parser && shuffleState && e.target.getPlaylistIndex() === e.target.getPlaylist().length - 1) e.target.setShuffle(true);
-                    e.target.playVideoAt(0);
                 }
                 console.log(e)
             },
