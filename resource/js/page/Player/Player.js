@@ -18,6 +18,7 @@ const Player = new Dynamic.Fragment("player",
             listType: 'playlist',
             list: parser[1]
         } : null,
+        loop: 1,
         videoId: !parser ? targetUrl.match(/v=([^&]+)/)[1] : null,
         events: {
             'onReady': e => {
