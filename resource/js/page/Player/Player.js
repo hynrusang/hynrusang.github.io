@@ -20,7 +20,7 @@ const Player = new Dynamic.Fragment("player",
         } : null,
         videoId: parser ? null : targetUrl.match(/v=([^&]+)/)[1],
         events: {
-            onStateChange: parser ? null : e => e.data === YT.PlayerState.ENDED ? e.target.playVideo() : null,
+            onStateChange: parser ? null : e => (e.data === YT.PlayerState.ENDED) && e.target.playVideo(),
             onReady: e => {
                 e.target.playVideo();
                 if (parser) Dynamic.snipe("fragment[rid=player]").add(createShuffleButton(e.target));
