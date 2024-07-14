@@ -9,7 +9,6 @@ const Player = new Dynamic.Fragment("player",
     const parser = targetUrl.match(/list=([^&]+)/);
     const createShuffleButton = YTPlayer => Dynamic.$("button", {class: "iconX", style: "position: absolute; left: 0px; bottom: 50%; background-image: url(/resource/img/icon/shuffle.png);", onclick: e => {
         YTPlayer.setShuffle(true);
-        YTPlayer.playVideoAt(0);
         pushSnackbar({message: "재생목록을 섞었습니다.", type: "normal"});
     }})
     new YT.Player("dynamic_player", {
