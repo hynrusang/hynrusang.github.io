@@ -76,10 +76,8 @@ export default class DataResource {
                 pushSnackbar({message: "잠시만 기다려 주십시오. 정보가 곧 삭제됩니다.", type: "normal"});
                 try {
                     await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).delete();
-                    await Promise.all([
-                        pushSnackbar({message: "사용자의 데이터를 모두 삭제하는데 성공하였습니다.", type: "normal"}),
-                        firebase.auth().currentUser.delete()
-                    ]);
+                    pushSnackbar({message: "사용자의 데이터를 모두 삭제하는데 성공하였습니다.", type: "normal"});
+                    await firebase.auth().currentUser.delete();
                     location.reload();
                 } catch (e) { DataResource.#firebaseAuthHandler(e); };
             }
