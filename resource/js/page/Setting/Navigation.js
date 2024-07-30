@@ -7,7 +7,7 @@ const Navigation = new Dynamic.Fragment("setting",
 ).registAction(() => {
     Dynamic.snipe("#dynamic_navigation").reset(
         Dynamic.$("h1", {text: "페이지 이동"}),
-        Object.values(DataResource.Data.navigator).map(navigation => ButtonX({value: navigation.label, onclick: () => Dynamic.FragMutation.mutate(navigation.page)}))
+        ...Object.values(DataResource.Data.navigator).map(navigation => ButtonX({value: navigation.label, onclick: () => Dynamic.FragMutation.mutate(navigation.page)}))
     );
 }).registAnimation(Dynamic.FragAnimation.fade, 500)
 
