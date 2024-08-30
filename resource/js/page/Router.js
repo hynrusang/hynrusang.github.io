@@ -13,8 +13,8 @@ const SettingRouter = [
 ]
 
 const MainRouter = [
-    IconX({icon: "memo", onclick: () => Dynamic.FragMutation.mutate(Memo)}),
-    IconX({icon: "link", onclick: () => Dynamic.FragMutation.mutate(Link)})
+    IconX({icon: "link", onclick: () => Dynamic.FragMutation.mutate(Link)}),
+    IconX({icon: "memo", onclick: () => Dynamic.FragMutation.mutate(Memo)})
 ]
 
 const PlayerRouter = [
