@@ -7,10 +7,17 @@ const Player = new Dynamic.Fragment("player",
 ).registAction(url => {
     let targetUrl = url ? (urlTemp = url) : urlTemp;
     const parser = targetUrl.match(/list=([^&]+)/);
-    const createShuffleButton = YTPlayer => Dynamic.$("button", {class: "iconX", style: "position: absolute; left: 0px; bottom: 50%; background-image: url(/resource/img/icon/shuffle.png);", onclick: e => {
-        YTPlayer.setShuffle(true);
-        pushSnackbar({message: "재생목록을 섞었습니다.", type: "normal"});
-    }})
+    const createPlayerTools = YTPlayer => Dynamic.$("div", {style: "position: absolute; left: 0px; bottom: 50%; display: flex; flex-direction: column;"}).add(
+        Dynamic.$("button", {class: "iconX", style: "margin: 5px 0px; background-image: url(/resource/img/icon/shuffle.png);", onclick: async () => {
+            await YTPlayer.setShuffle(true);
+            pushSnackbar({message: "재생목록을 섞었습니다.", type: "normal"});
+        }}),
+        Dynamic.$("button", {class: "iconX", style: "margin: 5px 0px; background-image: url(/resource/img/icon/reverse.png);", onclick: async () => {
+            await YTPlayer.cuePlaylist((await YTPlayer.getPlaylist()).reverse());
+            await YTPlayer.playVideoAt(0);
+            pushSnackbar({message: "재생목록을 역순으로 재배치했습니다.", type: "normal"});
+        }})
+    )
     new YT.Player("dynamic_player", {
         playerVars: parser ? {
             listType: 'playlist',
@@ -22,7 +29,7 @@ const Player = new Dynamic.Fragment("player",
             onStateChange: parser ? null : e => (e.data === YT.PlayerState.ENDED) && e.target.playVideo(),
             onReady: e => {
                 e.target.playVideo();
-                if (parser) Dynamic.snipe("fragment[rid=player]").add(createShuffleButton(e.target));
+                if (parser) Dynamic.snipe("fragment[rid=player]").add(createPlayerTools(e.target));
             },
             onError: e => {
                 pushSnackbar({message: parser ? "재생할 수 없는 동영상을 건너뛰었습니다." : "재생할 수 없는 동영상입니다.", type: "error"});
