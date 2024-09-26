@@ -13,7 +13,7 @@ const Player = new Dynamic.Fragment("player",
             pushSnackbar({message: "재생목록을 섞었습니다.", type: "normal"});
         }}),
         Dynamic.$("button", {class: "iconX", style: "margin: 5px 0px; background-image: url(/resource/img/icon/reverse.png);", onclick: () => {
-            YTPlayer.loafPlaylist(YTPlayer.getPlaylist().reverse());
+            YTPlayer.loadPlaylist(YTPlayer.getPlaylist().reverse());
             YTPlayer.playVideoAt(0);
             YTPlayer.setLoop(true);
             pushSnackbar({message: "재생목록을 역순으로 재배치했습니다.", type: "normal"});
