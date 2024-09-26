@@ -8,13 +8,14 @@ const Player = new Dynamic.Fragment("player",
     let targetUrl = url ? (urlTemp = url) : urlTemp;
     const parser = targetUrl.match(/list=([^&]+)/);
     const createPlayerTools = YTPlayer => Dynamic.$("div", {style: "position: absolute; left: 0px; bottom: 50%; display: flex; flex-direction: column;"}).add(
-        Dynamic.$("button", {class: "iconX", style: "margin: 5px 0px; background-image: url(/resource/img/icon/shuffle.png);", onclick: async () => {
-            await YTPlayer.setShuffle(true);
+        Dynamic.$("button", {class: "iconX", style: "margin: 5px 0px; background-image: url(/resource/img/icon/shuffle.png);", onclick: () => {
+            YTPlayer.setShuffle(true);
             pushSnackbar({message: "재생목록을 섞었습니다.", type: "normal"});
         }}),
-        Dynamic.$("button", {class: "iconX", style: "margin: 5px 0px; background-image: url(/resource/img/icon/reverse.png);", onclick: async () => {
-            await YTPlayer.cuePlaylist((await YTPlayer.getPlaylist()).reverse());
-            await YTPlayer.playVideoAt(0);
+        Dynamic.$("button", {class: "iconX", style: "margin: 5px 0px; background-image: url(/resource/img/icon/reverse.png);", onclick: () => {
+            YTPlayer.loafPlaylist(YTPlayer.getPlaylist().reverse());
+            YTPlayer.playVideoAt(0);
+            YTPlayer.setLoop(true);
             pushSnackbar({message: "재생목록을 역순으로 재배치했습니다.", type: "normal"});
         }})
     )
