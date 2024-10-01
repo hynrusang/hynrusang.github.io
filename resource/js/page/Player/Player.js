@@ -37,9 +37,8 @@ const Player = new Dynamic.Fragment("player",
                 if (parser) e.target.playVideoAt((e.target.getPlaylistIndex() + 1) % e.target.getPlaylist().length);
             },
             onAdStateChange: e => {
-                if (e.data === YT.PlayerState.PLAYING && e.target.getAdState()) {
-                    e.target.skipAd();
-                    pushSnackbar({message: "광고를 건너뛰었습니다.", type: "normal"});
+                console.dir(e.target)
+                if (e.data === YT.PlayerState.PLAYING) {
                 }
             }
         }
