@@ -35,6 +35,12 @@ const Player = new Dynamic.Fragment("player",
             onError: e => {
                 pushSnackbar({message: parser ? "재생할 수 없는 동영상을 건너뛰었습니다." : "재생할 수 없는 동영상입니다.", type: "error"});
                 if (parser) e.target.playVideoAt((e.target.getPlaylistIndex() + 1) % e.target.getPlaylist().length);
+            },
+            onAdStateChange: e => {
+                if (e.data === YT.PlayerState.PLAYING && e.target.getAdState()) {
+                    e.target.skipAd();
+                    pushSnackbar({message: "광고를 건너뛰었습니다.", type: "normal"});
+                }
             }
         }
     })
