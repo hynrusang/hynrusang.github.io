@@ -1,7 +1,7 @@
 import { Dynamic } from "./module.js";
 import DataResource from "../util/DataResource.js";
 import Login from "../page/Login.js";
-import Userinfo from "../page/Setting/Userinfo.js
+import Userinfo from "../page/Setting/Userinfo.js"
 import Link from "../page/Note/Link.js";
 import Playlist from "../page/Player/Playlist.js";
 
