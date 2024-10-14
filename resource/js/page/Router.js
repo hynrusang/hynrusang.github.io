@@ -8,8 +8,7 @@ import Playlist from "./Player/Playlist.js";
 import Player from "./Player/Player.js";
 
 const SettingRouter = [
-    IconX({icon: "navigator", onclick: () => Dynamic.FragMutation.mutate(Navigation)}),
-    IconX({icon: "user", onclick: () => Dynamic.FragMutation.mutate(Userinfo)})
+    IconX({icon: "navigator", onclick: () => Dynamic.FragMutation.mutate(Navigation)})
 ]
 
 const MainRouter = [
