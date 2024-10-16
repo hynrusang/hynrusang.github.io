@@ -109,16 +109,17 @@ select {
     flex-direction: column;
 }
 .screenX {
-    display: flex; 
+    display: flex;
+    overflow-y: hidden;
     flex-direction: column;
     position: relative;
     width: 100%; 
-    height: calc(100% - 4px);
+    height: 100%;
 }
 .inputX {
     display: flex;
     flex-direction: column;
-    margin: 10px;
+    margin: 5px;
 }
 .iconX {
     background-color: unset !important;

@@ -16,13 +16,13 @@ const Link = new Dynamic.Fragment("main",
                     e.preventDefault();
                     temp[e.target[0].value] = temp[key];
                     if (e.target[0].value != key) delete temp[key];
-                    if (DataResource.Data.updateData({key: "link", value: temp})) DataResource.Data.synchronize();
+                    if (DataResource.Data.updateData("link", temp)) DataResource.Data.synchronize();
                     Dynamic.FragMutation.refresh();
                 },
                 ondelete: () => {
                     if (confirm("정말로 해당 링크를 삭제하시겠습니까?")) {
                         delete temp[key];
-                        if (DataResource.Data.updateData({key: "link", value: temp})) DataResource.Data.synchronize();
+                        if (DataResource.Data.updateData("link", temp)) DataResource.Data.synchronize();
                         Dynamic.FragMutation.refresh();
                     }
                 }

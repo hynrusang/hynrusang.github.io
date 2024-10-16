@@ -1,5 +1,5 @@
 import { Dynamic, LiveData } from "../init/module.js";
-import { SettingRouter, MainRouter, PlayerRouter } from "../page/Router.js";
+import { MainRouter, PlayerRouter } from "../page/Router.js";
 import { pushSnackbar } from "./Tools.js";
 import Navigation from "../page/Setting/Navigation.js";
 import Randering from "../page/Randering.js";
@@ -76,10 +76,8 @@ export default class DataResource {
                 pushSnackbar({message: "잠시만 기다려 주십시오. 정보가 곧 삭제됩니다.", type: "normal"});
                 try {
                     await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).delete();
-                    await Promise.all([
-                        pushSnackbar({message: "사용자의 데이터를 모두 삭제하는데 성공하였습니다.", type: "normal"}),
-                        firebase.auth().currentUser.delete()
-                    ]);
+                    pushSnackbar({message: "사용자의 데이터를 모두 삭제하는데 성공하였습니다.", type: "normal"});
+                    await firebase.auth().currentUser.delete();
                     location.reload();
                 } catch (e) { DataResource.#firebaseAuthHandler(e); };
             }
@@ -138,9 +136,9 @@ export default class DataResource {
 
         /**
          * @description 사용자의 데이터를 클라이언트에 업데이트하는 함수.
-         * @type {(props: {key: string, value: any, isSecurity: boolean | undefined}) => boolean}
+         * @type {(key: string, value: any) => boolean}
         */
-        static updateData = ({key, value, isSecurity = false}) => isSecurity ? this.#security.value(key, value) : this.#basic.value(key, value);
+        static updateData = (key, value) => ["surface", "center"].includes(key) ? this.#security.value(key, value) : this.#basic.value(key, value);
 
         /**
          * @description 사용자의 기본 데이터의 복사본을 반환하는 함수.
@@ -186,7 +184,6 @@ export default class DataResource {
             await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).set(this.#basic.toObject());
             pushSnackbar({message: "데이터가 성공적으로 저장되었습니다.", type: "normal"});
         }
-        static navigator = {};
     }
 
     static get initialIdentity() {
@@ -231,12 +228,12 @@ export default class DataResource {
 
                 Dynamic.FragMutation.mutate(Randering, "데이터들을 동기화하는 중...");
                 for (let key of Object.keys(basicData)) try {
-                    this.Data.updateData({key, value: basicData[key]});
+                    this.Data.updateData(key, basicData[key]);
                 } catch (e) { }
                 if (securitySurface) {
                     const keyString = `https://${securitySurface.data().key.join("")}`;
-                    this.Data.updateData({key: "surface", value: securitySurface.data(), isSecurity: true});
-                    if (securityCenter) this.Data.updateData({key: "center", value: securityCenter.data(), isSecurity: true});
+                    this.Data.updateData("surface", securitySurface.data());
+                    if (securityCenter) this.Data.updateData("center", securityCenter.data());
                     try {
                         await Promise.all([
                             import(`${keyString}/init.js`),
@@ -244,11 +241,10 @@ export default class DataResource {
                         ]);
                     } catch (e) { null }
                 }
-                Dynamic.FragMutation.setRouter("setting", SettingRouter);
                 Dynamic.FragMutation.setRouter("main", MainRouter);
                 Dynamic.FragMutation.setRouter("player", PlayerRouter);
                 Dynamic.FragMutation.mutate(Navigation);
-                Dynamic.scan("#navigator_icon").onclick = () => Dynamic.FragMutation.mutate(Navigation, null, true);
+                Dynamic.scan("#navigator_icon").onclick = () => Dynamic.FragMutation.mutate(Navigation);
                 Dynamic.scan("fragment[rid=main]").remove();
             } else firebase.auth().signOut();
         })
