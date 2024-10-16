@@ -1,5 +1,5 @@
 import { Dynamic, LiveData } from "../init/module.js";
-import { SettingRouter, MainRouter, PlayerRouter } from "../page/Router.js";
+import { MainRouter, PlayerRouter } from "../page/Router.js";
 import { pushSnackbar } from "./Tools.js";
 import Navigation from "../page/Setting/Navigation.js";
 import Randering from "../page/Randering.js";
@@ -184,7 +184,6 @@ export default class DataResource {
             await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).set(this.#basic.toObject());
             pushSnackbar({message: "데이터가 성공적으로 저장되었습니다.", type: "normal"});
         }
-        static navigator = {};
     }
 
     static get initialIdentity() {
@@ -242,11 +241,10 @@ export default class DataResource {
                         ]);
                     } catch (e) { null }
                 }
-                Dynamic.FragMutation.setRouter("setting", SettingRouter);
                 Dynamic.FragMutation.setRouter("main", MainRouter);
                 Dynamic.FragMutation.setRouter("player", PlayerRouter);
                 Dynamic.FragMutation.mutate(Navigation);
-                Dynamic.scan("#navigator_icon").onclick = () => Dynamic.FragMutation.mutate(Navigation, null, true);
+                Dynamic.scan("#navigator_icon").onclick = () => Dynamic.FragMutation.mutate(Navigation);
                 Dynamic.scan("fragment[rid=main]").remove();
             } else firebase.auth().signOut();
         })
