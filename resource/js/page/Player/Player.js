@@ -1,11 +1,11 @@
 import { Dynamic } from "../../init/module.js";
 import { pushSnackbar } from "../../util/Tools.js";
 
-let urlTemp = "v=C0DPdy98e4c"
+let targetUrl = "v=C0DPdy98e4c"
 const Player = new Dynamic.Fragment("player",
     Dynamic.$("div", {id: "dynamic_player"})
 ).registAction(url => {
-    let targetUrl = url ? (urlTemp = url) : urlTemp;
+    if (targetUrl != url) targetUrl = url;
     const parser = targetUrl.match(/list=([^&]+)/);
     const createPlayerTools = YTPlayer => Dynamic.$("div", {style: "position: absolute; left: 0px; bottom: 50%; display: flex; flex-direction: column;"}).add(
         Dynamic.$("button", {class: "iconX", style: "margin: 5px 0px; background-image: url(/resource/img/icon/shuffle.png);", onclick: () => {
