@@ -1,6 +1,7 @@
 import { Dynamic } from "../init/module.js";
 
-const HandlerX = ({element, onedit, ondelete}) => {
+const HandlerContainerX = (...handler) => Dynamic.$("div", {style: "flex-direction: column", class: "handlerX"}).add(...handler)
+const HandlerX = ({element, onedit, ondelete, editFrom="innerText"}) => {
     const elements = {
         static: element,
         editer: Dynamic.$("form", {onsubmit: onedit}).add(
@@ -8,22 +9,21 @@ const HandlerX = ({element, onedit, ondelete}) => {
             Dynamic.$("input", {type: "submit", style: "display: none"})
         )
     }
-    let elementMode = "static";
-    const frame = Dynamic.$("div", {style: "width: 100%"}).add(elements[elementMode]);
+    let isEditable = false;
+    const frame = Dynamic.$("div", {style: "width: 100%"}).add(elements["static"]);
 
     return Dynamic.$("div", {class: "handlerX"}).add(
         frame,
-        Dynamic.$("div", {style: "display: flex; flex-direction: row-reverse;"}).add(
-            IconX({icon: "delete", onclick: ondelete}),
+        Dynamic.$("div", {style: "display: flex"}).add(
             IconX({icon: "edit", onclick: () => {
-                const isStatic = elementMode == "static";
-                if (isStatic) {
-                    elements.editer.node[0].value = elements.static.node.innerText;
+                isEditable = !isEditable;
+                if (isEditable) {
+                    elements.editer.node[0].value = elements.static.node[editFrom];
                     elements.editer.node[0].style.height = `${elements.static.node.scrollHeight + 20}px`;
                 } else elements.editer.node[1].click();
-                elementMode = elementMode == "static" ? "editer" : "static";
-                frame.reset(elements[elementMode]);
-            }})
+                frame.reset(elements[isEditable ? "editer" : "static"]);
+            }}),
+            IconX({icon: "delete", onclick: ondelete})
         )
     )
 }
@@ -39,4 +39,4 @@ const ButtonX = ({value, type="button", onclick}) => Dynamic.$("div", {class: "i
 )
 const IconX = ({icon, onclick}) => Dynamic.$("input", {type: "button", style: `background-image: url(${icon.includes("http") ? `https://www.google.com/s2/favicons?domain=${icon})` : `/resource/img/icon/${icon}.png)`}`, class: "iconX", onclick: onclick})
 
-export { HandlerX, ScreenX, InputX, ButtonX, IconX }
+export { HandlerContainerX, HandlerX, ScreenX, InputX, ButtonX, IconX }
