@@ -22,6 +22,6 @@ const Navigation = new Dynamic.Fragment("setting",
         Dynamic.$("h1", {text: "페이지 이동"}),
         navigator.map(navigation => ButtonX({value: navigation.label, onclick: () => Dynamic.FragMutation.mutate(navigation.page)}))
     );
-}).registAnimation(Dynamic.FragAnimation.fade, 500)
+}).registAnimation("fade", 500)
 
 export default Navigation;
