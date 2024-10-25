@@ -1,6 +1,6 @@
 import { Dynamic } from "../../init/module.js";
 import { PlaylistForm } from "../../component/FormBox.js";
-import { HandlerContainerX, HandlerX, IconX, ScreenX } from "../../component/XBox.js";
+import { HandlerContainerX, HandlerX, ScreenX } from "../../component/XBox.js";
 import { pushSnackbar } from "../../util/Tools.js";
 import DataResource from "../../util/DataResource.js";
 import Player, { YConfig } from "./Player.js";
