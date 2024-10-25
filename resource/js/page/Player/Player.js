@@ -1,13 +1,9 @@
 import { Dynamic } from "../../init/module.js";
 import { pushSnackbar } from "../../util/Tools.js";
 
-let targetUrl = "v=C0DPdy98e4c"
-const Player = new Dynamic.Fragment("player",
-    Dynamic.$("div", {id: "dynamic_player"})
-).registAction(url => {
-    if (targetUrl != url) targetUrl = url;
-    const parser = targetUrl.match(/list=([^&]+)/);
-    const createPlayerTools = YTPlayer => Dynamic.$("div", {style: "position: absolute; left: 0px; bottom: 50%; display: flex; flex-direction: column;"}).add(
+let YConfig = {
+    id: "v=C0DPdy98e4c",
+    createPlayerTools: YTPlayer => Dynamic.$("div", {style: "position: absolute; left: 0px; bottom: 50%; display: flex; flex-direction: column;"}).add(
         Dynamic.$("button", {class: "iconX", style: "margin: 5px 0px; background-image: url(/resource/img/icon/shuffle.png);", onclick: () => {
             YTPlayer.setShuffle(true);
             pushSnackbar({message: "재생목록을 섞었습니다.", type: "normal"});
@@ -19,18 +15,23 @@ const Player = new Dynamic.Fragment("player",
             pushSnackbar({message: "재생목록을 역순으로 재배치했습니다.", type: "normal"});
         }})
     )
+}
+const Player = new Dynamic.Fragment("player",
+    Dynamic.$("div", {id: "dynamic_player"})
+).registAction(() => {
+    const parser = YConfig.id.match(/list=([^&]+)/);
     new YT.Player("dynamic_player", {
         playerVars: parser ? {
             listType: 'playlist',
             list: parser[1],
             loop: 1
         } : null,
-        videoId: parser ? null : targetUrl.match(/v=([^&]+)/)[1],
+        videoId: parser ? null : YConfig.id.match(/v=([^&]+)/)[1],
         events: {
             onStateChange: parser ? null : e => (e.data === YT.PlayerState.ENDED) && e.target.playVideo(),
             onReady: e => {
                 e.target.playVideo();
-                if (parser) Dynamic.snipe("fragment[rid=player]").add(createPlayerTools(e.target));
+                if (parser) Dynamic.snipe("fragment[rid=player]").add(YConfig.createPlayerTools(e.target));
             },
             onError: e => {
                 pushSnackbar({message: parser ? "재생할 수 없는 동영상을 건너뛰었습니다." : "재생할 수 없는 동영상입니다.", type: "error"});
@@ -40,4 +41,5 @@ const Player = new Dynamic.Fragment("player",
     })
 });
 
+export { YConfig };
 export default Player;

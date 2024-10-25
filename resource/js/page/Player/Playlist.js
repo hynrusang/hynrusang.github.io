@@ -3,7 +3,7 @@ import { PlaylistForm } from "../../component/FormBox.js";
 import { HandlerContainerX, HandlerX, IconX, ScreenX } from "../../component/XBox.js";
 import { pushSnackbar } from "../../util/Tools.js";
 import DataResource from "../../util/DataResource.js";
-import Player from "./Player.js";
+import Player, { YConfig } from "./Player.js";
 
 const Playlist = new Dynamic.Fragment("player",
     ScreenX("dynamic_playlist").add(PlaylistForm)
@@ -36,7 +36,8 @@ const Playlist = new Dynamic.Fragment("player",
         Object.keys(temp[key]).sort().map(subkey => HandlerX({
             element: Dynamic.$("a", {text: subkey, href: temp[key][subkey], onclick: e => {
                 e.preventDefault();
-                Dynamic.FragMutation.mutate(Player, temp[key][subkey]);
+                YConfig.id = temp[key][subkey];
+                Dynamic.FragMutation.mutate(Player);
             }}),
             onedit: e => {
                 e.preventDefault();
