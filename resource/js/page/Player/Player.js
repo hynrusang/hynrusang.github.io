@@ -26,10 +26,12 @@ const Player = new Dynamic.Fragment("player",
     const videoId = match?.[2] || match?.[3] || null;
 
     new YT.Player("dynamic_player", {
-        playerVars: playlistId ? {
+            playerVars: parser ? {
             listType: 'playlist',
-            list: playlistId,
-            loop: 1
+            list: parser[1],
+            loop: 1,
+            controls: 1,
+            modestbranding: 1
         } : null,
         videoId: videoId,
         events: {
