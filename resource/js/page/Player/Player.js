@@ -21,10 +21,10 @@ const createPlayerTools = YTPlayer => Dynamic.$("div", {
     }}),
 
     Dynamic.$("button", { class: "playerButton", text: "🎯", onclick: () => {
-        const input = prompt("반복할 재생 인덱스를 쉼표(,)로 입력하세요. (예: 3,8,24)");
+        const input = prompt("반복할 재생 인덱스를 입력하세요. (예: 3 8 24)");
         if (!input) return;
 
-        const parsed = input.split(',').map(s => YTPlayer.getPlaylist()[parseInt(s.trim())]).filter(Boolean);
+        const parsed = input.split(' ').map(s => YTPlayer.getPlaylist()[parseInt(s.trim())]).filter(Boolean);
         if (parsed.length === 0) {
             pushSnackbar({ message: "유효한 인덱스를 입력하세요.", type: "error" });
             return;
@@ -33,7 +33,7 @@ const createPlayerTools = YTPlayer => Dynamic.$("div", {
         YTPlayer.loadPlaylist(parsed);
         YTPlayer.setLoop(true);
         YTPlayer.playVideoAt(0);
-        pushSnackbar({ message: `지정된 인덱스(${parsed.join(", ")})만 반복합니다.`, type: "normal" });
+        pushSnackbar({ message: `지정된 인덱스의 영상들로 새롭게 재생목록을 로드합니다.`, type: "normal" });
     }})
 );
 
