@@ -69,7 +69,6 @@ const Player = new Dynamic.Fragment("player",
         playerConfig.videoId = videoId;
         playerConfig.events.onStateChange = e => e.data === YT.PlayerState.ENDED && e.target.playVideo();
     }
-
     new YT.Player("dynamic_player", playerConfig);
 });
 
