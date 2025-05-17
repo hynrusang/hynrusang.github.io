@@ -47,7 +47,10 @@ const Player = new Dynamic.Fragment("player",
             onReady: e => {
                 e.target.playVideo();
                 console.log(true);
-                if (playlistId) Dynamic.snipe("fragment[rid=player]").add(createPlayerTools(e.target));
+                if (playlistId) {
+                    Dynamic.snipe("fragment[rid=player]").add(createPlayerTools(e.target));
+                    e.target.loadPlaylist(e.target.getPlaylist());
+                }
             },
             onError: e => {
                 pushSnackbar({message: playlistId ? "재생할 수 없는 동영상을 건너뛰었습니다." : "재생할 수 없는 동영상입니다.", type: "error"});
@@ -66,6 +69,7 @@ const Player = new Dynamic.Fragment("player",
         playerConfig.videoId = videoId;
         playerConfig.events.onStateChange = e => e.data === YT.PlayerState.ENDED && e.target.playVideo();
     }
+
     new YT.Player("dynamic_player", playerConfig);
 });
 
