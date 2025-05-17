@@ -103,6 +103,18 @@ select {
     opacity: 0;
 }
 
+.playerButton {
+    margin: 5px;
+    font-size: 16px;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    transition: background-color 0.2s ease;
+}
+.playerButton:hover {
+    background-color: #5a5aff;
+}
+
 .formBox {
     display: flex;
     flex-direction: column;
