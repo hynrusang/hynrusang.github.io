@@ -46,7 +46,6 @@ const Player = new Dynamic.Fragment("player",
         events: {
             onReady: e => {
                 e.target.playVideo();
-                console.log(true);
                 if (playlistId) {
                     Dynamic.snipe("fragment[rid=player]").add(createPlayerTools(e.target));
                     e.target.loadPlaylist(e.target.getPlaylist());
