@@ -26,14 +26,14 @@ const createPlayerTools = YTPlayer => Dynamic.$("div", {
 
         const parsed = input.split(' ').map(s => YTPlayer.getPlaylist()[parseInt(s.trim()) - 1]).filter(Boolean);
         if (parsed.length === 0) {
-            pushSnackbar({ message: "❗ 입력한 번호가 재생목록에 존재하지 않거나 잘못되었습니다.", type: "error" });
+            pushSnackbar({ message: "입력한 번호가 재생목록에 존재하지 않거나 잘못되었습니다.", type: "error" });
             return;
         }
 
         YTPlayer.loadPlaylist(parsed);
         YTPlayer.setLoop(true);
         YTPlayer.playVideoAt(0);
-        pushSnackbar({ message: `🔁 선택한 ${parsed.length}개의 영상으로 반복 재생을 시작합니다.`, type: "normal" });
+        pushSnackbar({ message: `선택한 ${parsed.length}개의 영상으로 반복 재생을 시작합니다.`, type: "normal" });
     }})
 );
 
