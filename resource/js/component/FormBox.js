@@ -4,8 +4,7 @@ import { ButtonX, InputX } from "./XBox.js";
 
 const LoginForm = Dynamic.$("form", {class: "formBox", onsubmit: e => {
     e.preventDefault();
-    const [email, password] = [e.target[0].value, e.target[1].value];
-    DataResource.Auth.authenticate(email, password);
+    DataResource.Auth.authenticate(e.target[0].value, e.target[1].value);
 }}).add(
     InputX({label: "email", placeholder: "Enter your Email.", oninput: e => {
         const preValue = e.target.preValue ??  "";

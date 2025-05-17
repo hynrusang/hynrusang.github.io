@@ -245,7 +245,6 @@ export default class DataResource {
                 Dynamic.FragMutation.setRouter("player", PlayerRouter);
                 Dynamic.FragMutation.mutate(Navigation);
                 Dynamic.scan("#navigator_icon").onclick = () => Dynamic.FragMutation.mutate(Navigation);
-                Dynamic.scan("fragment[rid=main]").remove();
             } else firebase.auth().signOut();
         })
     }
