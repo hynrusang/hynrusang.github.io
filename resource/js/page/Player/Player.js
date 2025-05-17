@@ -22,27 +22,26 @@ const Player = new Dynamic.Fragment("player",
 ).registAction(() => {
     const playlistId = YConfig.id.match(/[?&]list=([a-zA-Z0-9_-]+)/);
     const videoId = YConfig.id.match(/(?:[?&]v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1];
-    let playerConfig = {
-        events: {
-            onStateChange: playlistId ? null : e => (e.data === YT.PlayerState.ENDED) && e.target.playVideo(),
-            onReady: e => {
-                e.target.playVideo();
-                if (playlistId) Dynamic.snipe("fragment[rid=player]").add(YConfig.createPlayerTools(e.target));
-            },
-            onError: e => {
-                pushSnackbar({message: playlistId ? "재생할 수 없는 동영상을 건너뛰었습니다." : "재생할 수 없는 동영상입니다.", type: "error"});
-                if (playlistId) e.target.playVideoAt((e.target.getPlaylistIndex() + 1) % e.target.getPlaylist().length);
-            }
-        }
-    }
+    let playerConfig = { events: { onReady: e => e.target.playVideo(), } };
 
-    if (playlistId) playerConfig.playerVars = {
-        listType: "playlist",
-        list: playlistId[1],
-        index : 1,
-        loop: 1,
+    if (playlistId) {
+        playerConfig.playerVars = {
+            listType: "playlist",
+            list: playlistId[1],
+            index : 1,
+            loop: 1,
+        }
+        playerConfig.events.onError = e => {
+            pushSnackbar({message: "재생할 수 없는 동영상을 건너뛰었습니다.", type: "error"});
+            e.target.playVideoAt((e.target.getPlaylistIndex() + 1) % e.target.getPlaylist().length);
+        }
+        Dynamic.snipe("fragment[rid=player]").add(YConfig.createPlayerTools(e.target))
     }
-    else playerConfig.videoId = videoId;
+    else {
+        playerConfig.videoId = videoId;
+        playerConfig.events.onError = e => pushSnackbar({message: "재생할 수 없는 동영상입니다.", type: "error"});
+        playerConfig.events.onStateChange = e => e.data === YT.PlayerState.ENDED && e.target.playVideo();
+    }
     new YT.Player("dynamic_player", playerConfig);
 });
 
