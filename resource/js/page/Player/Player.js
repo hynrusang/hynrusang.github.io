@@ -21,7 +21,7 @@ const Player = new Dynamic.Fragment("player",
     Dynamic.$("div", {id: "dynamic_player"})
 ).registAction(() => {
     const playlistId = YConfig.id.match(/[?&]list=([a-zA-Z0-9_-]+)/);
-    const videoId = !playlistId && (YConfig.id.match(/(?:[?&]v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1] || null);
+    const videoId = YConfig.id.match(/(?:[?&]v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1];
     let playerConfig = {
         events: {
             onStateChange: playlistId ? null : e => (e.data === YT.PlayerState.ENDED) && e.target.playVideo(),
