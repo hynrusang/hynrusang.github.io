@@ -20,20 +20,9 @@ let YConfig = {
 const Player = new Dynamic.Fragment("player",
     Dynamic.$("div", {id: "dynamic_player"})
 ).registAction(() => {
-    const match = YConfig.id.match(/(?:list=([a-zA-Z0-9_-]+))|(?:youtu\.be\/([a-zA-Z0-9_-]{11}))|(?:v=([a-zA-Z0-9_-]{11}))/);
-
-    const playlistId = match?.[1] || null;
-    const videoId = match?.[2] || match?.[3] || null;
-
-    new YT.Player("dynamic_player", {
-            playerVars: playlistId ? {
-            listType: 'playlist',
-            list: playlistId,
-            loop: 1,
-            controls: 1,
-            modestbranding: 1
-        } : null,
-        videoId: videoId,
+    const playlistId = YConfig.id.match(/[?&]list=([a-zA-Z0-9_-]+)/);
+    const videoId = !playlistId && (YConfig.id.match(/(?:[?&]v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1] || null);
+    let playerConfig = {
         events: {
             onStateChange: playlistId ? null : e => (e.data === YT.PlayerState.ENDED) && e.target.playVideo(),
             onReady: e => {
@@ -45,7 +34,16 @@ const Player = new Dynamic.Fragment("player",
                 if (playlistId) e.target.playVideoAt((e.target.getPlaylistIndex() + 1) % e.target.getPlaylist().length);
             }
         }
-    });
+    }
+
+    if (playlistId) playerConfig.playerVars = {
+        listType: "playlist",
+        list: playlistId[1],
+        index : 1,
+        loop: 1,
+    }
+    else playerConfig.videoId = videoId;
+    new YT.Player("dynamic_player", playerConfig);
 });
 
 export { YConfig };
