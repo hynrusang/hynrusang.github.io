@@ -49,6 +49,7 @@ const Player = new Dynamic.Fragment("player",
                 if (playlistId) {
                     Dynamic.snipe("fragment[rid=player]").add(createPlayerTools(e.target));
                     e.target.loadPlaylist(e.target.getPlaylist());
+                    e.target.setLoop(true);
                 }
             },
             onError: e => {
@@ -62,7 +63,6 @@ const Player = new Dynamic.Fragment("player",
         listType: "playlist",
         list: playlistId[1],
         index : 1,
-        loop: 1,
     }
     else {
         playerConfig.videoId = videoId;
