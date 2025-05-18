@@ -20,10 +20,7 @@ const createPlayerTools = YTPlayer => Dynamic.$("div", {
         pushSnackbar({ message: "재생목록을 역순으로 재배치했습니다.", type: "normal" });
     }}),
 
-    Dynamic.$("button", {
-    class: "playerButton",
-    text: "🎯",
-    onclick: () => {
+    Dynamic.$("button", { class: "playerButton", text: "🎯", onclick: () => {
         const input = prompt(
             "재생할 영상 번호를 입력해 주세요 (띄어쓰기로 구분)\n\n" +
             "• 단일 번호 : 3 8 12\n" +
