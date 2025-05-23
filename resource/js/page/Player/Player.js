@@ -1,22 +1,33 @@
 import { Dynamic } from "../../init/module.js";
 import { pushSnackbar } from "../../util/Tools.js";
 
+let timeTracker = null;
 let YConfig = {
     id: "v=C0DPdy98e4c",
-}
+    playTarget: null,
+    playTime: 0
+};
+
+const loadPlaylist = (YTPlayer, playlist) => {
+    let playIndex = playlist.findIndex(id => id === YConfig.playTarget);
+    if (playIndex == -1) {
+        playIndex = 0;
+        YConfig.playTime = 0;
+    }
+    YTPlayer.loadPlaylist(playlist, playIndex, YConfig.playTime, "default");
+    YTPlayer.setLoop(true);
+};
 
 const createPlayerTools = YTPlayer => Dynamic.$("div", {
     style: "position: absolute; left: 0px; bottom: 50%; display: flex; flex-direction: column;"
 }).add(
     Dynamic.$("button", { class: "playerButton", text: "🔀", onclick: () => {
-        YTPlayer.setShuffle(true);
+        loadPlaylist(YTPlayer, YTPlayer.getPlaylist().sort(() => Math.random() - 0.5));
         pushSnackbar({ message: "재생목록을 섞었습니다.", type: "normal" });
     }}),
 
     Dynamic.$("button", { class: "playerButton", text: "🔁", onclick: () => {
-        YTPlayer.loadPlaylist(YTPlayer.getPlaylist().reverse());
-        YTPlayer.setLoop(true);
-        YTPlayer.playVideoAt(0);
+        loadPlaylist(YTPlayer, YTPlayer.getPlaylist().reverse());
         pushSnackbar({ message: "재생목록을 역순으로 재배치했습니다.", type: "normal" });
     }}),
     Dynamic.$("button", { class: "playerButton", text: "🎯", onclick: () => {
@@ -55,9 +66,7 @@ const createPlayerTools = YTPlayer => Dynamic.$("div", {
             return;
         }
 
-        YTPlayer.loadPlaylist(parsed);
-        YTPlayer.setLoop(true);
-        YTPlayer.playVideoAt(0);
+        loadPlaylist(YTPlayer, parsed);
         pushSnackbar({ message: `선택한 ${parsed.length}개의 영상으로 반복 재생을 시작합니다.`, type: "normal" });
     }})
 );
@@ -70,12 +79,10 @@ const Player = new Dynamic.Fragment("player",
     let playerConfig = {
         events: {
             onReady: e => {
-                e.target.playVideo();
                 if (playlistId) {
                     Dynamic.snipe("fragment[rid=player]").add(createPlayerTools(e.target));
-                    e.target.loadPlaylist(e.target.getPlaylist());
-                    e.target.setLoop(true);
-                }
+                    loadPlaylist(e.target, e.target.getPlaylist());
+                } else e.target.playVideo();
             },
             onError: e => {
                 pushSnackbar({message: playlistId ? "재생할 수 없는 동영상을 건너뛰었습니다." : "재생할 수 없는 동영상입니다.", type: "error"});
@@ -84,12 +91,23 @@ const Player = new Dynamic.Fragment("player",
         }
     }
 
-    if (playlistId) playerConfig.playerVars = {
-        listType: "playlist",
-        list: playlistId[1],
-        index : 1,
-    }
-    else {
+    if (playlistId) {
+        playerConfig.playerVars = {
+            listType: "playlist",
+            list: playlistId[1],
+            index : 0,
+        }
+        playerConfig.events.onStateChange = e => {
+            if (e.data === YT.PlayerState.PLAYING) {
+                cancelAnimationFrame(timeTracker);
+                YConfig.playTarget = e.target.getVideoData().video_id;
+                timeTracker = requestAnimationFrame(function update() {
+                    YConfig.playTime = e.target.getCurrentTime();
+                    timeTracker = requestAnimationFrame(update);
+                });
+            } else if ([YT.PlayerState.PAUSED, YT.PlayerState.ENDED, YT.PlayerState.BUFFERING].includes(e.data)) cancelAnimationFrame(timeTracker);
+        }
+    } else {
         playerConfig.videoId = videoId;
         playerConfig.events.onStateChange = e => e.data === YT.PlayerState.ENDED && e.target.playVideo();
     }
