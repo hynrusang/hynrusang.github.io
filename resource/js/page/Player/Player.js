@@ -43,7 +43,6 @@ const createPlayerTools = YTPlayer => Dynamic.$("div", {
         if (!input) return;
 
         const playlist = YTPlayer.getPlaylist();
-        const max = playlist.length;
         const indices = new Set();
 
         input.trim().split(/\s+/).forEach(token => {
@@ -55,11 +54,11 @@ const createPlayerTools = YTPlayer => Dynamic.$("div", {
             } else if (/^[-~](\d+)$/.test(token)) {
                 for (let i = 1, end = +token.match(/^[-~](\d+)$/)[1]; i <= end; i++) indices.add(i);
             } else if (/^(\d+)[-~]$/.test(token)) {
-                for (let i = +token.match(/^(\d+)[-~]$/)[1]; i <= max; i++) indices.add(i);
+                for (let i = +token.match(/^(\d+)[-~]$/)[1]; i <= playlist.length; i++) indices.add(i);
             }
         });
 
-        const parsed = Array.from(indices).map(n => playlist[n - 1]).filter(Boolean);
+        const parsed = [...indices].map(n => playlist[n - 1]).filter(Boolean);
 
         if (!parsed.length) {
             pushSnackbar({ message: "입력한 번호가 재생목록에 존재하지 않거나 잘못되었습니다.", type: "error" });
