@@ -108,8 +108,8 @@ select {
 }
 
 .playerButton {
-    margin: 5px;
-    font-size: clamp(12px, 1.2vw, 16px);
+    margin: 8px;
+    font-size: clamp(18px, 4vw, 24px);
     border: none;
     border-radius: 12px;
     color: white;
