@@ -39,7 +39,7 @@ fragmentbox {
     top: 0;
     left: 0;
     right: 0;
-    bottom: clamp(40px, 6vw, 60px);
+    bottom: clamp(60px, 6vw, 80px);
     overflow-y: scroll;
 }
 fragment {
@@ -71,7 +71,7 @@ footer > * {
 }
 iframe {
     width: 100%;
-    height: calc(100% - 6px);
+    height: calc(100% - 8px);
     border: none;
 }
 
