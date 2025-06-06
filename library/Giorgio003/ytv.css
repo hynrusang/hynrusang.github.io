@@ -64,6 +64,7 @@
 	text-decoration: none;
 	font-size: 11px;
 	color: #FEFEFE;
+	background: none;
 	padding: 10px;
 	padding-left: 8px;
 	border-top: 1px solid rgba(255,255,255,0.1);
@@ -211,7 +212,7 @@
 .ytv-playlist-open .ytv-arrow{
 	border-color: transparent;
 	border-bottom-color: rgba(0,0,0,0.4);
-	top: -10px;
+	top: -4px;
 }
 
 .ytv-list-header a:after,
