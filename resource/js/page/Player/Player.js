@@ -75,7 +75,42 @@ const Player = new Dynamic.Fragment("player",
 ).registAction(() => {
     const playlistId = YConfig.id.match(/[?&]list=([a-zA-Z0-9_-]+)/);
     const videoId = YConfig.id.match(/(?:[?&]v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1];
+
+    new YTV("dynamic_player", {
+        playlist: playlistId || undefined,
+        playId: videoId || undefined,
+        user: "GoogleDevelopers",
+        autoplay: true,
+        controls: true,
+        responsive: true,
+        fullscreen: true,
+        sortList: false,
+        shuffleList: false,
+        reverseList: false,
+        browsePlaylists: false,
+        events: {
+            videoReady: () => {
+                // 초기 실행 시 호출됨
+            },
+            stateChange: e => {
+                // 상태 변경 감지
+                if (e.data === YT.PlayerState.PLAYING) {
+                    YConfig.playTarget = e.target.getVideoData().video_id;
+                    const update = () => {
+                        YConfig.playTime = e.target.getCurrentTime();
+                        timeTracker = requestAnimationFrame(update);
+                    };
+                    timeTracker = requestAnimationFrame(update);
+                } else {
+                    cancelAnimationFrame(timeTracker);
+                }
+            }
+        }
+    });
+
+    /*
     let playerConfig = {
+        videoId: videoId,
         events: {
             onReady: e => {
                 if (playlistId) {
@@ -95,6 +130,7 @@ const Player = new Dynamic.Fragment("player",
             listType: "playlist",
             list: playlistId[1],
             index : 0,
+            rel: 0
         }
         playerConfig.events.onStateChange = e => {
             if (e.data === YT.PlayerState.PLAYING) {
@@ -111,6 +147,7 @@ const Player = new Dynamic.Fragment("player",
         playerConfig.events.onStateChange = e => e.data === YT.PlayerState.ENDED && e.target.playVideo();
     }
     new YT.Player("dynamic_player", playerConfig);
+    */
 });
 
 export { YConfig };
