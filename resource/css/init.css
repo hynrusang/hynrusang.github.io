@@ -1,6 +1,13 @@
+/* ========== Global Reset ========== */
 * {
     box-sizing: border-box;
 }
+*::-webkit-scrollbar {
+    width: 8px;
+    background: none;
+}
+
+/* ========== Animation ========== */
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -10,10 +17,10 @@
     100% { opacity: 1; transform: translateY(-10px); }
 }
 
+/* ========== Global Layout ========== */
 html {
     font-size: clamp(14px, 2.5vw, 18px);
 }
-
 body {
     overscroll-behavior-y: contain;
     transition: all 0.5s;
@@ -26,29 +33,19 @@ body {
     padding: 0px;
 }
 
+/* ========== Custom Elements ========== */
 fragmentbox {
-    width: 100%;
-    height: calc(100% - 40px);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: clamp(40px, 6vw, 60px);
     overflow-y: scroll;
-}
-*::-webkit-scrollbar {
-    width: 8px;
-    background: none;
 }
 fragment {
     display: block;
     width: 100%;
     height: 100%;
-}
-footer {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    height: clamp(40px, 6vw, 60px);
-    padding: 0px 5%;
-}
-footer > * {
-    display: flex;
 }
 snackbar {
     position: absolute;
@@ -58,29 +55,40 @@ snackbar {
     z-index: -1;
     opacity: 0;
 }
+
+/* ========== Layout Containers ========== */
+footer {
+    position: absolute;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    height: clamp(60px, 8vw, 80px);
+    padding: 0px 5%;
+}
+footer > * {
+    display: flex;
+}
 iframe {
     width: 100%;
     height: calc(100% - 6px);
     border: none;
 }
-textarea, input, button, a {
-    background: none;
-    border-radius: 10px;
-    padding: 10px;
+
+/* ========== Typography & Inputs ========== */
+h1, h2, h3, h4, p {
+    text-align: center;
+    margin: 10px;
 }
 a {
     display: block;
     font-size: small;
     text-decoration: unset;
 }
-h1, h2, h3, h4, p {
-    text-align: center;
-    margin: 10px;
-}
-textarea {
-    max-width: 100%;
-    min-height: 40px;
-    max-height: 320px;
+textarea, input, button, a {
+    background: none;
+    border-radius: 10px;
+    padding: 10px;
 }
 button, [type=button], [type=submit] {
     cursor: pointer;
@@ -90,7 +98,13 @@ select {
     height: 40px;
     background: none;
 }
+textarea {
+    max-width: 100%;
+    min-height: 40px;
+    max-height: 320px;
+}
 
+/* ========== Loading Elements ========== */
 #loading_icon {
     animation: spin 2s linear infinite;
     width: 50px;
@@ -107,6 +121,7 @@ select {
     opacity: 0;
 }
 
+/* ========== Player Control Buttons ========== */
 .playerButton {
     margin: 8px;
     font-size: clamp(18px, 4vw, 24px);
@@ -119,6 +134,7 @@ select {
     background-color: #5a5aff;
 }
 
+/* ========== Custom UI Components ========== */
 .formBox {
     display: flex;
     flex-direction: column;
@@ -154,13 +170,13 @@ select {
     background-color: initial !important;
 }
 
+/* ========== Responsive Layouts ========== */
 @media screen and (min-width: 1040px) {
     .screenX {
         width: 1040px;
         left: calc(50% - 520px);
     }
 }
-
 @media screen and (max-width: 768px) {
     .playerButton {
         font-size: clamp(18px, 5vw, 24px);
