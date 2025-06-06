@@ -1,11 +1,9 @@
 import { Dynamic } from "../../init/module.js";
 import { pushSnackbar } from "../../util/Tools.js";
-import DataResource from "../../util/DataResource.js";
 
 let timeTracker = null;
 let YConfig = {
-    title: "아무것도 재생중이지 않음",
-    playlist: [],
+    id: "v=C0DPdy98e4c",
     playTarget: null,
     playTime: 0
 };
@@ -73,35 +71,46 @@ const createPlayerTools = YTPlayer => Dynamic.$("div", {
 );
 
 const Player = new Dynamic.Fragment("player",
-    Dynamic.$("div", { id: "dynamic_player", class: "ytv-canvas ytv-full" }).add(
-        Dynamic.$("div", { class: "ytv-relative" }).add(
-            Dynamic.$("div", { class: "ytv-video" }),
-            Dynamic.$("div", { class: "ytv-list" })
-        )
-    )
+    Dynamic.$("div", {id: "dynamic_player"})
 ).registAction(() => {
-    const playlistMap = DataResource.Data.basic.playlist;
-    const listHeader = Dynamic.$("div", { class: "ytv-list-header ytv-has-playlists ytv-playlist-open" });
-    const listItems = Dynamic.$("div", { html: "<ul></ul>", class: "ytv-list-inner" })
+    const playlistId = YConfig.id.match(/[?&]list=([a-zA-Z0-9_-]+)/);
+    const videoId = YConfig.id.match(/(?:[?&]v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1];
+    let playerConfig = {
+        events: {
+            onReady: e => {
+                if (playlistId) {
+                    Dynamic.snipe("fragment[rid=player]").add(createPlayerTools(e.target));
+                    loadPlaylist(e.target, e.target.getPlaylist());
+                } else e.target.playVideo();
+            },
+            onError: e => {
+                pushSnackbar({message: playlistId ? "재생할 수 없는 동영상을 건너뛰었습니다." : "재생할 수 없는 동영상입니다.", type: "error"});
+                if (playlistId) e.target.playVideoAt((e.target.getPlaylistIndex() + 1) % e.target.getPlaylist().length);
+            }
+        }
+    }
 
-    listHeader.add(
-        Dynamic.$("a", { href: "#", onclick: e => {
-            e.preventDefault();
-            listHeader.node.classList.toggle("ytv-playlist-open")
-        }}).add(
-            Dynamic.$("img", { src: "https://yt3.ggpht.com/2eI1TjX447QZFDe6R32K0V2mjbVMKT5mIfQR-wK5bAsxttS_7qzUDS1ojoSKeSP0NuWd6sl7qQ=s88-c-k-c0x00ffffff-no-rj" }),
-            Dynamic.$("span", { html: `<i class="ytv-arrow down"></i`}).add(
-                Dynamic.$("b", { text: YConfig.title })
-            )
-        )
-    )
-
-    Object.keys(playlistMap).sort()
-
-    Dynamic.snipe(".ytv-list").add(
-        listHeader,
-        listItems
-    )
+    if (playlistId) {
+        playerConfig.playerVars = {
+            listType: "playlist",
+            list: playlistId[1],
+            index : 0,
+        }
+        playerConfig.events.onStateChange = e => {
+            if (e.data === YT.PlayerState.PLAYING) {
+                cancelAnimationFrame(timeTracker);
+                YConfig.playTarget = e.target.getVideoData().video_id;
+                timeTracker = requestAnimationFrame(function update() {
+                    YConfig.playTime = e.target.getCurrentTime();
+                    timeTracker = requestAnimationFrame(update);
+                });
+            } else if ([YT.PlayerState.PAUSED, YT.PlayerState.ENDED, YT.PlayerState.BUFFERING].includes(e.data)) cancelAnimationFrame(timeTracker);
+        }
+    } else {
+        playerConfig.videoId = videoId;
+        playerConfig.events.onStateChange = e => e.data === YT.PlayerState.ENDED && e.target.playVideo();
+    }
+    new YT.Player("dynamic_player", playerConfig);
 });
 
 export { YConfig };
