@@ -126,9 +126,7 @@ const Player = new Dynamic.Fragment("player",
         playerConfig.events.onStateChange = e => e.data === YT.PlayerState.ENDED && e.target.playVideo();
     }
 
-    loadYouTubeAPI(() => {
-        new YT.Player("dynamic_player", playerConfig);
-    });
+    loadYouTubeAPI(() => new YT.Player("dynamic_player", playerConfig));
 });
 
 export { YConfig };
