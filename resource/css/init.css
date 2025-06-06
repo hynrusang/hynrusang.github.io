@@ -123,10 +123,13 @@ textarea {
 
 /* ========== Player Control Buttons ========== */
 .playerButton {
-    margin: 8px;
-    font-size: clamp(18px, 4vw, 24px);
+    font-size: clamp(24px, 6vw, 30px);
+    padding: 16px 20px;
+    min-width: 64px;
+    min-height: 64px;
+    margin: 10px;
     border: none;
-    border-radius: 12px;
+    border-radius: 16px;
     color: white;
     transition: background-color 0.2s ease;
 }
