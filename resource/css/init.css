@@ -160,3 +160,27 @@ select {
         left: calc(50% - 520px);
     }
 }
+
+@media screen and (max-width: 768px) {
+    .playerButton {
+        font-size: clamp(18px, 5vw, 24px);  /* 기본보다 더 큼 */
+        padding: 0.8em 1.4em;
+    }
+
+    footer {
+        height: clamp(50px, 7vw, 64px);
+    }
+
+    .iconX {
+        width: clamp(40px, 10vw, 60px);
+        height: clamp(40px, 10vw, 60px);
+    }
+
+    input, textarea, button {
+        font-size: clamp(16px, 4vw, 22px);
+    }
+
+    h1, h2, h3, h4, p {
+        font-size: clamp(16px, 4vw, 20px);
+    }
+}
