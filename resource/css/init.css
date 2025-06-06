@@ -19,7 +19,7 @@
 
 /* ========== Global Layout ========== */
 html {
-    font-size: clamp(14px, 2.5vw, 18px);
+    font-size: clamp(18px, 4.5vw, 20px);
 }
 body {
     overscroll-behavior-y: contain;
