@@ -8,6 +8,20 @@ let YConfig = {
     playTime: 0
 };
 
+const loadYouTubeAPI = callback => {
+    if (window.YT && window.YT.Player) {
+        callback();
+    } else {
+        const tag = document.createElement("script");
+        tag.src = "https://www.youtube.com/iframe_api";
+        document.head.appendChild(tag);
+
+        window.onYouTubeIframeAPIReady = () => {
+            callback();
+        };
+    }
+}
+
 const loadPlaylist = (YTPlayer, playlist) => {
     let playIndex = playlist.findIndex(id => id === YConfig.playTarget);
     if (playIndex == -1) {
@@ -75,6 +89,7 @@ const Player = new Dynamic.Fragment("player",
 ).registAction(() => {
     const playlistId = YConfig.id.match(/[?&]list=([a-zA-Z0-9_-]+)/);
     const videoId = YConfig.id.match(/(?:[?&]v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1];
+
     let playerConfig = {
         events: {
             onReady: e => {
@@ -110,7 +125,10 @@ const Player = new Dynamic.Fragment("player",
         playerConfig.videoId = videoId;
         playerConfig.events.onStateChange = e => e.data === YT.PlayerState.ENDED && e.target.playVideo();
     }
-    new YT.Player("dynamic_player", playerConfig);
+
+    loadYouTubeAPI(() => {
+        new YT.Player("dynamic_player", playerConfig);
+    });
 });
 
 export { YConfig };
