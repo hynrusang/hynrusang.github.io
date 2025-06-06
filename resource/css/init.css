@@ -163,7 +163,7 @@ select {
 
 @media screen and (max-width: 768px) {
     .playerButton {
-        font-size: clamp(18px, 5vw, 24px);  /* 기본보다 더 큼 */
+        font-size: clamp(18px, 5vw, 24px);
         padding: 0.8em 1.4em;
     }
 
