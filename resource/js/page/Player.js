@@ -126,6 +126,24 @@ const Player = new Dynamic.Fragment("player",
     )
 ).registAction(() => {
     const playlistMap = DataResource.Data.basic.playlist;
+    clearInterval(TimeTracker);
+    
+    TimeTracker = setInterval(() => {
+        if (!YTPlayer || YTPlayer.getPlayerState() !== YT.PlayerState.PLAYING) return;
+        
+        const idx = YTPlayer.getPlaylistIndex();
+        YConfig.playbackPosition = YTPlayer.getCurrentTime();
+                    
+        if (0 <= idx && idx !== YConfig.lastIdx) {
+            const entrys = EntryLists.node.querySelectorAll(".entry-item");
+            entrys[YConfig.lastIdx]?.classList.toggle("active");
+            entrys[idx]?.classList.toggle("active");
+
+            YConfig.lastIdx = idx;
+            YConfig.currentEntry = YConfig.entries[idx];
+            EntryState.set({ text: `${idx + 1} / ${entrys.length}` });
+        }
+    }, 50);
     
     TitleLabel = Dynamic.$("b", { text: YConfig.title });
     PlayLists = Dynamic.$("ul").add(
@@ -262,26 +280,7 @@ const Player = new Dynamic.Fragment("player",
         },
         events: {
             onReady: () => loadPlaylist(),
-            onError: e => console.error("Player error", e),
-            onStateChange: e => {
-                if (e.data === YT.PlayerState.PLAYING) {
-                    clearInterval(TimeTracker);
-                    TimeTracker = setInterval(() => {
-                        const idx = e.target.getPlaylistIndex();
-                        YConfig.playbackPosition = e.target.getCurrentTime();
-                    
-                        if (0 <= idx && idx !== YConfig.lastIdx) {
-                            const entrys = EntryLists.node.querySelectorAll(".entry-item");
-                            entrys[YConfig.lastIdx]?.classList.toggle("active");
-                            entrys[idx]?.classList.toggle("active");
-
-                            YConfig.lastIdx = idx;
-                            YConfig.currentEntry = YConfig.entries[idx];
-                            EntryState.set({ text: `${idx + 1} / ${entrys.length}` });
-                        }
-                    }, 50);
-                } else if ([YT.PlayerState.PAUSED, YT.PlayerState.ENDED, YT.PlayerState.BUFFERING].includes(e.data)) clearInterval(TimeTracker);
-            }
+            onError: e => console.error("Player error", e)
         }
     });
     Dynamic.snipe(".ytv-list").reset(listHeader, listItems)
