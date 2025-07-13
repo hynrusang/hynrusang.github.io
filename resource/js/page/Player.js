@@ -277,7 +277,7 @@ const Player = new Dynamic.Fragment("player",
 
                             YConfig.lastIdx = idx;
                             YConfig.currentEntry = YConfig.entries[idx];
-                            EntryState.set({ text: `${idx} / ${entrys.length}` });
+                            EntryState.set({ text: `${idx + 1} / ${entrys.length}` });
                         }
                     }, 50);
                 } else if ([YT.PlayerState.PAUSED, YT.PlayerState.ENDED, YT.PlayerState.BUFFERING].includes(e.data)) clearInterval(TimeTracker);
