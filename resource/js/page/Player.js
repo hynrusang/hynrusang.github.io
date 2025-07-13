@@ -173,8 +173,7 @@ const Player = new Dynamic.Fragment("player",
             PlayLists.add(Dynamic.$("li", { class: "playlist-item", onclick: async () => { 
                 const apiKey = "AIzaSyAglJGn84cPu_YvRUdigYQFCBml-s6kcuo";
                 const playlistId = url.match(/[?&]list=([a-zA-Z0-9_-]+)/);
-                //const videoId = url.match(/(?:[?&]v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1];
-                const videoId = "C0DPdy98e4c"
+                const videoId = url.match(/(?:[?&]v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1];
 
                 try {
                     if (playlistId) {
@@ -200,6 +199,8 @@ const Player = new Dynamic.Fragment("player",
 
                     YConfig.currentEntry = YConfig.entries[0];
                     YConfig.playbackPosition = 0;
+
+                    listHeader.node.querySelector("a").click();
                     loadPlaylist(YTPlayer, YConfig);
                 } catch (err) { console.error("❌ API 호출 실패:", err); }
             }}).add(
