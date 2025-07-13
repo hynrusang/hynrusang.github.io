@@ -258,7 +258,10 @@ const Player = new Dynamic.Fragment("player",
                         YConfig.playbackPosition = e.target.getCurrentTime();
 
                         if (idx !== YConfig.lastIdx) {
-                            EntryLists.node.querySelectorAll(".entry-item").forEach((el, i) => el.classList.toggle("active", i === idx));
+                            const entrys = EntryLists.node.querySelectorAll(".entry-item");
+                            entrys[YConfig.lastIdx]?.classList.toggle("active");
+                            entrys[idx]?.classList.toggle("active");
+
                             YConfig.lastIdx = idx;
                         }
                         TimeTracker = requestAnimationFrame(update);
