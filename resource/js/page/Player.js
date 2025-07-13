@@ -14,6 +14,7 @@ let YConfig = {
         img: "https://i.ytimg.com/vi/C0DPdy98e4c/mqdefault.jpg",
         title: "TEST VIDEO"
     }],
+    lastIdx: -1,
     currentEntry: {
         id: "C0DPdy98e4c",
         img: "https://i.ytimg.com/vi/C0DPdy98e4c/mqdefault.jpg",
@@ -25,6 +26,7 @@ let YConfig = {
 const loadPlaylist = () => {
     const playlist = YConfig.entries.map(entry => entry.id);
     let playIndex = playlist.indexOf(YConfig.currentEntry.id);
+    YConfig.lastIdx = -1;
     
     if (playIndex === -1) {
         playIndex = 0;
@@ -255,7 +257,10 @@ const Player = new Dynamic.Fragment("player",
                         YConfig.currentEntry = YConfig.entries[idx]
                         YConfig.playbackPosition = e.target.getCurrentTime();
 
-                        EntryLists.node.querySelectorAll(".entry-item").forEach((el, i) => el.classList.toggle("active", i === idx));
+                        if (idx !== YConfig.lastIdx) {
+                            EntryLists.node.querySelectorAll(".entry-item").forEach((el, i) => el.classList.toggle("active", i === idx));
+                            YConfig.lastIdx = idx;
+                        }
                         TimeTracker = requestAnimationFrame(update);
                     });
                 } else if ([YT.PlayerState.PAUSED, YT.PlayerState.ENDED, YT.PlayerState.BUFFERING].includes(e.data)) cancelAnimationFrame(TimeTracker);
