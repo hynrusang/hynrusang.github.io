@@ -268,15 +268,15 @@ const Player = new Dynamic.Fragment("player",
                     clearInterval(TimeTracker);
                     TimeTracker = setInterval(() => {
                         const idx = e.target.getPlaylistIndex();
-                        YConfig.currentEntry = YConfig.entries[idx];
                         YConfig.playbackPosition = e.target.getCurrentTime();
                     
                         if (0 <= idx && idx !== YConfig.lastIdx) {
                             const entrys = EntryLists.node.querySelectorAll(".entry-item");
                             entrys[YConfig.lastIdx]?.classList.toggle("active");
                             entrys[idx]?.classList.toggle("active");
-                        
+
                             YConfig.lastIdx = idx;
+                            YConfig.currentEntry = YConfig.entries[idx];
                             EntryState.set({ text: `${idx} / ${entrys.length}` });
                         }
                     }, 50);
