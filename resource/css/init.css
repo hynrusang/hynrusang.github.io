@@ -1,6 +1,105 @@
+/* 전반적 크기 조정 */
+
 * {
     box-sizing: border-box;
 }
+*::-webkit-scrollbar {
+    width: 8px;
+    background: none;
+}
+
+/* 단락 */
+
+h1, h2, h3, h4, p {
+    text-align: center;
+    margin: 10px;
+}
+a {
+    display: block;
+    font-size: small;
+    text-decoration: unset;
+}
+textarea, input, button, a {
+    background: none;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+/* 기본 레이아웃 */
+
+body {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overscroll-behavior-y: contain;
+    transition: all 0.5s;
+}
+
+iframe {
+    border: none;
+}
+
+/* 내부 확장 요소 */
+
+fragmentbox {
+    width: 100%;
+    height: calc(100% - 40px);
+    overflow-y: scroll;
+}
+
+fragment {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+snackbar {
+    position: absolute;
+    bottom: 40px;
+    color: white;
+    padding: 8px 30px;
+    z-index: -1;
+    opacity: 0;
+}
+
+/* 하단 영역 */
+
+footer {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    height: 40px;
+    padding: 0px 5%;
+}
+
+footer > * {
+    display: flex;
+}
+
+/* 폼 요소 */
+
+textarea {
+    max-width: 100%;
+    min-height: 40px;
+    max-height: 320px;
+}
+
+select {
+    width: 100%;
+    height: 40px;
+    background: none;
+}
+
+button, [type=button], [type=submit] {
+    cursor: pointer;
+}
+
+/* 애니메이션 */
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -10,82 +109,7 @@
     100% { opacity: 1; transform: translateY(-10px); }
 }
 
-body {
-    overscroll-behavior-y: contain;
-    transition: all 0.5s;
-    display: flex;
-    flex-direction: column;
-    position: absolute;
-    width: 100vw;
-    height: 100vh;
-    margin: 0px;
-    padding: 0px;
-}
-
-fragmentbox {
-    width: 100%;
-    height: calc(100% - 40px);
-    overflow-y: scroll;
-}
-*::-webkit-scrollbar {
-    width: 8px;
-    background: none;
-}
-fragment {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-footer {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    height: 40px;
-    padding: 0px 5%;
-}
-footer > * {
-    display: flex;
-}
-snackbar {
-    position: absolute;
-    bottom: 40px;
-    color: white;
-    padding: 8px 30px;
-    z-index: -1;
-    opacity: 0;
-}
-iframe {
-    width: 100%;
-    height: calc(100% - 6px);
-    border: none;
-}
-textarea, input, button, a {
-    background: none;
-    border-radius: 10px;
-    padding: 10px;
-}
-a {
-    display: block;
-    font-size: small;
-    text-decoration: unset;
-}
-h1, h2, h3, h4, p {
-    text-align: center;
-    margin: 10px;
-}
-textarea {
-    max-width: 100%;
-    min-height: 40px;
-    max-height: 320px;
-}
-button, [type=button], [type=submit] {
-    cursor: pointer;
-}
-select {
-    width: 100%;
-    height: 40px;
-    background: none;
-}
+/* 로딩 아이콘 */
 
 #loading_icon {
     animation: spin 2s linear infinite;
@@ -103,6 +127,57 @@ select {
     opacity: 0;
 }
 
+/* 내부 컴포넌트 스타일 */
+
+.formBox {
+    display: flex;
+    flex-direction: column;
+}
+
+.screenX {
+    display: flex;
+    overflow-y: hidden;
+    flex-direction: column;
+    position: relative;
+    width: 100%; 
+    height: 100%;
+}
+
+.inputX {
+    display: flex;
+    flex-direction: column;
+    margin: 5px;
+}
+
+.iconX {
+    background-color: unset !important;
+    background-size: cover;
+    margin: 0px 5px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 24px;
+}
+
+.handlerX {
+    display: flex; 
+    margin: 10px;
+    border-radius: 20px;
+}
+
+.handlerX > * {
+    background-color: initial !important;
+}
+
+@media screen and (min-width: 1040px) {
+    .screenX {
+        width: 1040px;
+        left: calc(50% - 520px);
+    }
+}
+
+/* 플레이어 버튼 */
+
 .playerButton {
     margin: 5px;
     font-size: 16px;
@@ -115,44 +190,94 @@ select {
     background-color: #5a5aff;
 }
 
-.formBox {
-    display: flex;
-    flex-direction: column;
-}
-.screenX {
-    display: flex;
-    overflow-y: hidden;
-    flex-direction: column;
-    position: relative;
-    width: 100%; 
-    height: 100%;
-}
-.inputX {
-    display: flex;
-    flex-direction: column;
-    margin: 5px;
-}
-.iconX {
-    background-color: unset !important;
-    background-size: cover;
-    margin: 0px 5px;
-    width: 40px;
-    height: 40px;
-    border: none;
-    border-radius: 24px;
-}
-.handlerX {
-    display: flex; 
-    margin: 10px;
-    border-radius: 20px;
-}
-.handlerX > * {
-    background-color: initial !important;
+/* 내부 플레이리스트 컴포넌트 스타일 */
+
+.playlist-title {
+    font-weight: bold;
+    font-size: 1rem;
+    margin: 12px 0 4px 0;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 4px;
 }
 
-@media screen and (min-width: 1040px) {
-    .screenX {
-        width: 1040px;
-        left: calc(50% - 520px);
-    }
+.playlist-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-left: 10px;
+    margin-bottom: 4px;
+    padding: 4px 6px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+    transition: background 0.2s;
+}
+.playlist-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.playlist-name {
+    flex: 1;
+    margin-right: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.playlist-buttons > button {
+    margin-left: 5px;
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 6px;
+}
+
+.playlist-item {
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.playlist-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 엔트리 스타일 */
+
+.entry-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 8px 12px;
+    gap: 10px;
+    border-bottom: 1px solid #444;
+    cursor: pointer;
+    transition: background 0.2s;
+    height: auto;
+    min-height: 60px;
+}
+
+.entry-item.active {
+    background: rgba(255, 255, 255, 0.1);
+    font-weight: bold;
+    border-left: 3px solid #2196f3;
+}
+
+.entry-item:hover {
+    background: #2a2a2a;
+}
+
+.entry-item > img {
+    width: 100px;            /* 기존보다 작게 */
+    height: 56.25px;         /* 16:9 비율 유지 */
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+
+.entry-item > span {
+    font-size: 13px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+    flex-grow: 1;
 }
