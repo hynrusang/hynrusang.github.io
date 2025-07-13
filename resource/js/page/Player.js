@@ -2,10 +2,11 @@ import { Dynamic } from "../init/module.js";
 import { pushSnackbar } from "../util/Tools.js";
 import DataResource from "../util/DataResource.js";
 
+let TimeTracker = null;
 let TitleLabel = null;
 let PlayLists = null;
 let EntryLists = null;
-let TimeTracker = null;
+let EntryState = null;
 
 let YTPlayer = null;
 let YConfig = {
@@ -101,18 +102,21 @@ const loadPlaylist = () => {
             }
         })
     )
-    EntryLists.add(YConfig.entries.map((entry, _) => 
-        Dynamic.$("li", { class: "entry-item", onclick: () => {
-            YConfig.currentEntry = entry;
-            YConfig.playbackPosition = 0;
-            loadPlaylist();
+    EntryLists.add(
+        EntryState,
+        YConfig.entries.map((entry, _) => 
+            Dynamic.$("li", { class: "entry-item", onclick: () => {
+                YConfig.currentEntry = entry;
+                YConfig.playbackPosition = 0;
+                loadPlaylist();
 
-            TitleLabel.set({ text: entry.title });
-        }}).add(
-            Dynamic.$("img", { src: entry.img }),
-            Dynamic.$("span", { text: entry.title })
+                TitleLabel.set({ text: entry.title });
+            }}).add(
+                Dynamic.$("img", { src: entry.img }),
+                Dynamic.$("span", { text: entry.title })
+            )
         )
-    ))
+    )
 };
 
 const Player = new Dynamic.Fragment("player",
@@ -149,6 +153,7 @@ const Player = new Dynamic.Fragment("player",
         }})
     )
     EntryLists = Dynamic.$("ul", { style: "display: none;" });
+    EntryState = Dynamic.$("li", { class: "entry-status", style: "padding: 4px 8px; font-weight: bold; color: #999;" }).set({ text: `1 / ${YConfig.entries.length}` });
     const listHeader = Dynamic.$("div", { class: "ytv-list-header ytv-has-playlists" });
     const listItems = Dynamic.$("div", { class: "ytv-list-inner" }).add(PlayLists, EntryLists)
 
@@ -179,14 +184,23 @@ const Player = new Dynamic.Fragment("player",
 
                 try {
                     if (playlistId) {
-                        const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${playlistId[1]}&key=${apiKey}&part=snippet&maxResults=50&fields=items(snippet(title,thumbnails,resourceId(videoId)))`);
-                        const data = await res.json();
+                        let items = [], pageToken = "";
+                        while (items.length < 200) {
+                            console.log(items.length)
+                            const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${playlistId[1]}&key=${apiKey}&part=snippet&maxResults=50${pageToken ? `&pageToken=${pageToken}` : ""}&fields=items(snippet(title,thumbnails,resourceId(videoId))),nextPageToken`);
+                            const data = await res.json();
 
-                        YConfig.entries = data.items.map(item => ({
-                            id: item.snippet.resourceId.videoId,
-                            title: item.snippet.title,
-                            img: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url
-                        }));
+                            items.push(...data.items.map(item => ({
+                                id: item.snippet.resourceId.videoId,
+                                title: item.snippet.title,
+                                img: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url
+                            })));
+
+                            if (!data.nextPageToken) break;
+                            pageToken = data.nextPageToken;
+                        }
+
+                        YConfig.entries = items;
                     } else {
                         const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${apiKey}`);
                         const data = await res.json();
@@ -257,12 +271,13 @@ const Player = new Dynamic.Fragment("player",
                         YConfig.currentEntry = YConfig.entries[idx]
                         YConfig.playbackPosition = e.target.getCurrentTime();
 
-                        if (idx !== YConfig.lastIdx) {
+                        if (0 <= idx && idx !== YConfig.lastIdx) {
                             const entrys = EntryLists.node.querySelectorAll(".entry-item");
                             entrys[YConfig.lastIdx]?.classList.toggle("active");
                             entrys[idx]?.classList.toggle("active");
 
                             YConfig.lastIdx = idx;
+                            EntryState.set({ text: `${idx} / ${entrys.length}`})
                         }
                         TimeTracker = requestAnimationFrame(update);
                     });
