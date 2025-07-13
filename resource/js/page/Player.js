@@ -265,23 +265,22 @@ const Player = new Dynamic.Fragment("player",
             onError: e => console.error("Player error", e),
             onStateChange: e => {
                 if (e.data === YT.PlayerState.PLAYING) {
-                    cancelAnimationFrame(TimeTracker);
-                    TimeTracker = requestAnimationFrame(function update() {
+                    clearInterval(TimeTracker);
+                    TimeTracker = setInterval(() => {
                         const idx = e.target.getPlaylistIndex();
-                        YConfig.currentEntry = YConfig.entries[idx]
+                        YConfig.currentEntry = YConfig.entries[idx];
                         YConfig.playbackPosition = e.target.getCurrentTime();
-
+                    
                         if (0 <= idx && idx !== YConfig.lastIdx) {
                             const entrys = EntryLists.node.querySelectorAll(".entry-item");
                             entrys[YConfig.lastIdx]?.classList.toggle("active");
                             entrys[idx]?.classList.toggle("active");
-
+                        
                             YConfig.lastIdx = idx;
-                            EntryState.set({ text: `${idx} / ${entrys.length}`})
+                            EntryState.set({ text: `${idx} / ${entrys.length}` });
                         }
-                        TimeTracker = requestAnimationFrame(update);
-                    });
-                } else if ([YT.PlayerState.PAUSED, YT.PlayerState.ENDED, YT.PlayerState.BUFFERING].includes(e.data)) cancelAnimationFrame(TimeTracker);
+                    }, 50);
+                } else if ([YT.PlayerState.PAUSED, YT.PlayerState.ENDED, YT.PlayerState.BUFFERING].includes(e.data)) clearInterval(TimeTracker);
             }
         }
     });
