@@ -2,7 +2,7 @@ import { Dynamic } from "../../init/module.js";
 import { ButtonX } from "../../component/XBox.js";
 import Userinfo from "./Userinfo.js";
 import Link from "../Note/Link.js";
-import Playlist from "../Player/Playlist.js";
+import Player from "../Player.js";
 
 const navigator = [{
     label: "유저 데이터 관련",
@@ -12,7 +12,7 @@ const navigator = [{
     page: Link
 }, {
     label: "유튜브 플레이어 관련",
-    page: Playlist
+    page: Player
 }]
 
 const Navigation = new Dynamic.Fragment("setting", 

@@ -1,5 +1,5 @@
 import { Dynamic, LiveData } from "../init/module.js";
-import { MainRouter, PlayerRouter } from "../page/Router.js";
+import { MainRouter } from "../page/Router.js";
 import { pushSnackbar } from "./Tools.js";
 import Navigation from "../page/Setting/Navigation.js";
 import Randering from "../page/Randering.js";
@@ -242,7 +242,6 @@ export default class DataResource {
                     } catch (e) { null }
                 }
                 Dynamic.FragMutation.setRouter("main", MainRouter);
-                Dynamic.FragMutation.setRouter("player", PlayerRouter);
                 Dynamic.FragMutation.mutate(Navigation);
                 Dynamic.scan("#navigator_icon").onclick = () => Dynamic.FragMutation.mutate(Navigation);
             } else firebase.auth().signOut();
