@@ -103,7 +103,6 @@
 		height: 100%;
 	}
 	.ytv-list {
-		height: 100%;
 		transition: height 0.2s;
 	}
 	.ytv-panel-toggle-btn { 
