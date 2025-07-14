@@ -98,13 +98,14 @@ const loadPlaylist = () => {
 
     EntryLists.add(
         EntryState,
-        YConfig.entries.map(entry => 
+        YConfig.entries.map((entry, i) => 
             Dynamic.$("li", { class: "entry-item", onclick: () => {
                 YConfig.currentEntry = entry;
                 YConfig.playbackPosition = 0;
                 loadPlaylist();
                 TitleLabel.set({ text: entry.title });
             }}).add(
+                Dynamic.$("b", { text : i + 1 }),
                 Dynamic.$("img", { src: entry.img }),
                 Dynamic.$("span", { text: entry.title })
             )
