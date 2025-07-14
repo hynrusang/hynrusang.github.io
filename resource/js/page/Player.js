@@ -2,6 +2,8 @@ import { Dynamic } from "../init/module.js";
 import { pushSnackbar } from "../util/Tools.js";
 import DataResource from "../util/DataResource.js";
 
+let isConfigRestored = false;
+
 let TimeTracker = null;
 let TitleLabel = null;
 let PlayLists = null;
@@ -20,7 +22,9 @@ let YConfig = {
     currentEntry: null,
     playbackPosition: 0
 };
-YConfig.currentEntry = YConfig.entries[0];
+
+if (!YConfig.currentEntry) YConfig.currentEntry = YConfig.entries[0];
+else isConfigRestored = true;
 
 const restoreYConfig = savedConfig => YConfig = savedConfig; 
 
@@ -39,9 +43,11 @@ const loadPlaylist = () => {
     YTPlayer.setLoop(true);
 
     ListHeader.node.classList.add("ytv-playlist-open");
-    TitleLabel.set({ text: YConfig.currentEntry.title });
-    PlayLists.set({ style: "display: none" });
-    EntryLists.set({ style: "" });
+    if (isConfigRestored) {
+        TitleLabel.set({ text: YConfig.currentEntry.title });
+        PlayLists.set({ style: "display: none" });
+        EntryLists.set({ style: "" });
+    }
 
     const createButton = (icon, onClick) => Dynamic.$("button", { class: "playerButton", text: icon, onclick: onClick });
     
@@ -187,6 +193,7 @@ const Player = new Dynamic.Fragment("player",
             e.preventDefault();
             const showEntries = ListHeader.node.classList.toggle("ytv-playlist-open");
 
+            isConfigRestored = true;
             PlayLists.set({ style: showEntries ? "display: none" : ""})
             EntryLists.set({ style: showEntries ? "" : "display: none"})
         }}).add(
