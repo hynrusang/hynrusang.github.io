@@ -64,7 +64,7 @@ const loadPlaylist = () => {
     const createButton = (icon, onClick) => Dynamic.$("button", { class: "playerButton", text: icon, onclick: onClick });
     EntryLists.reset(
         (1 < playlist.length) ? [
-            createButton("🔄", () => loadPlaylist()),
+            createButton("🔄", () => Dynamic.FragMutation.refresh()),
             createButton("🔀", () => {
                 YConfig.entries = [...YConfig.entries].sort(() => Math.random() - 0.5);
                 loadPlaylist();
