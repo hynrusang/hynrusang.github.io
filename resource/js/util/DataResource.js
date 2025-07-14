@@ -228,6 +228,8 @@ export default class DataResource {
             }
 
             Dynamic.scan("#navigator_icon").onclick = () => Dynamic.FragMutation.mutate(Navigation);
+            Dynamic.scan("fragment[rid=main]").remove();
+            
             Dynamic.FragMutation.setRouter("main", MainRouter);
 
             const savedPlayerInstance = localStorage.getItem("YConfig");
