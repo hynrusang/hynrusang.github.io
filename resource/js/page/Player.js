@@ -39,6 +39,8 @@ const loadPlaylist = () => {
     YTPlayer.loadPlaylist(playlist, playIndex, YConfig.playbackPosition, "default");
     YTPlayer.setLoop(true);
     TitleLabel.set({ text: YConfig.currentEntry.title })
+    PlayLists.set({ style: "display: none" })
+    EntryLists.set({ style: "" })
     
     if (1 < playlist.length) EntryLists.reset(
         Dynamic.$("button", { text: "🔄", class: "playerButton", onclick: () => loadPlaylist()}),
@@ -249,7 +251,6 @@ const Player = new Dynamic.Fragment("player",
                     YConfig.currentEntry = YConfig.entries[0];
                     YConfig.playbackPosition = 0;
 
-                    listHeader.node.querySelector("a").click();
                     loadPlaylist(YTPlayer, YConfig);
                 } catch (err) { console.error("❌ API 호출 실패:", err); }
             }}).add(
