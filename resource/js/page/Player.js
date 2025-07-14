@@ -162,7 +162,7 @@ const Player = new Dynamic.Fragment("player",
         Dynamic.$("li").add(
             Dynamic.$("input", { id: "input-playlist-url", style: "width: 100%; margin-bottom: 8px;", placeholder: "YouTube URL" })
         ),
-        Dynamic.$("button", { text: "➕ 추가", style: "color: white;", onclick: () => {
+        Dynamic.$("button", { text: "➕ 추가", id: "input-playlist-button", onclick: () => {
                 const title = document.getElementById("input-main-title").value.trim();
                 const url = document.getElementById("input-playlist-url").value.trim();
 
