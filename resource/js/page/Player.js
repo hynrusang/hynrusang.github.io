@@ -8,8 +8,9 @@ let PlayLists = null;
 let EntryLists = null;
 let EntryState = null;
 let ListHeader = null;
-let YTPlayer = null;
 
+let PanelVisible = true;
+let YTPlayer = null;
 let YConfig = {
     entries: [{
         id: "C0DPdy98e4c",
@@ -115,6 +116,13 @@ const loadPlaylist = () => {
 const Player = new Dynamic.Fragment("player",
     Dynamic.$("div", { id: "dynamic_player", class: "ytv-canvas ytv-full" }).add(
         Dynamic.$("div", { id: "ytv-player", class: "ytv-video" }),
+        Dynamic.$("button", { class: "ytv-panel-toggle-btn", text: "◀", onclick: e => {
+            PanelVisible = !PanelVisible;
+
+            e.target.innerText = PanelVisible ? "◀" : "▶"
+            document.querySelector('.ytv-list').style.display = PanelVisible ? '' : 'none';
+            PanelToggleBtn.set({ text: PanelVisible ? "« 목록닫기" : "» 목록열기" });
+        }}),
         Dynamic.$("div", { class: "ytv-list" })
     )
 ).registAction(() => {
