@@ -21,7 +21,7 @@ let YConfig = {
     playbackPosition: 0
 };
 
-const restoreYConfig = savedConfig => YConfig = savedConfig; 
+const restoreYConfig = savedPlayerInstance => YConfig = savedPlayerInstance; 
 
 const loadPlaylist = () => {
     const playlist = YConfig.entries.map(entry => entry.id);
@@ -151,7 +151,7 @@ const Player = new Dynamic.Fragment("player",
             EntryState.set({ text: `${idx + 1} / ${entrys.length}` });
         }
 
-        sessionStorage.setItem("YConfig", JSON.stringify(YConfig));
+        localStorage.setItem("YConfig", JSON.stringify(YConfig));
     }, 1000);
     
     TitleLabel = Dynamic.$("b", { text: YConfig.title });

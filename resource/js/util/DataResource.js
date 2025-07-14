@@ -192,7 +192,7 @@ export default class DataResource {
             if (!user || !user.emailVerified) return firebase.auth().signOut();
 
             if (Date.now() - new Date(localStorage.getItem("timestamp")).getTime() >= 2592000000) {
-                localStorage.removeItem("timestamp");
+                localStorage.clear();
                 firebase.auth().signOut();
                 return;
             }
@@ -225,9 +225,9 @@ export default class DataResource {
             Dynamic.scan("#navigator_icon").onclick = () => Dynamic.FragMutation.mutate(Navigation);
             Dynamic.FragMutation.setRouter("main", MainRouter);
 
-            const savedConfig = sessionStorage.getItem("YConfig")
-            if (savedConfig) {
-                restoreYConfig(JSON.parse(savedConfig));
+            const savedPlayerInstance = localStorage.getItem("YConfig");
+            if (savedPlayerInstance) {
+                restoreYConfig(JSON.parse(savedPlayerInstance));
                 Dynamic.FragMutation.mutate(Player);
             } else Dynamic.FragMutation.mutate(Navigation);
         })
