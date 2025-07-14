@@ -23,10 +23,10 @@
 
 /* 리스트 영역 */
 
-.ytv-list{
+.ytv-list {
 	width: 350px;
-	padding: 8px;
   	overflow-y: auto;
+	transition: width 0.2s;
 }
 
 .ytv-list ul {
@@ -73,7 +73,7 @@
 	
 	transform: rotate(0deg);
 	transform-origin: center;
-	transition: transform 0.2s ease;
+	transition: transform 0.2s;
 }
 
 .ytv-playlist-open .ytv-arrow-triangle {
@@ -85,7 +85,7 @@
 .ytv-panel-toggle-btn {
 	border: none;
 	transform-origin: center;
-	transition: transform 0.2s ease;
+	transition: transform 0.2s;
 }
 
 /* 반응형 대응 */
@@ -102,5 +102,6 @@
 	}
 	.ytv-list {
 		height: 100%;
+		transition: height 0.2s;
 	}
 }
