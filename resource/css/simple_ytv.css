@@ -1,6 +1,7 @@
-/* YouTube TV */
+/* YOUTUBE TV LAYOUT */
 
-/* Base Canvas */
+/* Canvas 전체 프레임 */
+
 .ytv-canvas {
 	display: flex;
   	flex-direction: row;
@@ -9,30 +10,35 @@
   	height: 100%;
 	font-family: arial, sans-serif;
 }
+
 .ytv-canvas ::-webkit-scrollbar-thumb{
 	background: rgba(255,255,255,0.1);
 }
 
-/* Video */
+/* 비디오 영역 */
+
 .ytv-video{
 	flex-grow: 1;
 	width: calc(100% - 350px);
   	height: 100%;
 }
 
-/* List */
+/* 📃 리스트 영역 */
+
 .ytv-list{
 	width: 350px;
 	padding: 8px;
   	overflow-y: auto;
 }
+
 .ytv-list ul {
   	margin: 0;
   	padding: 0;
   	list-style-type: none;
 }
 
-/* Header */
+/* 🧭 헤더 영역 */
+
 .ytv-list-header a {
 	color: black;
 	background: rgba(255,255,255,0.05);
@@ -40,19 +46,20 @@
 	position: relative;
 	z-index: 10;
 }
+
 .ytv-list-header img {
 	float: left;
 	width: 30px;
-	vertical-align: middle;
 }
 
 .ytv-list-header a span{
-	white-space: nowrap;
-	padding-left: 10px;
 	display: flex;
+	align-items: center;
 	overflow: hidden;
-	text-overflow: ellipsis;
+	padding-left: 10px;
 	line-height: 30px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .playlist-title-label b {
@@ -60,22 +67,16 @@
 	text-overflow: ellipsis;
 }
 
-/* Modifiers */
+/* 화살표 스타일 */
 
 .ytv-arrow-triangle {
-	flex-shrink: 0;
-	align-self: center;
-
-	width: 0;
-	height: 0;
-
+	margin-left: 5px;
 	border-left: 9px solid transparent;
 	border-right: 9px solid transparent;
 	border-top: 11px solid rgba(0, 0, 0, 0.5);  /* 약간 진하게 */
-	margin-left: 10px;
 	
-	transform-origin: center;
 	transform: rotate(180deg);
+	transform-origin: center;
 	transition: transform 0.2s ease;
 }
 
@@ -83,19 +84,19 @@
 	transform: rotate(0deg);
 }
 
+/* 반응형 대응 */
+
 @media (max-width: 768px) {
-	.ytv-canvas {
+	.ytv-canvas, .ytv-relative {
 		flex-direction: column;
 	}
-	.ytv-relative {
-		flex-direction: column;
+	.ytv-video, .ytv-list {
+		width: 100%;
 	}
 	.ytv-video {
-		width: 100%;
 		height: 50%;
 	}
 	.ytv-list {
-		width: 100%;
 		height: 100%;
 	}
 }
