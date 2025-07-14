@@ -126,8 +126,21 @@ const Player = new Dynamic.Fragment("player",
     )
 ).registAction(() => {
     const playlistMap = DataResource.Data.basic.playlist;
-    clearInterval(TimeTracker);
+    const YTPlayerSettings = {
+        height: "360",
+        width: "640",
+        playerVars: {
+            autoplay: 0,
+            modestbranding: 1,
+            rel: 0
+        },
+        events: {
+            onReady: () => loadPlaylist(),
+            onError: e => console.error("Player error", e)
+        }
+    }
     
+    clearInterval(TimeTracker);
     TimeTracker = setInterval(() => {
         if (!YTPlayer || YTPlayer.getPlayerState() !== YT.PlayerState.PLAYING) return;
         
@@ -218,6 +231,8 @@ const Player = new Dynamic.Fragment("player",
                             pageToken = data.nextPageToken;
                         }
 
+                        YTPlayerSettings.playerVars.listType = "playlist"
+                        YTPlayerSettings.playerVars.list = playlistId
                         YConfig.entries = items;
                     } else {
                         const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${apiKey}`);
@@ -270,19 +285,7 @@ const Player = new Dynamic.Fragment("player",
         });
     });
 
-    if (!YTPlayer) YTPlayer = new YT.Player("ytv-player", {
-        height: "360",
-        width: "640",
-        playerVars: {
-            autoplay: 0,
-            modestbranding: 1,
-            rel: 0
-        },
-        events: {
-            onReady: () => loadPlaylist(),
-            onError: e => console.error("Player error", e)
-        }
-    });
+    if (!YTPlayer) YTPlayer = new YT.Player("ytv-player", );
     Dynamic.snipe(".ytv-list").reset(listHeader, listItems)
 });
 
