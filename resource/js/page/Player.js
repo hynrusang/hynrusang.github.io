@@ -193,7 +193,6 @@ const Player = new Dynamic.Fragment("player",
             e.preventDefault();
             const showEntries = ListHeader.node.classList.toggle("ytv-playlist-open");
 
-            isConfigRestored = true;
             PlayLists.set({ style: showEntries ? "display: none" : ""})
             EntryLists.set({ style: showEntries ? "" : "display: none"})
         }}).add(
@@ -244,6 +243,7 @@ const Player = new Dynamic.Fragment("player",
                         }];
                     }
 
+                    isConfigRestored = true;
                     YConfig.currentEntry = YConfig.entries[0];
                     YConfig.playbackPosition = 0;
 
