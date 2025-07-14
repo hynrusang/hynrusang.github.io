@@ -56,21 +56,21 @@
 }
 
 /* Modifiers */
+
 .ytv-arrow {
-	height: 10px;
-	width: 0;
-	position: relative;
-	top: 10px;
-	right: 5px;
-	border: 10px solid transparent;
-	float: right;
-	border-top-color: rgba(0,0,0,0.4);
 	display: inline-block;
+	position: relative;
+	float: right;
+	font-size: 20px;
+	color: rgba(0, 0, 0, 0.4);
+	transition: transform 0.2s ease;
+	transform: rotate(0deg);
+	margin-left: 5px;
 }
-.ytv-playlist-open .ytv-arrow{
-	border-color: transparent;
-	border-bottom-color: rgba(0,0,0,0.4);
-	top: -4px;
+
+/* 열린 상태일 때: ▲ 회전으로 표현 */
+.ytv-playlist-open .ytv-arrow {
+	transform: rotate(180deg);
 }
 
 @media (max-width: 768px) {
