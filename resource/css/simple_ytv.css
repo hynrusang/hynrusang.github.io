@@ -1,5 +1,3 @@
-/* YOUTUBE TV LAYOUT */
-
 /* Canvas 전체 프레임 */
 
 .ytv-canvas {
@@ -23,7 +21,7 @@
   	height: 100%;
 }
 
-/* 📃 리스트 영역 */
+/* 리스트 영역 */
 
 .ytv-list{
 	width: 350px;
@@ -37,7 +35,7 @@
   	list-style-type: none;
 }
 
-/* 🧭 헤더 영역 */
+/* 헤더 영역 */
 
 .ytv-list-header a {
 	color: black;
