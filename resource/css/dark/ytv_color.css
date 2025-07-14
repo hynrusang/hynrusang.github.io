@@ -20,10 +20,6 @@
 
 /* Others */
 
-.ytv-panel-toggle-btn {
-    color: white;
-}
-
-#input-playlist-button {
+.ytv-panel-toggle-btn, #input-playlist-button {
 	color: white;
 }
