@@ -28,7 +28,6 @@ const loadPlaylist = () => {
 
     if (YConfig.currentEntry) {
         ListHeader.node.classList.add("ytv-playlist-open");
-        TitleLabel.set({ text: YConfig.currentEntry.title });
         PlayLists.set({ style: "display: none" });
         EntryLists.set({ style: "" });
     } else YConfig.currentEntry = YConfig.entries[0];
@@ -103,7 +102,6 @@ const loadPlaylist = () => {
                 YConfig.currentEntry = entry;
                 YConfig.playbackPosition = 0;
                 loadPlaylist();
-                TitleLabel.set({ text: entry.title });
             }}).add(
                 Dynamic.$("b", { text : i + 1 }),
                 Dynamic.$("img", { src: entry.img }),
@@ -148,6 +146,7 @@ const Player = new Dynamic.Fragment("player",
 
             YConfig.lastIdx = idx;
             YConfig.currentEntry = YConfig.entries[idx];
+            TitleLabel.set({ text: YConfig.currentEntry.title });
             EntryState.set({ text: `${idx + 1} / ${entrys.length}` });
         }
 
