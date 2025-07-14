@@ -119,14 +119,7 @@ const Player = new Dynamic.Fragment("player",
     )
 ).registAction(() => {
     const playlistMap = DataResource.Data.basic.playlist;
-    const YTPlayerSettings = {
-        height: "360",
-        width: "640",
-        playerVars: {
-            autoplay: 1,
-            modestbranding: 1,
-            rel: 0
-        },
+    const playerConfig = {
         events: {
             onReady: () => loadPlaylist(),
             onError: e => console.error("Player error", e)
@@ -213,7 +206,14 @@ const Player = new Dynamic.Fragment("player",
 
                 try {
                     if (playlistId) {
+                        playerConfig.playerVars = {
+                            listType: "playlist",
+                            list: playlistId[1],
+                            index : 0,
+                        }
+
                         let items = [], pageToken = "";
+                        YConfig.entries = items;
                         while (items.length < 200) {
                             const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${playlistId[1]}&key=${apiKey}&part=snippet&maxResults=50${pageToken ? `&pageToken=${pageToken}` : ""}&fields=items(snippet(title,thumbnails,resourceId(videoId))),nextPageToken`);
                             const data = await res.json();
@@ -227,8 +227,6 @@ const Player = new Dynamic.Fragment("player",
                             if (!data.nextPageToken) break;
                             pageToken = data.nextPageToken;
                         }
-
-                        YConfig.entries = items;
                     } else {
                         const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${apiKey}`);
                         const data = await res.json();
@@ -241,6 +239,7 @@ const Player = new Dynamic.Fragment("player",
                         }];
                     }
 
+                    playerConfig.videoId = videoId;
                     YConfig.currentEntry = YConfig.entries[0];
                     YConfig.playbackPosition = 0;
 
@@ -280,7 +279,7 @@ const Player = new Dynamic.Fragment("player",
     });
 
     if (YTPlayer) YTPlayer.destroy();
-    YTPlayer = new YT.Player("ytv-player", YTPlayerSettings);
+    YTPlayer = new YT.Player("ytv-player", playerConfig);
     Dynamic.snipe(".ytv-list").reset(ListHeader, listItems)
 });
 
