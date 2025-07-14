@@ -279,7 +279,8 @@ const Player = new Dynamic.Fragment("player",
         });
     });
 
-    if (!YTPlayer) YTPlayer = new YT.Player("ytv-player", YTPlayerSettings);
+    if (YTPlayer) YTPlayer.destroy();
+    YTPlayer = new YT.Player("ytv-player", YTPlayerSettings);
     Dynamic.snipe(".ytv-list").reset(ListHeader, listItems)
 });
 
