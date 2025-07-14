@@ -100,9 +100,7 @@
 	}
 	.ytv-video, .ytv-list {
 		width: 100%;
-	}
-	.ytv-video {
-		height: 50%;
+		height: 100%;
 	}
 	.ytv-list {
 		height: 100%;
