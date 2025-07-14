@@ -8,8 +8,8 @@ let PlayLists = null;
 let EntryLists = null;
 let EntryState = null;
 let ListHeader = null;
-
 let YTPlayer = null;
+
 let YConfig = {
     entries: [{
         id: "C0DPdy98e4c",
@@ -17,27 +17,23 @@ let YConfig = {
         title: "TEST VIDEO"
     }],
     lastIdx: -1,
-    currentEntry: {
-        id: "C0DPdy98e4c",
-        img: "https://i.ytimg.com/vi/C0DPdy98e4c/mqdefault.jpg",
-        title: "TEST VIDEO"
-    },
+    currentEntry: null,
     playbackPosition: 0
 };
-
-
+YConfig.currentEntry = YConfig.entries[0];
 
 const restoreYConfig = savedConfig => YConfig = savedConfig; 
+
 const loadPlaylist = () => {
     const playlist = YConfig.entries.map(entry => entry.id);
     let playIndex = playlist.indexOf(YConfig.currentEntry.id);
-    YConfig.lastIdx = -1;
     
     if (playIndex === -1) {
         playIndex = 0;
         YConfig.currentEntry = YConfig.entries[0];
         YConfig.playbackPosition = 0;
     }
+    YConfig.lastIdx = -1;
 
     YTPlayer.loadPlaylist(playlist, playIndex, YConfig.playbackPosition, "default");
     YTPlayer.setLoop(true);
@@ -46,71 +42,66 @@ const loadPlaylist = () => {
     TitleLabel.set({ text: YConfig.currentEntry.title });
     PlayLists.set({ style: "display: none" });
     EntryLists.set({ style: "" });
+
+    const createButton = (icon, onClick) => Dynamic.$("button", { class: "playerButton", text: icon, onclick: onClick });
     
-    if (1 < playlist.length) 
-        EntryLists.reset(
-            Dynamic.$("button", { text: "🔄", class: "playerButton", onclick: () => loadPlaylist()}),
-            Dynamic.$("button", { text: "🔀", class: "playerButton", onclick: () => {
-                YConfig.entries = [...YConfig.entries].sort(() => Math.random() - 0.5);
-                loadPlaylist();
-                pushSnackbar({ message: "재생목록을 섞었습니다.", type: "normal" });
-            }
+    if (1 < playlist.length) EntryLists.reset(
+        createButton("🔄", () => loadPlaylist()),
+        createButton("🔀", () => {
+            YConfig.entries = [...YConfig.entries].sort(() => Math.random() - 0.5);
+            loadPlaylist();
+            pushSnackbar({ message: "재생목록을 섞었습니다.", type: "normal" });
         }),
-        Dynamic.$("button", { text: "↩️", class: "playerButton", onclick: () => {
-                YConfig.entries.reverse();
-                loadPlaylist();
-                pushSnackbar({ message: "재생목록을 역순으로 재배치했습니다.", type: "normal" });
-            }
+        createButton("↩️", () => {
+            YConfig.entries.reverse();
+            loadPlaylist();
+            pushSnackbar({ message: "재생목록을 역순으로 재배치했습니다.", type: "normal" });
         }),
-        Dynamic.$("button", { text: "🎯", class: "playerButton", onclick: () => {
-                const input = prompt(
-                    "재생할 영상 번호를 입력해 주세요 (띄어쓰기로 구분)\n\n" +
-                    "• 단일 번호 : 3 8 12\n" +
-                    "• 범위 입력 : 3-10 또는 3~10 (3~10번)\n" +
-                    "• 처음부터 : -5 또는 ~5 (1~5번)\n" +
-                    "• 끝까지   : 7- 또는 7~ (7~N번)\n\n" +
-                    "※ 단일 번호와 범위를 섞어 입력할 수 있습니다 (예: 2 5-9 11~)\n" +
-                    "※ '-' 또는 '~'는 숫자와 붙여 써야 하며, 번호는 현재 재생중인 목록을 따릅니다."
-                );
-                if (!input) return;
+        createButton("🎯", () => {
+            const input = prompt(
+                "재생할 영상 번호를 입력해 주세요 (띄어쓰기로 구분)\n\n" +
+                "• 단일 번호 : 3 8 12\n" +
+                "• 범위 입력 : 3-10 또는 3~10 (3~10번)\n" +
+                "• 처음부터 : -5 또는 ~5 (1~5번)\n" +
+                "• 끝까지   : 7- 또는 7~ (7~N번)\n\n" +
+                "※ 단일 번호와 범위를 섞어 입력할 수 있습니다 (예: 2 5-9 11~)\n" +
+                "※ '-' 또는 '~'는 숫자와 붙여 써야 하며, 번호는 현재 재생중인 목록을 따릅니다."
+            );
+            if (!input) return;
 
-                const playlist = YConfig.entries;
-                const indices = new Set();
+            const indices = new Set();
+            const tokens = input.trim().split(/\s+/);
 
-                input.trim().split(/\s+/).forEach(token => {
-                    if (/^\d+$/.test(token)) {
-                        indices.add(+token);
-                    } else if (/^(\d+)[-~](\d+)$/.test(token)) {
-                        let [ , a, b ] = token.match(/^(\d+)[-~](\d+)$/);
-                        for (let i = Math.min(a = +a, b = +b); i <= Math.max(a, b); i++) indices.add(i);
-                    } else if (/^[-~](\d+)$/.test(token)) {
-                        for (let i = 1, end = +token.match(/^[-~](\d+)$/)[1]; i <= end; i++) indices.add(i);
-                    } else if (/^(\d+)[-~]$/.test(token)) {
-                        for (let i = +token.match(/^(\d+)[-~]$/)[1]; i <= playlist.length; i++) indices.add(i);
-                    }
-                });
-
-                const parsed = [...indices].map(n => playlist[n - 1]).filter(Boolean);
-                if (!parsed.length) {
-                    pushSnackbar({ message: "선택이 잘못되었습니다.", type: "error" });
-                    return;
+            for (const token of tokens) {
+                if (/^\d+$/.test(token)) indices.add(+token);
+                else if (/^(\d+)[-~](\d+)$/.test(token)) {
+                    let [ , a, b ] = token.match(/^(\d+)[-~](\d+)$/);
+                    for (let i = Math.min(a = +a, b = +b); i <= Math.max(a, b); i++) indices.add(i);
+                } else if (/^[-~](\d+)$/.test(token)) {
+                    const end = +token.match(/^[-~](\d+)$/)[1];
+                    for (let i = 1; i <= end; i++) indices.add(i);
+                } else if (/^(\d+)[-~]$/.test(token)) {
+                    const start = +token.match(/^(\d+)[-~]$/)[1];
+                    for (let i = start; i <= playlist.length; i++) indices.add(i);
                 }
-
-                YConfig.entries = parsed;
-                loadPlaylist();
-                pushSnackbar({ message: `선택한 ${parsed.length}개의 영상으로 반복 재생합니다.`, type: "normal" });
             }
+
+            const parsed = [...indices].map(n => YConfig.entries[n - 1]).filter(Boolean);
+            if (!parsed.length) return pushSnackbar({ message: "선택이 잘못되었습니다.", type: "error" });
+
+            YConfig.entries = parsed;
+            loadPlaylist();
+            pushSnackbar({ message: `선택한 ${parsed.length}개의 영상으로 반복 재생합니다.`, type: "normal" });
         })
     )
 
     EntryLists.add(
         EntryState,
-        YConfig.entries.map((entry, _) => 
+        YConfig.entries.map(entry => 
             Dynamic.$("li", { class: "entry-item", onclick: () => {
                 YConfig.currentEntry = entry;
                 YConfig.playbackPosition = 0;
                 loadPlaylist();
-
                 TitleLabel.set({ text: entry.title });
             }}).add(
                 Dynamic.$("img", { src: entry.img }),
