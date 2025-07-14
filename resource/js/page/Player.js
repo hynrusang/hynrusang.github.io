@@ -123,7 +123,7 @@ const Player = new Dynamic.Fragment("player",
         height: "360",
         width: "640",
         playerVars: {
-            autoplay: 0,
+            autoplay: 1,
             modestbranding: 1,
             rel: 0
         },
