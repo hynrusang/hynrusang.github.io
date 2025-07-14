@@ -24,6 +24,16 @@ let YConfig = {
 
 const restoreYConfig = savedPlayerInstance => YConfig = savedPlayerInstance; 
 
+const refreshYPlayer = playerConfig => {
+    if (YTPlayer) YTPlayer.destroy();
+
+    playerConfig.events.onError = (1 < YConfig.entries.length) ? e => {
+        pushSnackbar({message: "재생할 수 없는 동영상을 건너뛰었습니다.", type: "error"});
+         e.target.playVideoAt((e.target.getPlaylistIndex() + 1) % e.target.getPlaylist().length);
+    } : () => pushSnackbar({message: "재생할 수 없는 동영상입니다.", type: "error"});
+    YTPlayer = new YT.Player("ytv-player", playerConfig);
+}
+
 const loadPlaylist = () => {
     const playlist = YConfig.entries.map(entry => entry.id);
 
@@ -128,11 +138,9 @@ const Player = new Dynamic.Fragment("player",
     )
 ).registAction(() => {
     const playlistMap = DataResource.Data.basic.playlist;
-    const playerConfig = {
-        events: {
-            onReady: e => (loadPlaylist(), e.target.playVideo()),
-            onError: e => console.error("Player error", e)
-        }
+    const playerConfig = { 
+        videoId: "C0DPdy98e4c",
+        events: { onReady: e => (loadPlaylist(), e.target.playVideo()) }
     }
     
     clearInterval(TimeTracker);
@@ -213,15 +221,10 @@ const Player = new Dynamic.Fragment("player",
                 const playlistId = url.match(/[?&]list=([a-zA-Z0-9_-]+)/);
                 const videoId = url.match(/(?:[?&]v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1];
 
+                YConfig.entries = [];
                 try {
                     if (playlistId) {
-                        playerConfig.playerVars = {
-                            listType: "playlist",
-                            list: playlistId[1],
-                            index : 0,
-                        }
-
-                        YConfig.entries = []; let pageToken = "";
+                        let pageToken = "";
                         while (YConfig.entries.length < 200) {
                             const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${playlistId[1]}&key=${apiKey}&part=snippet&maxResults=50${pageToken ? `&pageToken=${pageToken}` : ""}&fields=items(snippet(title,thumbnails,resourceId(videoId))),nextPageToken`);
                             const data = await res.json();
@@ -239,19 +242,17 @@ const Player = new Dynamic.Fragment("player",
                         const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${apiKey}`);
                         const data = await res.json();
                         const video = data.items[0];
-            
-                        YConfig.entries = [{
+
+                        YConfig.entries.push({
                             id: video.id,
                             title: video.snippet.title,
                             img: video.snippet.thumbnails.medium?.url || video.snippet.thumbnails.default?.url
-                        }];
+                        });
                     }
 
-                    playerConfig.videoId = videoId;
                     YConfig.currentEntry = YConfig.entries[0];
                     YConfig.playbackPosition = 0;
-
-                    loadPlaylist(YTPlayer, YConfig);
+                    refreshYPlayer(playerConfig);
                 } catch (err) { console.error("❌ API 호출 실패:", err); }
             }}).add(
                 Dynamic.$("span", { class: "playlist-name", text: name }),
@@ -286,8 +287,7 @@ const Player = new Dynamic.Fragment("player",
         });
     });
 
-    if (YTPlayer) YTPlayer.destroy();
-    YTPlayer = new YT.Player("ytv-player", playerConfig);
+    refreshYPlayer(playerConfig);
     Dynamic.snipe(".ytv-list").reset(ListHeader, listItems)
 });
 

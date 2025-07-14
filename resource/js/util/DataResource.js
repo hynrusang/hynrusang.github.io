@@ -140,7 +140,6 @@ export default class DataResource {
             const selected = themeList[this.#theme]; 
             DataResource.#icon.style.backgroundImage = `url(/resource/img/icon/${selected}.png)`;
 
-            console.log(Object.entries(DataResource.#selector))
             Object.entries(DataResource.#selector).forEach(([key, el]) => {
                 el.href = `/resource/css/${selected}/${key}.css`
             })
