@@ -189,9 +189,6 @@ button, [type=button], [type=submit] {
     color: white;
     transition: background-color 0.2s ease;
 }
-.playerButton:hover {
-    background-color: #5a5aff;
-}
 
 /* 내부 플레이리스트 컴포넌트 스타일 */
 
@@ -214,9 +211,6 @@ button, [type=button], [type=submit] {
     background-color: rgba(255, 255, 255, 0.05);
     transition: background 0.2s;
 }
-.playlist-item:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
 
 .playlist-name {
     flex: 1;
@@ -236,9 +230,6 @@ button, [type=button], [type=submit] {
 .playlist-item {
     cursor: pointer;
     transition: background 0.2s;
-}
-.playlist-item:hover {
-    background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* 엔트리 스타일 */
@@ -261,10 +252,6 @@ button, [type=button], [type=submit] {
     border-left: 3px solid #2196f3;
 }
 
-.entry-item:hover {
-    background: #2a2a2a;
-}
-
 .entry-item > * {
     height: 56.25px;
 }
@@ -272,8 +259,7 @@ button, [type=button], [type=submit] {
 .entry-item > b {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 20px;
+    width: 2em;
     text-align: center;
     flex-shrink: 0;
     font-weight: bold;

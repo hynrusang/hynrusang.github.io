@@ -31,3 +31,15 @@ a, [type=button], [type=submit] {
 .handlerX {
     background-color: #8080804d;
 }
+
+.playlist-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.playerButton:hover {
+    background-color: #5a5aff;
+}
+
+.entry-item:hover {
+    background: #2a2a2a;
+}

@@ -139,7 +139,11 @@ export default class DataResource {
 
             const selected = themeList[this.#theme]; 
             DataResource.#icon.style.backgroundImage = `url(/resource/img/icon/${selected}.png)`;
-            DataResource.#selector.href = `/resource/css/${selected}/init.css`;
+
+            console.log(Object.entries(DataResource.#selector))
+            Object.entries(DataResource.#selector).forEach(([key, el]) => {
+                el.href = `/resource/css/${selected}/${key}.css`
+            })
             localStorage.setItem("theme", this.#theme);
         } 
 
@@ -171,9 +175,10 @@ export default class DataResource {
      */
     static init = () => {
         if (this.#initialIdentity) return;
+         const [color, ytv] = Dynamic.scan("!.theme");
 
         this.#initialIdentity = true;
-        this.#selector = Dynamic.scan("#theme_selector");
+        this.#selector = { color, ytv };
         this.#icon = Dynamic.scan("#theme_icon");
         this.#icon.onclick = () => this.Data.theme++;
         this.Data.theme = localStorage.theme;
