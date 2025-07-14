@@ -7,6 +7,7 @@ let TitleLabel = null;
 let PlayLists = null;
 let EntryLists = null;
 let EntryState = null;
+let ListHeader = null;
 
 let YTPlayer = null;
 let YConfig = {
@@ -24,6 +25,8 @@ let YConfig = {
     playbackPosition: 0
 };
 
+
+
 const restoreYConfig = savedConfig => YConfig = savedConfig; 
 const loadPlaylist = () => {
     const playlist = YConfig.entries.map(entry => entry.id);
@@ -38,34 +41,28 @@ const loadPlaylist = () => {
 
     YTPlayer.loadPlaylist(playlist, playIndex, YConfig.playbackPosition, "default");
     YTPlayer.setLoop(true);
-    TitleLabel.set({ text: YConfig.currentEntry.title })
-    PlayLists.set({ style: "display: none" })
-    EntryLists.set({ style: "" })
+
+    ListHeader.node.classList.add("ytv-playlist-open");
+    TitleLabel.set({ text: YConfig.currentEntry.title });
+    PlayLists.set({ style: "display: none" });
+    EntryLists.set({ style: "" });
     
-    if (1 < playlist.length) EntryLists.reset(
-        Dynamic.$("button", { text: "🔄", class: "playerButton", onclick: () => loadPlaylist()}),
-        Dynamic.$("button", {
-            class: "playerButton",
-            text: "🔀",
-            onclick: () => {
+    if (1 < playlist.length) 
+        EntryLists.reset(
+            Dynamic.$("button", { text: "🔄", class: "playerButton", onclick: () => loadPlaylist()}),
+            Dynamic.$("button", { text: "🔀", class: "playerButton", onclick: () => {
                 YConfig.entries = [...YConfig.entries].sort(() => Math.random() - 0.5);
                 loadPlaylist();
                 pushSnackbar({ message: "재생목록을 섞었습니다.", type: "normal" });
             }
         }),
-        Dynamic.$("button", {
-            class: "playerButton",
-            text: "↩️",
-            onclick: () => {
+        Dynamic.$("button", { text: "↩️", class: "playerButton", onclick: () => {
                 YConfig.entries.reverse();
                 loadPlaylist();
                 pushSnackbar({ message: "재생목록을 역순으로 재배치했습니다.", type: "normal" });
             }
         }),
-        Dynamic.$("button", {
-            class: "playerButton",
-            text: "🎯",
-            onclick: () => {
+        Dynamic.$("button", { text: "🎯", class: "playerButton", onclick: () => {
                 const input = prompt(
                     "재생할 영상 번호를 입력해 주세요 (띄어쓰기로 구분)\n\n" +
                     "• 단일 번호 : 3 8 12\n" +
@@ -105,6 +102,7 @@ const loadPlaylist = () => {
             }
         })
     )
+
     EntryLists.add(
         EntryState,
         YConfig.entries.map((entry, _) => 
@@ -190,13 +188,13 @@ const Player = new Dynamic.Fragment("player",
     )
     EntryLists = Dynamic.$("ul", { style: "display: none;" });
     EntryState = Dynamic.$("li", { class: "entry-status", style: "padding: 4px 8px; font-weight: bold; color: #999;" }).set({ text: `1 / ${YConfig.entries.length}` });
-    const listHeader = Dynamic.$("div", { class: "ytv-list-header ytv-has-playlists" });
+    ListHeader = Dynamic.$("div", { class: "ytv-list-header ytv-has-playlists" });
     const listItems = Dynamic.$("div", { class: "ytv-list-inner" }).add(PlayLists, EntryLists)
 
-    listHeader.add(
+    ListHeader.add(
         Dynamic.$("a", { href: "#", onclick: e => {
             e.preventDefault();
-            const showEntries = listHeader.node.classList.toggle("ytv-playlist-open");
+            const showEntries = ListHeader.node.classList.toggle("ytv-playlist-open");
 
             PlayLists.set({ style: showEntries ? "display: none" : ""})
             EntryLists.set({ style: showEntries ? "" : "display: none"})
@@ -287,7 +285,7 @@ const Player = new Dynamic.Fragment("player",
     });
 
     if (!YTPlayer) YTPlayer = new YT.Player("ytv-player", YTPlayerSettings);
-    Dynamic.snipe(".ytv-list").reset(listHeader, listItems)
+    Dynamic.snipe(".ytv-list").reset(ListHeader, listItems)
 });
 
 export { restoreYConfig };
