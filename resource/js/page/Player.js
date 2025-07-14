@@ -2,8 +2,6 @@ import { Dynamic } from "../init/module.js";
 import { pushSnackbar } from "../util/Tools.js";
 import DataResource from "../util/DataResource.js";
 
-let isConfigRestored = false;
-
 let TimeTracker = null;
 let TitleLabel = null;
 let PlayLists = null;
@@ -23,15 +21,19 @@ let YConfig = {
     playbackPosition: 0
 };
 
-if (!YConfig.currentEntry) YConfig.currentEntry = YConfig.entries[0];
-else isConfigRestored = true;
-
 const restoreYConfig = savedConfig => YConfig = savedConfig; 
 
 const loadPlaylist = () => {
     const playlist = YConfig.entries.map(entry => entry.id);
+
+    if (YConfig.currentEntry) {
+        ListHeader.node.classList.add("ytv-playlist-open");
+        TitleLabel.set({ text: YConfig.currentEntry.title });
+        PlayLists.set({ style: "display: none" });
+        EntryLists.set({ style: "" });
+    } else YConfig.currentEntry = YConfig.entries[0];
+
     let playIndex = playlist.indexOf(YConfig.currentEntry.id);
-    
     if (playIndex === -1) {
         playIndex = 0;
         YConfig.currentEntry = YConfig.entries[0];
@@ -41,13 +43,6 @@ const loadPlaylist = () => {
 
     YTPlayer.loadPlaylist(playlist, playIndex, YConfig.playbackPosition, "default");
     YTPlayer.setLoop(true);
-
-    ListHeader.node.classList.add("ytv-playlist-open");
-    if (isConfigRestored) {
-        TitleLabel.set({ text: YConfig.currentEntry.title });
-        PlayLists.set({ style: "display: none" });
-        EntryLists.set({ style: "" });
-    }
 
     const createButton = (icon, onClick) => Dynamic.$("button", { class: "playerButton", text: icon, onclick: onClick });
     
@@ -243,7 +238,6 @@ const Player = new Dynamic.Fragment("player",
                         }];
                     }
 
-                    isConfigRestored = true;
                     YConfig.currentEntry = YConfig.entries[0];
                     YConfig.playbackPosition = 0;
 
