@@ -212,8 +212,8 @@ const Player = new Dynamic.Fragment("player",
                             index : 0,
                         }
 
-                        YConfig.entries = [], pageToken = "";
-                        while (items.length < 200) {
+                        YConfig.entries = []; let pageToken = "";
+                        while (YConfig.entries.length < 200) {
                             const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${playlistId[1]}&key=${apiKey}&part=snippet&maxResults=50${pageToken ? `&pageToken=${pageToken}` : ""}&fields=items(snippet(title,thumbnails,resourceId(videoId))),nextPageToken`);
                             const data = await res.json();
 
