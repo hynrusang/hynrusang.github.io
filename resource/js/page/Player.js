@@ -162,7 +162,8 @@ const Player = new Dynamic.Fragment("player",
         Dynamic.$("li").add(
             Dynamic.$("input", { id: "input-playlist-url", style: "width: 100%; margin-bottom: 8px;", placeholder: "YouTube URL" })
         ),
-        Dynamic.$("button", { text: "➕ 추가", id: "input-playlist-button", onclick: () => {
+        Dynamic.$("li").add(
+            Dynamic.$("button", { text: "➕ 추가", id: "input-playlist-button", onclick: () => {
                 const title = document.getElementById("input-main-title").value.trim();
                 const url = document.getElementById("input-playlist-url").value.trim();
 
@@ -177,7 +178,8 @@ const Player = new Dynamic.Fragment("player",
                 DataResource.Data.updateData("playlist", playlistMap);
                 DataResource.Data.synchronize();
                 Dynamic.FragMutation.refresh();
-        }})
+            }})
+        )
     )
     EntryLists = Dynamic.$("ul", { style: "display: none;" });
     EntryState = Dynamic.$("li", { class: "entry-status", style: "padding: 4px 8px; font-weight: bold; color: #999;" }).set({ text: `1 / ${YConfig.entries.length}` });
