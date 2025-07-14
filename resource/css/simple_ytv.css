@@ -62,6 +62,7 @@
 
 .playlist-title-label b {
 	overflow: hidden;
+	flex-grow: 1;
 	text-overflow: ellipsis;
 }
 
@@ -69,9 +70,6 @@
 
 .ytv-arrow-triangle {
 	margin-left: 5px;
-	border-left: 9px solid transparent;
-	border-right: 9px solid transparent;
-	border-top: 11px solid rgba(0, 0, 0, 0.5);  /* 약간 진하게 */
 	
 	transform: rotate(0deg);
 	transform-origin: center;
