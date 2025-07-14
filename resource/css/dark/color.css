@@ -1,36 +1,53 @@
-body {
-    color: white;
-    background-color: #141414;
-}
+/* 기본 색상 설정 */
 
-h1, h2, h3, h4 {
-    color: #9393FFCC
-}
-p {
-    color: #636363
-}
+/* 기본 레이아웃 */
 
 *::-webkit-scrollbar-thumb {
     background: cyan;
     border: none;
 }
-textarea, input, select {
-    color: cyan;
+
+body {
+    color: white;
+    background-color: #141414;
 }
-option {
-    color: black;
+
+/* 단락 */
+
+h1, h2, h3, h4 {
+    color: #9393FFCC
 }
-textarea {
-    border: 1px solid white;
+
+p {
+    color: #636363
 }
+
 a, [type=button], [type=submit] {
     color: white;
     background-color: #6262F5;
 }
 
+/* 입력 요소 */
+
+textarea, input, select {
+    color: cyan;
+}
+
+textarea {
+    border: 1px solid white;
+}
+
+option {
+    color: black;
+}
+
+/* 내부 컴포넌트 스타일 */
+
 .handlerX {
     background-color: #8080804d;
 }
+
+/* 내부 플레이리스트 컴포넌트 스타일 */
 
 .playlist-item:hover {
     background-color: rgba(255, 255, 255, 0.1);

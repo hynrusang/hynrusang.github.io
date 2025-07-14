@@ -175,10 +175,10 @@ export default class DataResource {
      */
     static init = () => {
         if (this.#initialIdentity) return;
-         const [color, ytv] = Dynamic.scan("!.theme");
+         const [color, ytv_color] = Dynamic.scan("!.theme");
 
         this.#initialIdentity = true;
-        this.#selector = { color, ytv };
+        this.#selector = { color, ytv_color };
         this.#icon = Dynamic.scan("#theme_icon");
         this.#icon.onclick = () => this.Data.theme++;
         this.Data.theme = localStorage.theme;
