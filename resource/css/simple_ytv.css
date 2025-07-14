@@ -73,13 +73,13 @@
 	border-right: 9px solid transparent;
 	border-top: 11px solid rgba(0, 0, 0, 0.5);  /* 약간 진하게 */
 	
-	transform: rotate(180deg);
+	transform: rotate(0deg);
 	transform-origin: center;
 	transition: transform 0.2s ease;
 }
 
 .ytv-playlist-open .ytv-arrow-triangle {
-	transform: rotate(0deg);
+	transform: rotate(180deg);
 }
 
 /* 반응형 대응 */
