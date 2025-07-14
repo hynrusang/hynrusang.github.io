@@ -38,8 +38,9 @@ const loadPlaylist = () => {
         YConfig.currentEntry = YConfig.entries[0];
         YConfig.playbackPosition = 0;
     }
+    EntryState.set({ text: `${playIndex + 1} / ${YConfig.entries.length}` });
+    
     YConfig.lastIdx = -1;
-
     YTPlayer.loadPlaylist(playlist, playIndex, YConfig.playbackPosition, "default");
     YTPlayer.setLoop(true);
 
@@ -147,7 +148,7 @@ const Player = new Dynamic.Fragment("player",
             YConfig.lastIdx = idx;
             YConfig.currentEntry = YConfig.entries[idx];
             TitleLabel.set({ text: YConfig.currentEntry.title });
-            EntryState.set({ text: `${idx + 1} / ${entrys.length}` });
+            EntryState.set({ text: `${idx + 1} / ${YConfig.entries.length}` });
         }
 
         localStorage.setItem("YConfig", JSON.stringify(YConfig));
