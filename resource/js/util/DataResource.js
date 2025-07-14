@@ -3,7 +3,7 @@ import { MainRouter } from "../page/Router.js";
 import { pushSnackbar } from "./Tools.js";
 import Player, { restoreYConfig } from "../page/Player.js";
 import Navigation from "../page/Setting/Navigation.js";
-import Randering from "../page/Randering.js";
+import Working from "../page/Rander/Working.js";
 
 export default class DataResource {
     static #initialIdentity = false;
@@ -202,7 +202,7 @@ export default class DataResource {
                 return;
             }
             
-            Dynamic.FragMutation.mutate(Randering, "데이터들을 불러오는 중...");
+            Dynamic.FragMutation.mutate(Working, "데이터들을 불러오는 중...");
             const [basic, securitySurface, securityCenter] = await Promise.all([
                 firebase.firestore().collection("user").doc(user.uid).get(),
                 firebase.firestore().collection("dat").doc("surface").get().catch(e => null),
@@ -210,7 +210,7 @@ export default class DataResource {
             ]);
             const basicData = basic.data() ?? this.Data.basic;
 
-            Dynamic.FragMutation.mutate(Randering, "데이터들을 동기화하는 중...");
+            Dynamic.FragMutation.mutate(Working, "데이터들을 동기화하는 중...");
             Object.keys(basicData).forEach(key => {
                 try { this.Data.updateData(key, basicData[key]); } catch { }
             })

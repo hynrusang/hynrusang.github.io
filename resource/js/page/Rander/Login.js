@@ -1,5 +1,5 @@
-import { Dynamic } from "../init/module.js";
-import { LoginForm } from "../component/FormBox.js";
+import { Dynamic } from "../../init/module.js";
+import { LoginForm } from "../../component/FormBox.js";
 
 const Login = new Dynamic.Fragment("rander", 
     Dynamic.$("div", {class: "screenX", style: "padding-top: 15vh;"}).add(
