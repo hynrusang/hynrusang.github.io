@@ -49,28 +49,37 @@
 .ytv-list-header a span{
 	white-space: nowrap;
 	padding-left: 10px;
-	display: block;
+	display: flex;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	line-height: 30px;
 }
 
-/* Modifiers */
-
-.ytv-arrow {
-	display: inline-block;
-	position: relative;
-	float: right;
-	font-size: 20px;
-	color: rgba(0, 0, 0, 0.4);
-	transition: transform 0.2s ease;
-	transform: rotate(0deg);
-	margin-left: 5px;
+.playlist-title-label b {
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
-/* 열린 상태일 때: ▲ 회전으로 표현 */
-.ytv-playlist-open .ytv-arrow {
-	transform: rotate(180deg);
+/* Modifiers */
+
+.ytv-arrow-triangle {
+	flex-shrink: 0;
+	align-self: center;
+
+	width: 0;
+	height: 0;
+
+	border-left: 9px solid transparent;
+	border-right: 9px solid transparent;
+	border-top: 11px solid rgba(0, 0, 0, 0.5);  /* 약간 진하게 */
+	margin-left: 10px;
+	
+	transform-origin: center;
+	transition: transform 0.2s ease;
+}
+
+.ytv-playlist-open .ytv-arrow-triangle {
+  transform: rotate(180deg);
 }
 
 @media (max-width: 768px) {
