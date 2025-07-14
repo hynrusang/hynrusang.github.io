@@ -15,29 +15,15 @@ export default class DataResource {
      * @type {(e: Error) => void}
      */
     static #firebaseAuthHandler = e => {
-        switch (e.code) {
-            case "auth/invalid-email":
-                pushSnackbar({message: "잘못된 이메일 형식입니다.", type: "error"});
-                break;
-            case "auth/wrong-password":
-                pushSnackbar({message: "비밀번호가 잘못되었습니다. 기억이 안나신다면 비밀번호 초기화를 시도해주세요.", type: "error"});
-                break;
-            case "auth/user-not-found":
-                pushSnackbar({message: "해당 계정은 존재하지 않습니다.", type: "error"});
-                break;
-            case "auth/too-many-requests":
-                pushSnackbar({message: "너무 짧은 시간동안 동일한 유형의 요청을 보냈습니다. 잠시 후 시도해주세요.", type: "error"});
-                break;
-            case "auth/weak-password": 
-                pushSnackbar({message: "비밀번호는 최소 6자리 이상이여야만 합니다.", type: "error"});
-                break;
-            case "auth/requires-recent-login":
-                pushSnackbar({message: "이 작업은 중요하므로 재 로그인 작업이 필요합니다.", type: "error"});
-                break;
-            default:
-                pushSnackbar({message: e.code, type: "error"});
-                break;
+        const errorMessages = {
+            "auth/invalid-email": "잘못된 이메일 형식입니다.",
+            "auth/wrong-password": "비밀번호가 잘못되었습니다. 기억이 안나신다면 비밀번호 초기화를 시도해주세요.",
+            "auth/user-not-found": "해당 계정은 존재하지 않습니다.",
+            "auth/too-many-requests": "너무 짧은 시간동안 동일한 유형의 요청을 보냈습니다. 잠시 후 시도해주세요.",
+            "auth/weak-password": "비밀번호는 최소 6자리 이상이여야만 합니다.",
+            "auth/requires-recent-login": "이 작업은 중요하므로 재 로그인 작업이 필요합니다."
         }
+        pushSnackbar({ message: errorMessages[e.code] ?? e.code, type: "error" });
     }
 
     /**
@@ -53,17 +39,15 @@ export default class DataResource {
             try {
                 await firebase.auth().signInWithEmailAndPassword(email, password);
             } catch (e) {
-                e.code == "auth/user-not-found" ? (async () => {
-                    if (confirm("해당 계정은 존재하지 않습니다.\n해당 계정으로 새롭게 회원가입을 시도할까요?")) {
-                        pushSnackbar({message: "회원가입을 시도하는 중입니다.", type: "normal"});
-                        try {
-                            const { user } = await firebase.auth().createUserWithEmailAndPassword(email, password);
-                            pushSnackbar({message: "회원가입 인증을 위한 메일을 발송하는 중입니다.", type: "normal"});
-                            await user.sendEmailVerification();
-                            pushSnackbar({message: "인증용 메일을 보냈습니다.", type: "normal"});
-                        } catch (e) { DataResource.#firebaseAuthHandler(e); }
-                    }
-                })() : DataResource.#firebaseAuthHandler(e);
+                if (e.code == "auth/user-not-found" && confirm("해당 계정은 존재하지 않습니다.\n해당 계정으로 새롭게 회원가입을 시도할까요?")) {
+                    pushSnackbar({message: "회원가입을 시도하는 중입니다.", type: "normal"});
+                    try {
+                        const { user } = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                        pushSnackbar({message: "회원가입 인증을 위한 메일을 발송하는 중입니다.", type: "normal"});
+                        await user.sendEmailVerification();
+                        pushSnackbar({message: "인증용 메일을 보냈습니다.", type: "normal"});
+                    } catch (err) { DataResource.#firebaseAuthHandler(err); }
+                } else DataResource.#firebaseAuthHandler(e);
             }
             localStorage.setItem("timestamp", new Date());
         }
@@ -73,15 +57,15 @@ export default class DataResource {
          * @type {() => Promise<void>}
          */
         static deleteUser = async () => {
-            if (confirm("정말로 이 계정을 삭제하시겠습니까?\n(이 결정은 번복되지 않습니다.)\n(추가로 다시 한 번 물어보는 절차도 없습니다.)")) {
-                pushSnackbar({message: "잠시만 기다려 주십시오. 정보가 곧 삭제됩니다.", type: "normal"});
-                try {
-                    await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).delete();
-                    pushSnackbar({message: "사용자의 데이터를 모두 삭제하는데 성공하였습니다.", type: "normal"});
-                    await firebase.auth().currentUser.delete();
-                    location.reload();
-                } catch (e) { DataResource.#firebaseAuthHandler(e); };
-            }
+            if (confirm("정말로 이 계정을 삭제하시겠습니까?\n(이 결정은 번복되지 않습니다.)\n(추가로 다시 한 번 물어보는 절차도 없습니다.)")) return;
+            
+            pushSnackbar({message: "잠시만 기다려 주십시오. 정보가 곧 삭제됩니다.", type: "normal"});
+            try {
+                await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).delete();
+                pushSnackbar({message: "사용자의 데이터를 모두 삭제하는데 성공하였습니다.", type: "normal"});
+                await firebase.auth().currentUser.delete();
+                location.reload();
+            } catch (e) { DataResource.#firebaseAuthHandler(e); };
         }
 
         /**
@@ -113,26 +97,14 @@ export default class DataResource {
     static Data = class Data {
         static #theme;
         static #basic = new LiveData.LiveManager({
-            memo: LiveData.$([], {
-                type: Array
-            }),
-            link: LiveData.$({}, {
-                type: Object
-            }),
-            playlist: LiveData.$({}, {
-                type: Object
-            }),
-            secret: LiveData.$({}, {
-                type: Object
-            })
+            memo: LiveData.$([], { type: Array }),
+            link: LiveData.$({}, { type: Object }),
+            playlist: LiveData.$({}, { type: Object }),
+            secret: LiveData.$({}, { type: Object })
         });
         static #security =  new LiveData.LiveManager({
-            surface: LiveData.$({}, {
-                type: Object
-            }),
-            center: LiveData.$({}, {
-                type: Object
-            })
+            surface: LiveData.$({}, { type: Object }),
+            center: LiveData.$({}, { type: Object })
         });
 
         /**
@@ -164,9 +136,11 @@ export default class DataResource {
         static set theme(index) {
             const themeList = ["dark", "right"];
             this.#theme = index < themeList.length ? index : 0;
-            DataResource.#icon.style.backgroundImage = `url(/resource/img/icon/${themeList[this.theme]}.png)`;
-            DataResource.#selector.href = `/resource/css/${themeList[this.theme]}/init.css`;
-            localStorage.setItem("theme", this.theme);
+
+            const selected = themeList[this.#theme]; 
+            DataResource.#icon.style.backgroundImage = `url(/resource/img/icon/${selected}.png)`;
+            DataResource.#selector.href = `/resource/css/${selected}/init.css`;
+            localStorage.setItem("theme", this.#theme);
         } 
 
         /**
@@ -197,11 +171,13 @@ export default class DataResource {
      */
     static init = () => {
         if (this.#initialIdentity) return;
+
         this.#initialIdentity = true;
         this.#selector = Dynamic.scan("#theme_selector");
         this.#icon = Dynamic.scan("#theme_icon");
         this.#icon.onclick = () => this.Data.theme++;
-        this.Data.theme = localStorage.theme
+        this.Data.theme = localStorage.theme;
+
         firebase.initializeApp({
             apiKey: "AIzaSyAglJGn84cPu_YvRUdigYQFCBml-s6kcuo",
             authDomain: "necronomicon-7ba57.firebaseapp.com",
@@ -211,46 +187,49 @@ export default class DataResource {
             appId: "1:582853710136:web:c237b2926e7736c707f1cd",
             measurementId: "G-QL8R6QQHGF"
         });
+
         firebase.auth().onAuthStateChanged(async user => {
-            if (user && user.emailVerified) {
-                if (Date.now() / 1000 - new Date(localStorage.getItem("timestamp")).getTime() / 1000 >= 2592000) {
-                    localStorage.removeItem("timestamp");
-                    firebase.auth().signOut();
-                    return;
-                }
+            if (!user || !user.emailVerified) return firebase.auth().signOut();
 
-                Dynamic.FragMutation.mutate(Randering, "데이터들을 불러오는 중...");
-                const [basic, securitySurface, securityCenter] = await Promise.all([
-                    firebase.firestore().collection("user").doc(user.uid).get(),
-                    firebase.firestore().collection("dat").doc("surface").get().catch(e => null),
-                    firebase.firestore().collection("dat").doc("center").get().catch(e => null)
-                ]);
-                const basicData = basic.data() ?? this.Data.basic;
+            if (Date.now() - new Date(localStorage.getItem("timestamp")).getTime() >= 2592000000) {
+                localStorage.removeItem("timestamp");
+                firebase.auth().signOut();
+                return;
+            }
+            
+            Dynamic.FragMutation.mutate(Randering, "데이터들을 불러오는 중...");
+            const [basic, securitySurface, securityCenter] = await Promise.all([
+                firebase.firestore().collection("user").doc(user.uid).get(),
+                firebase.firestore().collection("dat").doc("surface").get().catch(e => null),
+                firebase.firestore().collection("dat").doc("center").get().catch(e => null)
+            ]);
+            const basicData = basic.data() ?? this.Data.basic;
 
-                Dynamic.FragMutation.mutate(Randering, "데이터들을 동기화하는 중...");
-                for (let key of Object.keys(basicData)) try {
-                    this.Data.updateData(key, basicData[key]);
-                } catch (e) { }
-                if (securitySurface) {
-                    const keyString = `https://${securitySurface.data().key.join("")}`;
-                    this.Data.updateData("surface", securitySurface.data());
-                    if (securityCenter) this.Data.updateData("center", securityCenter.data());
-                    try {
-                        await Promise.all([
-                            import(`${keyString}/init.js`),
-                            ...this.Data.basic.secret.key.map(key => import(`${keyString}/dependency/${key}/init.js`).then(extension => extension.default()))
-                        ]);
-                    } catch (e) { null }
-                }
-                Dynamic.FragMutation.setRouter("main", MainRouter);
+            Dynamic.FragMutation.mutate(Randering, "데이터들을 동기화하는 중...");
+            Object.keys(basicData).forEach(key => {
+                try { this.Data.updateData(key, basicData[key]); } catch { }
+            })
+            if (securitySurface) {
+                const keyString = `https://${securitySurface.data().key.join("")}`;
+                this.Data.updateData("surface", securitySurface.data());
+                if (securityCenter) this.Data.updateData("center", securityCenter.data());
 
-                const savedConfig = sessionStorage.getItem("YConfig")
-                if (savedConfig) {
-                    restoreYConfig(JSON.parse(savedConfig));
-                    Dynamic.FragMutation.mutate(Player);
-                } else Dynamic.FragMutation.mutate(Navigation);
-                Dynamic.scan("#navigator_icon").onclick = () => Dynamic.FragMutation.mutate(Navigation);
-            } else firebase.auth().signOut();
+                try {
+                    await Promise.all([
+                        import(`${keyString}/init.js`),
+                        ...this.Data.basic.secret.key.map(key => import(`${keyString}/dependency/${key}/init.js`).then(extension => extension.default()))
+                    ]);
+                } catch { }
+            }
+
+            Dynamic.scan("#navigator_icon").onclick = () => Dynamic.FragMutation.mutate(Navigation);
+            Dynamic.FragMutation.setRouter("main", MainRouter);
+
+            const savedConfig = sessionStorage.getItem("YConfig")
+            if (savedConfig) {
+                restoreYConfig(JSON.parse(savedConfig));
+                Dynamic.FragMutation.mutate(Player);
+            } else Dynamic.FragMutation.mutate(Navigation);
         })
     }
 }
