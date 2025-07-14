@@ -119,8 +119,8 @@ const Player = new Dynamic.Fragment("player",
         Dynamic.$("button", { class: "ytv-panel-toggle-btn", text: "▶", onclick: e => {
             PanelVisible = !PanelVisible;
 
-            e.target.innerText = PanelVisible ? "▶" : "◀"
-            document.querySelector('.ytv-list').style.display = PanelVisible ? '' : 'none';
+            e.target.style.transform = PanelVisible ? "rotate(0deg)" : "rotate(180deg)"
+            document.querySelector('.ytv-list').style.display = PanelVisible ? "" : "none";
             PanelToggleBtn.set({ text: PanelVisible ? "« 목록닫기" : "» 목록열기" });
         }}),
         Dynamic.$("div", { class: "ytv-list" })

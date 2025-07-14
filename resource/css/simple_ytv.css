@@ -80,6 +80,14 @@
 	transform: rotate(180deg);
 }
 
+/* Others */
+
+.ytv-panel-toggle-btn {
+	border: none;
+	transform-origin: center;
+	transition: transform 0.2s ease;
+}
+
 /* 반응형 대응 */
 
 @media (max-width: 768px) {
