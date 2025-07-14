@@ -75,11 +75,12 @@
 	margin-left: 10px;
 	
 	transform-origin: center;
+	transform: rotate(180deg);
 	transition: transform 0.2s ease;
 }
 
 .ytv-playlist-open .ytv-arrow-triangle {
-  transform: rotate(180deg);
+	transform: rotate(0deg);
 }
 
 @media (max-width: 768px) {
