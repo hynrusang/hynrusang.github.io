@@ -231,9 +231,11 @@ const Player = new Dynamic.Fragment("player",
                             pageToken = data.nextPageToken;
                         }
 
+                        YConfig.entries = items;
                         YTPlayerSettings.playerVars.listType = "playlist"
                         YTPlayerSettings.playerVars.list = playlistId[1]
-                        YConfig.entries = items;
+                        YTPlayer.destroy();
+                        YTPlayer = new YT.Player("ytv-player", YTPlayerSettings);
                     } else {
                         const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${apiKey}`);
                         const data = await res.json();
@@ -285,7 +287,7 @@ const Player = new Dynamic.Fragment("player",
         });
     });
 
-    if (!YTPlayer) YTPlayer = new YT.Player("ytv-player", );
+    if (!YTPlayer) YTPlayer = new YT.Player("ytv-player", YTPlayerSettings);
     Dynamic.snipe(".ytv-list").reset(listHeader, listItems)
 });
 
