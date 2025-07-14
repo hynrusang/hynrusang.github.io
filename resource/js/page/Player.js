@@ -156,7 +156,7 @@ const Player = new Dynamic.Fragment("player",
             YConfig.currentEntry = YConfig.entries[idx];
             EntryState.set({ text: `${idx + 1} / ${entrys.length}` });
         }
-    }, 50);
+    }, 200);
     
     TitleLabel = Dynamic.$("b", { text: YConfig.title });
     PlayLists = Dynamic.$("ul").add(
@@ -232,10 +232,6 @@ const Player = new Dynamic.Fragment("player",
                         }
 
                         YConfig.entries = items;
-                        YTPlayerSettings.playerVars.listType = "playlist"
-                        YTPlayerSettings.playerVars.list = playlistId[1]
-                        YTPlayer.destroy();
-                        YTPlayer = new YT.Player("ytv-player", YTPlayerSettings);
                     } else {
                         const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${apiKey}`);
                         const data = await res.json();
