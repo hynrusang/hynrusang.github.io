@@ -15,7 +15,7 @@ const navigator = [{
     page: Player
 }]
 
-const Navigation = new Dynamic.Fragment("setting", 
+const Navigation = new Dynamic.Fragment("main", 
     Dynamic.$("div", {id: "dynamic_navigation", class: "screenX", style: "padding-top: 15vh;"})
 ).registAction(() => {
     Dynamic.snipe("#dynamic_navigation").reset(
