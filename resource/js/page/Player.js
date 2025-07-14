@@ -121,7 +121,10 @@ const Player = new Dynamic.Fragment("player",
     const playlistMap = DataResource.Data.basic.playlist;
     const playerConfig = {
         events: {
-            onReady: () => loadPlaylist(),
+            onReady: e => {
+                loadPlaylist();
+                e.target.playVideo();
+            },
             onError: e => console.error("Player error", e)
         }
     }
