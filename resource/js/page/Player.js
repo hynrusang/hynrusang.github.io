@@ -156,7 +156,7 @@ const Player = new Dynamic.Fragment("player",
             YConfig.currentEntry = YConfig.entries[idx];
             EntryState.set({ text: `${idx + 1} / ${entrys.length}` });
         }
-    }, 200);
+    }, 1000);
     
     TitleLabel = Dynamic.$("b", { text: YConfig.title });
     PlayLists = Dynamic.$("ul").add(
