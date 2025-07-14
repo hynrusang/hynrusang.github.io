@@ -232,7 +232,7 @@ const Player = new Dynamic.Fragment("player",
                         }
 
                         YTPlayerSettings.playerVars.listType = "playlist"
-                        YTPlayerSettings.playerVars.list = playlistId
+                        YTPlayerSettings.playerVars.list = playlistId[1]
                         YConfig.entries = items;
                     } else {
                         const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${apiKey}`);
