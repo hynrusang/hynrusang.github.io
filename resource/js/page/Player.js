@@ -116,13 +116,13 @@ const loadPlaylist = () => {
 const Player = new Dynamic.Fragment("player",
     Dynamic.$("div", { id: "dynamic_player", class: "ytv-canvas ytv-full" }).add(
         Dynamic.$("div", { id: "ytv-player", class: "ytv-video" }),
-        Dynamic.$("button", { class: "ytv-panel-toggle-btn", text: "▶", onclick: e => {
+        Dynamic.$("button", { class: "ytv-panel-toggle-btn ytv-list-open", text: "◀", onclick: e => {
             PanelVisible = !PanelVisible;
-            e.target.style.transform = PanelVisible ? "" : "rotate(180deg)"
 
             const list = document.querySelector('.ytv-list');
             list.style.width = PanelVisible ? "" : "0";
             list.style.height = PanelVisible ? "" : "0";
+            e.target.classList.toggle("ytv-list-open", PanelVisible);
         }}),
         Dynamic.$("div", { class: "ytv-list" })
     )
