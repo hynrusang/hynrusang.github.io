@@ -54,67 +54,65 @@ const loadPlaylist = () => {
     YConfig.lastIdx = -1;
     YTPlayer.loadPlaylist(playlist, playIndex, YConfig.playbackPosition, "default");
     YTPlayer.setLoop(true);
+    YTPlayer.playVideo()
 
     const createButton = (icon, onClick) => Dynamic.$("button", { class: "playerButton", text: icon, onclick: onClick });
-    
-    if (1 < playlist.length) EntryLists.reset(
-        createButton("🔄", () => loadPlaylist()),
-        createButton("🔀", () => {
-            YConfig.entries = [...YConfig.entries].sort(() => Math.random() - 0.5);
-            loadPlaylist();
-            pushSnackbar({ message: "재생목록을 섞었습니다.", type: "normal" });
-        }),
-        createButton("↩️", () => {
-            YConfig.entries.reverse();
-            loadPlaylist();
-            pushSnackbar({ message: "재생목록을 역순으로 재배치했습니다.", type: "normal" });
-        }),
-        createButton("🎯", () => {
-            const input = prompt(
-                "재생할 영상 번호를 입력해 주세요 (띄어쓰기로 구분)\n\n" +
-                "• 단일 번호 : 3 8 12\n" +
-                "• 범위 입력 : 3-10 또는 3~10 (3~10번)\n" +
-                "• 처음부터 : -5 또는 ~5 (1~5번)\n" +
-                "• 끝까지   : 7- 또는 7~ (7~N번)\n\n" +
-                "※ 단일 번호와 범위를 섞어 입력할 수 있습니다 (예: 2 5-9 11~)\n" +
-                "※ '-' 또는 '~'는 숫자와 붙여 써야 하며, 번호는 현재 재생중인 목록을 따릅니다."
-            );
-            if (!input) return;
+    EntryLists.reset(
+        (1 < playlist.length) ? [
+            createButton("🔄", () => loadPlaylist()),
+            createButton("🔀", () => {
+                YConfig.entries = [...YConfig.entries].sort(() => Math.random() - 0.5);
+                loadPlaylist();
+                pushSnackbar({ message: "재생목록을 섞었습니다.", type: "normal" });
+            }),
+            createButton("↩️", () => {
+                YConfig.entries.reverse();
+                loadPlaylist();
+                pushSnackbar({ message: "재생목록을 역순으로 재배치했습니다.", type: "normal" });
+            }),
+            createButton("🎯", () => {
+                const input = prompt(
+                    "재생할 영상 번호를 입력해 주세요 (띄어쓰기로 구분)\n\n" +
+                    "• 단일 번호 : 3 8 12\n" +
+                    "• 범위 입력 : 3-10 또는 3~10 (3~10번)\n" +
+                    "• 처음부터 : -5 또는 ~5 (1~5번)\n" +
+                    "• 끝까지   : 7- 또는 7~ (7~N번)\n\n" +
+                    "※ 단일 번호와 범위를 섞어 입력할 수 있습니다 (예: 2 5-9 11~)\n" +
+                    "※ '-' 또는 '~'는 숫자와 붙여 써야 하며, 번호는 현재 재생중인 목록을 따릅니다."
+                );
+                if (!input) return;
 
-            const indices = new Set();
-            const tokens = input.trim().split(/\s+/);
+                const indices = new Set();
+                const tokens = input.trim().split(/\s+/);
 
-            for (const token of tokens) {
-                if (/^\d+$/.test(token)) indices.add(+token);
-                else if (/^(\d+)[-~](\d+)$/.test(token)) {
-                    let [ , a, b ] = token.match(/^(\d+)[-~](\d+)$/);
-                    for (let i = Math.min(a = +a, b = +b); i <= Math.max(a, b); i++) indices.add(i);
-                } else if (/^[-~](\d+)$/.test(token)) {
-                    const end = +token.match(/^[-~](\d+)$/)[1];
-                    for (let i = 1; i <= end; i++) indices.add(i);
-                } else if (/^(\d+)[-~]$/.test(token)) {
-                    const start = +token.match(/^(\d+)[-~]$/)[1];
-                    for (let i = start; i <= playlist.length; i++) indices.add(i);
+                for (const token of tokens) {
+                    if (/^\d+$/.test(token)) indices.add(+token);
+                    else if (/^(\d+)[-~](\d+)$/.test(token)) {
+                        let [ , a, b ] = token.match(/^(\d+)[-~](\d+)$/);
+                        for (let i = Math.min(a = +a, b = +b); i <= Math.max(a, b); i++) indices.add(i);
+                    } else if (/^[-~](\d+)$/.test(token)) {
+                        const end = +token.match(/^[-~](\d+)$/)[1];
+                        for (let i = 1; i <= end; i++) indices.add(i);
+                    } else if (/^(\d+)[-~]$/.test(token)) {
+                        const start = +token.match(/^(\d+)[-~]$/)[1];
+                        for (let i = start; i <= playlist.length; i++) indices.add(i);
+                    }
                 }
-            }
 
-            const parsed = [...indices].map(n => YConfig.entries[n - 1]).filter(Boolean);
-            if (!parsed.length) return pushSnackbar({ message: "선택이 잘못되었습니다.", type: "error" });
+                const parsed = [...indices].map(n => YConfig.entries[n - 1]).filter(Boolean);
+                if (!parsed.length) return pushSnackbar({ message: "선택이 잘못되었습니다.", type: "error" });
 
-            YConfig.entries = parsed;
-            loadPlaylist();
-            pushSnackbar({ message: `선택한 ${parsed.length}개의 영상으로 반복 재생합니다.`, type: "normal" });
-        })
+                YConfig.entries = parsed;
+                loadPlaylist();
+                pushSnackbar({ message: `선택한 ${parsed.length}개의 영상으로 반복 재생합니다.`, type: "normal" });
+            })
+        ] : null
     )
 
     EntryLists.add(
         EntryState,
         YConfig.entries.map((entry, i) => 
-            Dynamic.$("li", { class: "entry-item", onclick: () => {
-                YConfig.currentEntry = entry;
-                YConfig.playbackPosition = 0;
-                loadPlaylist();
-            }}).add(
+            Dynamic.$("li", { class: "entry-item", onclick: () => YTPlayer.playVideoAt(i) }).add(
                 Dynamic.$("b", { text : i + 1 }),
                 Dynamic.$("img", { src: entry.img }),
                 Dynamic.$("span", { text: entry.title })
@@ -140,7 +138,7 @@ const Player = new Dynamic.Fragment("player",
     const playlistMap = DataResource.Data.basic.playlist;
     const playerConfig = { 
         videoId: "C0DPdy98e4c",
-        events: { onReady: e => (loadPlaylist(), e.target.playVideo()) }
+        events: { onReady: () => loadPlaylist() }
     }
     
     clearInterval(TimeTracker);
