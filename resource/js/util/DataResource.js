@@ -1,6 +1,7 @@
 import { Dynamic, LiveData } from "../init/module.js";
 import { MainRouter } from "../page/Router.js";
 import { pushSnackbar } from "./Tools.js";
+import Player, { restoreYConfig } from "../page/Player.js";
 import Navigation from "../page/Setting/Navigation.js";
 import Randering from "../page/Randering.js";
 
@@ -242,7 +243,12 @@ export default class DataResource {
                     } catch (e) { null }
                 }
                 Dynamic.FragMutation.setRouter("main", MainRouter);
-                Dynamic.FragMutation.mutate(Navigation);
+
+                const savedConfig = sessionStorage.getItem("YConfig")
+                if (savedConfig) {
+                    restoreYConfig(JSON.parse(savedConfig));
+                    Dynamic.FragMutation.mutate(Player);
+                } else Dynamic.FragMutation.mutate(Navigation);
                 Dynamic.scan("#navigator_icon").onclick = () => Dynamic.FragMutation.mutate(Navigation);
             } else firebase.auth().signOut();
         })

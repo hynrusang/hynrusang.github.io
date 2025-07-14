@@ -24,6 +24,7 @@ let YConfig = {
     playbackPosition: 0
 };
 
+const restoreYConfig = savedConfig => YConfig = savedConfig; 
 const loadPlaylist = () => {
     const playlist = YConfig.entries.map(entry => entry.id);
     let playIndex = playlist.indexOf(YConfig.currentEntry.id);
@@ -156,6 +157,8 @@ const Player = new Dynamic.Fragment("player",
             YConfig.currentEntry = YConfig.entries[idx];
             EntryState.set({ text: `${idx + 1} / ${entrys.length}` });
         }
+
+        sessionStorage.setItem("YConfig", JSON.stringify(YConfig));
     }, 1000);
     
     TitleLabel = Dynamic.$("b", { text: YConfig.title });
@@ -217,7 +220,6 @@ const Player = new Dynamic.Fragment("player",
                     if (playlistId) {
                         let items = [], pageToken = "";
                         while (items.length < 200) {
-                            console.log(items.length)
                             const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${playlistId[1]}&key=${apiKey}&part=snippet&maxResults=50${pageToken ? `&pageToken=${pageToken}` : ""}&fields=items(snippet(title,thumbnails,resourceId(videoId))),nextPageToken`);
                             const data = await res.json();
 
@@ -287,5 +289,5 @@ const Player = new Dynamic.Fragment("player",
     Dynamic.snipe(".ytv-list").reset(listHeader, listItems)
 });
 
-export { YConfig };
+export { restoreYConfig };
 export default Player;
