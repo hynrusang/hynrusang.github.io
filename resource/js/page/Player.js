@@ -54,7 +54,12 @@ const loadPlaylist = () => {
     YConfig.lastIdx = -1;
     YTPlayer.loadPlaylist(playlist, playIndex, YConfig.playbackPosition, "default");
     YTPlayer.setLoop(true);
-    YTPlayer.playVideo()
+    YTPlayer.addEventListener("onStateChange", e => {
+        if (e.data === YT.PlayerState.CUED) {
+            YTPlayer.playVideo();
+            YTPlayer.removeEventListener("onStateChange", onStateChange);
+        }
+    });
 
     const createButton = (icon, onClick) => Dynamic.$("button", { class: "playerButton", text: icon, onclick: onClick });
     EntryLists.reset(
