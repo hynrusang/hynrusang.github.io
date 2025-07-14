@@ -3,7 +3,7 @@ import { MainRouter } from "../page/Router.js";
 import { pushSnackbar } from "./Tools.js";
 import Player, { restoreYConfig } from "../page/Player.js";
 import Navigation from "../page/Setting/Navigation.js";
-import Working from "../page/Rander/Working.js";
+import Working from "../page/Prepare/Working.js";
 
 export default class DataResource {
     static #initialIdentity = false;
