@@ -467,10 +467,7 @@ class PlayerService {
 
         this.#YTPlayer = new YT.Player("ytv-player", { 
             events: { 
-                "onReady": () => {
-                    this.loadPlaylist();
-                    this.#startStateTracking();
-                },
+                "onReady": () => this.#onPlayerReady(),
                 "onStateChange": e => this.#onPlayerStateChange(e),
                 "onError": e => this.#onPlayerError(e)
             }
@@ -522,7 +519,7 @@ class PlayerService {
      */
     shuffleEntries() {
         YConfig.entries.sort(() => Math.random() - 0.5);
-        this.initializePlayer();
+        this.loadPlaylist();
         pushSnackbar({ message: "재생목록을 섞었습니다.", type: "normal" });
     }
 
@@ -531,7 +528,7 @@ class PlayerService {
      */
     reverseEntries() {
         YConfig.entries.reverse();
-        this.initializePlayer();
+        this.loadPlaylist();
         pushSnackbar({ message: "재생목록을 역순으로 재배치했습니다.", type: "normal" });
     }
     
@@ -541,7 +538,7 @@ class PlayerService {
      */
     filterEntries(newEntries) {
         YConfig.entries = newEntries;
-        this.initializePlayer();
+        this.loadPlaylist();
     }
 
     // --- Private Properties ---
@@ -553,6 +550,16 @@ class PlayerService {
     #uiManager;
 
     // --- Private Methods ---
+    /**
+     * @private
+     * @description 플레이어 로드(`onStateChange`) 이벤트를 처리합니다.
+     */
+    #onPlayerReady() {
+        this.loadPlaylist();
+        this.#startStateTracking();
+    }
+
+
     /**
      * @private
      * @description 플레이어 상태 변경(`onStateChange`) 이벤트를 처리합니다.
