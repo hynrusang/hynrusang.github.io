@@ -627,7 +627,9 @@ const restoreYConfig = savedPlayerInstance => YConfig = savedPlayerInstance;
 const Player = new Dynamic.Fragment("player",
     Dynamic.$("div", { id: "dynamic_player", class: "ytv-canvas ytv-full" }).add(
         Dynamic.$("div", { id: "ytv-player", class: "ytv-video" }),
-        Dynamic.$("button", { class: "ytv-panel-toggle-btn ytv-list-open", text: "◀" }),
+        Dynamic.$("button", { class: "ytv-panel-toggle-btn ytv-list-open" }).add(
+            Dynamic.$("span", { text: "◀" })
+        ),
         Dynamic.$("div", { class: "ytv-list" })
     )
 ).registAction(() => {

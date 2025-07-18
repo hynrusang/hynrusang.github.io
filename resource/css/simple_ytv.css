@@ -84,11 +84,15 @@
 
 .ytv-panel-toggle-btn {
 	border: none;
+}
+
+.ytv-panel-toggle-btn > span {
+	display: inline-block;
 	transform-origin: center;
 	transition: transform 0.2s;
 }
 
-.ytv-list-open {
+.ytv-list-open > span {
 	transform: rotate(180deg);
 }
 
@@ -105,10 +109,10 @@
 	.ytv-list {
 		transition: height 0.2s;
 	}
-	.ytv-panel-toggle-btn { 
+	.ytv-panel-toggle-btn > span { 
 		transform: rotate(90deg);
 	}
-	.ytv-list-open {
+	.ytv-list-open > span {
 		transform: rotate(270deg);
 	}
 }
