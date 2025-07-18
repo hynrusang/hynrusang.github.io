@@ -60,6 +60,7 @@ const loadPlaylist = () => {
         pushSnackbar({message: "재생할 수 없는 동영상을 건너뛰었습니다.", type: "error"});
          e.target.playVideoAt((e.target.getPlaylistIndex() + 1) % e.target.getPlaylist().length);
     } : () => pushSnackbar({message: "재생할 수 없는 동영상입니다.", type: "error"}));
+    YTPlayer.addEventListener("onReady", () => YTPlayer.playVideo())
 
     const createButton = (icon, onClick) => Dynamic.$("button", { class: "playerButton", text: icon, onclick: onClick });
     EntryLists.reset(
