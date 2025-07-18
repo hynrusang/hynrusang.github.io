@@ -328,10 +328,9 @@ class UIManager {
     #createPlaylistItem(title, name, url) {
         return Dynamic.$("li", { class: "playlist-item", onclick: async () => {
             if (!this.#playerService) return;
+
             const entries = await this.#apiService.fetchEntriesFromURL(url);
-            if (entries.length > 0) {
-                this.#playerService.loadNewPlaylist(entries);
-            }
+            if (entries.length > 0) this.#playerService.loadNewPlaylist(entries);
         }}).add(
             Dynamic.$("span", { class: "playlist-name", text: name }),
             Dynamic.$("span", { class: "playlist-buttons" }).add(
