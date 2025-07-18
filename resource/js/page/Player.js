@@ -40,12 +40,8 @@ class YouTubeAPIService {
         const videoIdMatch = url.match(/(?:[?&]v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
 
         try {
-            if (playlistIdMatch) {
-                return await this.#fetchPlaylistItems(playlistIdMatch[1]);
-            }
-            if (videoIdMatch) {
-                return await this.#fetchVideoItem(videoIdMatch[1]);
-            }
+            if (playlistIdMatch) return await this.#fetchPlaylistItems(playlistIdMatch[1]);
+            if (videoIdMatch) return await this.#fetchVideoItem(videoIdMatch[1]);
             return [];
         } catch (err) {
             console.error("❌ API 호출 실패:", err);
@@ -114,9 +110,7 @@ class YouTubeAPIService {
         const validEntries = allEntries.filter((_, index) => validationResults[index]);
         
         const invalidCount = allEntries.length - validEntries.length;
-        if (invalidCount > 0) {
-            pushSnackbar({ message: `사용할 수 없는 동영상 ${invalidCount}개를 제외했습니다.`, type: "normal" });
-        }
+        if (invalidCount > 0) pushSnackbar({ message: `사용할 수 없는 동영상 ${invalidCount}개를 제외했습니다.`, type: "normal" });
 
         return validEntries;
     }
@@ -244,9 +238,7 @@ class UIManager {
 
         Object.keys(playlistMap).sort().forEach(title => {
             this.PlayLists.add(Dynamic.$("li", { class: "playlist-title", text: title }));
-            Object.entries(playlistMap[title]).sort().forEach(([name, url]) => {
-                this.PlayLists.add(this.#createPlaylistItem(title, name, url));
-            });
+            Object.entries(playlistMap[title]).sort().forEach(([name, url]) => this.PlayLists.add(this.#createPlaylistItem(title, name, url)) );
         });
     }
 
@@ -567,9 +559,7 @@ class PlayerService {
      * @param {object} event - YouTube 플레이어 이벤트 객체
      */
     #onPlayerStateChange(event) {
-        if (event.data === YT.PlayerState.CUED) {
-            this.#YTPlayer.playVideo();
-        }
+        if (event.data === YT.PlayerState.CUED) this.#YTPlayer.playVideo();
     }
 
     /**
@@ -595,9 +585,7 @@ class PlayerService {
     #startStateTracking() {
         clearInterval(this.#TimeTracker);
         this.#TimeTracker = setInterval(() => {
-            if (!this.#YTPlayer || typeof this.#YTPlayer.getPlayerState !== 'function' || this.#YTPlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
-                return;
-            }
+            if (!this.#YTPlayer || typeof this.#YTPlayer.getPlayerState !== 'function' || this.#YTPlayer.getPlayerState() !== YT.PlayerState.PLAYING) return;
 
             const idx = this.#YTPlayer.getPlaylistIndex();
             YConfig.playbackPosition = this.#YTPlayer.getCurrentTime();
