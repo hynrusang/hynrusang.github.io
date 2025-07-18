@@ -475,7 +475,6 @@ class PlayerService {
 
         this.#YTPlayer = new YT.Player("ytv-player", { 
             playerVars: {
-                "rel": 1,
                 "enablejsapi": 1,
                 'origin': window.location.origin,
                 'widget_referrer': window.location.origin
