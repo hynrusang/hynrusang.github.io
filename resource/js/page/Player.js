@@ -53,7 +53,7 @@ class YouTubeAPIService {
     // --- Private Properties ---
     /**
      * @private
-     * @type {string} - YouTube API 호출에 사용되는 API 키
+     * @type {string}
      */
     #apiKey = "AIzaSyAglJGn84cPu_YvRUdigYQFCBml-s6kcuo";
 
@@ -93,7 +93,7 @@ class YouTubeAPIService {
             if (!data.items) break;
 
             const fetchedEntries = data.items
-                .filter(item => item.snippet?.resourceId?.videoId)
+                .filter(item => item.snippet?.resourceId?.videoId && item.snippet.title !== 'Private video' && item.snippet.title !== 'Deleted video')
                 .map(item => ({
                     id: item.snippet.resourceId.videoId,
                     title: item.snippet.title,
@@ -102,12 +102,29 @@ class YouTubeAPIService {
             
             allEntries.push(...fetchedEntries);
 
-            if (!data.nextPageToken) break;
+            if (!data.nextPageToken || allEntries.length >= MAX_RESULTS) break;
             pageToken = data.nextPageToken;
         }
         
-        const validationResults = await Promise.all(allEntries.map(entry => this.#validateVideo(entry.id)));
-        const validEntries = allEntries.filter((_, index) => validationResults[index]);
+        const allVideoIds = allEntries.map(entry => entry.id);
+        const validVideoIds = new Set();
+        
+        for (let i = 0; i < allVideoIds.length; i += 50) {
+            const chunk = allVideoIds.slice(i, i + 50);
+            // ▼▼▼ `part`에 'status'를 추가하여 임베딩 정보를 요청합니다. ▼▼▼
+            const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=id,status&id=${chunk.join(',')}&key=${this.#apiKey}&fields=items(id,status/embeddable)`);
+            const data = await res.json();
+            if (data.items) {
+                data.items.forEach(item => {
+                    // ▼▼▼ 'embeddable'이 true인 영상의 ID만 추가합니다. ▼▼▼
+                    if (item.status?.embeddable) {
+                        validVideoIds.add(item.id);
+                    }
+                });
+            }
+        }
+        
+        const validEntries = allEntries.filter(entry => validVideoIds.has(entry.id));
         
         const invalidCount = allEntries.length - validEntries.length;
         if (invalidCount > 0) pushSnackbar({ message: `사용할 수 없는 동영상 ${invalidCount}개를 제외했습니다.`, type: "normal" });
