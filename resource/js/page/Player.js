@@ -26,12 +26,8 @@ const restoreYConfig = savedPlayerInstance => YConfig = savedPlayerInstance;
 
 const refreshYPlayer = playerConfig => {
     if (YTPlayer) YTPlayer.destroy();
-
-    playerConfig.events.onError = (1 < YConfig.entries.length) ? e => {
-        pushSnackbar({message: "재생할 수 없는 동영상을 건너뛰었습니다.", type: "error"});
-         e.target.playVideoAt((e.target.getPlaylistIndex() + 1) % e.target.getPlaylist().length);
-    } : () => pushSnackbar({message: "재생할 수 없는 동영상입니다.", type: "error"});
     YTPlayer = new YT.Player("ytv-player", playerConfig);
+    loadPlaylist():
 }
 
 const loadPlaylist = () => {
@@ -60,6 +56,10 @@ const loadPlaylist = () => {
             YTPlayer.removeEventListener("onStateChange", onStateChange);
         }
     });
+    YTPlayer.addEventListener("onError", (1 < YConfig.entries.length) ? e => {
+        pushSnackbar({message: "재생할 수 없는 동영상을 건너뛰었습니다.", type: "error"});
+         e.target.playVideoAt((e.target.getPlaylistIndex() + 1) % e.target.getPlaylist().length);
+    } : () => pushSnackbar({message: "재생할 수 없는 동영상입니다.", type: "error"}));
 
     const createButton = (icon, onClick) => Dynamic.$("button", { class: "playerButton", text: icon, onclick: onClick });
     EntryLists.reset(
@@ -141,10 +141,6 @@ const Player = new Dynamic.Fragment("player",
     )
 ).registAction(() => {
     const playlistMap = DataResource.Data.basic.playlist;
-    const playerConfig = { 
-        videoId: "C0DPdy98e4c",
-        events: { onReady: () => loadPlaylist() }
-    }
     
     clearInterval(TimeTracker);
     TimeTracker = setInterval(() => {
