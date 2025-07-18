@@ -24,9 +24,9 @@ let YConfig = {
 
 const restoreYConfig = savedPlayerInstance => YConfig = savedPlayerInstance; 
 
-const refreshYPlayer = playerConfig => {
+const refreshYPlayer = () => {
     if (YTPlayer) YTPlayer.destroy();
-    YTPlayer = new YT.Player("ytv-player", playerConfig);
+    YTPlayer = new YT.Player("ytv-player");
     loadPlaylist():
 }
 
@@ -251,7 +251,7 @@ const Player = new Dynamic.Fragment("player",
 
                     YConfig.currentEntry = YConfig.entries[0];
                     YConfig.playbackPosition = 0;
-                    refreshYPlayer(playerConfig);
+                    refreshYPlayer();
                 } catch (err) { console.error("❌ API 호출 실패:", err); }
             }}).add(
                 Dynamic.$("span", { class: "playlist-name", text: name }),
@@ -286,7 +286,7 @@ const Player = new Dynamic.Fragment("player",
         });
     });
 
-    refreshYPlayer(playerConfig);
+    refreshYPlayer();
     Dynamic.snipe(".ytv-list").reset(ListHeader, listItems)
 });
 
