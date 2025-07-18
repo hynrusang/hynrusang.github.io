@@ -474,6 +474,12 @@ class PlayerService {
         if (this.#YTPlayer) this.#YTPlayer.destroy();
 
         this.#YTPlayer = new YT.Player("ytv-player", { 
+            playerVars: {
+                "rel": 1,
+                "enablejsapi": 1,
+                'origin': window.location.origin,
+                'widget_referrer': window.location.origin
+            },
             events: { 
                 "onReady": () => this.#onPlayerReady(),
                 "onStateChange": e => this.#onPlayerStateChange(e),
