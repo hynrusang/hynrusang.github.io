@@ -111,17 +111,9 @@ class YouTubeAPIService {
         
         for (let i = 0; i < allVideoIds.length; i += 50) {
             const chunk = allVideoIds.slice(i, i + 50);
-            // ▼▼▼ `part`에 'status'를 추가하여 임베딩 정보를 요청합니다. ▼▼▼
             const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=id,status&id=${chunk.join(',')}&key=${this.#apiKey}&fields=items(id,status/embeddable)`);
             const data = await res.json();
-            if (data.items) {
-                data.items.forEach(item => {
-                    // ▼▼▼ 'embeddable'이 true인 영상의 ID만 추가합니다. ▼▼▼
-                    if (item.status?.embeddable) {
-                        validVideoIds.add(item.id);
-                    }
-                });
-            }
+            if (data.items) data.items.forEach(item => { if (item.status?.embeddable) validVideoIds.add(item.id); });
         }
         
         const validEntries = allEntries.filter(entry => validVideoIds.has(entry.id));
