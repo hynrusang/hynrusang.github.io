@@ -27,7 +27,7 @@ const restoreYConfig = savedPlayerInstance => YConfig = savedPlayerInstance;
 const refreshYPlayer = () => {
     if (YTPlayer) YTPlayer.destroy();
     YTPlayer = new YT.Player("ytv-player");
-    loadPlaylist():
+    loadPlaylist();
 }
 
 const loadPlaylist = () => {

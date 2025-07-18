@@ -36,6 +36,7 @@ body {
     margin: 0;
     padding: 0;
     overscroll-behavior-y: contain;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     transition: all 0.5s;
 }
 
