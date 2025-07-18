@@ -49,16 +49,16 @@ const loadPlaylist = () => {
     YConfig.lastIdx = -1;
     YTPlayer.loadPlaylist(playlist, playIndex, YConfig.playbackPosition, "default");
     YTPlayer.setLoop(true);
-    YTPlayer.addEventListener("onError", (1 < YConfig.entries.length) ? e => {
-        pushSnackbar({message: "재생할 수 없는 동영상을 건너뛰었습니다.", type: "error"});
-         e.target.playVideoAt((e.target.getPlaylistIndex() + 1) % e.target.getPlaylist().length);
-    } : () => pushSnackbar({message: "재생할 수 없는 동영상입니다.", type: "error"}));
     YTPlayer.addEventListener("onStateChange", e => {
         if (e.data === YT.PlayerState.CUED) {
             YTPlayer.playVideo();
             YTPlayer.removeEventListener("onStateChange", onStateChange);
         }
     });
+    YTPlayer.addEventListener("onError", (1 < YConfig.entries.length) ? e => {
+        pushSnackbar({message: "재생할 수 없는 동영상을 건너뛰었습니다.", type: "error"});
+         e.target.playVideoAt((e.target.getPlaylistIndex() + 1) % e.target.getPlaylist().length);
+    } : () => pushSnackbar({message: "재생할 수 없는 동영상입니다.", type: "error"}));
 
     const createButton = (icon, onClick) => Dynamic.$("button", { class: "playerButton", text: icon, onclick: onClick });
     EntryLists.reset(
