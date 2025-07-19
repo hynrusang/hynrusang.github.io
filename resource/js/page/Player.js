@@ -192,7 +192,7 @@ class UIManager {
      * @description 플레이어의 기본 레이아웃을 초기화하고 DOM에 렌더링합니다.
      */
     initializeBaseLayout() {
-        this.ListHeader.add(
+        this.ListHeader.reset(
             Dynamic.$("a", { href: "#", onclick: e => this.#togglePlaylistView(e) }).add(
                 Dynamic.$("img", { src: "https://yt3.ggpht.com/2eI1TjX447QZFDe6R32K0V2mjbVMKT5mIfQR-wK5bAsxttS_7qzUDS1ojoSKeSP0NuWd6sl7qQ=s88-c-k-c0x00ffffff-no-rj" }),
                 Dynamic.$("span", { class: "playlist-title-label" }).add(
@@ -201,8 +201,10 @@ class UIManager {
                 )
             )
         );
+
         this.listItemsContainer.add(this.PlayLists, this.EntryLists);
         Dynamic.snipe(".ytv-list").reset(this.ListHeader, this.listItemsContainer);
+        Dynamic.snipe(".ytv-panel-toggle-btn").set({ onclick: e => this.togglePanel(e) });
     }
 
     /**
@@ -452,7 +454,6 @@ class UIManager {
     }
 }
 
-
 /**
  * @class PlayerService
  * @description YouTube 플레이어 인스턴스, 상태 및 핵심 제어 로직을 관리합니다.
@@ -464,6 +465,15 @@ class PlayerService {
      */
     constructor(uiManager) {
         this.#uiManager = uiManager;
+    }
+
+    /**
+     * @description 서비스의 모든 UI와 플레이어를 새로고침합니다.
+     */
+    refreshAll() {
+        this.#uiManager.initializeBaseLayout();
+        this.#uiManager.buildPlaylistList();
+        this.initializePlayer();
     }
 
     /**
@@ -491,6 +501,7 @@ class PlayerService {
      * @description `YConfig`의 영상 목록을 플레이어에 로드합니다. 시청 기록을 최대한 보존합니다.
      */
     loadPlaylist() {
+        if (!this.#YTPlayer || typeof this.#YTPlayer.loadPlaylist !== 'function') return;
         if (!YConfig.entries.length) return;
 
         const playlist = YConfig.entries.map(entry => entry.id);
@@ -572,7 +583,6 @@ class PlayerService {
         this.#startStateTracking();
     }
 
-
     /**
      * @private
      * @description 플레이어 상태 변경(`onStateChange`) 이벤트를 처리합니다.
@@ -622,12 +632,15 @@ class PlayerService {
 }
 
 // --- 전역 인스턴스 및 내보내기 ---
-/** @type {PlayerService | null} - 현재 활성화된 PlayerService의 유일한 인스턴스 */
+/** 
+ * @type {PlayerService | null} 
+ * @description 현재 활성화된 PlayerService의 유일한 인스턴스 
+ */
 let activePlayerService = null;
 
 /**
+ * @type {savedPlayerInstance: object}
  * @description 저장된 플레이어 설정(YConfig)을 복원합니다.
- * @param {object} savedPlayerInstance - `localStorage`에서 가져온 YConfig 객체
  */
 const restoreYConfig = savedPlayerInstance => YConfig = savedPlayerInstance;
 
@@ -640,27 +653,18 @@ const Player = new Dynamic.Fragment("player",
         Dynamic.$("div", { class: "ytv-list" })
     )
 ).registAction(() => {
-    // 이전 서비스 인스턴스가 있다면 완전히 파괴하고 시작
-    if (activePlayerService) activePlayerService.destroy();
+    // 서비스 인스턴스가 없으면 최초 1회만 생성
+    if (!activePlayerService) {
+        // --- 서비스 인스턴스 생성 및 의존성 주입 ---
+        const apiService = new YouTubeAPIService();
+        const uiManager = new UIManager(apiService);
 
-    // --- 서비스 인스턴스 생성 및 의존성 주입 ---
-    const apiService = new YouTubeAPIService();
-    const uiManager = new UIManager(apiService);
-    const playerService = new PlayerService(uiManager);
-    uiManager.setPlayerService(playerService);
+        activePlayerService = new PlayerService(uiManager);
+        uiManager.setPlayerService(activePlayerService);
+    }
 
-    // 현재 활성화된 서비스로 등록
-    activePlayerService = playerService;
-    
-    // UI 초기화
-    uiManager.initializeBaseLayout();
-    uiManager.buildPlaylistList();
-    
-    // 이벤트 리스너 연결
-    Dynamic.snipe(".ytv-panel-toggle-btn").set({ onclick: e => uiManager.togglePanel(e) });
-    
-    // 플레이어 초기화
-    playerService.initializePlayer();
+    // 최초 로드 및 새로고침 시 항상 전체 리프레시를 담당하는 메서드 호출
+    activePlayerService.refreshAll();
 });
 
 export { restoreYConfig };
