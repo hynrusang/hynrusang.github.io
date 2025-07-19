@@ -622,6 +622,8 @@ class PlayerService {
 }
 
 // --- 전역 인스턴스 및 내보내기 ---
+/** @type {PlayerService | null} - 현재 활성화된 PlayerService의 유일한 인스턴스 */
+let activePlayerService = null;
 
 /**
  * @description 저장된 플레이어 설정(YConfig)을 복원합니다.
@@ -638,11 +640,17 @@ const Player = new Dynamic.Fragment("player",
         Dynamic.$("div", { class: "ytv-list" })
     )
 ).registAction(() => {
+    // 이전 서비스 인스턴스가 있다면 완전히 파괴하고 시작
+    if (activePlayerService) activePlayerService.destroy();
+
     // --- 서비스 인스턴스 생성 및 의존성 주입 ---
     const apiService = new YouTubeAPIService();
     const uiManager = new UIManager(apiService);
     const playerService = new PlayerService(uiManager);
     uiManager.setPlayerService(playerService);
+
+    // 현재 활성화된 서비스로 등록
+    activePlayerService = playerService;
     
     // UI 초기화
     uiManager.initializeBaseLayout();
