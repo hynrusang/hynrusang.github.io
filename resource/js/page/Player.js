@@ -265,7 +265,7 @@ class UIManager {
                 this.#createControlButton("🔄", "새로고침", () => Dynamic.FragMutation.refresh()),
                 this.#createControlButton("🔀", "재생목록 섞기", () => this.#playerService?.shuffleEntries()),
                 this.#createControlButton("↩️", "역순으로 재배치", () => this.#playerService?.reverseEntries()),
-                this.#createControlButton("🎯", "재생할 영상 선택", () => this.#selectEntriesByNumber())
+                this.#createControlButton("🎯", "재생할 영상 선택", () => this.#playerService?.filterEntriesByNumber())
             );
         }
 
@@ -407,51 +407,6 @@ class UIManager {
     #createControlButton(icon, title, onClick) {
         return Dynamic.$("button", { class: "playerButton", text: icon, title, onclick: onClick });
     }
-
-    /**
-     * @private
-     * @description '번호로 선택' 기능의 프롬프트 및 파싱 로직을 처리합니다.
-     */
-    #selectEntriesByNumber() {
-        if (!this.#playerService) return;
-        const input = prompt(
-            "재생할 영상 번호를 입력해 주세요 (띄어쓰기로 구분)\n\n" +
-            "• 단일 번호 : 3 8 12\n" +
-            "• 범위 입력 : 3-10 또는 3~10 (3~10번)\n" +
-            "• 처음부터 : -5 또는 ~5 (1~5번)\n" +
-            "• 끝까지   : 7- 또는 7~ (7~N번)\n\n" +
-            "※ 단일 번호와 범위를 섞어 입력할 수 있습니다 (예: 2 5-9 11~)\n" +
-            "※ '-' 또는 '~'는 숫자와 붙여 써야 하며, 번호는 현재 재생중인 목록을 따릅니다."
-        );
-        if (!input) return;
-    
-        const indices = new Set();
-        const tokens = input.trim().split(/\s+/);
-        const maxIndex = YConfig.entries.length;
-    
-        for (const token of tokens) {
-            if (/^\d+$/.test(token)) indices.add(Number(token));
-            else if (/^(\d+)[-~](\d+)$/.test(token)) {
-                let [ , a, b ] = token.match(/^(\d+)[-~](\d+)$/).map(Number);
-                for (let i = Math.min(a, b); i <= Math.max(a, b); i++) indices.add(i);
-            } else if (/^[-~](\d+)$/.test(token)) {
-                const end = Number(token.match(/^[-~](\d+)$/)[1]);
-                for (let i = 1; i <= end; i++) indices.add(i);
-            } else if (/^(\d+)[-~]$/.test(token)) {
-                const start = Number(token.match(/^(\d+)[-~]$/)[1]);
-                for (let i = start; i <= maxIndex; i++) indices.add(i);
-            }
-        }
-    
-        const parsed = [...indices].map(n => YConfig.entries[n - 1]).filter(Boolean);
-        if (!parsed.length) {
-            pushSnackbar({ message: "선택이 잘못되었습니다.", type: "error" });
-            return;
-        }
-        
-        this.#playerService.filterEntries(parsed);
-        pushSnackbar({ message: `선택한 ${parsed.length}개의 영상으로 반복 재생합니다.`, type: "normal" });
-    }
 }
 
 /**
@@ -555,14 +510,50 @@ class PlayerService {
         this.loadPlaylist();
         pushSnackbar({ message: "재생목록을 역순으로 재배치했습니다.", type: "normal" });
     }
-    
+
     /**
-     * @description 필터링된 새 영상 목록으로 교체하고 플레이어를 다시 로드합니다. (시청 기록 보존)
-     * @param {Array<object>} newEntries - 필터링된 새로운 Entry 객체 배열
+     * @private
+     * @description 특정 인덱스로 목록을 필터링하고 플레이어를 다시 로드합니다. (시청 기록 보존)
      */
-    filterEntries(newEntries) {
-        YConfig.entries = newEntries;
+    filterEntriesByNumber() {
+        const input = prompt(
+            "재생할 영상 번호를 입력해 주세요 (띄어쓰기로 구분)\n\n" +
+            "• 단일 번호 : 3 8 12\n" +
+            "• 범위 입력 : 3-10 또는 3~10 (3~10번)\n" +
+            "• 처음부터 : -5 또는 ~5 (1~5번)\n" +
+            "• 끝까지   : 7- 또는 7~ (7~N번)\n\n" +
+            "※ 단일 번호와 범위를 섞어 입력할 수 있습니다 (예: 2 5-9 11~)\n" +
+            "※ '-' 또는 '~'는 숫자와 붙여 써야 하며, 번호는 현재 재생중인 목록을 따릅니다."
+        );
+        if (!input) return;
+    
+        const indices = new Set();
+        const tokens = input.trim().split(/\s+/);
+        const maxIndex = YConfig.entries.length;
+    
+        for (const token of tokens) {
+            if (/^\d+$/.test(token)) indices.add(Number(token));
+            else if (/^(\d+)[-~](\d+)$/.test(token)) {
+                let [ , a, b ] = token.match(/^(\d+)[-~](\d+)$/).map(Number);
+                for (let i = Math.min(a, b); i <= Math.max(a, b); i++) indices.add(i);
+            } else if (/^[-~](\d+)$/.test(token)) {
+                const end = Number(token.match(/^[-~](\d+)$/)[1]);
+                for (let i = 1; i <= end; i++) indices.add(i);
+            } else if (/^(\d+)[-~]$/.test(token)) {
+                const start = Number(token.match(/^(\d+)[-~]$/)[1]);
+                for (let i = start; i <= maxIndex; i++) indices.add(i);
+            }
+        }
+    
+        const parsed = [...indices].map(n => YConfig.entries[n - 1]).filter(Boolean);
+        if (!parsed.length) {
+            pushSnackbar({ message: "선택이 잘못되었습니다.", type: "error" });
+            return;
+        }
+        
+        YConfig.entries = parsed;
         this.loadPlaylist();
+        pushSnackbar({ message: `선택한 ${parsed.length}개의 영상으로 반복 재생합니다.`, type: "normal" });
     }
 
     // --- Private Properties ---
