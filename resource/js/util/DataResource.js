@@ -227,7 +227,6 @@ export default class DataResource {
             }
 
             Dynamic.scan("#navigator_icon").onclick = () => Dynamic.FragMutation.mutate(Navigation);
-            Dynamic.scan("#rotate_icon").onclick = () => Dynamic.scan("#rotation-wrapper").classList.toggle("rotated");
             Dynamic.scan("fragment[rid=rander]").remove();
             Dynamic.FragMutation.setRouter("main", MainRouter);
 
