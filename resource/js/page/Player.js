@@ -265,7 +265,7 @@ class UIManager {
                 this.#createControlButton("🔄", "새로고침", () => Dynamic.FragMutation.refresh()),
                 this.#createControlButton("🔀", "재생목록 섞기", () => this.#playerService?.shuffleEntries()),
                 this.#createControlButton("↩️", "역순으로 재배치", () => this.#playerService?.reverseEntries()),
-                this.#createControlButton("🎯", "재생할 영상 선택", () => this.#playerService?.filterEntries())
+                this.#createControlButton("🎯", "재생할 영상 선택", () => this.#playerService?.filterEntriesByNumber())
             );
         }
 
@@ -515,7 +515,7 @@ class PlayerService {
      * @private
      * @description 특정 인덱스로 목록을 필터링하고 플레이어를 다시 로드합니다. (시청 기록 보존)
      */
-    filterEntries() {
+    filterEntriesByNumber() {
         const input = prompt(
             "재생할 영상 번호를 입력해 주세요 (띄어쓰기로 구분)\n\n" +
             "• 단일 번호 : 3 8 12\n" +
