@@ -15,15 +15,18 @@
     <link type="text/css" class="theme" rel="stylesheet" href="/resource/css/dark/ytv.css"/>
 </head>
 <body>
-    <snackbar></snackbar>
-    <fragmentbox></fragmentbox>
-    <footer>
-        <div>
-            <input style="background-image: url(/resource/img/icon/navigator.png);" id="navigator_icon" class="iconX" type="button">
-            <input style="background-image: url(/resource/img/icon/dark.png);" id="theme_icon" class="iconX" type="button">
-        </div>
-        <router></router>
-    </footer>
+    <div id="rotation-wrapper">
+        <snackbar></snackbar>
+        <fragmentbox></fragmentbox>
+        <footer>
+            <div>
+                <input style="background-image: url(/resource/img/icon/navigator.png);" id="navigator_icon" class="iconX" type="button">
+                <input style="background-image: url(/resource/img/icon/dark.png);" id="theme_icon" class="iconX" type="button">
+                <input style="background-image: url(/resource/img/icon/rotate.png);" id="rotate_icon" class="iconX" type="button">
+            </div>
+            <router></router>
+        </footer>
+    </div>
     <script src="https://www.youtube.com/s/player/79e6d03a/www-widgetapi.vflset/www-widgetapi.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
