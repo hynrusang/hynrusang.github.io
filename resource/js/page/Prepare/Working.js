@@ -7,6 +7,6 @@ const Randering = new Dynamic.Fragment("rander",
         Dynamic.$("div", {id: "loading_icon"}),
         messageText
     )
-).registAction(message => messageText.innerText = message);
+).registAction(message => messageText.node.innerText = message);
 
 export default Randering;
