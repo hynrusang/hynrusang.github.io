@@ -1,0 +1,25 @@
+/* 기본 색상 설정 */
+
+/* Canvas 전체 프레임 */
+
+.ytv-canvas {
+	background: #282828;
+}
+
+/* 리스트 영역 */
+
+.ytv-list{
+  	background: #1e1e1e;
+}
+
+/* 헤더 영역 */
+
+.ytv-list-header a {
+	color: white;
+}
+
+/* Others */
+
+.ytv-panel-toggle-btn, #input-playlist-button {
+	color: white;
+}
