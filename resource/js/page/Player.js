@@ -9,7 +9,6 @@ import DataResource from "../util/DataResource.js";
  * @property {Array<object>} entries - 현재 재생 목록의 영상 정보 배열
  * @property {number} lastIdx - 마지막으로 재생된 영상의 인덱스
  * @property {object|null} currentEntry - 현재 재생 중인 영상의 Entry 객체
- * @property {number} playbackPosition - 현재 영상의 재생 위치 (초)
  */
 let YConfig = {
     entries: [{
@@ -462,7 +461,6 @@ class PlayerService {
         if (playIndex === -1) {
             playIndex = 0;
             YConfig.currentEntry = YConfig.entries[0] || null;
-            YConfig.playbackPosition = 0;
         }
         
         YConfig.lastIdx = -1;
