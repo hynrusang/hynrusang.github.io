@@ -336,18 +336,16 @@ class UIManager {
      */
     #createPlaylistItem(title, name, url) {
         return Dynamic.$("li", { class: "playlist-item" }).add(
-            Dynamic.$("a", { href: url, onclick: async e => {
+            Dynamic.$("a", { href: url, text: name, onclick: async e => {
                 e.preventDefault();
                 if (!this.#playerService) return;
 
                 const entries = await this.#apiService.fetchEntriesFromURL(url);
                 if (entries.length > 0) this.#playerService.loadNewPlaylist(entries);
-            }}).add(
-                Dynamic.$("span", { class: "playlist-name", text: name }),
-                Dynamic.$("span", { class: "playlist-buttons" }).add(
-                    Dynamic.$("button", { class: "playerButton", text: "✏️", onclick: e => this.#editPlaylistName(e, title, name) }),
-                    Dynamic.$("button", { class: "playerButton", text: "❌", onclick: e => this.#deletePlaylist(e, title, name) })
-                )
+            }}),
+            Dynamic.$("span", { class: "playlist-buttons" }).add(
+                Dynamic.$("button", { class: "playerButton", text: "✏️", onclick: e => this.#editPlaylistName(e, title, name) }),
+                Dynamic.$("button", { class: "playerButton", text: "❌", onclick: e => this.#deletePlaylist(e, title, name) })
             )
         );
     }
