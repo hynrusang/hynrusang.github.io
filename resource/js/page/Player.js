@@ -18,6 +18,7 @@ let YConfig = {
     }],
     lastIdx: -1,
     currentEntry: null,
+    playbackPosition: 0
 };
 
 // --- 서비스 클래스 정의 ---
@@ -434,7 +435,9 @@ class PlayerService {
      * @description YouTube 플레이어 인스턴스를 초기화합니다.
      */
     initializePlayer() {
+        clearInterval(this.#TimeTracker);
         if (this.#YTPlayer) this.#YTPlayer.destroy();
+
         this.#YTPlayer = new YT.Player("ytv-player", { 
             playerVars: {
                 "enablejsapi": 1,
@@ -462,10 +465,11 @@ class PlayerService {
         if (playIndex === -1) {
             playIndex = 0;
             YConfig.currentEntry = YConfig.entries[0] || null;
+            YConfig.playbackPosition = 0;
         }
         
         YConfig.lastIdx = -1;
-        this.#YTPlayer.loadPlaylist(playlist, playIndex);
+        this.#YTPlayer.loadPlaylist(playlist, playIndex, YConfig.playbackPosition, "default");
         this.#YTPlayer.setLoop(true);
         this.#uiManager.buildEntryList(YConfig.entries);
     }
@@ -477,6 +481,7 @@ class PlayerService {
     loadNewPlaylist(entries) {
         YConfig.entries = entries;
         YConfig.currentEntry = entries[0] || null;
+        YConfig.playbackPosition = 0;
         this.initializePlayer();
     }
     
@@ -566,6 +571,7 @@ class PlayerService {
      */
     #onPlayerReady() {
         this.loadPlaylist();
+        this.#startStateTracking();
     }
 
     /**
@@ -600,6 +606,28 @@ class PlayerService {
         } else {
             pushSnackbar({ message: "재생할 수 없는 동영상입니다.", type: "error" });
         }
+    }
+
+    /**
+     * @private
+     * @description `setInterval`을 사용하여 1초마다 플레이어 상태를 확인하고 `localStorage`에 저장합니다.
+     */
+    #startStateTracking() {
+        clearInterval(this.#TimeTracker);
+        this.#TimeTracker = setInterval(() => {
+            if (!this.#YTPlayer || typeof this.#YTPlayer.getPlayerState !== 'function' || this.#YTPlayer.getPlayerState() !== YT.PlayerState.PLAYING) return;
+
+            const idx = this.#YTPlayer.getPlaylistIndex();
+            YConfig.playbackPosition = this.#YTPlayer.getCurrentTime();
+
+            if (idx >= 0 && idx !== YConfig.lastIdx) {
+                YConfig.currentEntry = YConfig.entries[idx];
+                this.#uiManager.updateNowPlaying(YConfig.currentEntry, idx, YConfig.entries.length);
+                YConfig.lastIdx = idx;
+            }
+
+            localStorage.setItem("YConfig", JSON.stringify(YConfig));
+        }, 1000);
     }
 }
 
