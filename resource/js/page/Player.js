@@ -441,16 +441,13 @@ class PlayerService {
     initializePlayer() {
         clearInterval(this.#TimeTracker);
         if (this.#YTPlayer) this.#YTPlayer.destroy();
-
         const playlistIds = YConfig.entries.map(entry => entry.id).slice(0, 20);
-        const firstVideoId = playlistIds[0] || "C0DPdy98e4c";
 
         this.#YTPlayer = new YT.Player("ytv-player", {
-            videoId: firstVideoId,
+            host: 'https://www.youtube.com',
             playerVars: {
                 "enablejsapi": 1,
                 "origin": window.location.origin,
-                "widget_referrer": window.location.origin,
                 "playsinline": 1,
                 "playlist": playlistIds.join(','),
                 "rel": 0
