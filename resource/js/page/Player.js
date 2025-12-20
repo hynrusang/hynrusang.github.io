@@ -445,6 +445,7 @@ class PlayerService {
 
         this.#YTPlayer = new YT.Player("ytv-player", {
             host: 'https://www.youtube.com',
+            origin: window.location.origin,
             playerVars: {
                 "enablejsapi": 1,
                 "origin": window.location.origin,
