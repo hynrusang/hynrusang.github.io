@@ -84,7 +84,7 @@ class YouTubeAPIService {
         let pageToken = "";
         const MAX_RESULTS = 200;
 
-        while (allEntries.length < MAX_RESULTS) {
+        while (allEntries.length <= MAX_RESULTS) {
             const apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${playlistId}&key=${this.#apiKey}&part=snippet&maxResults=50${pageToken ? `&pageToken=${pageToken}` : ""}&fields=items(snippet(title,thumbnails,resourceId(videoId))),nextPageToken`;
             const res = await fetch(apiUrl);
             const data = await res.json();
