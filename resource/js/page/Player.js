@@ -84,7 +84,7 @@ class YouTubeAPIService {
         let pageToken = "";
         const MAX_RESULTS = 200;
 
-        while (allEntries.length <= MAX_RESULTS) {
+        while (true) {
             const apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${playlistId}&key=${this.#apiKey}&part=snippet&maxResults=50${pageToken ? `&pageToken=${pageToken}` : ""}&fields=items(snippet(title,thumbnails,resourceId(videoId))),nextPageToken`;
             const res = await fetch(apiUrl);
             const data = await res.json();
@@ -100,9 +100,13 @@ class YouTubeAPIService {
                 }));
             
             allEntries.push(...fetchedEntries);
-
-            if (!data.nextPageToken || allEntries.length >= MAX_RESULTS) break;
             pageToken = data.nextPageToken;
+            
+            if (allEntries.length >= MAX_RESULTS) {
+                allEntries = allEntries.slice(0, MAX_RESULTS);
+                break;
+            }
+            if (!pageToken || allEntries.length >= MAX_RESULTS) break;
         }
         
         const allVideoIds = allEntries.map(entry => entry.id);
@@ -441,8 +445,11 @@ class PlayerService {
         this.#YTPlayer = new YT.Player("ytv-player", { 
             playerVars: {
                 "enablejsapi": 1,
-                'origin': window.location.origin,
-                'widget_referrer': window.location.origin
+                "origin": window.location.origin,
+                "widget_referrer": window.location.origin,
+                "playsinline": 1,
+                "listType": "playlist",
+                "rel": 0
             },
             events: { 
                 "onReady": () => this.#onPlayerReady(),
