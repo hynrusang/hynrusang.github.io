@@ -442,7 +442,7 @@ class PlayerService {
         clearInterval(this.#TimeTracker);
         if (this.#YTPlayer) this.#YTPlayer.destroy();
 
-        const playlistIds = YConfig.entries.map(entry => entry.id);
+        const playlistIds = YConfig.entries.map(entry => entry.id).slice(0, 20);
         const firstVideoId = playlistIds[0] || "C0DPdy98e4c";
 
         this.#YTPlayer = new YT.Player("ytv-player", {
@@ -452,7 +452,6 @@ class PlayerService {
                 "origin": window.location.origin,
                 "widget_referrer": window.location.origin,
                 "playsinline": 1,
-                "listType": "playlist",
                 "playlist": playlistIds.join(','),
                 "rel": 0
             },
@@ -582,7 +581,12 @@ class PlayerService {
      * @description 플레이어 로드(`onStateChange`) 이벤트를 처리합니다.
      */
     #onPlayerReady() {
-        if (YConfig.playbackPosition > 0) this.#YTPlayer.seekTo(YConfig.playbackPosition, true);
+        if (YConfig.entries.length > 0) {
+            const allIds = YConfig.entries.map(e => e.id);
+            const startIndex = YConfig.currentEntry ? YConfig.entries.findIndex(e => e.id === YConfig.currentEntry.id) : 0;
+            
+            this.#YTPlayer.loadPlaylist(allIds, startIndex < 0 ? 0 : startIndex, YConfig.playbackPosition || 0);
+        }
 
         this.#startStateTracking();
         this.#uiManager.buildEntryList(YConfig.entries);
