@@ -455,7 +455,6 @@ class PlayerService {
             },
             events: { 
                 "onReady": () => this.#onPlayerReady(),
-                "onStateChange": e => this.#onPlayerStateChange(e),
                 "onError": e => this.#onPlayerError(e)
             }
         });
@@ -587,6 +586,7 @@ class PlayerService {
 
     /**
      * @private
+     * @deprecated 해당 메서드는 더이상 사용되지 않습니다.
      * @description 플레이어 상태 변경(`onStateChange`) 이벤트를 처리합니다.
      * @param {object} event - YouTube 플레이어 이벤트 객체
      */
