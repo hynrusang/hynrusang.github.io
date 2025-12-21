@@ -579,12 +579,7 @@ class PlayerService {
      * @description 플레이어 로드(`onStateChange`) 이벤트를 처리합니다.
      */
     #onPlayerReady() {
-        if (YConfig.entries.length > 0) {
-            const allIds = YConfig.entries.map(e => e.id);
-            const startIndex = YConfig.currentEntry ? YConfig.entries.findIndex(e => e.id === YConfig.currentEntry.id) : 0;
-            
-            this.#YTPlayer.loadPlaylist(allIds, startIndex < 0 ? 0 : startIndex, YConfig.playbackPosition || 0);
-        }
+        if (YConfig.entries.length > 0) this.loadPlaylist();
 
         this.#startStateTracking();
         this.#uiManager.buildEntryList(YConfig.entries);
