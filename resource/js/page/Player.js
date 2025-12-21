@@ -633,8 +633,8 @@ class PlayerService {
 
             if (idx >= 0 && idx !== YConfig.lastIdx) {
                 YConfig.currentEntry = YConfig.entries[idx];
-                this.#uiManager.updateNowPlaying(YConfig.currentEntry, idx, YConfig.entries.length);
                 YConfig.lastIdx = idx;
+                this.#uiManager.updateNowPlaying(YConfig.currentEntry, idx, YConfig.entries.length);
             }
 
             localStorage.setItem("YConfig", JSON.stringify(YConfig));
