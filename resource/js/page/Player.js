@@ -441,7 +441,7 @@ class PlayerService {
     initializePlayer() {
         clearInterval(this.#TimeTracker);
         if (this.#YTPlayer) this.#YTPlayer.destroy();
-        const playlistIds = YConfig.entries.map(entry => entry.id).slice(0, 20);
+        const playlistIds = YConfig.entries.map(entry => entry.id);
 
         this.#YTPlayer = new YT.Player("ytv-player", {
             host: 'https://www.youtube.com',
