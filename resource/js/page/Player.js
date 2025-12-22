@@ -596,8 +596,8 @@ class PlayerService {
             
             if (0 <= idx && idx !== YConfig.lastIdx) {
                 YConfig.currentEntry = YConfig.entries[idx];
-                YConfig.lastIdx = idx;
                 this.#uiManager.updateNowPlaying(YConfig.currentEntry, idx, YConfig.entries.length);
+                YConfig.lastIdx = idx;
                 localStorage.setItem("YConfig", JSON.stringify(YConfig));
             }
         }
@@ -633,8 +633,8 @@ class PlayerService {
 
             if (idx >= 0 && idx !== YConfig.lastIdx) {
                 YConfig.currentEntry = YConfig.entries[idx];
-                YConfig.lastIdx = idx;
                 this.#uiManager.updateNowPlaying(YConfig.currentEntry, idx, YConfig.entries.length);
+                YConfig.lastIdx = idx;
             }
 
             localStorage.setItem("YConfig", JSON.stringify(YConfig));
