@@ -339,7 +339,7 @@ class UIManager {
      * @param {string} url - 재생목록의 YouTube URL
      * @returns {Dynamic} - 생성된 `<li>` Dynamic 객체
      */
-    ##createPlaylistItem(title, name, url) {
+    #createPlaylistItem(title, name, url) {
         return Dynamic.$("li", { class: "playlist-item" }).add(
             Dynamic.$("a", { href: url, text: name, onclick: async e => {
                 e.preventDefault();
