@@ -339,14 +339,25 @@ class UIManager {
      * @param {string} url - 재생목록의 YouTube URL
      * @returns {Dynamic} - 생성된 `<li>` Dynamic 객체
      */
-    #createPlaylistItem(title, name, url) {
+    ##createPlaylistItem(title, name, url) {
         return Dynamic.$("li", { class: "playlist-item" }).add(
             Dynamic.$("a", { href: url, text: name, onclick: async e => {
                 e.preventDefault();
                 if (!this.#playerService) return;
-
-                const entries = await this.#apiService.fetchEntriesFromURL(url);
-                if (entries.length > 0) this.#playerService.loadNewPlaylist(entries);
+                
+                pushSnackbar({ message: `'${name}' 목록을 불러오는 중...`, type: "normal" })
+                
+                try {
+                    const entries = await this.#apiService.fetchEntriesFromURL(url);
+                    
+                    if (entries && entries.length > 0) {
+                        this.#playerService.loadNewPlaylist(entries);
+                        pushSnackbar({ message: "재생목록 로드 완료!", type: "normal" });
+                    } else pushSnackbar({ message: "재생 가능한 영상이 없거나 로드에 실패했습니다.", type: "error" });
+                } catch (err) {
+                    console.error(err);
+                    pushSnackbar({ message: "알 수 없는 오류가 발생했습니다.", type: "error" });
+                }
             }}),
             Dynamic.$("span", { class: "playlist-buttons" }).add(
                 Dynamic.$("button", { class: "playerButton", text: "✏️", onclick: e => this.#editPlaylistName(e, title, name) }),
@@ -354,7 +365,6 @@ class UIManager {
             )
         );
     }
-    
     /**
      * @private
      * @description 재생목록 이름 수정을 처리합니다.
