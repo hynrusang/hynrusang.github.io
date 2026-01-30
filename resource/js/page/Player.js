@@ -83,48 +83,40 @@ class YouTubeAPIService {
         let allEntries = [];
         let pageToken = "";
         const MAX_RESULTS = 200;
-
+        
         while (true) {
             const apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${playlistId}&key=${this.#apiKey}&part=snippet&maxResults=50${pageToken ? `&pageToken=${pageToken}` : ""}&fields=items(snippet(title,thumbnails,resourceId(videoId))),nextPageToken`;
-            const res = await fetch(apiUrl);
-            const data = await res.json();
 
-            if (!data.items) break;
-
-            const fetchedEntries = data.items
-                .filter(item => item.snippet?.resourceId?.videoId && item.snippet.title !== 'Private video' && item.snippet.title !== 'Deleted video')
-                .map(item => ({
-                    id: item.snippet.resourceId.videoId,
-                    title: item.snippet.title,
-                    img: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url
-                }));
-            
-            allEntries.push(...fetchedEntries);
-            pageToken = data.nextPageToken;
-            
-            if (allEntries.length >= MAX_RESULTS) {
-                allEntries = allEntries.slice(0, MAX_RESULTS);
+            try {
+                const res = await fetch(apiUrl);
+                const data = await res.json();
+                
+                if (data.error) {
+                    pushSnackbar({ message: `목록 로드 실패: ${data.error.message}`, type: "error" });
+                    break;
+                }
+                
+                if (!data.items) break;
+                
+                const fetchedEntries = data.items
+                    .filter(item => item.snippet?.resourceId?.videoId && item.snippet.title !== 'Private video' && item.snippet.title !== 'Deleted video')
+                    .map(item => ({
+                        id: item.snippet.resourceId.videoId,
+                        title: item.snippet.title,
+                        img: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url
+                    }));
+                
+                allEntries.push(...fetchedEntries);
+                pageToken = data.nextPageToken;
+                
+                if (allEntries.length >= MAX_RESULTS || !pageToken) break;
+            } catch (err) {
+                console.error("Network Error:", err);
                 break;
             }
-            if (!pageToken || allEntries.length >= MAX_RESULTS) break;
         }
         
-        const allVideoIds = allEntries.map(entry => entry.id);
-        const validVideoIds = new Set();
-        
-        for (let i = 0; i < allVideoIds.length; i += 50) {
-            const chunk = allVideoIds.slice(i, i + 50);
-            const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=id,status&id=${chunk.join(',')}&key=${this.#apiKey}&fields=items(id,status/embeddable)`);
-            const data = await res.json();
-            if (data.items) data.items.forEach(item => { if (item.status?.embeddable) validVideoIds.add(item.id); });
-        }
-        
-        const validEntries = allEntries.filter(entry => validVideoIds.has(entry.id));
-        
-        const invalidCount = allEntries.length - validEntries.length;
-        if (invalidCount > 0) pushSnackbar({ message: `사용할 수 없는 동영상 ${invalidCount}개를 제외했습니다.`, type: "normal" });
-
-        return validEntries;
+        return allEntries; 
     }
     
     /**
@@ -615,18 +607,28 @@ class PlayerService {
 
     /**
      * @private
-     * @description 플레이어 에러(`onError`) 이벤트를 처리합니다.
+     * @description 플레이어 에러 발생 시 자동으로 다음 곡으로 건너뜁니다.
      * @param {object} event - YouTube 플레이어 이벤트 객체
      */
     #onPlayerError(event) {
+        const errorCode = event.data;
+        const errorMsg = {
+            2: "유효하지 않은 파라미터입니다.",
+            5: "HTML5 플레이어 오류입니다.",
+            100: "영상을 찾을 수 없거나 비공개 동영상입니다.",
+            101: "이 영상은 퍼가기가 차단되었습니다.",
+            150: "이 영상은 퍼가기가 차단되었습니다."
+        }[errorCode] || "알 수 없는 오류입니다.";
+        
+        console.warn(`Playback Error (${errorCode}): ${errorMsg} - Skipping to next track.`);
+        
         if (YConfig.entries.length > 1) {
-            pushSnackbar({ message: "재생할 수 없는 동영상을 건너뛰었습니다.", type: "error" });
             const currentIndex = event.target.getPlaylistIndex();
-            const nextIndex = (currentIndex + 1) % YConfig.entries.length;
-            event.target.playVideoAt(nextIndex);
-        } else {
-            pushSnackbar({ message: "재생할 수 없는 동영상입니다.", type: "error" });
-        }
+            const safeIndex = currentIndex >= 0 ? currentIndex : (YConfig.lastIdx >= 0 ? YConfig.lastIdx : 0);
+            const nextIndex = (safeIndex + 1) % YConfig.entries.length;
+            
+            setTimeout(() => event.target.playVideoAt(nextIndex), 100);
+        } else pushSnackbar({ message: "재생할 수 있는 영상이 없습니다.", type: "error" });
     }
 
     /**
