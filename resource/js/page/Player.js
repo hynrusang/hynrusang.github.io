@@ -285,6 +285,8 @@ class UIManager {
     #playerService = null;
     /** @private @type {YouTubeAPIService} */
     #apiService;
+    /** @private @type {Boolean} */
+    #isFetching = false;
 
     // --- Private Methods ---
     /**
@@ -335,7 +337,8 @@ class UIManager {
         return Dynamic.$("li", { class: "playlist-item" }).add(
             Dynamic.$("a", { href: url, text: name, onclick: async e => {
                 e.preventDefault();
-                if (!this.#playerService) return;
+                if (!this.#playerService || this.#isFetching) return;
+                this.#isFetching = true;
                 
                 pushSnackbar({ message: `'${name}' 목록을 불러오는 중...`, type: "normal" })
                 
@@ -349,6 +352,8 @@ class UIManager {
                 } catch (err) {
                     console.error(err);
                     pushSnackbar({ message: "알 수 없는 오류가 발생했습니다.", type: "error" });
+                } finally {
+                    this.#isFetching = false;
                 }
             }}),
             Dynamic.$("span", { class: "playlist-buttons" }).add(
