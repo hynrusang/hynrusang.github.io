@@ -18,7 +18,6 @@ let YConfig = {
     }],
     lastIdx: -1,
     currentEntry: null,
-    playbackPosition: 0
 };
 
 // --- 서비스 클래스 정의 ---
@@ -529,7 +528,6 @@ class PlayerService {
         this.#YTPlayer.loadPlaylist({
             playlist: videoIds,
             index: playIndex,
-            startSeconds: YConfig.playbackPosition
         });
 
         this.#uiManager.buildEntryList(YConfig.entries);
@@ -700,10 +698,7 @@ class PlayerService {
                 navigator.mediaSession.playbackState = 'paused';
             }
 
-            // 요청하신 대로 영상이 끝나는 시점에만 로컬 스토리지에 동기화합니다
-            if (event.data === YT.PlayerState.ENDED) {
-                localStorage.setItem("YConfig", JSON.stringify(YConfig));
-            }
+            localStorage.setItem("YConfig", JSON.stringify(YConfig));
         }
     }
 
@@ -730,20 +725,6 @@ class PlayerService {
             
             setTimeout(() => this.playVideoAt(nextIndex), 100);
         } else pushSnackbar({ message: "재생할 수 있는 영상이 없습니다.", type: "error" });
-    }
-
-    /**
-     * @private
-     * @description 메모리상의 현재 재생 상태만 가볍게 추적합니다.
-     */
-    #startStateTracking() {
-        clearInterval(this.#TimeTracker);
-        this.#TimeTracker = setInterval(() => {
-            if (!this.#YTPlayer || typeof this.#YTPlayer.getPlayerState !== 'function') return;
-            if (this.#YTPlayer.getPlayerState() !== YT.PlayerState.PLAYING) return;
-            
-            YConfig.playbackPosition = this.#YTPlayer.getCurrentTime();
-        }, 1000);
     }
 }
 
