@@ -1,4 +1,4 @@
-import { Dynamic } from "../init/module.js";
+jimport { Dynamic } from "../init/module.js";
 import { pushSnackbar } from "../util/Tools.js";
 import DataResource from "../util/DataResource.js";
 
@@ -226,6 +226,8 @@ class UIManager {
 
         const activeNode = this.EntryLists.node.querySelector(".active");
         if (activeNode) activeNode.classList.remove("active");
+        
+        const entryItems = this.EntryLists.node.querySelectorAll(".entry-item");
         entryItems[index]?.classList.add("active");
     }
 
