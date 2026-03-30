@@ -516,12 +516,13 @@ class PlayerService {
         YConfig.playbackPosition = 0;
         YConfig.lastIdx = index;
 
+        this.#uiManager.updateNowPlaying(YConfig.currentEntry, index, YConfig.entries.length);
+        YConfig.lastIdx = index;
+        
         this.#YTPlayer.loadVideoById({
             videoId: YConfig.currentEntry.id,
             startSeconds: 0
         });
-        
-        this.#uiManager.updateNowPlaying(YConfig.currentEntry, index, YConfig.entries.length);
     }
     
     /**
@@ -637,11 +638,10 @@ class PlayerService {
         console.warn(`Playback Error (${errorCode}): ${errorMsg} - Skipping to next track.`);
         
         if (YConfig.entries.length > 1) {
-            const currentIndex = event.target.getPlaylistIndex();
-            const safeIndex = currentIndex >= 0 ? currentIndex : (YConfig.lastIdx >= 0 ? YConfig.lastIdx : 0);
+            const safeIndex = YConfig.lastIdx >= 0 ? YConfig.lastIdx : 0;
             const nextIndex = (safeIndex + 1) % YConfig.entries.length;
             
-            setTimeout(() => event.target.playVideoAt(nextIndex), 100);
+            setTimeout(() => this.playVideoAt(nextIndex), 100);
         } else pushSnackbar({ message: "재생할 수 있는 영상이 없습니다.", type: "error" });
     }
 
