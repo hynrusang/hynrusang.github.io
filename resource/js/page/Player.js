@@ -1,4 +1,4 @@
-jimport { Dynamic } from "../init/module.js";
+import { Dynamic } from "../init/module.js";
 import { pushSnackbar } from "../util/Tools.js";
 import DataResource from "../util/DataResource.js";
 
