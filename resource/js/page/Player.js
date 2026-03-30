@@ -450,22 +450,21 @@ class PlayerService {
         if (this.#YTPlayer) this.#YTPlayer.destroy();
         if (!YConfig.entries || YConfig.entries.length === 0) return;
 
-        const playlistIds = YConfig.entries.map(entry => entry.id);
-        const firstVideoId = playlistIds.shift();
-
+        const initialVideoId = YConfig.currentEntry ? YConfig.currentEntry.id : YConfig.entries[0].id;
+        
         this.#YTPlayer = new YT.Player("ytv-player", {
             host: 'https://www.youtube.com',
             origin: window.location.origin,
-            videoId: firstVideoId, // 필수: 첫 번째 영상을 명시
+            videoId: initialVideoId,
             playerVars: {
                 "enablejsapi": 1,
                 "origin": window.location.origin,
                 "playsinline": 1,
-                "playlist": playlistIds.join(','), 
                 "rel": 0
             },
             events: { 
                 "onReady": () => this.#onPlayerReady(),
+                "onStateChange": e => this.#onPlayerStateChange(e),
                 "onError": e => this.#onPlayerError(e)
             }
         });
@@ -477,20 +476,22 @@ class PlayerService {
     loadPlaylist() {
         if (!this.#YTPlayer || typeof this.#YTPlayer.loadPlaylist !== 'function') return;
         if (!YConfig.entries.length) return;
-
-        const playlist = YConfig.entries.map(entry => entry.id);
-        let playIndex = YConfig.currentEntry ? playlist.indexOf(YConfig.currentEntry.id) : -1;
+        
+        let playIndex = YConfig.currentEntry ? YConfig.entries.findIndex(e => e.id === YConfig.currentEntry.id) : -1;
 
         if (playIndex === -1) {
             playIndex = 0;
             YConfig.currentEntry = YConfig.entries[0] || null;
             YConfig.playbackPosition = 0;
         }
+
+        this.#YTPlayer.loadVideoById({
+            videoId: YConfig.entries[playIndex].id,
+            startSeconds: YConfig.playbackPosition
+        });
         
-        YConfig.lastIdx = -1;
-        this.#YTPlayer.loadPlaylist(playlist, playIndex, YConfig.playbackPosition, "default");
-        this.#YTPlayer.setLoop(true);
         this.#uiManager.buildEntryList(YConfig.entries);
+        this.#uiManager.updateNowPlaying(YConfig.currentEntry, playIndex, YConfig.entries.length);
     }
     
     /**
@@ -509,7 +510,18 @@ class PlayerService {
      * @param {number} index - 재생할 영상의 인덱스
      */
     playVideoAt(index) {
-        this.#YTPlayer.playVideoAt(index);
+        if (index < 0 || index >= YConfig.entries.length) return;
+
+        YConfig.currentEntry = YConfig.entries[index];
+        YConfig.playbackPosition = 0;
+        YConfig.lastIdx = index;
+
+        this.#YTPlayer.loadVideoById({
+            videoId: YConfig.currentEntry.id,
+            startSeconds: 0
+        });
+        
+        this.#uiManager.updateNowPlaying(YConfig.currentEntry, index, YConfig.entries.length);
     }
     
     /**
@@ -597,20 +609,13 @@ class PlayerService {
 
     /**
      * @private
-     * @deprecated 해당 메서드는 더이상 사용되지 않습니다.
      * @description 플레이어 상태 변경(`onStateChange`) 이벤트를 처리합니다.
      * @param {object} event - YouTube 플레이어 이벤트 객체
      */
     #onPlayerStateChange(event) {
-        if (event.data === YT.PlayerState.PLAYING) {
-            const idx = this.#YTPlayer.getPlaylistIndex();
-            
-            if (0 <= idx && idx !== YConfig.lastIdx) {
-                YConfig.currentEntry = YConfig.entries[idx];
-                this.#uiManager.updateNowPlaying(YConfig.currentEntry, idx, YConfig.entries.length);
-                YConfig.lastIdx = idx;
-                localStorage.setItem("YConfig", JSON.stringify(YConfig));
-            }
+        if (event.data === YT.PlayerState.ENDED) {
+            const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
+            this.playVideoAt(nextIndex);
         }
     }
 
@@ -647,17 +652,10 @@ class PlayerService {
     #startStateTracking() {
         clearInterval(this.#TimeTracker);
         this.#TimeTracker = setInterval(() => {
-            if (!this.#YTPlayer || typeof this.#YTPlayer.getPlayerState !== 'function' || this.#YTPlayer.getPlayerState() !== YT.PlayerState.PLAYING) return;
-
-            const idx = this.#YTPlayer.getPlaylistIndex();
+            if (!this.#YTPlayer || typeof this.#YTPlayer.getPlayerState !== 'function') return;
+            if (this.#YTPlayer.getPlayerState() !== YT.PlayerState.PLAYING) return;
+            
             YConfig.playbackPosition = this.#YTPlayer.getCurrentTime();
-
-            if (idx >= 0 && idx !== YConfig.lastIdx) {
-                YConfig.currentEntry = YConfig.entries[idx];
-                this.#uiManager.updateNowPlaying(YConfig.currentEntry, idx, YConfig.entries.length);
-                YConfig.lastIdx = idx;
-            }
-
             localStorage.setItem("YConfig", JSON.stringify(YConfig));
         }, 1000);
     }
