@@ -448,16 +448,20 @@ class PlayerService {
     initializePlayer() {
         clearInterval(this.#TimeTracker);
         if (this.#YTPlayer) this.#YTPlayer.destroy();
+        if (!YConfig.entries || YConfig.entries.length === 0) return;
+
         const playlistIds = YConfig.entries.map(entry => entry.id);
+        const firstVideoId = playlistIds.shift();
 
         this.#YTPlayer = new YT.Player("ytv-player", {
             host: 'https://www.youtube.com',
             origin: window.location.origin,
+            videoId: firstVideoId, // 필수: 첫 번째 영상을 명시
             playerVars: {
                 "enablejsapi": 1,
                 "origin": window.location.origin,
                 "playsinline": 1,
-                "playlist": playlistIds.join(','),
+                "playlist": playlistIds.join(','), 
                 "rel": 0
             },
             events: { 
