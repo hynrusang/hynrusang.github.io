@@ -25,7 +25,7 @@ let YConfig = {
 
 /**
  * @class YouTubeAPIService
- * @description YouTube Data API v3 관련 로직을 처리합니다. (영상 정보 가져오기, 유효성 검사 등)
+ * @description YouTube Data API v3 관련 로직을 처리합니다. (영상 정보 가져오기 유효성 검사 등)
  */
 class YouTubeAPIService {
     // --- Public Methods ---
@@ -85,7 +85,8 @@ class YouTubeAPIService {
         const MAX_RESULTS = 200;
         
         while (true) {
-            const apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${playlistId}&key=${this.#apiKey}&part=snippet&maxResults=50${pageToken ? `&pageToken=${pageToken}` : ""}&fields=items(snippet(title,thumbnails,resourceId(videoId))),nextPageToken`;
+            const apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${playlistId}&key=${this.#apiKey}&part=snippet&maxResults=50${pageToken ?
+            `&pageToken=${pageToken}` : ""}&fields=items(snippet(title,thumbnails,resourceId(videoId))),nextPageToken`;
 
             try {
                 const res = await fetch(apiUrl);
@@ -97,7 +98,7 @@ class YouTubeAPIService {
                 }
                 
                 if (!data.items) break;
-                
+
                 const fetchedEntries = data.items
                     .filter(item => item.snippet?.resourceId?.videoId && item.snippet.title !== 'Private video' && item.snippet.title !== 'Deleted video')
                     .map(item => ({
@@ -105,18 +106,19 @@ class YouTubeAPIService {
                         title: item.snippet.title,
                         img: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url
                     }));
-                
+
                 allEntries.push(...fetchedEntries);
                 pageToken = data.nextPageToken;
                 
                 if (allEntries.length >= MAX_RESULTS || !pageToken) break;
+
             } catch (err) {
                 console.error("Network Error:", err);
                 break;
             }
         }
         
-        return allEntries; 
+        return allEntries;
     }
     
     /**
@@ -140,7 +142,8 @@ class YouTubeAPIService {
         return [{
             id: video.id,
             title: video.snippet.title,
-            img: video.snippet.thumbnails.medium?.url || video.snippet.thumbnails.default?.url
+            img: video.snippet.thumbnails.medium?.url ||
+            video.snippet.thumbnails.default?.url
         }];
     }
 }
@@ -148,22 +151,28 @@ class YouTubeAPIService {
 
 /**
  * @class UIManager
- * @description UI 생성 및 업데이트, 사용자 상호작용 관련 로직을 처리합니다.
+ * @description UI 생성 및 업데이트 사용자 상호작용 관련 로직을 처리합니다.
  */
 class UIManager {
     // --- Public Properties ---
     /** @type {Dynamic} - 현재 재생 목록의 타이틀 라벨 */
     TitleLabel = Dynamic.$("b");
+
     /** @type {Dynamic} - 저장된 재생 목록들을 표시하는 리스트 */
     PlayLists = Dynamic.$("ul");
+
     /** @type {Dynamic} - 현재 활성화된 재생 목록의 영상들을 표시하는 리스트 */
     EntryLists = Dynamic.$("ul", { style: "display: none;" });
+
     /** @type {Dynamic} - 현재 재생 상태(n / m)를 표시하는 엘리먼트 */
     EntryState = Dynamic.$("li", { class: "entry-status", style: "padding: 4px 8px; font-weight: bold; color: #999;" });
+
     /** @type {Dynamic} - 목록 상단의 헤더 */
     ListHeader = Dynamic.$("div", { class: "ytv-list-header ytv-has-playlists" });
+
     /** @type {Dynamic} - 목록 아이템들을 감싸는 컨테이너 */
     listItemsContainer = Dynamic.$("div", { class: "ytv-list-inner" });
+
     /** @type {boolean} - 사이드 패널의 가시성 상태 */
     PanelVisible = true;
 
@@ -208,6 +217,7 @@ class UIManager {
      */
     togglePanel(e) {
         this.PanelVisible = !this.PanelVisible;
+
         const list = document.querySelector('.ytv-list');
         list.style.width = this.PanelVisible ? "" : "0";
         list.style.height = this.PanelVisible ? "" : "0";
@@ -215,7 +225,7 @@ class UIManager {
     }
 
     /**
-     * @description UI의 '현재 재생 중' 정보를 업데이트합니다. (타이틀, 상태 텍스트, 활성 항목 강조)
+     * @description UI의 '현재 재생 중' 정보를 업데이트합니다. (타이틀 상태 텍스트 활성 항목 강조)
      * @param {object} entry - 현재 영상의 Entry 객체
      * @param {number} index - 현재 영상의 인덱스
      * @param {number} total - 전체 영상의 수
@@ -227,8 +237,10 @@ class UIManager {
         const activeNode = this.EntryLists.node.querySelector(".active");
         if (activeNode) activeNode.classList.remove("active");
         
-        const entryItems = this.EntryLists.node.querySelectorAll(".entry-item");
-        entryItems[index]?.classList.add("active");
+        const items = this.EntryLists.node.querySelectorAll(".entry-item");
+        if (items[index]) {
+            items[index].classList.add("active");
+        }
     }
 
     /**
@@ -285,6 +297,7 @@ class UIManager {
     // --- Private Properties ---
     /** @private @type {PlayerService|null} */
     #playerService = null;
+
     /** @private @type {YouTubeAPIService} */
     #apiService;
     /** @private @type {Boolean} */
@@ -298,6 +311,7 @@ class UIManager {
      */
     #togglePlaylistView(e) {
         e.preventDefault();
+
         const showEntries = this.ListHeader.node.classList.toggle("ytv-playlist-open");
         this.PlayLists.set({ style: showEntries ? "display: none" : "" });
         this.EntryLists.set({ style: showEntries ? "" : "display: none" });
@@ -305,7 +319,7 @@ class UIManager {
     
     /**
      * @private
-     * @description '추가' 버튼 클릭 시, 입력된 정보로 새 재생목록을 저장합니다.
+     * @description '추가' 버튼 클릭 시 입력된 정보로 새 재생목록을 저장합니다.
      */
     #addPlaylist() {
         const titleInput = document.getElementById("input-main-title");
@@ -320,6 +334,7 @@ class UIManager {
 
         const playlistMap = DataResource.Data.basic.playlist;
         if (!playlistMap[title]) playlistMap[title] = {};
+
         playlistMap[title][url] = url;
 
         DataResource.Data.updateData("playlist", playlistMap);
@@ -364,6 +379,7 @@ class UIManager {
             )
         );
     }
+
     /**
      * @private
      * @description 재생목록 이름 수정을 처리합니다.
@@ -373,10 +389,12 @@ class UIManager {
      */
     #editPlaylistName(e, title, oldName) {
         e.stopPropagation();
+
         const newName = prompt("새 이름을 입력하세요", oldName);
         if (!newName || newName === oldName) return;
 
         const playlistMap = DataResource.Data.basic.playlist;
+
         if (playlistMap[title][newName]) {
             pushSnackbar({ message: "해당 이름은 이미 존재합니다.", type: "error" });
             return;
@@ -398,6 +416,7 @@ class UIManager {
      */
     #deletePlaylist(e, title, name) {
         e.stopPropagation();
+
         if (!confirm("정말로 삭제하시겠습니까?")) return;
         
         const playlistMap = DataResource.Data.basic.playlist;
@@ -424,7 +443,7 @@ class UIManager {
 
 /**
  * @class PlayerService
- * @description YouTube 플레이어 인스턴스, 상태 및 핵심 제어 로직을 관리합니다.
+ * @description YouTube 플레이어 인스턴스 상태 및 핵심 제어 로직을 관리합니다.
  */
 class PlayerService {
     // --- Public Methods ---
@@ -433,6 +452,7 @@ class PlayerService {
      */
     constructor(uiManager) {
         this.#uiManager = uiManager;
+        this.#initKeepAliveAudio();
     }
 
     /**
@@ -449,11 +469,27 @@ class PlayerService {
      */
     initializePlayer() {
         clearInterval(this.#TimeTracker);
-        if (this.#YTPlayer) this.#YTPlayer.destroy();
+        if (this.#YTPlayer) {
+            this.#YTPlayer.destroy();
+            this.#YTPlayer = null;
+        }
+
         if (!YConfig.entries || YConfig.entries.length === 0) return;
 
+        let playerContainer = document.getElementById("ytv-player");
+        if (!playerContainer) {
+            playerContainer = document.createElement("div");
+            playerContainer.id = "ytv-player";
+            playerContainer.className = "ytv-video";
+            
+            const dynamicPlayer = document.getElementById("dynamic_player");
+            if (dynamicPlayer) {
+                dynamicPlayer.insertBefore(playerContainer, dynamicPlayer.firstChild);
+            }
+        }
+
         const initialVideoId = YConfig.currentEntry ? YConfig.currentEntry.id : YConfig.entries[0].id;
-        
+
         this.#YTPlayer = new YT.Player("ytv-player", {
             host: 'https://www.youtube.com',
             origin: window.location.origin,
@@ -473,7 +509,7 @@ class PlayerService {
     }
 
     /**
-     * @description `YConfig`의 영상 목록을 플레이어에 로드합니다. 시청 기록을 최대한 보존합니다.
+     * @description `YConfig`의 영상 목록을 플레이어에 네이티브 재생목록으로 로드합니다.
      */
     loadPlaylist() {
         if (!this.#YTPlayer || typeof this.#YTPlayer.loadPlaylist !== 'function') return;
@@ -486,18 +522,22 @@ class PlayerService {
             YConfig.currentEntry = YConfig.entries[0] || null;
             YConfig.playbackPosition = 0;
         }
+        YConfig.lastIdx = playIndex;
 
-        this.#YTPlayer.loadVideoById({
-            videoId: YConfig.entries[playIndex].id,
+        const videoIds = YConfig.entries.map(entry => entry.id);
+        
+        this.#YTPlayer.loadPlaylist({
+            playlist: videoIds,
+            index: playIndex,
             startSeconds: YConfig.playbackPosition
         });
-        
+
         this.#uiManager.buildEntryList(YConfig.entries);
         this.#uiManager.updateNowPlaying(YConfig.currentEntry, playIndex, YConfig.entries.length);
     }
     
     /**
-     * @description 새로운 영상 목록으로 교체하고 플레이어를 처음부터 다시 로드합니다. (사용자가 새 재생목록 선택 시)
+     * @description 새로운 영상 목록으로 교체하고 플레이어를 처음부터 다시 로드합니다.
      * @param {Array<object>} entries - 새로운 영상 Entry 객체 배열
      */
     loadNewPlaylist(entries) {
@@ -519,16 +559,12 @@ class PlayerService {
         YConfig.lastIdx = index;
 
         this.#uiManager.updateNowPlaying(YConfig.currentEntry, index, YConfig.entries.length);
-        YConfig.lastIdx = index;
         
-        this.#YTPlayer.loadVideoById({
-            videoId: YConfig.currentEntry.id,
-            startSeconds: 0
-        });
+        this.#YTPlayer.playVideoAt(index);
     }
     
     /**
-     * @description 현재 영상 목록을 무작위로 섞고 플레이어를 다시 로드합니다. (시청 기록 보존)
+     * @description 현재 영상 목록을 무작위로 섞고 플레이어를 다시 로드합니다.
      */
     shuffleEntries() {
         YConfig.entries.sort(() => Math.random() - 0.5);
@@ -537,7 +573,7 @@ class PlayerService {
     }
 
     /**
-     * @description 현재 영상 목록을 역순으로 뒤집고 플레이어를 다시 로드합니다. (시청 기록 보존)
+     * @description 현재 영상 목록을 역순으로 뒤집고 플레이어를 다시 로드합니다.
      */
     reverseEntries() {
         YConfig.entries.reverse();
@@ -547,7 +583,7 @@ class PlayerService {
 
     /**
      * @private
-     * @description 특정 인덱스로 목록을 필터링하고 플레이어를 다시 로드합니다. (시청 기록 보존)
+     * @description 특정 인덱스로 목록을 필터링하고 플레이어를 다시 로드합니다.
      */
     filterEntries() {
         const input = prompt(
@@ -557,18 +593,19 @@ class PlayerService {
             "• 처음부터 : -5 또는 ~5 (1~5번)\n" +
             "• 끝까지   : 7- 또는 7~ (7~N번)\n\n" +
             "※ 단일 번호와 범위를 섞어 입력할 수 있습니다 (예: 2 5-9 11~)\n" +
-            "※ '-' 또는 '~'는 숫자와 붙여 써야 하며, 번호는 현재 재생중인 목록을 따릅니다."
+            "※ '-' 또는 '~'는 숫자와 붙여 써야 하며 번호는 현재 재생중인 목록을 따릅니다."
         );
+
         if (!input) return;
     
         const indices = new Set();
         const tokens = input.trim().split(/\s+/);
         const maxIndex = YConfig.entries.length;
-    
+
         for (const token of tokens) {
             if (/^\d+$/.test(token)) indices.add(Number(token));
             else if (/^(\d+)[-~](\d+)$/.test(token)) {
-                let [ , a, b ] = token.match(/^(\d+)[-~](\d+)$/).map(Number);
+                let [ a, b ] = token.match(/^(\d+)[-~](\d+)$/).slice(1).map(Number);
                 for (let i = Math.min(a, b); i <= Math.max(a, b); i++) indices.add(i);
             } else if (/^[-~](\d+)$/.test(token)) {
                 const end = Number(token.match(/^[-~](\d+)$/)[1]);
@@ -580,6 +617,7 @@ class PlayerService {
         }
     
         const parsed = [...indices].map(n => YConfig.entries[n - 1]).filter(Boolean);
+
         if (!parsed.length) {
             pushSnackbar({ message: "선택이 잘못되었습니다.", type: "error" });
             return;
@@ -593,12 +631,28 @@ class PlayerService {
     // --- Private Properties ---
     /** @private @type {YT.Player|null} - YouTube IFrame Player API의 플레이어 인스턴스 */
     #YTPlayer = null;
+
     /** @private @type {number|null} - 플레이어 상태 추적을 위한 `setInterval` 타이머 ID */
     #TimeTracker = null;
+
     /** @private @type {UIManager} - UI 관리를 위한 UIManager 인스턴스 */
     #uiManager;
 
+    /** @private @type {HTMLAudioElement|null} - 백그라운드 재생 유지를 위한 더미 오디오 */
+    #keepAliveAudio = null;
+
     // --- Private Methods ---
+    /**
+     * @private
+     * @description 브라우저 탭 절전 방지를 위한 더미 오디오를 초기화합니다.
+     */
+    #initKeepAliveAudio() {
+        this.#keepAliveAudio = new Audio();
+        this.#keepAliveAudio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+        this.#keepAliveAudio.loop = true;
+        this.#keepAliveAudio.volume = 0;
+    }
+
     /**
      * @private
      * @description 플레이어 로드(`onStateChange`) 이벤트를 처리합니다.
@@ -616,9 +670,35 @@ class PlayerService {
      * @param {object} event - YouTube 플레이어 이벤트 객체
      */
     #onPlayerStateChange(event) {
-        if (event.data === YT.PlayerState.ENDED) {
-            const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
-            this.playVideoAt(nextIndex);
+        if (event.data === YT.PlayerState.PLAYING) {
+            if (this.#keepAliveAudio) {
+                this.#keepAliveAudio.play().catch(() => {});
+            }
+            
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'playing';
+            }
+
+            const nativeIndex = this.#YTPlayer.getPlaylistIndex();
+            const isValid = nativeIndex >= 0;
+            const isChanged = nativeIndex !== YConfig.lastIdx;
+            
+            if (isValid && isChanged) {
+                YConfig.lastIdx = nativeIndex;
+                YConfig.currentEntry = YConfig.entries[nativeIndex];
+                
+                const totalLength = YConfig.entries.length;
+                this.#uiManager.updateNowPlaying(YConfig.currentEntry, nativeIndex, totalLength);
+            }
+        } 
+        else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+            if (this.#keepAliveAudio) {
+                this.#keepAliveAudio.pause();
+            }
+            
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'paused';
+            }
         }
     }
 
@@ -638,7 +718,7 @@ class PlayerService {
         }[errorCode] || "알 수 없는 오류입니다.";
         
         console.warn(`Playback Error (${errorCode}): ${errorMsg} - Skipping to next track.`);
-        
+
         if (YConfig.entries.length > 1) {
             const safeIndex = YConfig.lastIdx >= 0 ? YConfig.lastIdx : 0;
             const nextIndex = (safeIndex + 1) % YConfig.entries.length;
@@ -664,8 +744,7 @@ class PlayerService {
 }
 
 // --- 전역 인스턴스 및 내보내기 ---
-/** 
- * @type {PlayerService | null} 
+/** * @type {PlayerService | null} 
  * @description 현재 활성화된 PlayerService의 유일한 인스턴스 
  */
 let activePlayerService = null;
