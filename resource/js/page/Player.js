@@ -699,6 +699,11 @@ class PlayerService {
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.playbackState = 'paused';
             }
+
+            // 요청하신 대로 영상이 끝나는 시점에만 로컬 스토리지에 동기화합니다
+            if (event.data === YT.PlayerState.ENDED) {
+                localStorage.setItem("YConfig", JSON.stringify(YConfig));
+            }
         }
     }
 
@@ -729,7 +734,7 @@ class PlayerService {
 
     /**
      * @private
-     * @description `setInterval`을 사용하여 1초마다 플레이어 상태를 확인하고 `localStorage`에 저장합니다.
+     * @description 메모리상의 현재 재생 상태만 가볍게 추적합니다.
      */
     #startStateTracking() {
         clearInterval(this.#TimeTracker);
@@ -738,7 +743,6 @@ class PlayerService {
             if (this.#YTPlayer.getPlayerState() !== YT.PlayerState.PLAYING) return;
             
             YConfig.playbackPosition = this.#YTPlayer.getCurrentTime();
-            localStorage.setItem("YConfig", JSON.stringify(YConfig));
         }, 1000);
     }
 }
