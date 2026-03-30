@@ -224,8 +224,8 @@ class UIManager {
         this.TitleLabel.set({ text: entry.title });
         this.EntryState.set({ text: `${index + 1} / ${total}` });
 
-        const entryItems = this.EntryLists.node.querySelectorAll(".entry-item");
-        if (YConfig.lastIdx >= 0) entryItems[YConfig.lastIdx]?.classList.remove("active");
+        const activeNode = this.EntryLists.node.querySelector(".active");
+        if (activeNode) activeNode.classList.remove("active");
         entryItems[index]?.classList.add("active");
     }
 
