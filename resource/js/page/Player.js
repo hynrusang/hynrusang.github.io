@@ -394,15 +394,16 @@ class PlayerService {
      * 브라우저 메모리 폭파 현상을 원천 차단하기 위해 영상이 바뀔 때마다 이 함수가 호출되어 iframe을 완전히 파괴하고 텅 빈 새 캔버스를 렌더링합니다.
      */
     initializePlayer() {
-        // 기존 인스턴스가 존재할 경우 확실하게 파괴하여 이전 영상의 미디어 버퍼 메모리 누수를 원천 차단합니다
+        // 1. 기존 플레이어 인스턴스 파괴 및 가비지 컬렉션 유도
         if (this.#YTPlayer) {
             this.#YTPlayer.destroy();
             this.#YTPlayer = null;
         }
     
+        // 2. 재생할 데이터가 없는 경우 중단
         if (!YConfig.entries || YConfig.entries.length === 0) return;
     
-        // destroy() 호출 시 요소 자체가 DOM에서 완전히 사라지므로 컨테이너 요소 자체를 매번 새롭게 생성해 줍니다
+        // 3. destroy()로 사라진 플레이어 컨테이너 재생성
         let playerContainer = document.getElementById("ytv-player");
         if (!playerContainer) {
             playerContainer = document.createElement("div");
@@ -415,15 +416,15 @@ class PlayerService {
             }
         }
     
-        // 로컬 스토리지 데이터에 기반하여 재생을 시작할 인덱스 산출
-        let playIndex = YConfig.currentEntry ? YConfig.entries.findIndex(e => e.id === YConfig.currentEntry.id) : -1;
-        if (playIndex === -1) {
+        // 4. 재생 인덱스 결정 및 상태 동기화
+        let playIndex = YConfig.lastIdx;
+        if (playIndex < 0 || playIndex >= YConfig.entries.length) {
             playIndex = 0;
+            YConfig.lastIdx = 0;
             YConfig.currentEntry = YConfig.entries[0] || null;
         }
-        YConfig.lastIdx = playIndex;
     
-        // 텅 빈 단일 영상 환경으로 플레이어를 생성하여 모바일 브라우저의 메모리 사용량을 최소한으로 유지합니다
+        // 5. 새 플레이어 인스턴스 생성
         this.#YTPlayer = new YT.Player("ytv-player", {
             host: 'https://www.youtube.com',
             videoId: YConfig.entries[playIndex].id,
@@ -432,7 +433,7 @@ class PlayerService {
                 "origin": window.location.origin,
                 "playsinline": 1,
                 "rel": 0,
-                "autoplay": 1 // iframe이 새롭게 생성되자마자 즉시 미디어 재생을 시작하도록 강제합니다
+                "autoplay": 1
             },
             events: { 
                 "onReady": () => this.#onPlayerReady(),
@@ -602,9 +603,6 @@ class PlayerService {
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
         }
         else if (event.data === YT.PlayerState.ENDED) {
-            // 핵심 로직: 곡이 끝났을 때 절대 가상 오디오를 끄지 않아 자바스크립트 실행 환경을 철저히 보호합니다
-            localStorage.setItem("YConfig", JSON.stringify(YConfig));
-            
             if (YConfig.entries.length > 0) {
                 const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
                 this.playVideoAt(nextIndex);
