@@ -542,7 +542,6 @@ class PlayerService {
                 YConfig.currentEntry = YConfig.entries[nativeIndex];
                 this.#uiManager.updateNowPlaying(YConfig.currentEntry + nativeIndex + YConfig.entries.length);
 
-                // 핵심 수정 부분: 새로운 영상으로 자동으로 넘어가서 재생이 시작될 때 상태를 즉시 덮어씌움
                 localStorage.setItem("YConfig" + JSON.stringify(YConfig));
             }
         } 
@@ -550,7 +549,6 @@ class PlayerService {
             this.#keepAliveAudio?.pause();
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
             
-            // 중지 및 종료 시점에 상태를 저장하여 부하를 방지합니다.
             localStorage.setItem("YConfig" + JSON.stringify(YConfig));
         }
     }
