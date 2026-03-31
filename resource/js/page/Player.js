@@ -388,7 +388,7 @@ class PlayerService {
         }
         YConfig.lastIdx = playIndex;
     
-        // 1. playerVars에서 문제가 되던 playlist 속성을 완전히 제거하고, 첫 영상(videoId)만으로 렌더링합니다.
+        // playerVars에서 문제가 되던 playlist 속성을 완전히 제거하고 첫 영상(videoId)만으로 렌더링합니다.
         this.#YTPlayer = new YT.Player("ytv-player", {
             host: 'https://www.youtube.com',
             videoId: YConfig.entries[playIndex].id,
@@ -400,6 +400,7 @@ class PlayerService {
             },
             events: { 
                 "onReady": (e) => {
+                    // 플레이어 렌더링이 끝난 직후 전체 영상 ID 배열을 내부 큐에 직접 적재합니다.
                     const idArray = YConfig.entries.map(entry => entry.id);
                     e.target.loadPlaylist(idArray, playIndex);
                     
@@ -428,18 +429,22 @@ class PlayerService {
         YConfig.currentEntry = YConfig.entries[index];
         YConfig.lastIdx = index;
         this.#uiManager.updateNowPlaying(YConfig.currentEntry, index, YConfig.entries.length);
-        this.#YTPlayer.playVideoAt(index);
+        if (this.#YTPlayer && this.#YTPlayer.playVideoAt) {
+            this.#YTPlayer.playVideoAt(index);
+        }
     }
     
     shuffleEntries() {
         YConfig.entries.sort(() => Math.random() - 0.5);
         this.refreshPlaylistStatus();
+        this.#syncNativePlaylist(0);
         pushSnackbar({ message: "재생목록을 섞었습니다.", type: "normal" });
     }
 
     reverseEntries() {
         YConfig.entries.reverse();
         this.refreshPlaylistStatus();
+        this.#syncNativePlaylist(0);
         pushSnackbar({ message: "재생목록을 역순으로 재배치했습니다.", type: "normal" });
     }
 
@@ -477,6 +482,7 @@ class PlayerService {
         }
         YConfig.entries = parsed;
         this.refreshPlaylistStatus();
+        this.#syncNativePlaylist(0);
         pushSnackbar({ message: `선택한 ${parsed.length}개의 영상으로 반복 재생합니다.`, type: "normal" });
     }
 
@@ -486,6 +492,13 @@ class PlayerService {
     #keepAliveAudio = null;
 
     // --- Private Methods ---
+    #syncNativePlaylist(startIndex = 0) {
+        if (this.#YTPlayer && typeof this.#YTPlayer.loadPlaylist === 'function') {
+            const idArray = YConfig.entries.map(entry => entry.id);
+            this.#YTPlayer.loadPlaylist(idArray, startIndex);
+        }
+    }
+
     #initKeepAliveAudio() {
         this.#keepAliveAudio = new Audio();
         this.#keepAliveAudio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
