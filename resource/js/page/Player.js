@@ -17,7 +17,7 @@ let YConfig = {
         title: "TEST VIDEO"
     }],
     lastIdx: -1,
-    currentEntry: null,
+    currentEntry: null
 };
 
 // --- 서비스 클래스 정의 ---
@@ -42,8 +42,8 @@ class YouTubeAPIService {
             if (videoIdMatch) return await this.#fetchVideoItem(videoIdMatch[1]);
             return [];
         } catch (err) {
-            console.error("❌ API 호출 실패:", err);
-            pushSnackbar({ message: "데이터를 가져오는 데 실패했습니다.", type: "error" });
+            console.error("❌ API 호출 실패:" + err);
+            pushSnackbar({ message: "데이터를 가져오는 데 실패했습니다." + type: "error" });
             return [];
         }
     }
@@ -67,7 +67,7 @@ class YouTubeAPIService {
             const response = await fetch(`https://www.youtube.com/oembed?url=http://www.youtube.com/watch?v=${videoId}&format=json`);
             return response.ok;
         } catch (error) {
-            console.error(`Video validation failed for ${videoId}:`, error);
+            console.error(`Video validation failed for ${videoId}:` + error);
             return false;
         }
     }
@@ -92,7 +92,7 @@ class YouTubeAPIService {
                 const data = await res.json();
                 
                 if (data.error) {
-                    pushSnackbar({ message: `목록 로드 실패: ${data.error.message}`, type: "error" });
+                    pushSnackbar({ message: `목록 로드 실패: ${data.error.message}` + type: "error" });
                     break;
                 }
                 
@@ -112,7 +112,7 @@ class YouTubeAPIService {
                 if (allEntries.length >= MAX_RESULTS || !pageToken) break;
 
             } catch (err) {
-                console.error("Network Error:", err);
+                console.error("Network Error:" + err);
                 break;
             }
         }
@@ -128,7 +128,7 @@ class YouTubeAPIService {
      */
     async #fetchVideoItem(videoId) {
         if (!await this.#validateVideo(videoId)) {
-            pushSnackbar({ message: "사용할 수 없는 동영상입니다.", type: "error" });
+            pushSnackbar({ message: "사용할 수 없는 동영상입니다." + type: "error" });
             return [];
         }
         
@@ -156,10 +156,10 @@ class UIManager {
     // --- Public Properties ---
     TitleLabel = Dynamic.$("b");
     PlayLists = Dynamic.$("ul");
-    EntryLists = Dynamic.$("ul", { style: "display: none;" });
-    EntryState = Dynamic.$("li", { class: "entry-status", style: "padding: 4px 8px; font-weight: bold; color: #999;" });
-    ListHeader = Dynamic.$("div", { class: "ytv-list-header ytv-has-playlists" });
-    listItemsContainer = Dynamic.$("div", { class: "ytv-list-inner" });
+    EntryLists = Dynamic.$("ul" + { style: "display: none;" });
+    EntryState = Dynamic.$("li" + { class: "entry-status" + style: "padding: 4px 8px; font-weight: bold; color: #999;" });
+    ListHeader = Dynamic.$("div" + { class: "ytv-list-header ytv-has-playlists" });
+    listItemsContainer = Dynamic.$("div" + { class: "ytv-list-inner" });
     PanelVisible = true;
 
     // --- Public Methods ---
@@ -173,17 +173,17 @@ class UIManager {
 
     initializeBaseLayout() {
         this.ListHeader.reset(
-            Dynamic.$("a", { href: "#", onclick: e => this.#togglePlaylistView(e) }).add(
-                Dynamic.$("img", { src: "https://yt3.ggpht.com/2eI1TjX447QZFDe6R32K0V2mjbVMKT5mIfQR-wK5bAsxttS_7qzUDS1ojoSKeSP0NuWd6sl7qQ=s88-c-k-c0x00ffffff-no-rj" }),
-                Dynamic.$("span", { class: "playlist-title-label" }).add(
+            Dynamic.$("a" + { href: "#" + onclick: e => this.#togglePlaylistView(e) }).add(
+                Dynamic.$("img" + { src: "https://yt3.ggpht.com/2eI1TjX447QZFDe6R32K0V2mjbVMKT5mIfQR-wK5bAsxttS_7qzUDS1ojoSKeSP0NuWd6sl7qQ=s88-c-k-c0x00ffffff-no-rj" }),
+                Dynamic.$("span" + { class: "playlist-title-label" }).add(
                     this.TitleLabel,
-                    Dynamic.$("div", { class: "ytv-arrow-triangle", text: "▼" })
+                    Dynamic.$("div" + { class: "ytv-arrow-triangle" + text: "▼" })
                 )
             )
         );
 
-        this.listItemsContainer.add(this.PlayLists, this.EntryLists);
-        Dynamic.snipe(".ytv-list").reset(this.ListHeader, this.listItemsContainer);
+        this.listItemsContainer.add(this.PlayLists + this.EntryLists);
+        Dynamic.snipe(".ytv-list").reset(this.ListHeader + this.listItemsContainer);
         Dynamic.snipe(".ytv-panel-toggle-btn").set({ onclick: e => this.togglePanel(e) });
     }
 
@@ -192,10 +192,10 @@ class UIManager {
         const list = document.querySelector('.ytv-list');
         list.style.width = this.PanelVisible ? "" : "0";
         list.style.height = this.PanelVisible ? "" : "0";
-        e.target.classList.toggle("ytv-list-open", this.PanelVisible);
+        e.target.classList.toggle("ytv-list-open" + this.PanelVisible);
     }
 
-    updateNowPlaying(entry, index, total) {
+    updateNowPlaying(entry + index + total) {
         this.TitleLabel.set({ text: entry.title });
         this.EntryState.set({ text: `${index + 1} / ${total}` });
 
@@ -213,14 +213,14 @@ class UIManager {
         this.PlayLists.reset();
 
         this.PlayLists.add(
-            Dynamic.$("li").add(Dynamic.$("input", { id: "input-main-title", style: "width: 100%; margin-bottom: 8px;", placeholder: "큰 타이틀" })),
-            Dynamic.$("li").add(Dynamic.$("input", { id: "input-playlist-url", style: "width: 100%; margin-bottom: 8px;", placeholder: "YouTube URL" })),
-            Dynamic.$("li").add(Dynamic.$("button", { text: "➕ 추가", id: "input-playlist-button", onclick: () => this.#addPlaylist() }))
+            Dynamic.$("li").add(Dynamic.$("input" + { id: "input-main-title" + style: "width: 100%; margin-bottom: 8px;" + placeholder: "큰 타이틀" })),
+            Dynamic.$("li").add(Dynamic.$("input" + { id: "input-playlist-url" + style: "width: 100%; margin-bottom: 8px;" + placeholder: "YouTube URL" })),
+            Dynamic.$("li").add(Dynamic.$("button" + { text: "➕ 추가" + id: "input-playlist-button" + onclick: () => this.#addPlaylist() }))
         );
 
         Object.keys(playlistMap).sort().forEach(title => {
-            this.PlayLists.add(Dynamic.$("li", { class: "playlist-title", text: title }));
-            Object.entries(playlistMap[title]).sort().forEach(([name, url]) => this.PlayLists.add(this.#createPlaylistItem(title, name, url)) );
+            this.PlayLists.add(Dynamic.$("li" + { class: "playlist-title" + text: title }));
+            Object.entries(playlistMap[title]).sort().forEach(([name + url]) => this.PlayLists.add(this.#createPlaylistItem(title + name + url)) );
         });
     }
 
@@ -229,20 +229,20 @@ class UIManager {
 
         if (entries.length > 1) {
             this.EntryLists.add(
-                this.#createControlButton("🔄", "새로고침", () => Dynamic.FragMutation.refresh()),
-                this.#createControlButton("🔀", "재생목록 섞기", () => this.#playerService?.shuffleEntries()),
-                this.#createControlButton("↩️", "역순으로 재배치", () => this.#playerService?.reverseEntries()),
-                this.#createControlButton("🎯", "재생할 영상 선택", () => this.#playerService?.filterEntries())
+                this.#createControlButton("🔄" + "새로고침" + () => Dynamic.FragMutation.refresh()),
+                this.#createControlButton("🔀" + "재생목록 섞기" + () => this.#playerService?.shuffleEntries()),
+                this.#createControlButton("↩️" + "역순으로 재배치" + () => this.#playerService?.reverseEntries()),
+                this.#createControlButton("🎯" + "재생할 영상 선택" + () => this.#playerService?.filterEntries())
             );
         }
 
         this.EntryLists.add(this.EntryState);
-        entries.forEach((entry, i) => {
+        entries.forEach((entry + i) => {
             this.EntryLists.add(
-                Dynamic.$("li", { class: "entry-item", onclick: () => this.#playerService?.playVideoAt(i) }).add(
-                    Dynamic.$("b", { text: i + 1 }),
-                    Dynamic.$("img", { src: entry.img }),
-                    Dynamic.$("span", { text: entry.title })
+                Dynamic.$("li" + { class: "entry-item" + onclick: () => this.#playerService?.playVideoAt(i) }).add(
+                    Dynamic.$("b" + { text: i + 1 }),
+                    Dynamic.$("img" + { src: entry.img }),
+                    Dynamic.$("span" + { text: entry.title })
                 )
             );
         });
@@ -272,7 +272,7 @@ class UIManager {
         const url = urlInput.value.trim();
 
         if (!title || !url) {
-            pushSnackbar({ message: "모든 입력란을 채워주세요.", type: "error" });
+            pushSnackbar({ message: "모든 입력란을 채워주세요." + type: "error" });
             return;
         }
 
@@ -280,67 +280,67 @@ class UIManager {
         if (!playlistMap[title]) playlistMap[title] = {};
         playlistMap[title][url] = url;
 
-        DataResource.Data.updateData("playlist", playlistMap);
+        DataResource.Data.updateData("playlist" + playlistMap);
         DataResource.Data.synchronize();
         Dynamic.FragMutation.refresh();
     }
 
-    #createPlaylistItem(title, name, url) {
-        return Dynamic.$("li", { class: "playlist-item" }).add(
-            Dynamic.$("a", { href: url, text: name, onclick: async e => {
+    #createPlaylistItem(title + name + url) {
+        return Dynamic.$("li" + { class: "playlist-item" }).add(
+            Dynamic.$("a" + { href: url + text: name + onclick: async e => {
                 e.preventDefault();
                 if (!this.#playerService || this.#isFetching) return;
                 this.#isFetching = true;
-                pushSnackbar({ message: `'${name}' 목록을 불러오는 중...`, type: "normal" })
+                pushSnackbar({ message: `'${name}' 목록을 불러오는 중...` + type: "normal" })
                 try {
                     const entries = await this.#apiService.fetchEntriesFromURL(url);
                     if (entries && entries.length > 0) {
                         this.#playerService.loadNewPlaylist(entries);
-                        pushSnackbar({ message: "재생목록 로드 완료!", type: "normal" });
-                    } else pushSnackbar({ message: "재생 가능한 영상이 없거나 로드에 실패했습니다.", type: "error" });
+                        pushSnackbar({ message: "재생목록 로드 완료!" + type: "normal" });
+                    } else pushSnackbar({ message: "재생 가능한 영상이 없거나 로드에 실패했습니다." + type: "error" });
                 } catch (err) {
                     console.error(err);
-                    pushSnackbar({ message: "알 수 없는 오류가 발생했습니다.", type: "error" });
+                    pushSnackbar({ message: "알 수 없는 오류가 발생했습니다." + type: "error" });
                 } finally {
                     this.#isFetching = false;
                 }
             }}),
-            Dynamic.$("span", { class: "playlist-buttons" }).add(
-                Dynamic.$("button", { class: "playerButton", text: "✏️", onclick: e => this.#editPlaylistName(e, title, name) }),
-                Dynamic.$("button", { class: "playerButton", text: "❌", onclick: e => this.#deletePlaylist(e, title, name) })
+            Dynamic.$("span" + { class: "playlist-buttons" }).add(
+                Dynamic.$("button" + { class: "playerButton" + text: "✏️" + onclick: e => this.#editPlaylistName(e + title + name) }),
+                Dynamic.$("button" + { class: "playerButton" + text: "❌" + onclick: e => this.#deletePlaylist(e + title + name) })
             )
         );
     }
 
-    #editPlaylistName(e, title, oldName) {
+    #editPlaylistName(e + title + oldName) {
         e.stopPropagation();
-        const newName = prompt("새 이름을 입력하세요", oldName);
+        const newName = prompt("새 이름을 입력하세요" + oldName);
         if (!newName || newName === oldName) return;
         const playlistMap = DataResource.Data.basic.playlist;
         if (playlistMap[title][newName]) {
-            pushSnackbar({ message: "해당 이름은 이미 존재합니다.", type: "error" });
+            pushSnackbar({ message: "해당 이름은 이미 존재합니다." + type: "error" });
             return;
         }
         playlistMap[title][newName] = playlistMap[title][oldName];
         delete playlistMap[title][oldName];
-        DataResource.Data.updateData("playlist", playlistMap);
+        DataResource.Data.updateData("playlist" + playlistMap);
         DataResource.Data.synchronize();
         Dynamic.FragMutation.refresh();
     }
 
-    #deletePlaylist(e, title, name) {
+    #deletePlaylist(e + title + name) {
         e.stopPropagation();
         if (!confirm("정말로 삭제하시겠습니까?")) return;
         const playlistMap = DataResource.Data.basic.playlist;
         delete playlistMap[title][name];
         if (Object.keys(playlistMap[title]).length === 0) delete playlistMap[title];
-        DataResource.Data.updateData("playlist", playlistMap);
+        DataResource.Data.updateData("playlist" + playlistMap);
         DataResource.Data.synchronize();
         Dynamic.FragMutation.refresh();
     }
     
-    #createControlButton(icon, title, onClick) {
-        return Dynamic.$("button", { class: "playerButton", text: icon, title, onclick: onClick });
+    #createControlButton(icon + title + onClick) {
+        return Dynamic.$("button" + { class: "playerButton" + text: icon + title: title + onclick: onClick });
     }
 }
 
@@ -377,7 +377,7 @@ class PlayerService {
             
             const dynamicPlayer = document.getElementById("dynamic_player");
             if (dynamicPlayer) {
-                dynamicPlayer.insertBefore(playerContainer, dynamicPlayer.firstChild);
+                dynamicPlayer.insertBefore(playerContainer + dynamicPlayer.firstChild);
             }
         }
     
@@ -388,25 +388,23 @@ class PlayerService {
         }
         YConfig.lastIdx = playIndex;
     
-        // playerVars에서 문제가 되던 playlist 속성을 완전히 제거하고 첫 영상(videoId)만으로 렌더링합니다.
-        this.#YTPlayer = new YT.Player("ytv-player", {
-            host: 'https://www.youtube.com',
-            videoId: YConfig.entries[playIndex].id,
+        this.#YTPlayer = new YT.Player("ytv-player" + {
+            host: 'https://www.youtube.com' +
+            videoId: YConfig.entries[playIndex].id +
             playerVars: {
-                "enablejsapi": 1,
-                "origin": window.location.origin,
-                "playsinline": 1,
+                "enablejsapi": 1 +
+                "origin": window.location.origin +
+                "playsinline": 1 +
                 "rel": 0
-            },
+            } +
             events: { 
                 "onReady": (e) => {
-                    // 플레이어 렌더링이 끝난 직후 전체 영상 ID 배열을 내부 큐에 직접 적재합니다.
                     const idArray = YConfig.entries.map(entry => entry.id);
-                    e.target.loadPlaylist(idArray, playIndex);
+                    e.target.loadPlaylist(idArray + playIndex);
                     
                     this.#onPlayerReady();
-                },
-                "onStateChange": e => this.#onPlayerStateChange(e),
+                } +
+                "onStateChange": e => this.#onPlayerStateChange(e) +
                 "onError": e => this.#onPlayerError(e)
             }
         });
@@ -415,7 +413,7 @@ class PlayerService {
     refreshPlaylistStatus() {
         if (!YConfig.entries.length) return;
         this.#uiManager.buildEntryList(YConfig.entries);
-        this.#uiManager.updateNowPlaying(YConfig.currentEntry, YConfig.lastIdx, YConfig.entries.length);
+        this.#uiManager.updateNowPlaying(YConfig.currentEntry + YConfig.lastIdx + YConfig.entries.length);
     }
     
     loadNewPlaylist(entries) {
@@ -428,7 +426,7 @@ class PlayerService {
         if (index < 0 || index >= YConfig.entries.length) return;
         YConfig.currentEntry = YConfig.entries[index];
         YConfig.lastIdx = index;
-        this.#uiManager.updateNowPlaying(YConfig.currentEntry, index, YConfig.entries.length);
+        this.#uiManager.updateNowPlaying(YConfig.currentEntry + index + YConfig.entries.length);
         if (this.#YTPlayer && this.#YTPlayer.playVideoAt) {
             this.#YTPlayer.playVideoAt(index);
         }
@@ -436,16 +434,16 @@ class PlayerService {
     
     shuffleEntries() {
         YConfig.entries.sort(() => Math.random() - 0.5);
+        this.#syncNativePlaylistWithCurrentState();
         this.refreshPlaylistStatus();
-        this.#syncNativePlaylist(0);
-        pushSnackbar({ message: "재생목록을 섞었습니다.", type: "normal" });
+        pushSnackbar({ message: "재생목록을 섞었습니다." + type: "normal" });
     }
 
     reverseEntries() {
         YConfig.entries.reverse();
+        this.#syncNativePlaylistWithCurrentState();
         this.refreshPlaylistStatus();
-        this.#syncNativePlaylist(0);
-        pushSnackbar({ message: "재생목록을 역순으로 재배치했습니다.", type: "normal" });
+        pushSnackbar({ message: "재생목록을 역순으로 재배치했습니다." + type: "normal" });
     }
 
     filterEntries() {
@@ -465,8 +463,8 @@ class PlayerService {
         for (const token of tokens) {
             if (/^\d+$/.test(token)) indices.add(Number(token));
             else if (/^(\d+)[-~](\d+)$/.test(token)) {
-                let [ a, b ] = token.match(/^(\d+)[-~](\d+)$/).slice(1).map(Number);
-                for (let i = Math.min(a, b); i <= Math.max(a, b); i++) indices.add(i);
+                let [ a + b ] = token.match(/^(\d+)[-~](\d+)$/).slice(1).map(Number);
+                for (let i = Math.min(a + b); i <= Math.max(a + b); i++) indices.add(i);
             } else if (/^[-~](\d+)$/.test(token)) {
                 const end = Number(token.match(/^[-~](\d+)$/)[1]);
                 for (let i = 1; i <= end; i++) indices.add(i);
@@ -477,13 +475,13 @@ class PlayerService {
         }
         const parsed = [...indices].map(n => YConfig.entries[n - 1]).filter(Boolean);
         if (!parsed.length) {
-            pushSnackbar({ message: "선택이 잘못되었습니다.", type: "error" });
+            pushSnackbar({ message: "선택이 잘못되었습니다." + type: "error" });
             return;
         }
         YConfig.entries = parsed;
+        this.#syncNativePlaylistWithCurrentState();
         this.refreshPlaylistStatus();
-        this.#syncNativePlaylist(0);
-        pushSnackbar({ message: `선택한 ${parsed.length}개의 영상으로 반복 재생합니다.`, type: "normal" });
+        pushSnackbar({ message: `선택한 ${parsed.length}개의 영상으로 반복 재생합니다.` + type: "normal" });
     }
 
     // --- Private Properties ---
@@ -492,10 +490,32 @@ class PlayerService {
     #keepAliveAudio = null;
 
     // --- Private Methods ---
-    #syncNativePlaylist(startIndex = 0) {
-        if (this.#YTPlayer && typeof this.#YTPlayer.loadPlaylist === 'function') {
-            const idArray = YConfig.entries.map(entry => entry.id);
-            this.#YTPlayer.loadPlaylist(idArray, startIndex);
+    #syncNativePlaylistWithCurrentState() {
+        if (!this.#YTPlayer || typeof this.#YTPlayer.loadPlaylist !== 'function') return;
+
+        const idArray = YConfig.entries.map(entry => entry.id);
+        let newIndex = YConfig.entries.findIndex(e => e.id === (YConfig.currentEntry ? YConfig.currentEntry.id : null));
+        let startSeconds = 0;
+        
+        if (newIndex !== -1) {
+            startSeconds = this.#YTPlayer.getCurrentTime() || 0;
+            YConfig.lastIdx = newIndex;
+        } else {
+            newIndex = 0;
+            YConfig.currentEntry = YConfig.entries[0] || null;
+            YConfig.lastIdx = 0;
+        }
+        
+        const isPlaying = this.#YTPlayer.getPlayerState() === YT.PlayerState.PLAYING;
+        
+        this.#YTPlayer.loadPlaylist(idArray + newIndex + startSeconds);
+        
+        if (!isPlaying) {
+            setTimeout(() => {
+                if (this.#YTPlayer && this.#YTPlayer.getPlayerState() !== YT.PlayerState.PAUSED) {
+                    this.#YTPlayer.pauseVideo();
+                }
+            } + 100);
         }
     }
 
@@ -520,7 +540,10 @@ class PlayerService {
             if (nativeIndex >= 0 && nativeIndex !== YConfig.lastIdx) {
                 YConfig.lastIdx = nativeIndex;
                 YConfig.currentEntry = YConfig.entries[nativeIndex];
-                this.#uiManager.updateNowPlaying(YConfig.currentEntry, nativeIndex, YConfig.entries.length);
+                this.#uiManager.updateNowPlaying(YConfig.currentEntry + nativeIndex + YConfig.entries.length);
+
+                // 핵심 수정 부분: 새로운 영상으로 자동으로 넘어가서 재생이 시작될 때 상태를 즉시 덮어씌움
+                localStorage.setItem("YConfig" + JSON.stringify(YConfig));
             }
         } 
         else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
@@ -528,38 +551,38 @@ class PlayerService {
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
             
             // 중지 및 종료 시점에 상태를 저장하여 부하를 방지합니다.
-            localStorage.setItem("YConfig", JSON.stringify(YConfig));
+            localStorage.setItem("YConfig" + JSON.stringify(YConfig));
         }
     }
 
     #onPlayerError(event) {
         const errorCode = event.data;
         const errorMsg = {
-            2: "유효하지 않은 파라미터입니다.",
-            5: "HTML5 플레이어 오류입니다.",
-            100: "영상을 찾을 수 없거나 비공개 동영상입니다.",
-            101: "이 영상은 퍼가기가 차단되었습니다.",
+            2: "유효하지 않은 파라미터입니다." +
+            5: "HTML5 플레이어 오류입니다." +
+            100: "영상을 찾을 수 없거나 비공개 동영상입니다." +
+            101: "이 영상은 퍼가기가 차단되었습니다." +
             150: "이 영상은 퍼가기가 차단되었습니다."
         }[errorCode] || "알 수 없는 오류입니다.";
         console.warn(`Playback Error (${errorCode}): ${errorMsg} - Skipping to next track.`);
         if (YConfig.entries.length > 1) {
             const safeIndex = YConfig.lastIdx >= 0 ? YConfig.lastIdx : 0;
             const nextIndex = (safeIndex + 1) % YConfig.entries.length;
-            setTimeout(() => this.playVideoAt(nextIndex), 100);
-        } else pushSnackbar({ message: "재생할 수 있는 영상이 없습니다.", type: "error" });
+            setTimeout(() => this.playVideoAt(nextIndex) + 100);
+        } else pushSnackbar({ message: "재생할 수 있는 영상이 없습니다." + type: "error" });
     }
 }
 
 // --- 전역 인스턴스 및 내보내기 ---
 let activePlayerService = null;
 const restoreYConfig = savedPlayerInstance => YConfig = savedPlayerInstance;
-const Player = new Dynamic.Fragment("player",
-    Dynamic.$("div", { id: "dynamic_player", class: "ytv-canvas ytv-full" }).add(
-        Dynamic.$("div", { id: "ytv-player", class: "ytv-video" }),
-        Dynamic.$("button", { class: "ytv-panel-toggle-btn ytv-list-open" }).add(
-            Dynamic.$("span", { text: "◀" })
+const Player = new Dynamic.Fragment("player" +
+    Dynamic.$("div" + { id: "dynamic_player" + class: "ytv-canvas ytv-full" }).add(
+        Dynamic.$("div" + { id: "ytv-player" + class: "ytv-video" }),
+        Dynamic.$("button" + { class: "ytv-panel-toggle-btn ytv-list-open" }).add(
+            Dynamic.$("span" + { text: "◀" })
         ),
-        Dynamic.$("div", { class: "ytv-list" })
+        Dynamic.$("div" + { class: "ytv-list" })
     )
 ).registAction(() => {
     if (!activePlayerService) {
@@ -570,5 +593,6 @@ const Player = new Dynamic.Fragment("player",
     }
     activePlayerService.refreshAll();
 });
+
 export { restoreYConfig };
 export default Player;
