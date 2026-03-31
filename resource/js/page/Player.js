@@ -407,11 +407,8 @@ class PlayerService {
             }
         });
     }
-
-    /**
-     * @description 네이티브 재생목록으로 전체 영상을 로드합니다.
-     */
-    loadPlaylist() {
+    
+    refreshPlaylistStatus() {
         if (!YConfig.entries.length) return;
         this.#uiManager.buildEntryList(YConfig.entries);
         this.#uiManager.updateNowPlaying(YConfig.currentEntry, YConfig.lastIdx, YConfig.entries.length);
@@ -433,13 +430,13 @@ class PlayerService {
     
     shuffleEntries() {
         YConfig.entries.sort(() => Math.random() - 0.5);
-        this.loadPlaylist();
+        this.refreshPlaylistStatus();
         pushSnackbar({ message: "재생목록을 섞었습니다.", type: "normal" });
     }
 
     reverseEntries() {
         YConfig.entries.reverse();
-        this.loadPlaylist();
+        this.refreshPlaylistStatus();
         pushSnackbar({ message: "재생목록을 역순으로 재배치했습니다.", type: "normal" });
     }
 
@@ -476,7 +473,7 @@ class PlayerService {
             return;
         }
         YConfig.entries = parsed;
-        this.loadPlaylist();
+        this.refreshPlaylistStatus();
         pushSnackbar({ message: `선택한 ${parsed.length}개의 영상으로 반복 재생합니다.`, type: "normal" });
     }
 
@@ -494,7 +491,7 @@ class PlayerService {
     }
 
     #onPlayerReady() {
-        if (YConfig.entries.length > 0) this.loadPlaylist();
+        if (YConfig.entries.length > 0) this.refreshPlaylistStatus();
         this.#uiManager.buildEntryList(YConfig.entries);
     }
 
