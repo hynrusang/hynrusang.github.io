@@ -366,9 +366,9 @@ class PlayerService {
             this.#YTPlayer.destroy();
             this.#YTPlayer = null;
         }
-
+    
         if (!YConfig.entries || YConfig.entries.length === 0) return;
-
+    
         let playerContainer = document.getElementById("ytv-player");
         if (!playerContainer) {
             playerContainer = document.createElement("div");
@@ -380,19 +380,25 @@ class PlayerService {
                 dynamicPlayer.insertBefore(playerContainer, dynamicPlayer.firstChild);
             }
         }
-
-        const initialVideoId = YConfig.currentEntry ?
-        YConfig.currentEntry.id : YConfig.entries[0].id;
-
+    
+        let playIndex = YConfig.currentEntry ? YConfig.entries.findIndex(e => e.id === YConfig.currentEntry.id) : -1;
+        if (playIndex === -1) {
+            playIndex = 0;
+            YConfig.currentEntry = YConfig.entries[0] || null;
+        }
+        YConfig.lastIdx = playIndex;
+    
+        const videoIdsString = YConfig.entries.map(entry => entry.id).join(',');
         this.#YTPlayer = new YT.Player("ytv-player", {
             host: 'https://www.youtube.com',
             origin: window.location.origin,
-            videoId: initialVideoId,
             playerVars: {
                 "enablejsapi": 1,
                 "origin": window.location.origin,
                 "playsinline": 1,
-                "rel": 0
+                "rel": 0,
+                "playlist": videoIdsString,
+                "index": playIndex
             },
             events: { 
                 "onReady": () => this.#onPlayerReady(),
@@ -406,26 +412,9 @@ class PlayerService {
      * @description 네이티브 재생목록으로 전체 영상을 로드합니다.
      */
     loadPlaylist() {
-        if (!this.#YTPlayer || typeof this.#YTPlayer.loadPlaylist !== 'function') return;
         if (!YConfig.entries.length) return;
-        
-        let playIndex = YConfig.currentEntry ? YConfig.entries.findIndex(e => e.id === YConfig.currentEntry.id) : -1;
-
-        if (playIndex === -1) {
-            playIndex = 0;
-            YConfig.currentEntry = YConfig.entries[0] || null;
-        }
-        YConfig.lastIdx = playIndex;
-
-        const videoIds = YConfig.entries.map(entry => entry.id);
-        
-        this.#YTPlayer.loadPlaylist({
-            playlist: videoIds,
-            index: playIndex,
-        });
-
         this.#uiManager.buildEntryList(YConfig.entries);
-        this.#uiManager.updateNowPlaying(YConfig.currentEntry, playIndex, YConfig.entries.length);
+        this.#uiManager.updateNowPlaying(YConfig.currentEntry, YConfig.lastIdx, YConfig.entries.length);
     }
     
     loadNewPlaylist(entries) {
