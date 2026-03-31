@@ -454,6 +454,7 @@ class PlayerService {
     loadNewPlaylist(entries) {
         YConfig.entries = entries;
         YConfig.currentEntry = entries[0] || null;
+        this.#saveConfig();
         this.initializePlayer();
     }
     
@@ -462,8 +463,10 @@ class PlayerService {
      */
     playVideoAt(index) {
         if (index < 0 || index >= YConfig.entries.length) return;
+
         YConfig.currentEntry = YConfig.entries[index];
         YConfig.lastIdx = index;
+        this.#saveConfig();
         
         // 치명적인 메모리 폭파 현상을 피하기 위해 주소만 교체하지 않고 플레이어 자체를 매번 새롭게 갈아끼웁니다
         this.initializePlayer();
@@ -476,8 +479,11 @@ class PlayerService {
         const current = YConfig.currentEntry;
         const others = YConfig.entries.filter(e => e.id !== current.id);
         others.sort(() => Math.random() - 0.5);
+
         YConfig.entries = [current, ...others];
         YConfig.lastIdx = 0;
+        this.#saveConfig();
+
         this.refreshPlaylistStatus();
         pushSnackbar({ message: "재생목록을 섞었습니다.", type: "normal" });
     }
@@ -488,6 +494,8 @@ class PlayerService {
     reverseEntries() {
         YConfig.entries.reverse();
         YConfig.lastIdx = YConfig.entries.findIndex(e => e.id === YConfig.currentEntry.id);
+        this.#saveConfig();
+
         this.refreshPlaylistStatus();
         pushSnackbar({ message: "재생목록을 역순으로 재배치했습니다.", type: "normal" });
     }
@@ -537,6 +545,7 @@ class PlayerService {
             this.playVideoAt(newIndex);
         } else {
             YConfig.lastIdx = newIndex;
+            this.#saveConfig();
             this.refreshPlaylistStatus();
         }
         pushSnackbar({ message: `선택한 ${parsed.length}개의 영상으로 반복 재생합니다.`, type: "normal" });
@@ -558,6 +567,18 @@ class PlayerService {
         this.#keepAliveAudio.volume = 0.01;
     }
 
+    /**
+     * @private
+     * @description 현재 전역 상태인 YConfig를 localStorage에 즉시 동기화합니다
+     */
+    #saveConfig() {
+        try {
+            localStorage.setItem("YConfig", JSON.stringify(YConfig));
+        } catch (e) {
+            console.error("Storage save failed:" + e);
+        }
+    }
+
     #onPlayerReady() {
         if (YConfig.entries.length > 0) this.refreshPlaylistStatus();
         
@@ -575,26 +596,17 @@ class PlayerService {
         if (event.data === YT.PlayerState.PLAYING) {
             this.#keepAliveAudio?.play().catch(() => {});
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
-            
-            // 재생이 시작될 때 최신 상태를 로컬 스토리지에 동기화합니다
-            localStorage.setItem("YConfig", JSON.stringify(YConfig));
         } 
         else if (event.data === YT.PlayerState.PAUSED) {
-            // 사용자가 명시적으로 정지했을 때만 백그라운드 보호용 가상 오디오를 함께 끕니다
             this.#keepAliveAudio?.pause();
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-            
-            localStorage.setItem("YConfig", JSON.stringify(YConfig));
         }
         else if (event.data === YT.PlayerState.ENDED) {
             // 핵심 로직: 곡이 끝났을 때 절대 가상 오디오를 끄지 않아 자바스크립트 실행 환경을 철저히 보호합니다
             localStorage.setItem("YConfig", JSON.stringify(YConfig));
             
             if (YConfig.entries.length > 0) {
-                const safeIndex = YConfig.lastIdx >= 0 ? YConfig.lastIdx : 0;
-                const nextIndex = (safeIndex + 1) % YConfig.entries.length;
-                
-                // 다음 곡을 재생할 때 브라우저 메모리 확보를 위해 플레이어를 완전히 새로 생성하는 함수로 연결합니다
+                const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
                 this.playVideoAt(nextIndex);
             }
         }
