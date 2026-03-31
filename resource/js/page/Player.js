@@ -388,20 +388,23 @@ class PlayerService {
         }
         YConfig.lastIdx = playIndex;
     
-        const videoIdsString = YConfig.entries.map(entry => entry.id).join(',');
+        // 1. playerVars에서 문제가 되던 playlist 속성을 완전히 제거하고, 첫 영상(videoId)만으로 렌더링합니다.
         this.#YTPlayer = new YT.Player("ytv-player", {
             host: 'https://www.youtube.com',
-            origin: window.location.origin,
+            videoId: YConfig.entries[playIndex].id,
             playerVars: {
                 "enablejsapi": 1,
                 "origin": window.location.origin,
                 "playsinline": 1,
-                "rel": 0,
-                "playlist": videoIdsString,
-                "index": playIndex
+                "rel": 0
             },
             events: { 
-                "onReady": () => this.#onPlayerReady(),
+                "onReady": (e) => {
+                    const idArray = YConfig.entries.map(entry => entry.id);
+                    e.target.loadPlaylist(idArray, playIndex);
+                    
+                    this.#onPlayerReady();
+                },
                 "onStateChange": e => this.#onPlayerStateChange(e),
                 "onError": e => this.#onPlayerError(e)
             }
