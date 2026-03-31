@@ -390,15 +390,19 @@ class PlayerService {
     }
 
     /**
-     * @description YouTube Iframe API를 기반으로 플레이어 인스턴스를 최초에만 생성합니다.
-     * 모바일 백그라운드 자동재생 권한 유지를 위해 한 번 생성된 iframe 요소 자체는 파괴하지 않고 재사용합니다.
+     * @description YouTube Iframe API를 기반으로 단일 영상 플레이어 인스턴스를 생성합니다.
+     * 브라우저 메모리 폭파 현상을 원천 차단하기 위해 영상이 바뀔 때마다 이 함수가 호출되어 iframe을 완전히 파괴하고 텅 빈 새 캔버스를 렌더링합니다.
      */
     initializePlayer() {
-        // 이미 생성된 플레이어가 있다면 요소를 보호하기 위해 그대로 반환합니다
-        if (this.#YTPlayer) return;
+        // 기존 인스턴스가 존재할 경우 확실하게 파괴하여 이전 영상의 미디어 버퍼 메모리 누수를 원천 차단합니다
+        if (this.#YTPlayer) {
+            this.#YTPlayer.destroy();
+            this.#YTPlayer = null;
+        }
     
         if (!YConfig.entries || YConfig.entries.length === 0) return;
     
+        // destroy() 호출 시 요소 자체가 DOM에서 완전히 사라지므로 컨테이너 요소 자체를 매번 새롭게 생성해 줍니다
         let playerContainer = document.getElementById("ytv-player");
         if (!playerContainer) {
             playerContainer = document.createElement("div");
@@ -428,7 +432,7 @@ class PlayerService {
                 "origin": window.location.origin,
                 "playsinline": 1,
                 "rel": 0,
-                "autoplay": 1 // 사용자의 최초 클릭 시점에 즉시 미디어 재생을 시작하도록 강제합니다
+                "autoplay": 1 // iframe이 새롭게 생성되자마자 즉시 미디어 재생을 시작하도록 강제합니다
             },
             events: { 
                 "onReady": () => this.#onPlayerReady(),
@@ -450,13 +454,7 @@ class PlayerService {
     loadNewPlaylist(entries) {
         YConfig.entries = entries;
         YConfig.currentEntry = entries[0] || null;
-        
-        // 새로운 목록을 불러왔을 때 이미 플레이어가 있다면 파괴하지 않고 주소 교체 로직을 바로 태웁니다
-        if (this.#YTPlayer && typeof this.#YTPlayer.getIframe === 'function') {
-            this.playVideoAt(0);
-        } else {
-            this.initializePlayer();
-        }
+        this.initializePlayer();
     }
     
     /**
@@ -468,17 +466,8 @@ class PlayerService {
         YConfig.lastIdx = index;
         this.#uiManager.updateNowPlaying(YConfig.currentEntry, index, YConfig.entries.length);
         
-        // 이전 문서 자체가 파기되므로 브라우저가 메모리를 완벽하게 회수하면서도 요소는 남아있어 백그라운드 재생 권한이 유지됩니다
-        if (this.#YTPlayer && typeof this.#YTPlayer.getIframe === 'function') {
-            const iframe = this.#YTPlayer.getIframe();
-            if (iframe) {
-                const videoId = YConfig.currentEntry.id;
-                const originUrl = encodeURIComponent(window.location.origin);
-                iframe.src = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${originUrl}&playsinline=1&rel=0&autoplay=1`;
-            }
-        } else {
-            this.initializePlayer();
-        }
+        // 치명적인 메모리 폭파 현상을 피하기 위해 주소만 교체하지 않고 플레이어 자체를 매번 새롭게 갈아끼웁니다
+        this.initializePlayer();
     }
     
     /**
@@ -566,6 +555,7 @@ class PlayerService {
         this.#keepAliveAudio = new Audio();
         this.#keepAliveAudio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
         this.#keepAliveAudio.loop = true;
+        // 안드로이드 운영체제가 무음 미디어로 판단하여 프로세스를 강제 종료하지 않도록 볼륨을 0.01로 미세하게 올립니다
         this.#keepAliveAudio.volume = 0.01;
     }
 
@@ -606,7 +596,7 @@ class PlayerService {
                 const safeIndex = YConfig.lastIdx >= 0 ? YConfig.lastIdx : 0;
                 const nextIndex = (safeIndex + 1) % YConfig.entries.length;
                 
-                // 다음 영상으로 넘어갈 때 직접 주소를 교체하는 함수를 호출합니다
+                // 다음 곡을 재생할 때 브라우저 메모리 확보를 위해 플레이어를 완전히 새로 생성하는 함수로 연결합니다
                 this.playVideoAt(nextIndex);
             }
         }
@@ -632,7 +622,7 @@ class PlayerService {
             const safeIndex = YConfig.lastIdx >= 0 ? YConfig.lastIdx : 0;
             const nextIndex = (safeIndex + 1) % YConfig.entries.length;
             
-            // 에러 발생 시에도 메모리 확보를 위해 깔끔하게 다음 곡 주소로 교체합니다
+            // 에러 발생 시에도 메모리 확보를 위해 안전하게 플레이어를 파괴하고 다음 곡으로 넘깁니다
             setTimeout(() => this.playVideoAt(nextIndex), 100);
         } else pushSnackbar({ message: "재생할 수 있는 영상이 없습니다.", type: "error" });
     }
