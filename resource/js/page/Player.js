@@ -464,7 +464,6 @@ class PlayerService {
         if (index < 0 || index >= YConfig.entries.length) return;
         YConfig.currentEntry = YConfig.entries[index];
         YConfig.lastIdx = index;
-        this.#uiManager.updateNowPlaying(YConfig.currentEntry, index, YConfig.entries.length);
         
         // 치명적인 메모리 폭파 현상을 피하기 위해 주소만 교체하지 않고 플레이어 자체를 매번 새롭게 갈아끼웁니다
         this.initializePlayer();
@@ -561,7 +560,6 @@ class PlayerService {
 
     #onPlayerReady() {
         if (YConfig.entries.length > 0) this.refreshPlaylistStatus();
-        this.#uiManager.buildEntryList(YConfig.entries);
         
         // 모바일 환경에서 재생 권한을 잃지 않도록 ready 직후 playVideo 명령을 한 번 더 확실하게 전달합니다
         if (this.#YTPlayer && this.#YTPlayer.playVideo) {
