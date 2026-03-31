@@ -2,16 +2,13 @@ import { Dynamic } from "../init/module.js";
 import { pushSnackbar } from "../util/Tools.js";
 import DataResource from "../util/DataResource.js";
 
-// ==========================================
-// 1. 초기 설정 및 전역 상태 관리
-// ==========================================
+// --- 초기 설정 및 상태 관리 ---
 
 /**
- * @description YouTube 플레이어 및 재생목록 데이터의 전반적인 상태를 관리하는 전역 설정 객체입니다.
- * 재생할 영상들의 목록과 현재 재생 중인 위치 정보를 기억하여 로컬 스토리지 동기화 및 UI 업데이트에 활용됩니다.
- * @property {Array<object>} entries - 현재 재생 대기열에 포함된 모든 영상 정보(ID 썸네일 제목) 배열
- * @property {number} lastIdx - 내부 큐에서 마지막으로 재생된 영상의 위치 인덱스 번호
- * @property {object|null} currentEntry - 현재 재생 중인 단일 영상의 정보 객체
+ * @description YouTube 플레이어 및 재생목록 데이터의 상태를 관리하는 전역 설정 객체입니다.
+ * @property {Array<object>} entries - 현재 재생 목록의 영상 정보 배열
+ * @property {number} lastIdx - 마지막으로 재생된 영상의 인덱스
+ * @property {object|null} currentEntry - 현재 재생 중인 영상의 Entry 객체
  */
 let YConfig = {
     entries: [{
@@ -20,37 +17,33 @@ let YConfig = {
         title: "TEST VIDEO"
     }],
     lastIdx: -1,
-    currentEntry: null
+    currentEntry: null,
+    playbackPosition: 0
 };
 
-// ==========================================
-// 2. 서비스 클래스 정의 (API 통신 및 UI/플레이어 제어)
-// ==========================================
+// --- 서비스 클래스 정의 ---
 
 /**
  * @class YouTubeAPIService
- * @description YouTube Data API v3를 활용하여 영상 정보를 긁어오고 유효성을 검사하는 백엔드 통신 담당 클래스입니다.
+ * @description YouTube Data API v3 관련 로직을 처리합니다. (영상 정보 가져오기, 유효성 검사 등)
  */
 class YouTubeAPIService {
     // --- Public Methods ---
     /**
-     * @description 사용자가 입력한 YouTube URL(단일 영상 또는 재생목록)을 분석하여 재생 가능한 영상 목록 데이터로 변환합니다.
-     * @param {string} url - 사용자가 입력한 YouTube 영상 또는 재생목록 주소
-     * @returns {Promise<Array<object>>} - 파싱 및 검증이 완료된 Entry 객체 배열
+     * @description YouTube URL(단일 영상 또는 재생목록)에서 재생 가능한 영상 목록을 가져옵니다.
+     * @param {string} url - YouTube 영상 또는 재생목록 URL
+     * @returns {Promise<Array<object>>} - Entry 객체 배열
      */
     async fetchEntriesFromURL(url) {
-        // 정규식을 통해 재생목록 ID 또는 단일 영상 ID를 추출합니다
         const playlistIdMatch = url.match(/[?&]list=([a-zA-Z0-9_-]+)/);
         const videoIdMatch = url.match(/(?:[?&]v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
 
         try {
-            // 재생목록 주소인 경우 재생목록 페치 메서드 호출
             if (playlistIdMatch) return await this.#fetchPlaylistItems(playlistIdMatch[1]);
-            // 단일 영상 주소인 경우 단일 영상 페치 메서드 호출
             if (videoIdMatch) return await this.#fetchVideoItem(videoIdMatch[1]);
             return [];
         } catch (err) {
-            console.error("❌ API 호출 실패:" + err);
+            console.error("❌ API 호출 실패:", err);
             pushSnackbar({ message: "데이터를 가져오는 데 실패했습니다.", type: "error" });
             return [];
         }
@@ -59,7 +52,6 @@ class YouTubeAPIService {
     // --- Private Properties ---
     /**
      * @private
-     * @description YouTube Data API v3 호출 시 필요한 인증 키입니다.
      * @type {string}
      */
     #apiKey = "AIzaSyAglJGn84cPu_YvRUdigYQFCBml-s6kcuo";
@@ -67,26 +59,25 @@ class YouTubeAPIService {
     // --- Private Methods ---
     /**
      * @private
-     * @description oEmbed 엔드포인트를 우회 호출하여 해당 영상 ID가 퍼가기 제한 없이 실제로 재생 가능한지 사전 검증합니다.
-     * @param {string} videoId - 유효성을 검사할 YouTube 영상 고유 ID
-     * @returns {Promise<boolean>} - 재생 가능 여부 (true/false)
+     * @description 영상 ID가 실제로 재생 가능한지 oEmbed 엔드포인트를 통해 확인합니다.
+     * @param {string} videoId - 확인할 YouTube 영상 ID
+     * @returns {Promise<boolean>} - 재생 가능 여부
      */
     async #validateVideo(videoId) {
         try {
             const response = await fetch(`https://www.youtube.com/oembed?url=http://www.youtube.com/watch?v=${videoId}&format=json`);
             return response.ok;
         } catch (error) {
-            console.error(`Video validation failed for ${videoId}:` + error);
+            console.error(`Video validation failed for ${videoId}:`, error);
             return false;
         }
     }
     
     /**
      * @private
-     * @description 재생목록 ID를 기반으로 내부의 모든 영상 항목을 순회하며 가져옵니다.
-     * 비공개 및 삭제된 동영상은 이 단계에서 자동으로 필터링됩니다.
-     * @param {string} playlistId - YouTube 공식 재생목록 고유 ID
-     * @returns {Promise<Array<object>>} - 검증이 완료된 Entry 객체 배열
+     * @description 재생목록 ID를 사용하여 모든 항목을 가져오고 유효성을 검사합니다. (최대 200개)
+     * @param {string} playlistId - YouTube 재생목록 ID
+     * @returns {Promise<Array<object>>} - 유효한 Entry 객체 배열
      */
     async #fetchPlaylistItems(playlistId) {
         let allEntries = [];
@@ -100,15 +91,13 @@ class YouTubeAPIService {
                 const res = await fetch(apiUrl);
                 const data = await res.json();
                 
-                // API 할당량 초과 및 잘못된 요청 에러 핸들링
                 if (data.error) {
                     pushSnackbar({ message: `목록 로드 실패: ${data.error.message}`, type: "error" });
                     break;
                 }
                 
                 if (!data.items) break;
-
-                // 비공개 영상 및 삭제된 영상 필터링 후 렌더링용 객체로 매핑
+                
                 const fetchedEntries = data.items
                     .filter(item => item.snippet?.resourceId?.videoId && item.snippet.title !== 'Private video' && item.snippet.title !== 'Deleted video')
                     .map(item => ({
@@ -116,27 +105,25 @@ class YouTubeAPIService {
                         title: item.snippet.title,
                         img: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url
                     }));
-
+                
                 allEntries.push(...fetchedEntries);
                 pageToken = data.nextPageToken;
                 
-                // 최대 개수에 도달하거나 다음 페이지가 없으면 루프 종료
                 if (allEntries.length >= MAX_RESULTS || !pageToken) break;
-
             } catch (err) {
-                console.error("Network Error:" + err);
+                console.error("Network Error:", err);
                 break;
             }
         }
         
-        return allEntries;
+        return allEntries; 
     }
     
     /**
      * @private
-     * @description 단일 영상 ID를 기반으로 상세 정보를 가져오고 재생 유효성을 최종 검사합니다.
-     * @param {string} videoId - YouTube 영상 고유 ID
-     * @returns {Promise<Array<object>>} - 유효성이 확인된 단일 Entry 객체가 담긴 배열
+     * @description 단일 영상 ID를 사용하여 정보를 가져오고 유효성을 검사합니다.
+     * @param {string} videoId - YouTube 영상 ID
+     * @returns {Promise<Array<object>>} - 유효한 Entry 객체가 담긴 배열 (또는 빈 배열)
      */
     async #fetchVideoItem(videoId) {
         if (!await this.#validateVideo(videoId)) {
@@ -161,29 +148,43 @@ class YouTubeAPIService {
 
 /**
  * @class UIManager
- * @description 사용자 인터페이스 요소 생성 및 클릭 이벤트 등 프론트엔드 상호작용 관련 로직을 독점적으로 처리합니다.
+ * @description UI 생성 및 업데이트, 사용자 상호작용 관련 로직을 처리합니다.
  */
 class UIManager {
     // --- Public Properties ---
+    /** @type {Dynamic} - 현재 재생 목록의 타이틀 라벨 */
     TitleLabel = Dynamic.$("b");
+    /** @type {Dynamic} - 저장된 재생 목록들을 표시하는 리스트 */
     PlayLists = Dynamic.$("ul");
+    /** @type {Dynamic} - 현재 활성화된 재생 목록의 영상들을 표시하는 리스트 */
     EntryLists = Dynamic.$("ul", { style: "display: none;" });
+    /** @type {Dynamic} - 현재 재생 상태(n / m)를 표시하는 엘리먼트 */
     EntryState = Dynamic.$("li", { class: "entry-status", style: "padding: 4px 8px; font-weight: bold; color: #999;" });
+    /** @type {Dynamic} - 목록 상단의 헤더 */
     ListHeader = Dynamic.$("div", { class: "ytv-list-header ytv-has-playlists" });
+    /** @type {Dynamic} - 목록 아이템들을 감싸는 컨테이너 */
     listItemsContainer = Dynamic.$("div", { class: "ytv-list-inner" });
+    /** @type {boolean} - 사이드 패널의 가시성 상태 */
     PanelVisible = true;
 
     // --- Public Methods ---
+    /**
+     * @param {YouTubeAPIService} apiService - YouTubeAPIService 인스턴스
+     */
     constructor(apiService) {
         this.#apiService = apiService;
     }
 
+    /**
+     * @description PlayerService 인스턴스를 설정하여 순환 참조를 해결합니다.
+     * @param {PlayerService} playerService - 주입할 PlayerService 인스턴스
+     */
     setPlayerService(playerService) {
         this.#playerService = playerService;
     }
 
     /**
-     * @description 플레이어 우측 및 하단의 커스텀 UI 골격을 최초 1회 초기화합니다.
+     * @description 플레이어의 기본 레이아웃을 초기화하고 DOM에 렌더링합니다.
      */
     initializeBaseLayout() {
         this.ListHeader.reset(
@@ -202,7 +203,8 @@ class UIManager {
     }
 
     /**
-     * @description 우측 재생목록 패널의 열림 닫힘 상태를 제어합니다.
+     * @description 사이드 패널 전체를 토글(표시/숨김)합니다.
+     * @param {Event} e - 클릭 이벤트 객체
      */
     togglePanel(e) {
         this.PanelVisible = !this.PanelVisible;
@@ -213,36 +215,33 @@ class UIManager {
     }
 
     /**
-     * @description 현재 재생 중인 영상 정보를 UI에 반영합니다.
+     * @description UI의 '현재 재생 중' 정보를 업데이트합니다. (타이틀, 상태 텍스트, 활성 항목 강조)
+     * @param {object} entry - 현재 영상의 Entry 객체
+     * @param {number} index - 현재 영상의 인덱스
+     * @param {number} total - 전체 영상의 수
      */
     updateNowPlaying(entry, index, total) {
         this.TitleLabel.set({ text: entry.title });
         this.EntryState.set({ text: `${index + 1} / ${total}` });
 
-        const activeNode = this.EntryLists.node.querySelector(".active");
-        if (activeNode) activeNode.classList.remove("active");
-        
-        const items = this.EntryLists.node.querySelectorAll(".entry-item");
-        if (items[index]) {
-            items[index].classList.add("active");
-        }
+        const entryItems = this.EntryLists.node.querySelectorAll(".entry-item");
+        if (YConfig.lastIdx >= 0) entryItems[YConfig.lastIdx]?.classList.remove("active");
+        entryItems[index]?.classList.add("active");
     }
 
     /**
-     * @description 로컬 저장소에 저장된 대분류 재생목록 UI를 생성합니다.
+     * @description `DataResource`에서 데이터를 읽어와 저장된 재생 목록 UI를 구성합니다.
      */
     buildPlaylistList() {
         const playlistMap = DataResource.Data.basic.playlist;
         this.PlayLists.reset();
 
-        // 재생목록 추가를 위한 입력란 및 버튼 생성
         this.PlayLists.add(
             Dynamic.$("li").add(Dynamic.$("input", { id: "input-main-title", style: "width: 100%; margin-bottom: 8px;", placeholder: "큰 타이틀" })),
             Dynamic.$("li").add(Dynamic.$("input", { id: "input-playlist-url", style: "width: 100%; margin-bottom: 8px;", placeholder: "YouTube URL" })),
             Dynamic.$("li").add(Dynamic.$("button", { text: "➕ 추가", id: "input-playlist-button", onclick: () => this.#addPlaylist() }))
         );
 
-        // 저장된 플레이리스트 데이터를 순회하며 DOM 요소 렌더링
         Object.keys(playlistMap).sort().forEach(title => {
             this.PlayLists.add(Dynamic.$("li", { class: "playlist-title", text: title }));
             Object.entries(playlistMap[title]).sort().forEach(([name, url]) => this.PlayLists.add(this.#createPlaylistItem(title, name, url)) );
@@ -250,12 +249,12 @@ class UIManager {
     }
 
     /**
-     * @description 현재 대기열에 올라온 개별 영상 목록을 하단 UI로 생성합니다.
+     * @description 주어진 영상 목록(entries)으로 현재 영상 목록 UI를 구성합니다.
+     * @param {Array<object>} entries - 표시할 영상 Entry 객체 배열
      */
     buildEntryList(entries) {
         this.EntryLists.reset();
 
-        // 셔플 및 필터링 제어 버튼 추가
         if (entries.length > 1) {
             this.EntryLists.add(
                 this.#createControlButton("🔄", "새로고침", () => Dynamic.FragMutation.refresh()),
@@ -282,11 +281,19 @@ class UIManager {
     }
 
     // --- Private Properties ---
+    /** @private @type {PlayerService|null} */
     #playerService = null;
+    /** @private @type {YouTubeAPIService} */
     #apiService;
+    /** @private @type {Boolean} */
     #isFetching = false;
 
     // --- Private Methods ---
+    /**
+     * @private
+     * @description 저장된 재생목록 뷰와 현재 영상 목록 뷰를 전환합니다.
+     * @param {Event} e - 클릭 이벤트 객체
+     */
     #togglePlaylistView(e) {
         e.preventDefault();
         const showEntries = this.ListHeader.node.classList.toggle("ytv-playlist-open");
@@ -294,6 +301,10 @@ class UIManager {
         this.EntryLists.set({ style: showEntries ? "" : "display: none" });
     }
     
+    /**
+     * @private
+     * @description '추가' 버튼 클릭 시, 입력된 정보로 새 재생목록을 저장합니다.
+     */
     #addPlaylist() {
         const titleInput = document.getElementById("input-main-title");
         const urlInput = document.getElementById("input-playlist-url");
@@ -314,15 +325,26 @@ class UIManager {
         Dynamic.FragMutation.refresh();
     }
 
+    /**
+     * @private
+     * @description 저장된 재생목록의 개별 항목 UI를 생성합니다.
+     * @param {string} title - 재생목록의 대분류 타이틀
+     * @param {string} name - 재생목록의 이름(소분류)
+     * @param {string} url - 재생목록의 YouTube URL
+     * @returns {Dynamic} - 생성된 `<li>` Dynamic 객체
+     */
     #createPlaylistItem(title, name, url) {
         return Dynamic.$("li", { class: "playlist-item" }).add(
             Dynamic.$("a", { href: url, text: name, onclick: async e => {
                 e.preventDefault();
                 if (!this.#playerService || this.#isFetching) return;
                 this.#isFetching = true;
+                
                 pushSnackbar({ message: `'${name}' 목록을 불러오는 중...`, type: "normal" })
+                
                 try {
                     const entries = await this.#apiService.fetchEntriesFromURL(url);
+                    
                     if (entries && entries.length > 0) {
                         this.#playerService.loadNewPlaylist(entries);
                         pushSnackbar({ message: "재생목록 로드 완료!", type: "normal" });
@@ -340,11 +362,18 @@ class UIManager {
             )
         );
     }
-
+    /**
+     * @private
+     * @description 재생목록 이름 수정을 처리합니다.
+     * @param {Event} e - 클릭 이벤트
+     * @param {string} title - 대분류 타이틀
+     * @param {string} oldName - 이전 이름
+     */
     #editPlaylistName(e, title, oldName) {
         e.stopPropagation();
         const newName = prompt("새 이름을 입력하세요", oldName);
         if (!newName || newName === oldName) return;
+
         const playlistMap = DataResource.Data.basic.playlist;
         if (playlistMap[title][newName]) {
             pushSnackbar({ message: "해당 이름은 이미 존재합니다.", type: "error" });
@@ -352,22 +381,40 @@ class UIManager {
         }
         playlistMap[title][newName] = playlistMap[title][oldName];
         delete playlistMap[title][oldName];
+
         DataResource.Data.updateData("playlist", playlistMap);
         DataResource.Data.synchronize();
         Dynamic.FragMutation.refresh();
     }
 
+    /**
+     * @private
+     * @description 재생목록 삭제를 처리합니다.
+     * @param {Event} e - 클릭 이벤트
+     * @param {string} title - 대분류 타이틀
+     * @param {string} name - 삭제할 재생목록 이름
+     */
     #deletePlaylist(e, title, name) {
         e.stopPropagation();
         if (!confirm("정말로 삭제하시겠습니까?")) return;
+        
         const playlistMap = DataResource.Data.basic.playlist;
         delete playlistMap[title][name];
         if (Object.keys(playlistMap[title]).length === 0) delete playlistMap[title];
+
         DataResource.Data.updateData("playlist", playlistMap);
         DataResource.Data.synchronize();
         Dynamic.FragMutation.refresh();
     }
     
+    /**
+     * @private
+     * @description 영상 목록 상단의 컨트롤 버튼을 생성하는 헬퍼 함수입니다.
+     * @param {string} icon - 버튼에 표시될 아이콘
+     * @param {string} title - 버튼의 툴팁(title 속성)
+     * @param {Function} onClick - 버튼 클릭 시 실행될 콜백 함수
+     * @returns {Dynamic} - 생성된 `<button>` Dynamic 객체
+     */
     #createControlButton(icon, title, onClick) {
         return Dynamic.$("button", { class: "playerButton", text: icon, title, onclick: onClick });
     }
@@ -375,14 +422,20 @@ class UIManager {
 
 /**
  * @class PlayerService
- * @description YouTube 플레이어 인스턴스의 생명주기 제어 및 셔플 등 핵심 재생 로직을 관리합니다.
+ * @description YouTube 플레이어 인스턴스, 상태 및 핵심 제어 로직을 관리합니다.
  */
 class PlayerService {
+    // --- Public Methods ---
+    /**
+     * @param {UIManager} uiManager - UIManager 인스턴스
+     */
     constructor(uiManager) {
         this.#uiManager = uiManager;
-        this.#initKeepAliveAudio();
     }
 
+    /**
+     * @description 서비스의 모든 UI와 플레이어를 새로고침합니다.
+     */
     refreshAll() {
         this.#uiManager.initializeBaseLayout();
         this.#uiManager.buildPlaylistList();
@@ -390,111 +443,92 @@ class PlayerService {
     }
 
     /**
-     * @description YouTube Iframe API를 기반으로 단일 영상 플레이어 인스턴스를 생성합니다.
-     * 브라우저 메모리 폭파 현상을 원천 차단하기 위해 영상이 바뀔 때마다 이 함수가 호출되어 iframe을 완전히 파괴하고 텅 빈 새 캔버스를 렌더링합니다.
+     * @description YouTube 플레이어 인스턴스를 초기화합니다.
      */
     initializePlayer() {
-        // 기존 인스턴스가 존재할 경우 확실하게 파괴하여 이전 영상의 미디어 버퍼 메모리 누수를 원천 차단합니다
-        if (this.#YTPlayer) {
-            this.#YTPlayer.destroy();
-            this.#YTPlayer = null;
-        }
-    
-        if (!YConfig.entries || YConfig.entries.length === 0) return;
-    
-        // destroy() 호출 시 요소 자체가 DOM에서 완전히 사라지므로 컨테이너 요소 자체를 매번 새롭게 생성해 줍니다
-        let playerContainer = document.getElementById("ytv-player");
-        if (!playerContainer) {
-            playerContainer = document.createElement("div");
-            playerContainer.id = "ytv-player";
-            playerContainer.className = "ytv-video";
-            
-            const dynamicPlayer = document.getElementById("dynamic_player");
-            if (dynamicPlayer) {
-                dynamicPlayer.insertBefore(playerContainer, dynamicPlayer.firstChild);
-            }
-        }
-    
-        // 로컬 스토리지 데이터에 기반하여 재생을 시작할 인덱스 산출
-        let playIndex = YConfig.currentEntry ? YConfig.entries.findIndex(e => e.id === YConfig.currentEntry.id) : -1;
-        if (playIndex === -1) {
-            playIndex = 0;
-            YConfig.currentEntry = YConfig.entries[0] || null;
-        }
-        YConfig.lastIdx = playIndex;
-    
-        // 텅 빈 단일 영상 환경으로 플레이어를 생성하여 모바일 브라우저의 메모리 사용량을 최소한으로 유지합니다
+        clearInterval(this.#TimeTracker);
+        if (this.#YTPlayer) this.#YTPlayer.destroy();
+        const playlistIds = YConfig.entries.map(entry => entry.id);
+
         this.#YTPlayer = new YT.Player("ytv-player", {
             host: 'https://www.youtube.com',
-            videoId: YConfig.entries[playIndex].id,
+            origin: window.location.origin,
             playerVars: {
                 "enablejsapi": 1,
                 "origin": window.location.origin,
                 "playsinline": 1,
-                "rel": 0,
-                "autoplay": 1 // iframe이 새롭게 생성되자마자 즉시 미디어 재생을 시작하도록 강제합니다
+                "playlist": playlistIds.join(','),
+                "rel": 0
             },
             events: { 
                 "onReady": () => this.#onPlayerReady(),
-                "onStateChange": e => this.#onPlayerStateChange(e),
                 "onError": e => this.#onPlayerError(e)
             }
         });
     }
-    
-    refreshPlaylistStatus() {
+
+    /**
+     * @description `YConfig`의 영상 목록을 플레이어에 로드합니다. 시청 기록을 최대한 보존합니다.
+     */
+    loadPlaylist() {
+        if (!this.#YTPlayer || typeof this.#YTPlayer.loadPlaylist !== 'function') return;
         if (!YConfig.entries.length) return;
+
+        const playlist = YConfig.entries.map(entry => entry.id);
+        let playIndex = YConfig.currentEntry ? playlist.indexOf(YConfig.currentEntry.id) : -1;
+
+        if (playIndex === -1) {
+            playIndex = 0;
+            YConfig.currentEntry = YConfig.entries[0] || null;
+            YConfig.playbackPosition = 0;
+        }
+        
+        YConfig.lastIdx = -1;
+        this.#YTPlayer.loadPlaylist(playlist, playIndex, YConfig.playbackPosition, "default");
+        this.#YTPlayer.setLoop(true);
         this.#uiManager.buildEntryList(YConfig.entries);
-        this.#uiManager.updateNowPlaying(YConfig.currentEntry, YConfig.lastIdx, YConfig.entries.length);
     }
     
     /**
-     * @description 새로운 외부 재생목록이 로드되었을 때 플레이어를 초기화합니다.
+     * @description 새로운 영상 목록으로 교체하고 플레이어를 처음부터 다시 로드합니다. (사용자가 새 재생목록 선택 시)
+     * @param {Array<object>} entries - 새로운 영상 Entry 객체 배열
      */
     loadNewPlaylist(entries) {
         YConfig.entries = entries;
         YConfig.currentEntry = entries[0] || null;
+        YConfig.playbackPosition = 0;
         this.initializePlayer();
     }
     
     /**
-     * @description 커스텀 UI에서 특정 영상을 클릭하거나 다음 곡으로 넘어갈 때 해당 인덱스로 점프합니다.
+     * @description 지정된 인덱스의 영상을 재생합니다.
+     * @param {number} index - 재생할 영상의 인덱스
      */
     playVideoAt(index) {
-        if (index < 0 || index >= YConfig.entries.length) return;
-        YConfig.currentEntry = YConfig.entries[index];
-        YConfig.lastIdx = index;
-        this.#uiManager.updateNowPlaying(YConfig.currentEntry, index, YConfig.entries.length);
-        
-        // 치명적인 메모리 폭파 현상을 피하기 위해 주소만 교체하지 않고 플레이어 자체를 매번 새롭게 갈아끼웁니다
-        this.initializePlayer();
+        this.#YTPlayer.playVideoAt(index);
     }
     
     /**
-     * @description 현재 재생 중인 영상을 제외한 나머지 대기열을 무작위로 섞어 새롭게 배치합니다.
+     * @description 현재 영상 목록을 무작위로 섞고 플레이어를 다시 로드합니다. (시청 기록 보존)
      */
     shuffleEntries() {
-        const current = YConfig.currentEntry;
-        const others = YConfig.entries.filter(e => e.id !== current.id);
-        others.sort(() => Math.random() - 0.5);
-        YConfig.entries = [current, ...others];
-        YConfig.lastIdx = 0;
-        this.refreshPlaylistStatus();
+        YConfig.entries.sort(() => Math.random() - 0.5);
+        this.loadPlaylist();
         pushSnackbar({ message: "재생목록을 섞었습니다.", type: "normal" });
     }
 
     /**
-     * @description 현재 대기열을 역순으로 재배치합니다.
+     * @description 현재 영상 목록을 역순으로 뒤집고 플레이어를 다시 로드합니다. (시청 기록 보존)
      */
     reverseEntries() {
         YConfig.entries.reverse();
-        YConfig.lastIdx = YConfig.entries.findIndex(e => e.id === YConfig.currentEntry.id);
-        this.refreshPlaylistStatus();
+        this.loadPlaylist();
         pushSnackbar({ message: "재생목록을 역순으로 재배치했습니다.", type: "normal" });
     }
 
     /**
-     * @description 사용자 입력을 받아 현재 대기열에서 특정 영상만 추출해 새로운 재생목록을 구성합니다.
+     * @private
+     * @description 특정 인덱스로 목록을 필터링하고 플레이어를 다시 로드합니다. (시청 기록 보존)
      */
     filterEntries() {
         const input = prompt(
@@ -504,16 +538,18 @@ class PlayerService {
             "• 처음부터 : -5 또는 ~5 (1~5번)\n" +
             "• 끝까지   : 7- 또는 7~ (7~N번)\n\n" +
             "※ 단일 번호와 범위를 섞어 입력할 수 있습니다 (예: 2 5-9 11~)\n" +
-            "※ '-' 또는 '~'는 숫자와 붙여 써야 하며 번호는 현재 재생중인 목록을 따릅니다."
+            "※ '-' 또는 '~'는 숫자와 붙여 써야 하며, 번호는 현재 재생중인 목록을 따릅니다."
         );
         if (!input) return;
+    
         const indices = new Set();
         const tokens = input.trim().split(/\s+/);
         const maxIndex = YConfig.entries.length;
+    
         for (const token of tokens) {
             if (/^\d+$/.test(token)) indices.add(Number(token));
             else if (/^(\d+)[-~](\d+)$/.test(token)) {
-                let [ a, b ] = token.match(/^(\d+)[-~](\d+)$/).slice(1).map(Number);
+                let [ , a, b ] = token.match(/^(\d+)[-~](\d+)$/).map(Number);
                 for (let i = Math.min(a, b); i <= Math.max(a, b); i++) indices.add(i);
             } else if (/^[-~](\d+)$/.test(token)) {
                 const end = Number(token.match(/^[-~](\d+)$/)[1]);
@@ -523,88 +559,61 @@ class PlayerService {
                 for (let i = start; i <= maxIndex; i++) indices.add(i);
             }
         }
+    
         const parsed = [...indices].map(n => YConfig.entries[n - 1]).filter(Boolean);
         if (!parsed.length) {
             pushSnackbar({ message: "선택이 잘못되었습니다.", type: "error" });
             return;
         }
-        YConfig.entries = parsed;
-        let newIndex = YConfig.entries.findIndex(e => e.id === YConfig.currentEntry.id);
         
-        // 필터링 결과에 현재 영상이 없을 경우 첫 번째 영상을 새롭게 재생합니다
-        if (newIndex === -1) {
-            newIndex = 0;
-            YConfig.currentEntry = YConfig.entries[0];
-            this.playVideoAt(newIndex);
-        } else {
-            YConfig.lastIdx = newIndex;
-            this.refreshPlaylistStatus();
-        }
+        YConfig.entries = parsed;
+        this.loadPlaylist();
         pushSnackbar({ message: `선택한 ${parsed.length}개의 영상으로 반복 재생합니다.`, type: "normal" });
     }
 
+    // --- Private Properties ---
+    /** @private @type {YT.Player|null} - YouTube IFrame Player API의 플레이어 인스턴스 */
     #YTPlayer = null;
+    /** @private @type {number|null} - 플레이어 상태 추적을 위한 `setInterval` 타이머 ID */
+    #TimeTracker = null;
+    /** @private @type {UIManager} - UI 관리를 위한 UIManager 인스턴스 */
     #uiManager;
-    #keepAliveAudio = null;
 
+    // --- Private Methods ---
     /**
      * @private
-     * @description 모바일 환경에서 백그라운드 탭 차단을 막기 위해 무음 오디오를 생성하여 생명 주기를 연장합니다.
+     * @description 플레이어 로드(`onStateChange`) 이벤트를 처리합니다.
      */
-    #initKeepAliveAudio() {
-        this.#keepAliveAudio = new Audio();
-        this.#keepAliveAudio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
-        this.#keepAliveAudio.loop = true;
-        // 안드로이드 운영체제가 무음 미디어로 판단하여 프로세스를 강제 종료하지 않도록 볼륨을 0.01로 미세하게 올립니다
-        this.#keepAliveAudio.volume = 0.01;
-    }
-
     #onPlayerReady() {
-        if (YConfig.entries.length > 0) this.refreshPlaylistStatus();
+        if (YConfig.entries.length > 0) this.loadPlaylist();
+
+        this.#startStateTracking();
         this.#uiManager.buildEntryList(YConfig.entries);
-        
-        // 모바일 환경에서 재생 권한을 잃지 않도록 ready 직후 playVideo 명령을 한 번 더 확실하게 전달합니다
-        if (this.#YTPlayer && this.#YTPlayer.playVideo) {
-            this.#YTPlayer.playVideo();
-        }
     }
 
     /**
      * @private
-     * @description 유튜브 플레이어의 상태 변화 이벤트를 감지하여 제어 로직을 수행합니다.
+     * @deprecated 해당 메서드는 더이상 사용되지 않습니다.
+     * @description 플레이어 상태 변경(`onStateChange`) 이벤트를 처리합니다.
+     * @param {object} event - YouTube 플레이어 이벤트 객체
      */
     #onPlayerStateChange(event) {
         if (event.data === YT.PlayerState.PLAYING) {
-            this.#keepAliveAudio?.play().catch(() => {});
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+            const idx = this.#YTPlayer.getPlaylistIndex();
             
-            // 재생이 시작될 때 최신 상태를 로컬 스토리지에 동기화합니다
-            localStorage.setItem("YConfig", JSON.stringify(YConfig));
-        } 
-        else if (event.data === YT.PlayerState.PAUSED) {
-            // 사용자가 명시적으로 정지했을 때만 백그라운드 보호용 가상 오디오를 함께 끕니다
-            this.#keepAliveAudio?.pause();
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-            
-            localStorage.setItem("YConfig", JSON.stringify(YConfig));
-        }
-        else if (event.data === YT.PlayerState.ENDED) {
-            // 핵심 로직: 곡이 끝났을 때 절대 가상 오디오를 끄지 않아 자바스크립트 실행 환경을 철저히 보호합니다
-            localStorage.setItem("YConfig", JSON.stringify(YConfig));
-            
-            if (YConfig.entries.length > 0) {
-                const safeIndex = YConfig.lastIdx >= 0 ? YConfig.lastIdx : 0;
-                const nextIndex = (safeIndex + 1) % YConfig.entries.length;
-                
-                // 다음 곡을 재생할 때 브라우저 메모리 확보를 위해 플레이어를 완전히 새로 생성하는 함수로 연결합니다
-                this.playVideoAt(nextIndex);
+            if (0 <= idx && idx !== YConfig.lastIdx) {
+                YConfig.currentEntry = YConfig.entries[idx];
+                this.#uiManager.updateNowPlaying(YConfig.currentEntry, idx, YConfig.entries.length);
+                YConfig.lastIdx = idx;
+                localStorage.setItem("YConfig", JSON.stringify(YConfig));
             }
         }
     }
 
     /**
      * @private
-     * @description 영상이 삭제되었거나 재생 불가능한 에러가 발생했을 때 자동으로 다음 곡으로 스킵합니다.
+     * @description 플레이어 에러 발생 시 자동으로 다음 곡으로 건너뜁니다.
+     * @param {object} event - YouTube 플레이어 이벤트 객체
      */
     #onPlayerError(event) {
         const errorCode = event.data;
@@ -619,25 +628,50 @@ class PlayerService {
         console.warn(`Playback Error (${errorCode}): ${errorMsg} - Skipping to next track.`);
         
         if (YConfig.entries.length > 1) {
-            const safeIndex = YConfig.lastIdx >= 0 ? YConfig.lastIdx : 0;
+            const currentIndex = event.target.getPlaylistIndex();
+            const safeIndex = currentIndex >= 0 ? currentIndex : (YConfig.lastIdx >= 0 ? YConfig.lastIdx : 0);
             const nextIndex = (safeIndex + 1) % YConfig.entries.length;
             
-            // 에러 발생 시에도 메모리 확보를 위해 안전하게 플레이어를 파괴하고 다음 곡으로 넘깁니다
-            setTimeout(() => this.playVideoAt(nextIndex), 100);
+            setTimeout(() => event.target.playVideoAt(nextIndex), 100);
         } else pushSnackbar({ message: "재생할 수 있는 영상이 없습니다.", type: "error" });
+    }
+
+    /**
+     * @private
+     * @description `setInterval`을 사용하여 1초마다 플레이어 상태를 확인하고 `localStorage`에 저장합니다.
+     */
+    #startStateTracking() {
+        clearInterval(this.#TimeTracker);
+        this.#TimeTracker = setInterval(() => {
+            if (!this.#YTPlayer || typeof this.#YTPlayer.getPlayerState !== 'function' || this.#YTPlayer.getPlayerState() !== YT.PlayerState.PLAYING) return;
+
+            const idx = this.#YTPlayer.getPlaylistIndex();
+            YConfig.playbackPosition = this.#YTPlayer.getCurrentTime();
+
+            if (idx >= 0 && idx !== YConfig.lastIdx) {
+                YConfig.currentEntry = YConfig.entries[idx];
+                this.#uiManager.updateNowPlaying(YConfig.currentEntry, idx, YConfig.entries.length);
+                YConfig.lastIdx = idx;
+            }
+
+            localStorage.setItem("YConfig", JSON.stringify(YConfig));
+        }, 1000);
     }
 }
 
-// ==========================================
-// 3. 전역 인스턴스 초기화 및 모듈 내보내기
-// ==========================================
-
+// --- 전역 인스턴스 및 내보내기 ---
+/** 
+ * @type {PlayerService | null} 
+ * @description 현재 활성화된 PlayerService의 유일한 인스턴스 
+ */
 let activePlayerService = null;
 
-// 외부 스토리지 데이터 복원용 전역 인터페이스 함수
+/**
+ * @type {savedPlayerInstance: object}
+ * @description 저장된 플레이어 설정(YConfig)을 복원합니다.
+ */
 const restoreYConfig = savedPlayerInstance => YConfig = savedPlayerInstance;
 
-// UI 컴포넌트 마운트 및 플레이어 모듈 최초 진입점 구성
 const Player = new Dynamic.Fragment("player",
     Dynamic.$("div", { id: "dynamic_player", class: "ytv-canvas ytv-full" }).add(
         Dynamic.$("div", { id: "ytv-player", class: "ytv-video" }),
@@ -647,15 +681,17 @@ const Player = new Dynamic.Fragment("player",
         Dynamic.$("div", { class: "ytv-list" })
     )
 ).registAction(() => {
-    // 플레이어 서비스 객체가 없을 때만 최초 초기화를 진행하여 메모리 중복 할당을 확실하게 방지합니다
+    // 서비스 인스턴스가 없으면 최초 1회만 생성
     if (!activePlayerService) {
+        // --- 서비스 인스턴스 생성 및 의존성 주입 ---
         const apiService = new YouTubeAPIService();
         const uiManager = new UIManager(apiService);
+
         activePlayerService = new PlayerService(uiManager);
         uiManager.setPlayerService(activePlayerService);
     }
-    
-    // 레이아웃 렌더링 및 플레이어 리프레시 실행
+
+    // 최초 로드 및 새로고침 시 항상 전체 리프레시를 담당하는 메서드 호출
     activePlayerService.refreshAll();
 });
 
