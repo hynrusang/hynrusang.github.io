@@ -417,8 +417,7 @@ class PlayerService {
                 widget_referrer: window.location.origin,
                 playsinline: 1,
                 rel: 0,
-                autoplay: 1,
-                controls: 0
+                autoplay: 1
             },
             events: {
                 onReady: () => this.#onPlayerReady(),
