@@ -216,6 +216,7 @@ class UIManager {
      * @description 현재 재생 중인 영상 정보를 UI에 반영합니다.
      */
     updateNowPlaying(entry, index, total) {
+        if (!entry) return;
         this.TitleLabel.set({ text: entry.title });
         this.EntryState.set({ text: `${index + 1} / ${total}` });
 
@@ -243,10 +244,12 @@ class UIManager {
         );
 
         // 저장된 플레이리스트 데이터를 순회하며 DOM 요소 렌더링
-        Object.keys(playlistMap).sort().forEach(title => {
-            this.PlayLists.add(Dynamic.$("li", { class: "playlist-title", text: title }));
-            Object.entries(playlistMap[title]).sort().forEach(([name, url]) => this.PlayLists.add(this.#createPlaylistItem(title, name, url)) );
-        });
+        if (playlistMap) {
+            Object.keys(playlistMap).sort().forEach(title => {
+                this.PlayLists.add(Dynamic.$("li", { class: "playlist-title", text: title }));
+                Object.entries(playlistMap[title]).sort().forEach(([name, url]) => this.PlayLists.add(this.#createPlaylistItem(title, name, url)) );
+            });
+        }
     }
 
     /**
@@ -305,7 +308,7 @@ class UIManager {
             return;
         }
 
-        const playlistMap = DataResource.Data.basic.playlist;
+        const playlistMap = DataResource.Data.basic.playlist || {};
         if (!playlistMap[title]) playlistMap[title] = {};
         playlistMap[title][url] = url;
 
@@ -376,12 +379,11 @@ class UIManager {
 /**
  * @class PlayerService
  * @description YouTube 플레이어 인스턴스의 생명주기 제어 및 셔플 등 핵심 재생 로직을 관리합니다.
+ * 백그라운드 재생과 메모리 최적화를 위해 슬라이딩 윈도우(Sliding Window) 기법을 사용합니다.
  */
 class PlayerService {
     constructor(uiManager) {
         this.#uiManager = uiManager;
-        this.#initKeepAliveAudio();
-        this.#initPrecisionWorker(); // 워커 초기화 호출 추가
     }
 
     refreshAll() {
@@ -391,14 +393,11 @@ class PlayerService {
     }
 
     /**
-     * @description YouTube Iframe API를 기반으로 단일 영상 플레이어 인스턴스를 생성합니다.
-     * 브라우저 메모리 폭파 현상을 원천 차단하기 위해 영상이 바뀔 때마다 이 함수가 호출되어 iframe을 완전히 파괴하고 텅 빈 새 캔버스를 렌더링합니다.
+     * @description YouTube Iframe API를 기반으로 플레이어 인스턴스를 초기화합니다.
      */
     initializePlayer() {
-        // 1. 이미 플레이어가 존재하거나 재생할 데이터가 없는 경우 파괴하지 않고 무시 (백그라운드 권한 유지)
-        if (this.#YTPlayer || !YConfig.entries || YConfig.entries.length === 0) return;
-
-        // 2. 플레이어 객체 생성
+        if (this.#YTPlayer) this.#YTPlayer.destroy();
+        
         let playerContainer = document.getElementById("ytv-player");
         if (!playerContainer) {
             playerContainer = document.createElement("div");
@@ -410,38 +409,39 @@ class PlayerService {
                 dynamicPlayer.insertBefore(playerContainer, dynamicPlayer.firstChild);
             }
         }
-    
-        // 3. 재생 인덱스 결정 및 상태 동기화
-        let playIndex = YConfig.lastIdx;
-        if (playIndex < 0 || playIndex >= YConfig.entries.length) {
-            playIndex = 0;
-            YConfig.lastIdx = 0;
-            YConfig.currentEntry = YConfig.entries[0] || null;
-        }
-    
-        // 4. 새 플레이어 인스턴스 생성
+
         this.#YTPlayer = new YT.Player("ytv-player", {
-            host: 'https://www.youtube.com',
-            videoId: YConfig.entries[playIndex].id,
             playerVars: {
-                "enablejsapi": 1,
-                "origin": window.location.origin,
-                "playsinline": 1,
-                "rel": 0,
-                "autoplay": 1
+                enablejsapi: 1,
+                origin: window.location.origin,
+                widget_referrer: window.location.origin,
+                playsinline: 1,
+                rel: 0,
+                autoplay: 1
             },
-            events: { 
-                "onReady": () => this.#onPlayerReady(),
-                "onStateChange": e => this.#onPlayerStateChange(e),
-                "onError": e => this.#onPlayerError(e)
+            events: {
+                onReady: () => this.#onPlayerReady(),
+                onStateChange: e => this.#onPlayerStateChange(e),
+                onError: e => this.#onPlayerError(e)
             }
         });
     }
     
-    refreshPlaylistStatus() {
+    /**
+     * @description YConfig 배열을 바탕으로 슬라이딩 윈도우를 로드합니다.
+     */
+    loadPlaylist() {
         if (!YConfig.entries.length) return;
+
+        let absIndex = YConfig.currentEntry ? YConfig.entries.findIndex(v => v.id === YConfig.currentEntry.id) : 0;
+        if (absIndex < 0) absIndex = 0;
+
+        YConfig.lastIdx = absIndex;
+        YConfig.currentEntry = YConfig.entries[absIndex] || null;
+
         this.#uiManager.buildEntryList(YConfig.entries);
-        this.#uiManager.updateNowPlaying(YConfig.currentEntry, YConfig.lastIdx, YConfig.entries.length);
+        this.#uiManager.updateNowPlaying(YConfig.currentEntry, absIndex, YConfig.entries.length);
+        this.#loadPlaylistWindow(absIndex, 0);
     }
     
     /**
@@ -450,29 +450,25 @@ class PlayerService {
     loadNewPlaylist(entries) {
         YConfig.entries = entries;
         YConfig.currentEntry = entries[0] || null;
-        this.#saveConfig();
-        this.playVideoAt(0);
+        YConfig.lastIdx = 0;
+        localStorage.setItem("YConfig", JSON.stringify(YConfig));
+
+        if (!this.#YTPlayer) {
+            this.initializePlayer();
+            return;
+        }
+
+        this.#uiManager.buildEntryList(YConfig.entries);
+        this.#uiManager.updateNowPlaying(YConfig.currentEntry, 0, YConfig.entries.length);
+        this.#loadPlaylistWindow(0, 0);
     }
     
     /**
-     * @description 커스텀 UI에서 특정 영상을 클릭하거나 다음 곡으로 넘어갈 때 해당 인덱스로 점프.
+     * @description 커스텀 UI에서 특정 영상을 클릭하거나 다음 곡으로 넘어갈 때 해당 인덱스로 점프합니다.
      */
     playVideoAt(index) {
         if (index < 0 || index >= YConfig.entries.length) return;
-
-        YConfig.currentEntry = YConfig.entries[index];
-        YConfig.lastIdx = index;
-        this.#saveConfig();
-
-        // 백그라운드 재생 권한 소멸을 막기 위해 기존 플레이어를 재사용.
-        if (this.#YTPlayer && typeof this.#YTPlayer.loadVideoById === "function") {
-            this.#YTPlayer.loadVideoById({
-                videoId: YConfig.entries[index].id,
-                startSeconds: 0
-            });
-                
-            this.refreshPlaylistStatus();
-        } else this.initializePlayer();
+        this.#loadPlaylistWindow(index, 0);
     }
     
     /**
@@ -480,14 +476,18 @@ class PlayerService {
      */
     shuffleEntries() {
         const current = YConfig.currentEntry;
-        const others = YConfig.entries.filter(e => e.id !== current.id);
+        const others = YConfig.entries.filter(e => e.id !== current?.id);
         others.sort(() => Math.random() - 0.5);
 
-        YConfig.entries = [current, ...others];
+        YConfig.entries = current ? [current, ...others] : others;
         YConfig.lastIdx = 0;
-        this.#saveConfig();
+        YConfig.currentEntry = YConfig.entries[0] || null;
 
-        this.refreshPlaylistStatus();
+        localStorage.setItem("YConfig", JSON.stringify(YConfig));
+        this.#uiManager.buildEntryList(YConfig.entries);
+        this.#uiManager.updateNowPlaying(YConfig.currentEntry, 0, YConfig.entries.length);
+        this.#loadPlaylistWindow(0, 0);
+
         pushSnackbar({ message: "재생목록을 섞었습니다.", type: "normal" });
     }
 
@@ -496,10 +496,15 @@ class PlayerService {
      */
     reverseEntries() {
         YConfig.entries.reverse();
-        YConfig.lastIdx = YConfig.entries.findIndex(e => e.id === YConfig.currentEntry.id);
-        this.#saveConfig();
+        YConfig.lastIdx = YConfig.entries.findIndex(e => e.id === YConfig.currentEntry?.id);
+        if (YConfig.lastIdx < 0) YConfig.lastIdx = 0;
+        YConfig.currentEntry = YConfig.entries[YConfig.lastIdx] || null;
 
-        this.refreshPlaylistStatus();
+        localStorage.setItem("YConfig", JSON.stringify(YConfig));
+        this.#uiManager.buildEntryList(YConfig.entries);
+        this.#uiManager.updateNowPlaying(YConfig.currentEntry, YConfig.lastIdx, YConfig.entries.length);
+        this.#loadPlaylistWindow(YConfig.lastIdx, 0);
+
         pushSnackbar({ message: "재생목록을 역순으로 재배치했습니다.", type: "normal" });
     }
 
@@ -514,12 +519,14 @@ class PlayerService {
             "• 처음부터 : -5 또는 ~5 (1~5번)\n" +
             "• 끝까지   : 7- 또는 7~ (7~N번)\n\n" +
             "※ 단일 번호와 범위를 섞어 입력할 수 있습니다 (예: 2 5-9 11~)\n" +
-            "※ '-' 또는 '~'는 숫자와 붙여 써야 하며 번호는 현재 재생중인 목록을 따릅니다."
+            "※ '-' 또는 '~'는 숫자와 붙여 써야 하며, 번호는 현재 재생중인 목록을 따릅니다."
         );
         if (!input) return;
+
         const indices = new Set();
         const tokens = input.trim().split(/\s+/);
         const maxIndex = YConfig.entries.length;
+
         for (const token of tokens) {
             if (/^\d+$/.test(token)) indices.add(Number(token));
             else if (/^(\d+)[-~](\d+)$/.test(token)) {
@@ -533,139 +540,74 @@ class PlayerService {
                 for (let i = start; i <= maxIndex; i++) indices.add(i);
             }
         }
+
         const parsed = [...indices].map(n => YConfig.entries[n - 1]).filter(Boolean);
         if (!parsed.length) {
             pushSnackbar({ message: "선택이 잘못되었습니다.", type: "error" });
             return;
         }
+
         YConfig.entries = parsed;
-        let newIndex = YConfig.entries.findIndex(e => e.id === YConfig.currentEntry.id);
-        
-        // 필터링 결과에 현재 영상이 없을 경우 첫 번째 영상을 새롭게 재생합니다
-        if (newIndex === -1) {
-            newIndex = 0;
-            YConfig.currentEntry = YConfig.entries[0];
-            this.playVideoAt(newIndex);
-        } else {
-            YConfig.lastIdx = newIndex;
-            this.#saveConfig();
-            this.refreshPlaylistStatus();
-        }
+        YConfig.lastIdx = 0;
+        YConfig.currentEntry = YConfig.entries[0] || null;
+
+        localStorage.setItem("YConfig", JSON.stringify(YConfig));
+        this.#uiManager.buildEntryList(YConfig.entries);
+        this.#uiManager.updateNowPlaying(YConfig.currentEntry, 0, YConfig.entries.length);
+        this.#loadPlaylistWindow(0, 0);
+
         pushSnackbar({ message: `선택한 ${parsed.length}개의 영상으로 반복 재생합니다.`, type: "normal" });
     }
 
     #YTPlayer = null;
     #uiManager;
-    #keepAliveAudio = null;
-    #precisionWorker = null;
 
-    // 브라우저 스로틀링을 우회하는 정밀 타이머 초기화 메서드
-    #initPrecisionWorker() {
-        try {
-            this.#precisionWorker = new Worker('../util/YtTimerWorker.js');
-            
-            this.#precisionWorker.onmessage = (e) => {
-                if (e.data === 'tick' && this.#YTPlayer && typeof this.#YTPlayer.getCurrentTime === 'function') {
-                    try {
-                        const state = this.#YTPlayer.getPlayerState();
+    // 핵심: 전체 큐 대신 작은 윈도우만 플레이어에 탑재
+    #windowSize = 12;
+    #windowAbsIndices = [];
+    #windowReloadLock = false;
+    #windowReloadTimer = null;
 
-                        // 현재 재생 중일 때만 남은 시간 체크
-                        if (state === YT.PlayerState.PLAYING) {
-                            const current = this.#YTPlayer.getCurrentTime();
-                            const duration = this.#YTPlayer.getDuration();
-                            
-                            // 곡 종료 0.2초 전: 오디오 포커스를 잃기 직전에 강제 스왑
-                            if (duration > 0 && (duration - current) <= 0.2) {
-                                this.#precisionWorker.postMessage('stop');
-                                
-                                const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
-                                this.playVideoAt(nextIndex);
-                            }
-                        }
-                    } catch (err) {
-                        // 플레이어 객체가 아직 온전하지 않을 때 무시
-                    }
-                }
-            };
-        } catch (err) {
-            console.warn("워커 초기화 실패 (경로가 다르거나 로컬 파일 CORS 문제일 수 있습니다):", err);
-        }
-    }
+    #loadPlaylistWindow(absIndex, startSeconds = 0) {
+        if (!this.#YTPlayer || typeof this.#YTPlayer.loadPlaylist !== "function") return;
+        if (!YConfig.entries.length) return;
 
-    #initKeepAliveAudio() {
-        this.#keepAliveAudio = new Audio();
-        this.#keepAliveAudio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
-        this.#keepAliveAudio.loop = true;
-        this.#keepAliveAudio.volume = 0.01;
+        const total = YConfig.entries.length;
+        const size = Math.min(this.#windowSize, total);
 
-        // 브라우저 미디어 정책 우회를 위한 사용자 제스처 기반 Unlock 함수
-        const unlockAudio = () => {
-            if (this.#keepAliveAudio.paused) {
-                this.#keepAliveAudio.play()
-                    .then(() => console.log("✅ Keep-alive 오디오 활성화 완료"))
-                    .catch(err => console.warn("오디오 활성화 실패:", err));
-            }
-            // 한 번 잠금이 해제되면 불필요한 이벤트 호출을 막기 위해 리스너 제거
-            document.removeEventListener('click', unlockAudio);
-            document.removeEventListener('touchstart', unlockAudio);
-        };
+        // 현재 곡 바로 앞 1곡부터 시작해서 총 size개를 원형으로 구성
+        const start = ((absIndex - 1) % total + total) % total;
+        this.#windowAbsIndices = Array.from({ length: size }, (_, i) => (start + i) % total);
 
-        document.addEventListener('click', unlockAudio);
-        document.addEventListener('touchstart', unlockAudio);
-        
-        this.#setupMediaSession();
-    }
+        const ids = this.#windowAbsIndices.map(i => YConfig.entries[i].id);
+        const localIndex = this.#windowAbsIndices.indexOf(absIndex);
 
-    /**
-     * @private
-     * @description OS 미디어 컨트롤러에 해당 앱이 플레이어임을 명시적으로 알립니다.
-     */
-    #setupMediaSession() {
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.setActionHandler('nexttrack', () => {
-                if (YConfig.entries.length > 0) {
-                    const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
-                    this.playVideoAt(nextIndex);
-                }
-            });
-            navigator.mediaSession.setActionHandler('previoustrack', () => {
-                if (YConfig.entries.length > 0) {
-                    const prevIndex = (YConfig.lastIdx - 1 + YConfig.entries.length) % YConfig.entries.length;
-                    this.playVideoAt(prevIndex);
-                }
-            });
-        }
-    }
+        YConfig.lastIdx = absIndex;
+        YConfig.currentEntry = YConfig.entries[absIndex] || null;
+        localStorage.setItem("YConfig", JSON.stringify(YConfig));
 
-    /**
-     * @private
-     * @description 현재 전역 상태인 YConfig를 localStorage에 즉시 동기화합니다
-     */
-    #saveConfig() {
-        try {
-            localStorage.setItem("YConfig", JSON.stringify(YConfig));
-        } catch (e) {
-            console.error("Storage save failed:" + e);
-        }
+        this.#uiManager.updateNowPlaying(YConfig.currentEntry, absIndex, YConfig.entries.length);
+
+        this.#windowReloadLock = true;
+        this.#YTPlayer.loadPlaylist(ids, localIndex, startSeconds);
+        this.#YTPlayer.setLoop(true);
+
+        clearTimeout(this.#windowReloadTimer);
+        this.#windowReloadTimer = setTimeout(() => {
+            this.#windowReloadLock = false;
+        }, 400);
     }
 
     #onPlayerReady() {
-        if (YConfig.entries.length > 0) this.refreshPlaylistStatus();
-        
-        // 모바일 환경에서 재생 권한을 잃지 않도록 ready 직후 playVideo 명령을 한 번 더 확실하게 전달합니다
-        if (this.#YTPlayer && this.#YTPlayer.playVideo) {
-            this.#YTPlayer.playVideo();
-        }
+        this.loadPlaylist();
     }
 
     /**
      * @private
-     * @description [수정됨] 무음 오디오 재생 로직 제거 및 메타데이터 업데이트 최적화
+     * @description 미디어 세션 메타데이터 업데이트 및 슬라이딩 윈도우 진행을 제어합니다.
      */
     #onPlayerStateChange(event) {
         if (event.data === YT.PlayerState.PLAYING) {
-            if (this.#precisionWorker) this.#precisionWorker.postMessage('start');
-
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.playbackState = 'playing';
                 navigator.mediaSession.metadata = new MediaMetadata({
@@ -673,18 +615,44 @@ class PlayerService {
                     artist: "YouTube Player",
                     artwork: [{ src: YConfig.currentEntry?.img || "", sizes: "320x180", type: "image/jpeg" }]
                 });
+                
+                navigator.mediaSession.setActionHandler('nexttrack', () => {
+                    if (YConfig.entries.length > 0) {
+                        const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
+                        this.playVideoAt(nextIndex);
+                    }
+                });
+                navigator.mediaSession.setActionHandler('previoustrack', () => {
+                    if (YConfig.entries.length > 0) {
+                        const prevIndex = (YConfig.lastIdx - 1 + YConfig.entries.length) % YConfig.entries.length;
+                        this.playVideoAt(prevIndex);
+                    }
+                });
             }
-        } 
-        else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.BUFFERING) {
-            if (this.#precisionWorker) this.#precisionWorker.postMessage('stop');
         }
-        else if (event.data === YT.PlayerState.ENDED) {
-            if (this.#precisionWorker) this.#precisionWorker.postMessage('stop');
 
-            if (YConfig.entries.length > 0) {
-                const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
-                this.playVideoAt(nextIndex);
-            }
+        if (event.data !== YT.PlayerState.PLAYING) return;
+
+        const localIndex = this.#YTPlayer.getPlaylistIndex();
+        const absIndex = this.#windowAbsIndices[localIndex];
+        if (absIndex == null) return;
+
+        if (absIndex !== YConfig.lastIdx) {
+            YConfig.lastIdx = absIndex;
+            YConfig.currentEntry = YConfig.entries[absIndex] || null;
+            this.#uiManager.updateNowPlaying(YConfig.currentEntry, absIndex, YConfig.entries.length);
+            localStorage.setItem("YConfig", JSON.stringify(YConfig));
+        }
+
+        // 윈도우 끝 2~3곡 전에 현재 곡 시점으로 윈도우를 앞으로 밀어준다.
+        // 이렇게 해야 전체 200곡을 한 번에 안 올리면서도 내부 playlist 자동전환을 계속 활용할 수 있다.
+        if (
+            YConfig.entries.length > this.#windowSize &&
+            localIndex >= this.#windowAbsIndices.length - 3 &&
+            !this.#windowReloadLock
+        ) {
+            const currentTime = this.#YTPlayer.getCurrentTime?.() || 0;
+            this.#loadPlaylistWindow(absIndex, currentTime);
         }
     }
 
