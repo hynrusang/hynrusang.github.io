@@ -1,4 +1,4 @@
-import { Dynamic } from "../init/module.js";
+iimport { Dynamic } from "../init/module.js";
 import { pushSnackbar } from "../util/Tools.js";
 import DataResource from "../util/DataResource.js";
 
@@ -563,8 +563,8 @@ class PlayerService {
     #YTPlayer = null;
     #uiManager;
 
-    // 핵심: 전체 큐 대신 작은 윈도우만 플레이어에 탑재
-    #windowSize = 12;
+    // 전체 큐 대신 작은 윈도우만 플레이어에 탑재
+    #windowSize = 6;
     #windowAbsIndices = [];
     #windowReloadLock = false;
     #windowReloadTimer = null;
@@ -650,7 +650,7 @@ class PlayerService {
         // 이렇게 해야 전체 200곡을 한 번에 안 올리면서도 내부 playlist 자동전환을 계속 활용할 수 있다.
         if (
             YConfig.entries.length > this.#windowSize &&
-            localIndex >= this.#windowAbsIndices.length - 3 &&
+            (localIndex === 0 || localIndex >= this.#windowAbsIndices.length - 2) &&
             !this.#windowReloadLock
         ) {
             const currentTime = this.#YTPlayer.getCurrentTime?.() || 0;
