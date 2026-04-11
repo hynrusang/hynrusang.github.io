@@ -381,6 +381,7 @@ class PlayerService {
     constructor(uiManager) {
         this.#uiManager = uiManager;
         this.#initKeepAliveAudio();
+        this.#initPrecisionWorker(); // 워커 초기화 호출 추가
     }
 
     refreshAll() {
@@ -556,6 +557,40 @@ class PlayerService {
     #YTPlayer = null;
     #uiManager;
     #keepAliveAudio = null;
+    #precisionWorker = null;
+
+    // 브라우저 스로틀링을 우회하는 정밀 타이머 초기화 메서드
+    #initPrecisionWorker() {
+        try {
+            this.#precisionWorker = new Worker('../util/YtTimerWorker.js');
+            
+            this.#precisionWorker.onmessage = (e) => {
+                if (e.data === 'tick' && this.#YTPlayer && typeof this.#YTPlayer.getCurrentTime === 'function') {
+                    try {
+                        const state = this.#YTPlayer.getPlayerState();
+
+                        // 현재 재생 중일 때만 남은 시간 체크
+                        if (state === YT.PlayerState.PLAYING) {
+                            const current = this.#YTPlayer.getCurrentTime();
+                            const duration = this.#YTPlayer.getDuration();
+                            
+                            // 곡 종료 0.2초 전: 오디오 포커스를 잃기 직전에 강제 스왑
+                            if (duration > 0 && (duration - current) <= 0.2) {
+                                this.#precisionWorker.postMessage('stop');
+                                
+                                const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
+                                this.playVideoAt(nextIndex);
+                            }
+                        }
+                    } catch (err) {
+                        // 플레이어 객체가 아직 온전하지 않을 때 무시
+                    }
+                }
+            };
+        } catch (err) {
+            console.warn("워커 초기화 실패 (경로가 다르거나 로컬 파일 CORS 문제일 수 있습니다):", err);
+        }
+    }
 
     #initKeepAliveAudio() {
         this.#keepAliveAudio = new Audio();
@@ -629,6 +664,8 @@ class PlayerService {
      */
     #onPlayerStateChange(event) {
         if (event.data === YT.PlayerState.PLAYING) {
+            if (this.#precisionWorker) this.#precisionWorker.postMessage('start');
+
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.playbackState = 'playing';
                 navigator.mediaSession.metadata = new MediaMetadata({
@@ -638,7 +675,12 @@ class PlayerService {
                 });
             }
         } 
+        else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.BUFFERING) {
+            if (this.#precisionWorker) this.#precisionWorker.postMessage('stop');
+        }
         else if (event.data === YT.PlayerState.ENDED) {
+            if (this.#precisionWorker) this.#precisionWorker.postMessage('stop');
+
             if (YConfig.entries.length > 0) {
                 const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
                 this.playVideoAt(nextIndex);
