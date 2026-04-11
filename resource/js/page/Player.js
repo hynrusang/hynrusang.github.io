@@ -644,15 +644,6 @@ class PlayerService {
                 this.playVideoAt(nextIndex);
             }
         }
-        // 백그라운드 큐잉(대기) 상태 무한 루프 탈출
-        else if (event.data === YT.PlayerState.UNSTARTED || event.data === YT.PlayerState.CUED) {
-            if (this.#YTPlayer && typeof this.#YTPlayer.playVideo === 'function') {
-                // 브라우저가 포그라운드에 없을 때(백그라운드일 때) 강제로 재생을 한 번 더 트리거
-                if (document.hidden || document.visibilityState === 'hidden') {
-                    this.#YTPlayer.playVideo();
-                }
-            }
-        }
     }
 
     /**
