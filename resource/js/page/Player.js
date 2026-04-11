@@ -605,7 +605,7 @@ class PlayerService {
      * @description [수정됨] 무음 오디오 재생 로직 제거 및 메타데이터 업데이트 최적화
      */
     #onPlayerStateChange(event) {
-        else if (event.data === YT.PlayerState.ENDED) {
+        if (event.data === YT.PlayerState.ENDED) {
             if (YConfig.entries.length > 0) {
                 const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
                 this.playVideoAt(nextIndex);
