@@ -629,11 +629,8 @@ class PlayerService {
      */
     #onPlayerStateChange(event) {
         if (event.data === YT.PlayerState.PLAYING) {
-            // 무음 오디오는 unlockAudio에서 이미 독립적으로 실행 중이므로 여기서 play()를 호출할 필요가 없습니다.
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.playbackState = 'playing';
-                
-                // 현재 재생 중인 영상 정보를 OS 노티피케이션에 동기화
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: YConfig.currentEntry?.title || "Unknown Title",
                     artist: "YouTube Player",
@@ -641,15 +638,19 @@ class PlayerService {
                 });
             }
         } 
-        else if (event.data === YT.PlayerState.PAUSED) {
-            // 주의: 사용자가 명시적으로 일시정지했을 때만 무음 오디오를 끌지 선택해야 합니다.
-            // 백그라운드 전환 안전성을 위해 무음 오디오를 pause() 하지 않고 계속 흘려보내는 것이 훨씬 안정적입니다.
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-        }
         else if (event.data === YT.PlayerState.ENDED) {
             if (YConfig.entries.length > 0) {
                 const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
                 this.playVideoAt(nextIndex);
+            }
+        }
+        // [추가된 로직] 백그라운드 큐잉(대기) 상태 무한 루프 탈출
+        else if (event.data === YT.PlayerState.UNSTARTED || event.data === YT.PlayerState.CUED) {
+            if (this.#YTPlayer && typeof this.#YTPlayer.playVideo === 'function') {
+                // 브라우저가 포그라운드에 없을 때(백그라운드일 때) 강제로 재생을 한 번 더 트리거
+                if (document.hidden || document.visibilityState === 'hidden') {
+                    this.#YTPlayer.playVideo();
+                }
             }
         }
     }
