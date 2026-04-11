@@ -394,16 +394,10 @@ class PlayerService {
      * 브라우저 메모리 폭파 현상을 원천 차단하기 위해 영상이 바뀔 때마다 이 함수가 호출되어 iframe을 완전히 파괴하고 텅 빈 새 캔버스를 렌더링합니다.
      */
     initializePlayer() {
-        // 1. 기존 플레이어 인스턴스 파괴 및 가비지 컬렉션 유도
-        if (this.#YTPlayer) {
-            this.#YTPlayer.destroy();
-            this.#YTPlayer = null;
-        }
-    
-        // 2. 재생할 데이터가 없는 경우 중단
-        if (!YConfig.entries || YConfig.entries.length === 0) return;
-    
-        // 3. destroy()로 사라진 플레이어 컨테이너 재생성
+        // 1. 이미 플레이어가 존재하거나 재생할 데이터가 없는 경우 파괴하지 않고 무시 (백그라운드 권한 유지)
+        if (this.#YTPlayer || !YConfig.entries || YConfig.entries.length === 0) return;
+
+        // 2. 플레이어 객체 생성
         let playerContainer = document.getElementById("ytv-player");
         if (!playerContainer) {
             playerContainer = document.createElement("div");
@@ -416,7 +410,7 @@ class PlayerService {
             }
         }
     
-        // 4. 재생 인덱스 결정 및 상태 동기화
+        // 3. 재생 인덱스 결정 및 상태 동기화
         let playIndex = YConfig.lastIdx;
         if (playIndex < 0 || playIndex >= YConfig.entries.length) {
             playIndex = 0;
@@ -424,7 +418,7 @@ class PlayerService {
             YConfig.currentEntry = YConfig.entries[0] || null;
         }
     
-        // 5. 새 플레이어 인스턴스 생성
+        // 4. 새 플레이어 인스턴스 생성
         this.#YTPlayer = new YT.Player("ytv-player", {
             host: 'https://www.youtube.com',
             videoId: YConfig.entries[playIndex].id,
@@ -456,11 +450,11 @@ class PlayerService {
         YConfig.entries = entries;
         YConfig.currentEntry = entries[0] || null;
         this.#saveConfig();
-        this.initializePlayer();
+        this.playVideoAt(0);
     }
     
     /**
-     * @description 커스텀 UI에서 특정 영상을 클릭하거나 다음 곡으로 넘어갈 때 해당 인덱스로 점프합니다.
+     * @description 커스텀 UI에서 특정 영상을 클릭하거나 다음 곡으로 넘어갈 때 해당 인덱스로 점프.
      */
     playVideoAt(index) {
         if (index < 0 || index >= YConfig.entries.length) return;
@@ -468,9 +462,27 @@ class PlayerService {
         YConfig.currentEntry = YConfig.entries[index];
         YConfig.lastIdx = index;
         this.#saveConfig();
-        
-        // 치명적인 메모리 폭파 현상을 피하기 위해 주소만 교체하지 않고 플레이어 자체를 매번 새롭게 갈아끼웁니다
-        this.initializePlayer();
+
+        // 백그라운드 재생 권한 소멸을 막기 위해 기존 플레이어를 재사용.
+        if (this.#YTPlayer && typeof this.#YTPlayer.loadVideoById === "function") {
+            try {
+                // 새 영상을 로드하기 전, 이전 영상의 재생을 강제 정지시켜 플레이어 내부의 MSE 버퍼 메모리 반환을 유도.
+                this.#YTPlayer.stopVideo(); 
+                
+                this.#YTPlayer.loadVideoById({
+                    videoId: YConfig.entries[index].id,
+                    startSeconds: 0
+                });
+                
+                this.refreshPlaylistStatus();
+            } catch (e) {
+                // 만약 iframe 객체가 손상되었다면 최후의 수단으로 재초기화.
+                console.error("Player reuse failed, fallback to re-init:", e);
+                this.#YTPlayer.destroy();
+                this.#YTPlayer = null;
+                this.initializePlayer();
+            }
+        } else this.initializePlayer();
     }
     
     /**
