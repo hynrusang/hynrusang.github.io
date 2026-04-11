@@ -577,31 +577,8 @@ class PlayerService {
 
         document.addEventListener('click', unlockAudio);
         document.addEventListener('touchstart', unlockAudio);
-        
-        this.#setupMediaSession();
     }
-
-    /**
-     * @private
-     * @description OS 미디어 컨트롤러에 해당 앱이 플레이어임을 명시적으로 알립니다.
-     */
-    #setupMediaSession() {
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.setActionHandler('nexttrack', () => {
-                if (YConfig.entries.length > 0) {
-                    const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
-                    this.playVideoAt(nextIndex);
-                }
-            });
-            navigator.mediaSession.setActionHandler('previoustrack', () => {
-                if (YConfig.entries.length > 0) {
-                    const prevIndex = (YConfig.lastIdx - 1 + YConfig.entries.length) % YConfig.entries.length;
-                    this.playVideoAt(prevIndex);
-                }
-            });
-        }
-    }
-
+    
     /**
      * @private
      * @description 현재 전역 상태인 YConfig를 localStorage에 즉시 동기화합니다
