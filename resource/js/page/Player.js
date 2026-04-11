@@ -273,7 +273,7 @@ class UIManager {
             this.EntryLists.add(
                 Dynamic.$("li", { class: "entry-item", onclick: () => this.#playerService?.playVideoAt(i) }).add(
                     Dynamic.$("b", { text: i + 1 }),
-                    Dynamic.$("img", { src: entry.img }),
+                    Dynamic.$("img", { src: entry.img, loading: "lazy", decoding: "async", referrerpolicy: "no-referrer" }),
                     Dynamic.$("span", { text: entry.title })
                 )
             );
@@ -417,7 +417,8 @@ class PlayerService {
                 widget_referrer: window.location.origin,
                 playsinline: 1,
                 rel: 0,
-                autoplay: 1
+                autoplay: 1,
+                controls: 0
             },
             events: {
                 onReady: () => this.#onPlayerReady(),
@@ -599,6 +600,22 @@ class PlayerService {
     }
 
     #onPlayerReady() {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('nexttrack', () => {
+                if (YConfig.entries.length > 0) {
+                    const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
+                    this.playVideoAt(nextIndex);
+                }
+            });
+
+            navigator.mediaSession.setActionHandler('previoustrack', () => {
+                if (YConfig.entries.length > 0) {
+                    const prevIndex = (YConfig.lastIdx - 1 + YConfig.entries.length) % YConfig.entries.length;
+                    this.playVideoAt(prevIndex);
+                }
+            });
+        }
+
         this.loadPlaylist();
     }
 
@@ -607,30 +624,6 @@ class PlayerService {
      * @description 미디어 세션 메타데이터 업데이트 및 슬라이딩 윈도우 진행을 제어합니다.
      */
     #onPlayerStateChange(event) {
-        if (event.data === YT.PlayerState.PLAYING) {
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.playbackState = 'playing';
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: YConfig.currentEntry?.title || "Unknown Title",
-                    artist: "YouTube Player",
-                    artwork: [{ src: YConfig.currentEntry?.img || "", sizes: "320x180", type: "image/jpeg" }]
-                });
-                
-                navigator.mediaSession.setActionHandler('nexttrack', () => {
-                    if (YConfig.entries.length > 0) {
-                        const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
-                        this.playVideoAt(nextIndex);
-                    }
-                });
-                navigator.mediaSession.setActionHandler('previoustrack', () => {
-                    if (YConfig.entries.length > 0) {
-                        const prevIndex = (YConfig.lastIdx - 1 + YConfig.entries.length) % YConfig.entries.length;
-                        this.playVideoAt(prevIndex);
-                    }
-                });
-            }
-        }
-
         if (event.data !== YT.PlayerState.PLAYING) return;
 
         const localIndex = this.#YTPlayer.getPlaylistIndex();
@@ -642,6 +635,15 @@ class PlayerService {
             YConfig.currentEntry = YConfig.entries[absIndex] || null;
             this.#uiManager.updateNowPlaying(YConfig.currentEntry, absIndex, YConfig.entries.length);
             localStorage.setItem("YConfig", JSON.stringify(YConfig));
+        }
+
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.playbackState = 'playing';
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: YConfig.currentEntry?.title || "Unknown Title",
+                artist: "YouTube Player",
+                artwork: [{ src: YConfig.currentEntry?.img || "", sizes: "320x180", type: "image/jpeg" }]
+            });
         }
 
         // 윈도우 끝 2~3곡 전에 현재 곡 시점으로 윈도우를 앞으로 밀어준다.
