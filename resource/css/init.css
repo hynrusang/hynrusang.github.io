@@ -7,6 +7,9 @@
     width: 8px;
     background: none;
 }
+html, body {
+    overscroll-behavior-y: contain;
+}
 
 /* 단락 */
 
