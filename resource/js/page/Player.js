@@ -557,16 +557,49 @@ class PlayerService {
     #uiManager;
     #keepAliveAudio = null;
 
-    /**
-     * @private
-     * @description 모바일 환경에서 백그라운드 탭 차단을 막기 위해 무음 오디오를 생성하여 생명 주기를 연장합니다.
-     */
     #initKeepAliveAudio() {
         this.#keepAliveAudio = new Audio();
         this.#keepAliveAudio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
         this.#keepAliveAudio.loop = true;
-        // 안드로이드 운영체제가 무음 미디어로 판단하여 프로세스를 강제 종료하지 않도록 볼륨을 0.01로 미세하게 올립니다
         this.#keepAliveAudio.volume = 0.01;
+
+        // 브라우저 미디어 정책 우회를 위한 사용자 제스처 기반 Unlock 함수
+        const unlockAudio = () => {
+            if (this.#keepAliveAudio.paused) {
+                this.#keepAliveAudio.play()
+                    .then(() => console.log("✅ Keep-alive 오디오 활성화 완료"))
+                    .catch(err => console.warn("오디오 활성화 실패:", err));
+            }
+            // 한 번 잠금이 해제되면 불필요한 이벤트 호출을 막기 위해 리스너 제거
+            document.removeEventListener('click', unlockAudio);
+            document.removeEventListener('touchstart', unlockAudio);
+        };
+
+        document.addEventListener('click', unlockAudio);
+        document.addEventListener('touchstart', unlockAudio);
+        
+        this.#setupMediaSession();
+    }
+
+    /**
+     * @private
+     * @description OS 미디어 컨트롤러에 해당 앱이 플레이어임을 명시적으로 알립니다.
+     */
+    #setupMediaSession() {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('nexttrack', () => {
+                if (YConfig.entries.length > 0) {
+                    const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
+                    this.playVideoAt(nextIndex);
+                }
+            });
+            navigator.mediaSession.setActionHandler('previoustrack', () => {
+                if (YConfig.entries.length > 0) {
+                    const prevIndex = (YConfig.lastIdx - 1 + YConfig.entries.length) % YConfig.entries.length;
+                    this.playVideoAt(prevIndex);
+                }
+            });
+        }
     }
 
     /**
@@ -592,15 +625,25 @@ class PlayerService {
 
     /**
      * @private
-     * @description 유튜브 플레이어의 상태 변화 이벤트를 감지하여 제어 로직을 수행합니다.
+     * @description [수정됨] 무음 오디오 재생 로직 제거 및 메타데이터 업데이트 최적화
      */
     #onPlayerStateChange(event) {
         if (event.data === YT.PlayerState.PLAYING) {
-            this.#keepAliveAudio?.play().catch(() => {});
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+            // 무음 오디오는 unlockAudio에서 이미 독립적으로 실행 중이므로 여기서 play()를 호출할 필요가 없습니다.
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'playing';
+                
+                // 현재 재생 중인 영상 정보를 OS 노티피케이션에 동기화
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: YConfig.currentEntry?.title || "Unknown Title",
+                    artist: "YouTube Player",
+                    artwork: [{ src: YConfig.currentEntry?.img || "", sizes: "320x180", type: "image/jpeg" }]
+                });
+            }
         } 
         else if (event.data === YT.PlayerState.PAUSED) {
-            this.#keepAliveAudio?.pause();
+            // 주의: 사용자가 명시적으로 일시정지했을 때만 무음 오디오를 끌지 선택해야 합니다.
+            // 백그라운드 전환 안전성을 위해 무음 오디오를 pause() 하지 않고 계속 흘려보내는 것이 훨씬 안정적입니다.
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
         }
         else if (event.data === YT.PlayerState.ENDED) {
