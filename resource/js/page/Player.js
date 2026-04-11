@@ -465,23 +465,12 @@ class PlayerService {
 
         // 백그라운드 재생 권한 소멸을 막기 위해 기존 플레이어를 재사용.
         if (this.#YTPlayer && typeof this.#YTPlayer.loadVideoById === "function") {
-            try {
-                // 새 영상을 로드하기 전, 이전 영상의 재생을 강제 정지시켜 플레이어 내부의 MSE 버퍼 메모리 반환을 유도.
-                this.#YTPlayer.stopVideo(); 
+            this.#YTPlayer.loadVideoById({
+                videoId: YConfig.entries[index].id,
+                startSeconds: 0
+            });
                 
-                this.#YTPlayer.loadVideoById({
-                    videoId: YConfig.entries[index].id,
-                    startSeconds: 0
-                });
-                
-                this.refreshPlaylistStatus();
-            } catch (e) {
-                // 만약 iframe 객체가 손상되었다면 최후의 수단으로 재초기화.
-                console.error("Player reuse failed, fallback to re-init:", e);
-                this.#YTPlayer.destroy();
-                this.#YTPlayer = null;
-                this.initializePlayer();
-            }
+            this.refreshPlaylistStatus();
         } else this.initializePlayer();
     }
     
