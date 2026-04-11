@@ -577,29 +577,6 @@ class PlayerService {
 
         document.addEventListener('click', unlockAudio);
         document.addEventListener('touchstart', unlockAudio);
-        
-        this.#setupMediaSession();
-    }
-
-    /**
-     * @private
-     * @description OS 미디어 컨트롤러에 해당 앱이 플레이어임을 명시적으로 알립니다.
-     */
-    #setupMediaSession() {
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.setActionHandler('nexttrack', () => {
-                if (YConfig.entries.length > 0) {
-                    const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
-                    this.playVideoAt(nextIndex);
-                }
-            });
-            navigator.mediaSession.setActionHandler('previoustrack', () => {
-                if (YConfig.entries.length > 0) {
-                    const prevIndex = (YConfig.lastIdx - 1 + YConfig.entries.length) % YConfig.entries.length;
-                    this.playVideoAt(prevIndex);
-                }
-            });
-        }
     }
 
     /**
@@ -628,24 +605,6 @@ class PlayerService {
      * @description [수정됨] 무음 오디오 재생 로직 제거 및 메타데이터 업데이트 최적화
      */
     #onPlayerStateChange(event) {
-        if (event.data === YT.PlayerState.PLAYING) {
-            // 무음 오디오는 unlockAudio에서 이미 독립적으로 실행 중이므로 여기서 play()를 호출할 필요가 없습니다.
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.playbackState = 'playing';
-                
-                // 현재 재생 중인 영상 정보를 OS 노티피케이션에 동기화
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: YConfig.currentEntry?.title || "Unknown Title",
-                    artist: "YouTube Player",
-                    artwork: [{ src: YConfig.currentEntry?.img || "", sizes: "320x180", type: "image/jpeg" }]
-                });
-            }
-        } 
-        else if (event.data === YT.PlayerState.PAUSED) {
-            // 주의: 사용자가 명시적으로 일시정지했을 때만 무음 오디오를 끌지 선택해야 합니다.
-            // 백그라운드 전환 안전성을 위해 무음 오디오를 pause() 하지 않고 계속 흘려보내는 것이 훨씬 안정적입니다.
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-        }
         else if (event.data === YT.PlayerState.ENDED) {
             if (YConfig.entries.length > 0) {
                 const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
