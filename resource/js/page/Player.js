@@ -563,7 +563,7 @@ class PlayerService {
     #uiManager;
 
     // 전체 큐 대신 작은 윈도우만 플레이어에 탑재
-    #windowSize = 6;
+    #windowSize = 10;
     #windowAbsIndices = [];
     #windowReloadLock = false;
     #windowReloadTimer = null;
