@@ -563,7 +563,7 @@ class PlayerService {
     #uiManager;
 
     // 전체 큐 대신 작은 윈도우만 플레이어에 탑재
-    #windowSize = 8;
+    #windowSize = 6;
     #windowAbsIndices = [];
     #windowReloadLock = false;
     #windowReloadTimer = null;
@@ -645,11 +645,11 @@ class PlayerService {
             });
         }
 
-        // 윈도우 끝 2~3곡 전에 현재 곡 시점으로 윈도우를 앞으로 밀어준다.
+        // 윈도우 끝 곡 시점에 현재 곡 시점으로 윈도우를 앞으로 밀어준다.
         // 이렇게 해야 전체 200곡을 한 번에 안 올리면서도 내부 playlist 자동전환을 계속 활용할 수 있다.
         if (
             YConfig.entries.length > this.#windowSize &&
-            (localIndex === 0 || localIndex >= this.#windowAbsIndices.length - 2) &&
+            (localIndex === 0 || localIndex >= this.#windowAbsIndices.length - 1) &&
             !this.#windowReloadLock
         ) {
             const currentTime = this.#YTPlayer.getCurrentTime?.() || 0;
