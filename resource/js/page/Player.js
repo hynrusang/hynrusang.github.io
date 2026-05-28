@@ -428,7 +428,7 @@ class UIManager {
             Dynamic.$("div", { class: "ytv-entry-toolbar-row" }).add(
                 Dynamic.$("div", { class: "ytv-entry-toolbar-title" }).add(
                     Dynamic.$("strong", { text: "재생 대기열" }),
-                    Dynamic.$("span", { text: `${total}개의 영상 · 6개 윈도우 재생` })
+                    Dynamic.$("span", { text: `${total}개의 영상 · 8개 윈도우 재생` })
                 ),
                 Dynamic.$("div", { class: "ytv-entry-controls" }).add(
                     this.#createControlButton("⟳", "새로고침", () => Dynamic.FragMutation.refresh()),
@@ -540,6 +540,17 @@ class PlayerService {
     constructor(uiManager, apiService) {
         this.#uiManager = uiManager;
         this.#apiService = apiService;
+
+        // 모바일 브라우저는 화면이 꺼지거나 앱이 백그라운드로 내려가면 외부 JS의 즉시 재생 명령을 제한할 수 있습니다.
+        // 따라서 백그라운드 상태에서는 재생 중인 YouTube iframe의 내부 playlist queue를 건드리지 않고,
+        // 화면이 다시 보일 때만 보류된 윈도우 재구성을 수행하여 큐 내부 자동 재생을 보존합니다.
+        document.addEventListener("visibilitychange", () => {
+            if (!document.hidden && this.#pendingWindowReloadIndex >= 0) {
+                const index = this.#pendingWindowReloadIndex;
+                this.#pendingWindowReloadIndex = -1;
+                this.#loadPlaylistWindow(index, this.#YTPlayer?.getCurrentTime?.() || 0);
+            }
+        });
     }
 
     refreshAll() {
@@ -726,10 +737,14 @@ class PlayerService {
     #metadataHydrationToken = 0;
 
     // 전체 큐 대신 작은 윈도우만 플레이어에 탑재
-    #windowSize = 6;
+    #windowSize = 8;
     #windowAbsIndices = [];
     #windowReloadLock = false;
     #windowReloadTimer = null;
+    #pendingWindowReloadIndex = -1;
+    #autoAdvanceTimer = null;
+    #playResumeTimer = null;
+    #autoAdvanceEnabled = false;
 
     /**
      * @private
@@ -807,10 +822,61 @@ class PlayerService {
         this.#YTPlayer.loadPlaylist(ids, localIndex, startSeconds);
         this.#YTPlayer.setLoop(true);
 
+        // 재생 중인 상태에서 chunk를 다시 물린 경우, 모바일 브라우저가 새 queue를 CUED/BUFFERING 상태로 멈춰두는 경우가 있습니다.
+        // 사용자가 이미 재생을 시작한 세션에서는 다음 곡 전환과 chunk 재구성 이후에도 playVideo()를 짧게 재확인해 자동재생 흐름을 유지합니다.
+        if (this.#autoAdvanceEnabled) this.#resumePlaybackAfterQueueMutation();
+
         clearTimeout(this.#windowReloadTimer);
         this.#windowReloadTimer = setTimeout(() => {
             this.#windowReloadLock = false;
         }, 400);
+    }
+
+
+    #reloadPlaylistWindowForBoundary(absIndex) {
+        // 핵심 복구 지점입니다.
+        // 화면이 꺼져 있거나 브라우저가 백그라운드 상태인 동안 loadPlaylist()를 호출하면,
+        // 모바일 브라우저가 "사용자 제스처 없는 새 재생 요청"으로 판단해 현재 YouTube queue의 자동 재생을 끊을 수 있습니다.
+        // 백그라운드에서는 이미 iframe 내부에 들어가 있는 8개 queue가 스스로 넘어가도록 그대로 두고,
+        // 포그라운드로 돌아왔을 때만 현재 영상 기준으로 새 chunk를 다시 탑재합니다.
+        if (document.hidden) {
+            this.#pendingWindowReloadIndex = absIndex;
+            return;
+        }
+
+        this.#loadPlaylistWindow(absIndex, this.#YTPlayer.getCurrentTime?.() || 0);
+    }
+
+    #resumePlaybackAfterQueueMutation() {
+        // loadPlaylist()/nextVideo() 직후에는 IFrame 내부 상태가 곧바로 PLAYING으로 고정되지 않고,
+        // 모바일 Chromium/WebView 계열에서 CUED 또는 BUFFERING 상태로 한 박자 멈추는 경우가 있습니다.
+        // 이미 사용자가 재생을 시작한 세션에서만 짧게 playVideo()를 재호출해, 사용자가 직접 누른 재생 의사를 다음 영상 전환까지 보존합니다.
+        clearTimeout(this.#playResumeTimer);
+        this.#playResumeTimer = setTimeout(() => {
+            if (!this.#YTPlayer || !this.#autoAdvanceEnabled) return;
+            if (this.#YTPlayer.getPlayerState?.() !== YT.PlayerState.PLAYING) this.#YTPlayer.playVideo?.();
+        }, 120);
+    }
+
+    #advanceAfterEnded() {
+        // IFrame 내부 playlist가 정상적으로 다음 영상으로 넘어가지 못한 경우를 위한 보정입니다.
+        // local queue 안에 다음 영상이 남아 있으면 nextVideo()로 내부 queue를 그대로 사용하고,
+        // queue 끝이면 전체 entries 기준 다음 absIndex가 포함된 새 8개 chunk를 만들어 이어서 재생합니다.
+        if (!this.#autoAdvanceEnabled || !this.#YTPlayer || YConfig.entries.length < 2) return;
+
+        clearTimeout(this.#autoAdvanceTimer);
+        this.#autoAdvanceTimer = setTimeout(() => {
+            if (!this.#YTPlayer || !this.#autoAdvanceEnabled || YConfig.entries.length < 2) return;
+
+            const localIndex = this.#YTPlayer.getPlaylistIndex?.() ?? -1;
+            if (localIndex >= 0 && localIndex < this.#windowAbsIndices.length - 1) {
+                this.#YTPlayer.nextVideo?.();
+                this.#resumePlaybackAfterQueueMutation();
+                return;
+            }
+
+            this.#loadPlaylistWindow(((YConfig.lastIdx >= 0 ? YConfig.lastIdx : 0) + 1) % YConfig.entries.length, 0);
+        }, 80);
     }
 
     #onPlayerReady() {
@@ -838,7 +904,21 @@ class PlayerService {
      * @description 미디어 세션 메타데이터 업데이트 및 슬라이딩 윈도우 진행을 제어합니다.
      */
     #onPlayerStateChange(event) {
+        if (event.data === YT.PlayerState.ENDED) {
+            this.#advanceAfterEnded();
+            return;
+        }
+
+        if (event.data === YT.PlayerState.PAUSED) {
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+            return;
+        }
+
         if (event.data !== YT.PlayerState.PLAYING) return;
+
+        this.#autoAdvanceEnabled = true;
+        clearTimeout(this.#autoAdvanceTimer);
+        clearTimeout(this.#playResumeTimer);
 
         const localIndex = this.#YTPlayer.getPlaylistIndex();
         const absIndex = this.#windowAbsIndices[localIndex];
@@ -876,11 +956,10 @@ class PlayerService {
         // 이렇게 해야 전체 200곡을 한 번에 안 올리면서도 내부 playlist 자동전환을 계속 활용할 수 있다.
         if (
             YConfig.entries.length > this.#windowSize &&
-            (localIndex === 0 || localIndex >= this.#windowAbsIndices.length - 1) &&
+            (localIndex === 0 || localIndex >= this.#windowAbsIndices.length - 2) &&
             !this.#windowReloadLock
         ) {
-            const currentTime = this.#YTPlayer.getCurrentTime?.() || 0;
-            this.#loadPlaylistWindow(absIndex, currentTime);
+            this.#reloadPlaylistWindowForBoundary(absIndex);
         }
     }
 
