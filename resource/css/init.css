@@ -678,6 +678,7 @@ img {
 .memo-create-form,
 .inlineEditForm {
     display: grid !important;
+    position: relative;
     grid-template-columns: 1fr;
     gap: 8px;
 }
