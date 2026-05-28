@@ -32,6 +32,18 @@ const paintSnackbar = (snackbar, type = "normal") => {
 }
 
 /**
+ * @description snackbar를 완전히 숨김 상태로 고정합니다.
+ * Web Animations API는 fill 옵션 없이 종료되면 시작 전 inline style로 되돌아갈 수 있으므로,
+ * 완료/취소 이후에도 DOM 상태가 다시 보이는 값으로 복구되지 않도록 최종 상태를 직접 확정합니다.
+ * @param {HTMLElement} snackbar - 실제 snackbar DOM 노드
+ */
+const hideSnackbar = snackbar => {
+    snackbar.style.opacity = "0";
+    snackbar.style.zIndex = "-1";
+    snackbar.style.transform = "translateX(-50%) translateY(14px) scale(0.98)";
+}
+
+/**
  * @description snackbar를 즉시 보이는 상태로 고정합니다.
  * @param {string} message - 표시할 메시지
  * @param {string} type - normal/error/loading 중 하나
@@ -40,6 +52,7 @@ const setSnackbarVisible = (message, type = "normal") => {
     const snackbar = getSnackbar();
 
     SnackbarState.animation?.cancel?.();
+    SnackbarState.animation = null;
     paintSnackbar(snackbar, type);
     snackbar.innerText = message;
     snackbar.style.opacity = "1";
@@ -66,10 +79,9 @@ const pushProgressSnackbar = ({ message, type = "loading" }) => {
             if (SnackbarState.persistentToken !== token) return;
             if (finalMessage) pushSnackbar({ message: finalMessage, type: finalType, duration });
             else {
-                const snackbar = getSnackbar();
-                snackbar.style.opacity = "0";
-                snackbar.style.zIndex = "-1";
-                snackbar.style.transform = "translateX(-50%) translateY(14px) scale(0.98)";
+                SnackbarState.animation?.cancel?.();
+                SnackbarState.animation = null;
+                hideSnackbar(getSnackbar());
             }
         }
     };
@@ -92,9 +104,14 @@ const pushSnackbar = async ({ message, type = "normal", duration = 1800 }) => {
         { opacity: 1, zIndex: 100, transform: "translateX(-50%) translateY(0) scale(1)", offset: 0.16 },
         { opacity: 1, zIndex: 100, transform: "translateX(-50%) translateY(0) scale(1)", offset: 0.84 },
         { opacity: 0, zIndex: -1, transform: "translateX(-50%) translateY(14px) scale(0.98)" }
-    ], { duration, easing: "cubic-bezier(.2,.8,.2,1)" });
+    ], { duration, easing: "cubic-bezier(.2,.8,.2,1)", fill: "forwards" });
 
-    try { await SnackbarState.animation.finished; } catch { }
+    const currentAnimation = SnackbarState.animation;
+    try { await currentAnimation.finished; } catch { }
+    if (SnackbarState.animation === currentAnimation) {
+        hideSnackbar(snackbar);
+        SnackbarState.animation = null;
+    }
 }
 
 export { pushSnackbar, pushProgressSnackbar }
