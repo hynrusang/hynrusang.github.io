@@ -559,3 +559,521 @@
         flex: 1;
     }
 }
+
+/* =========================================================
+ * Release Compact Density Pass
+ * - 우측/하단 패널이 화면을 과점유하지 않도록 플레이어 레이아웃 밀도 재조정
+ * - 재생 iframe 1개 + 6개 sliding queue 구조는 변경하지 않고 CSS 레이어만 조정
+ * ========================================================= */
+.ytv-canvas {
+    grid-template-columns: minmax(0, 1fr) clamp(286px, 24vw, 336px);
+    gap: 10px;
+}
+
+.ytv-video,
+.ytv-list {
+    border-radius: 18px;
+}
+
+.ytv-panel-toggle-btn {
+    right: calc(clamp(286px, 24vw, 336px) + 12px);
+    width: 34px;
+    height: 58px;
+    border-radius: 999px;
+    font-size: 13px;
+}
+
+.ytv-list-header {
+    padding: 8px;
+}
+
+.ytv-header-card {
+    gap: 8px;
+    padding: 6px;
+    border-radius: 14px;
+}
+
+.ytv-list-header img {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+}
+
+.ytv-header-eyebrow {
+    margin-bottom: 1px;
+    font-size: 10px;
+}
+
+.playlist-title-label b {
+    font-size: 14px;
+    line-height: 1.25;
+}
+
+.ytv-arrow-triangle {
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    font-size: 10px;
+}
+
+.ytv-list ul {
+    padding: 8px;
+}
+
+.ytv-add-card {
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 16px;
+}
+
+.ytv-add-card h3 {
+    font-size: 15px;
+}
+
+.ytv-add-card p {
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.ytv-add-card input {
+    min-height: 36px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+#input-playlist-button {
+    min-height: 38px;
+    border-radius: 10px;
+}
+
+.playlist-title {
+    margin: 12px 3px 6px;
+    font-size: 11px;
+}
+
+.playlist-item {
+    gap: 6px;
+    margin-bottom: 6px;
+    padding: 6px;
+    border-radius: 13px;
+}
+
+.playlist-item a {
+    padding: 6px;
+    font-size: 13px;
+}
+
+.playlist-buttons {
+    gap: 4px;
+}
+
+.playlist-buttons .playerButton {
+    width: 28px;
+    height: 28px;
+    border-radius: 9px;
+    font-size: 12px;
+}
+
+.ytv-entry-toolbar {
+    top: -8px;
+    gap: 8px;
+    margin: -8px -8px 8px;
+    padding: 8px;
+}
+
+.ytv-entry-toolbar-title strong {
+    font-size: 13px;
+}
+
+.ytv-entry-toolbar-title span {
+    font-size: 11px;
+}
+
+.ytv-entry-controls {
+    gap: 4px;
+}
+
+.ytv-entry-search {
+    min-height: 36px;
+    padding-left: 34px;
+    background-position: left 10px center;
+    background-size: 16px;
+    font-size: 13px;
+}
+
+.entry-status {
+    margin-bottom: 6px;
+    padding: 7px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.entry-item {
+    grid-template-columns: 32px 88px minmax(0, 1fr);
+    gap: 8px;
+    min-height: 64px;
+    margin-bottom: 6px;
+    padding: 7px;
+    border-radius: 14px;
+    contain-intrinsic-size: 64px;
+}
+
+.entry-item > b {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    font-size: 12px;
+}
+
+.entry-item > img {
+    width: 88px;
+    border-radius: 9px;
+}
+
+.entry-item > span {
+    font-size: 13px;
+    line-height: 1.28;
+    -webkit-line-clamp: 2;
+}
+
+@media (max-width: 1100px) {
+    .ytv-canvas {
+        grid-template-columns: minmax(0, 1fr) clamp(280px, 28vw, 320px);
+    }
+
+    .ytv-panel-toggle-btn {
+        right: calc(clamp(280px, 28vw, 320px) + 10px);
+    }
+}
+
+@media (max-width: 768px) {
+    .ytv-canvas {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 1fr) minmax(220px, 42dvh);
+        gap: 0;
+    }
+
+    .ytv-video {
+        border-radius: 0;
+    }
+
+    .ytv-list {
+        border-radius: 18px 18px 0 0;
+        transform: none;
+    }
+
+    .ytv-panel-toggle-btn {
+        top: auto;
+        right: 12px;
+        bottom: calc(42dvh + 6px);
+        width: 42px;
+        height: 34px;
+        border-radius: 999px;
+    }
+
+    .ytv-canvas.ytv-list-collapsed .ytv-panel-toggle-btn {
+        top: auto;
+        right: 12px;
+        bottom: 12px;
+    }
+
+    .ytv-list-header {
+        padding: 7px 8px;
+    }
+
+    .ytv-header-card {
+        padding: 5px;
+    }
+
+    .ytv-list-header img {
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+    }
+
+    .playlist-title-label b {
+        font-size: 13px;
+    }
+
+    .ytv-list ul {
+        padding: 8px 8px calc(12px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .ytv-add-card {
+        gap: 7px;
+        margin-bottom: 8px;
+        padding: 9px;
+        border-radius: 14px;
+    }
+
+    .ytv-add-card p {
+        display: none;
+    }
+
+    .ytv-add-card input {
+        min-height: 34px;
+        font-size: 12px;
+    }
+
+    #input-playlist-button {
+        min-height: 36px;
+    }
+
+    .playlist-item {
+        margin-bottom: 5px;
+        padding: 5px;
+    }
+
+    .ytv-entry-toolbar {
+        margin: -8px -8px 7px;
+        padding: 8px;
+    }
+
+    .ytv-entry-toolbar-row {
+        gap: 6px;
+    }
+
+    .ytv-entry-controls .playerButton {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+    }
+
+    .entry-item {
+        grid-template-columns: 28px 82px minmax(0, 1fr);
+        gap: 7px;
+        min-height: 58px;
+        padding: 6px;
+        border-radius: 12px;
+        contain-intrinsic-size: 58px;
+    }
+
+    .entry-item > b {
+        width: 28px;
+        height: 28px;
+        border-radius: 9px;
+        font-size: 11px;
+    }
+
+    .entry-item > img {
+        width: 82px;
+        border-radius: 8px;
+    }
+
+    .entry-item > span {
+        font-size: 12px;
+        line-height: 1.24;
+    }
+}
+
+@media (max-width: 420px) {
+    .ytv-canvas {
+        grid-template-rows: minmax(0, 1fr) minmax(200px, 40dvh);
+    }
+
+    .ytv-panel-toggle-btn {
+        bottom: calc(40dvh + 6px);
+    }
+
+    .entry-item {
+        grid-template-columns: 26px 76px minmax(0, 1fr);
+        gap: 6px;
+    }
+
+    .entry-item > b {
+        width: 26px;
+        height: 26px;
+    }
+
+    .entry-item > img {
+        width: 76px;
+    }
+}
+
+/* =========================================================
+ * Release Panel Size Hotfix
+ * - 우측 패널 폭을 한 단계 더 줄이고, 모바일 영상 영역은 16:9 근처로 제한
+ * - 썸네일/항목 이미지는 칸 밖으로 넘치거나 반복되어 보이지 않도록 명시
+ * ========================================================= */
+.ytv-canvas {
+    grid-template-columns: minmax(0, 1fr) clamp(270px, 20vw, 300px);
+    gap: 9px;
+}
+
+.ytv-panel-toggle-btn {
+    right: calc(clamp(270px, 20vw, 300px) + 10px);
+    width: 32px;
+    height: 54px;
+}
+
+.ytv-list-header {
+    padding: 7px;
+}
+
+.ytv-add-card {
+    gap: 7px;
+    margin-bottom: 8px;
+    padding: 9px;
+}
+
+.playlist-title {
+    margin: 10px 3px 5px;
+}
+
+.playlist-item {
+    min-height: 40px;
+    margin-bottom: 5px;
+    padding: 5px 6px;
+}
+
+.playlist-item a {
+    min-width: 0;
+    padding: 5px 6px;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.playlist-buttons .playerButton {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    font-size: 11px;
+}
+
+.entry-item {
+    grid-template-columns: 30px 76px minmax(0, 1fr);
+    min-height: 56px;
+    contain-intrinsic-size: 56px;
+}
+
+.entry-item > img {
+    display: block;
+    width: 76px;
+    max-width: 76px;
+    aspect-ratio: 16 / 9;
+    height: auto;
+    object-fit: cover;
+    object-position: center;
+    background-repeat: no-repeat;
+}
+
+.entry-item > span {
+    font-size: 12px;
+    -webkit-line-clamp: 2;
+}
+
+@media (max-width: 1100px) {
+    .ytv-canvas {
+        grid-template-columns: minmax(0, 1fr) clamp(260px, 24vw, 288px);
+    }
+
+    .ytv-panel-toggle-btn {
+        right: calc(clamp(260px, 24vw, 288px) + 9px);
+    }
+}
+
+@media (max-width: 768px) {
+    .ytv-canvas {
+        --ytv-mobile-video-height: min(56.25vw, 216px);
+        grid-template-columns: 1fr;
+        grid-template-rows: var(--ytv-mobile-video-height) minmax(0, 1fr);
+    }
+
+    .ytv-video {
+        min-height: 0;
+        aspect-ratio: 16 / 9;
+    }
+
+    .ytv-panel-toggle-btn {
+        right: 10px;
+        bottom: calc(var(--ytv-mobile-video-height) + 5px);
+        width: 38px;
+        height: 30px;
+    }
+
+    .ytv-list-header {
+        padding: 6px 7px;
+    }
+
+    .ytv-header-card {
+        gap: 7px;
+        padding: 4px;
+    }
+
+    .ytv-list-header img {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+    }
+
+    .ytv-header-eyebrow {
+        font-size: 9px;
+    }
+
+    .playlist-title-label b {
+        font-size: 12px;
+    }
+
+    .ytv-arrow-triangle {
+        width: 26px;
+        height: 26px;
+    }
+
+    .ytv-add-card {
+        padding: 8px;
+    }
+
+    .ytv-add-card h3 {
+        font-size: 14px;
+    }
+
+    .playlist-item {
+        min-height: 36px;
+    }
+
+    .entry-item {
+        grid-template-columns: 26px 72px minmax(0, 1fr);
+        min-height: 52px;
+        padding: 5px;
+        contain-intrinsic-size: 52px;
+    }
+
+    .entry-item > b {
+        width: 26px;
+        height: 26px;
+        font-size: 10px;
+    }
+
+    .entry-item > img {
+        width: 72px;
+        max-width: 72px;
+        border-radius: 7px;
+    }
+
+    .entry-item > span {
+        font-size: 11px;
+        line-height: 1.2;
+    }
+}
+
+@media (max-width: 420px) {
+    .ytv-canvas {
+        --ytv-mobile-video-height: min(56.25vw, 210px);
+    }
+
+    .entry-item {
+        grid-template-columns: 24px 68px minmax(0, 1fr);
+    }
+
+    .entry-item > b {
+        width: 24px;
+        height: 24px;
+    }
+
+    .entry-item > img {
+        width: 68px;
+        max-width: 68px;
+    }
+}
