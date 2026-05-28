@@ -5,7 +5,7 @@ const HandlerX = ({element, onedit, ondelete, editFrom="innerText"}) => {
     const elements = {
         static: element,
         editer: Dynamic.$("form", {class: "inlineEditForm memo-inline-editor", onsubmit: onedit}).add(
-            Dynamic.$("textarea", {required: null, class: "inlineEditTextarea", spellcheck: "false"}),
+            Dynamic.$("textarea", {required: null, class: "inlineEditTextarea", spellcheck: "false", rows: "2"}),
             Dynamic.$("button", {type: "submit", class: "inlineEditSubmit", text: "반영"})
         )
     }
@@ -20,7 +20,7 @@ const HandlerX = ({element, onedit, ondelete, editFrom="innerText"}) => {
                 if (isEditable) {
                     elements.editer.node[0].value = elements.static.node[editFrom];
                     elements.editer.node[0].style.height = "";
-                    elements.editer.node[0].style.height = `${Math.min(Math.max(elements.static.node.scrollHeight + 12, 44), 180)}px`;
+                    elements.editer.node[0].style.height = `${Math.min(Math.max(elements.static.node.scrollHeight + 12, 44), 132)}px`;
                 }
                 frame.reset(elements[isEditable ? "editer" : "static"]);
             }}),

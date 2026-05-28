@@ -51,7 +51,7 @@ const setSnackbarVisible = (message, type = "normal") => {
  * @description 진행 중인 작업용 snackbar를 생성합니다.
  * 반환된 handle은 같은 token을 가진 작업만 갱신/종료할 수 있어, 이전 로드 작업의 늦은 완료 콜백이 새 snackbar를 닫는 문제를 방지합니다.
  * @param {{message: string, type?: string}} props - snackbar 초기 메시지와 유형
- * @returns {{update: (message: string, type?: string) => void, close: (message?: string, type?: string) => void, token: number}}
+ * @returns {{update: (message: string, type?: string) => void, close: (message?: string, type?: string, duration?: number) => void, token: number}}
  */
 const pushProgressSnackbar = ({ message, type = "loading" }) => {
     const token = ++SnackbarState.persistentToken;
@@ -62,9 +62,9 @@ const pushProgressSnackbar = ({ message, type = "loading" }) => {
         update: (nextMessage, nextType = type) => {
             if (SnackbarState.persistentToken === token) setSnackbarVisible(nextMessage, nextType);
         },
-        close: (finalMessage = "", finalType = "normal") => {
+        close: (finalMessage = "", finalType = "normal", duration = 1000) => {
             if (SnackbarState.persistentToken !== token) return;
-            if (finalMessage) pushSnackbar({ message: finalMessage, type: finalType });
+            if (finalMessage) pushSnackbar({ message: finalMessage, type: finalType, duration });
             else {
                 const snackbar = getSnackbar();
                 snackbar.style.opacity = "0";
@@ -76,11 +76,11 @@ const pushProgressSnackbar = ({ message, type = "loading" }) => {
 }
 
 /**
- * @type {(props: {message: string, type: string}) => Promise<void>}
+ * @type {(props: {message: string, type?: string, duration?: number}) => Promise<void>}
  * @description 앱 전역 토스트 메시지를 표시합니다.
  * 기존 snackbar DOM을 재사용하고 Web Animations API만 사용하므로 추가 노드 누적이나 타이머 누수가 발생하지 않습니다.
  */
-const pushSnackbar = async ({ message, type = "normal" }) => {
+const pushSnackbar = async ({ message, type = "normal", duration = 1800 }) => {
     const snackbar = getSnackbar();
 
     ++SnackbarState.persistentToken;
@@ -92,7 +92,7 @@ const pushSnackbar = async ({ message, type = "normal" }) => {
         { opacity: 1, zIndex: 100, transform: "translateX(-50%) translateY(0) scale(1)", offset: 0.16 },
         { opacity: 1, zIndex: 100, transform: "translateX(-50%) translateY(0) scale(1)", offset: 0.84 },
         { opacity: 0, zIndex: -1, transform: "translateX(-50%) translateY(14px) scale(0.98)" }
-    ], { duration: 1800, easing: "cubic-bezier(.2,.8,.2,1)" });
+    ], { duration, easing: "cubic-bezier(.2,.8,.2,1)" });
 
     try { await SnackbarState.animation.finished; } catch { }
 }

@@ -703,9 +703,15 @@ img {
 
 .memo-create-input,
 .inlineEditTextarea {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
     min-height: 42px;
-    max-height: 112px;
+    max-height: 132px;
+    overflow: auto;
     line-height: 1.45;
+    resize: vertical;
+    overscroll-behavior: contain;
 }
 
 .formApplyButton,
@@ -722,11 +728,14 @@ img {
     margin-bottom: 8px;
     padding: 8px 10px;
     gap: 8px;
+    overflow: hidden;
 }
 
 .handlerContent {
     flex: 1 1 auto;
     min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .handlerActions {
@@ -747,6 +756,12 @@ img {
     align-items: flex-start;
 }
 
+.memo-inline-editor {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
 .link-handler .link-item-anchor,
 #dynamic_link .link-item-anchor {
     display: block;
@@ -761,15 +776,21 @@ img {
 }
 
 .memo-item-body {
+    box-sizing: border-box;
+    contain: paint;
+    display: block;
     width: 100%;
+    max-width: 100%;
     max-height: 220px;
     margin: 0;
-    overflow-y: auto;
+    overflow: auto;
     color: var(--text);
     font-size: 14px;
     line-height: 1.5;
     white-space: pre-wrap;
+    overflow-wrap: anywhere;
     word-break: break-word;
+    overscroll-behavior: contain;
 }
 
 .iconX {
