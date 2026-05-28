@@ -678,7 +678,6 @@ img {
 .memo-create-form,
 .inlineEditForm {
     display: grid !important;
-    position: relative;
     grid-template-columns: 1fr;
     gap: 8px;
 }
@@ -967,4 +966,33 @@ router .iconX {
         border-radius: 12px;
         background-size: 25px 25px;
     }
+}
+
+/* =========================================================
+ * Memo/Snackbar Stability Hotfix
+ * - pre 요소의 paint containment와 빡빡한 줄 높이가 긴 문장/토큰 경계에서 글리프를 잘라내는 문제를 제거
+ * - 긴 URL/base64/연속 문자열은 가로 스크롤 대신 안전하게 줄바꿈
+ * ========================================================= */
+.memo-item-body,
+.handlerX pre.memo-item-body {
+    contain: none !important;
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    max-height: 240px;
+    padding: 2px 4px 4px 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.68;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+    line-break: anywhere;
+    text-overflow: clip;
+}
+
+.handlerContent:has(.memo-item-body) {
+    overflow: visible;
 }

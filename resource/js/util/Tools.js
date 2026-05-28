@@ -109,6 +109,7 @@ const pushSnackbar = async ({ message, type = "normal", duration = 1800 }) => {
     const currentAnimation = SnackbarState.animation;
     try { await currentAnimation.finished; } catch { }
     if (SnackbarState.animation === currentAnimation) {
+        currentAnimation.cancel();
         hideSnackbar(snackbar);
         SnackbarState.animation = null;
     }
