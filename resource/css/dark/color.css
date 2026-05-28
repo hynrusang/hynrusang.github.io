@@ -1,62 +1,23 @@
-/* 기본 색상 설정 */
-
-/* 기본 레이아웃 */
-
-*::-webkit-scrollbar-thumb {
-    background: cyan;
-    border: none;
-}
-
-body {
-    color: white;
-    background-color: #141414;
-}
-
-/* 단락 */
-
-h1, h2, h3, h4 {
-    color: #9393FFCC
-}
-
-p {
-    color: #636363
-}
-
-a, [type=button], [type=submit] {
-    color: white;
-    background-color: #6262F5;
-}
-
-/* 입력 요소 */
-
-textarea, input, select {
-    color: cyan;
-}
-
-textarea {
-    border: 1px solid white;
-}
-
-option {
-    color: black;
-}
-
-/* 내부 컴포넌트 스타일 */
-
-.handlerX {
-    background-color: #8080804d;
-}
-
-/* 내부 플레이리스트 컴포넌트 스타일 */
-
-.playlist-item:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.playerButton:hover {
-    background-color: #5a5aff;
-}
-
-.entry-item:hover {
-    background: #2a2a2a;
+/* Dark theme variables */
+:root {
+    --app-bg: #090b12;
+    --app-bg-soft: #121520;
+    --surface: rgba(18, 22, 34, 0.78);
+    --surface-solid: #111522;
+    --surface-elevated: rgba(25, 30, 45, 0.94);
+    --surface-muted: rgba(255, 255, 255, 0.06);
+    --line: rgba(255, 255, 255, 0.1);
+    --line-strong: rgba(255, 255, 255, 0.18);
+    --text: #f5f7fb;
+    --text-soft: #c7cedd;
+    --text-faint: #8b94a7;
+    --accent: #6ea8ff;
+    --accent-strong: #9b7cff;
+    --accent-soft: rgba(110, 168, 255, 0.16);
+    --success: #3ddc84;
+    --danger: #ff5c7a;
+    --warning: #ffd166;
+    --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.22);
+    --shadow-md: 0 18px 52px rgba(0, 0, 0, 0.34);
+    --shadow-lg: 0 30px 90px rgba(0, 0, 0, 0.45);
 }

@@ -1,6 +1,6 @@
 import { Dynamic, LiveData } from "../init/module.js";
 import { MainRouter } from "../page/Router.js";
-import { pushSnackbar } from "./Tools.js";
+import { pushProgressSnackbar, pushSnackbar } from "./Tools.js";
 import Player, { restoreYConfig } from "../page/Player.js";
 import Navigation from "../page/Setting/Navigation.js";
 import Working from "../page/Prepare/Working.js";
@@ -37,18 +37,29 @@ export default class DataResource {
          * @type {(email: string, password: string) => Promise<void>}
          */
         static authenticate = async (email, password) => {
+            const progressSnackbar = pushProgressSnackbar({ message: "로그인 정보를 확인하는 중입니다." });
             try {
                 await firebase.auth().signInWithEmailAndPassword(email, password);
+                progressSnackbar.close("로그인 완료. 사용자 데이터를 불러옵니다.", "normal");
             } catch (e) {
-                if (e.code == "auth/user-not-found" && confirm("해당 계정은 존재하지 않습니다.\n해당 계정으로 새롭게 회원가입을 시도할까요?")) {
-                    pushSnackbar({message: "회원가입을 시도하는 중입니다.", type: "normal"});
-                    try {
-                        const { user } = await firebase.auth().createUserWithEmailAndPassword(email, password);
-                        pushSnackbar({message: "회원가입 인증을 위한 메일을 발송하는 중입니다.", type: "normal"});
-                        await user.sendEmailVerification();
-                        pushSnackbar({message: "인증용 메일을 보냈습니다.", type: "normal"});
-                    } catch (err) { DataResource.#firebaseAuthHandler(err); }
-                } else DataResource.#firebaseAuthHandler(e);
+                if (e.code == "auth/user-not-found") {
+                    progressSnackbar.close("등록된 계정을 찾지 못했습니다.", "error");
+                    if (confirm("해당 계정은 존재하지 않습니다.\n해당 계정으로 새롭게 회원가입을 시도할까요?")) {
+                        const registerProgress = pushProgressSnackbar({ message: "회원가입을 시도하는 중입니다." });
+                        try {
+                            const { user } = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                            registerProgress.update("회원가입 인증 메일을 발송하는 중입니다.");
+                            await user.sendEmailVerification();
+                            registerProgress.close("인증용 메일을 보냈습니다.", "normal");
+                        } catch (err) {
+                            registerProgress.close("회원가입 처리에 실패했습니다.", "error");
+                            DataResource.#firebaseAuthHandler(err);
+                        }
+                    }
+                } else {
+                    progressSnackbar.close("로그인 처리에 실패했습니다.", "error");
+                    DataResource.#firebaseAuthHandler(e);
+                }
             }
             localStorage.setItem("timestamp", new Date());
         }
@@ -194,14 +205,21 @@ export default class DataResource {
         });
 
         firebase.auth().onAuthStateChanged(async user => {
-            if (!user || !user.emailVerified) return firebase.auth().signOut();
+            if (!user) return;
+            if (!user.emailVerified) {
+                pushSnackbar({ message: "이메일 인증이 완료되지 않아 로그아웃합니다.", type: "error" });
+                return firebase.auth().signOut();
+            }
 
+            const authProgress = pushProgressSnackbar({ message: "자동 로그인 상태를 확인하는 중입니다." });
             if (Date.now() - new Date(localStorage.getItem("timestamp")).getTime() >= 2592000000) {
+                authProgress.close("로그인 유지 시간이 만료되었습니다.", "error");
                 localStorage.clear();
                 firebase.auth().signOut();
                 return;
             }
             
+            authProgress.update("사용자 데이터를 불러오는 중입니다.");
             Dynamic.FragMutation.mutate(Working, "데이터들을 불러오는 중...");
             const [basic, securitySurface, securityCenter] = await Promise.all([
                 firebase.firestore().collection("user").doc(user.uid).get(),
@@ -230,12 +248,14 @@ export default class DataResource {
             Dynamic.scan("#navigator_icon").onclick = () => Dynamic.FragMutation.mutate(Navigation);
             Dynamic.scan("fragment[rid=rander]").remove();
             Dynamic.FragMutation.setRouter("main", MainRouter);
+            authProgress.update("화면 구성을 복원하는 중입니다.");
 
             const savedPlayerInstance = localStorage.getItem("YConfig");
             if (savedPlayerInstance) {
                 restoreYConfig(JSON.parse(savedPlayerInstance));
                 Dynamic.FragMutation.mutate(Player);
             } else Dynamic.FragMutation.mutate(Navigation);
+            authProgress.close("로그인 동기화 완료", "normal");
         })
     }
 }

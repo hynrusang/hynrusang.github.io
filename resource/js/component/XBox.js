@@ -4,23 +4,24 @@ const HandlerContainerX = (...handler) => Dynamic.$("div", {style: "flex-directi
 const HandlerX = ({element, onedit, ondelete, editFrom="innerText"}) => {
     const elements = {
         static: element,
-        editer: Dynamic.$("form", {onsubmit: onedit}).add(
-            Dynamic.$("textarea", {required: null, style: "width: 100%;", spellcheck: "false"}),
-            Dynamic.$("input", {type: "submit", style: "display: none"})
+        editer: Dynamic.$("form", {class: "inlineEditForm memo-inline-editor", onsubmit: onedit}).add(
+            Dynamic.$("textarea", {required: null, class: "inlineEditTextarea", spellcheck: "false", rows: "2"}),
+            Dynamic.$("button", {type: "submit", class: "inlineEditSubmit", text: "반영"})
         )
     }
     let isEditable = false;
-    const frame = Dynamic.$("div", {style: "width: 100%"}).add(elements["static"]);
+    const frame = Dynamic.$("div", {class: "handlerContent"}).add(elements["static"]);
 
     return Dynamic.$("div", {class: "handlerX"}).add(
         frame,
-        Dynamic.$("div", {style: "display: flex"}).add(
+        Dynamic.$("div", {class: "handlerActions"}).add(
             IconX({icon: "edit", onclick: () => {
                 isEditable = !isEditable;
                 if (isEditable) {
                     elements.editer.node[0].value = elements.static.node[editFrom];
-                    elements.editer.node[0].style.height = `${elements.static.node.scrollHeight + 20}px`;
-                } else elements.editer.node[1].click();
+                    elements.editer.node[0].style.height = "";
+                    elements.editer.node[0].style.height = `${Math.min(Math.max(elements.static.node.scrollHeight + 12, 44), 132)}px`;
+                }
                 frame.reset(elements[isEditable ? "editer" : "static"]);
             }}),
             IconX({icon: "delete", onclick: ondelete})
@@ -28,7 +29,7 @@ const HandlerX = ({element, onedit, ondelete, editFrom="innerText"}) => {
     )
 }
 const ScreenX = screenId => Dynamic.$("div", {class: "screenX"}).add(
-    Dynamic.$("div", {id: screenId, style: "height: 100%; overflow-y: scroll;"})
+    Dynamic.$("div", {id: screenId})
 )
 const InputX = ({label, value, placeholder, type="text", oninput}) => Dynamic.$("div", {class: "inputX"}).add(
     Dynamic.$("label", {text: label}),

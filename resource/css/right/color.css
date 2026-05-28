@@ -1,0 +1,23 @@
+/* Light theme variables. The existing code calls this theme "right". */
+:root {
+    --app-bg: #eef3ff;
+    --app-bg-soft: #ffffff;
+    --surface: rgba(255, 255, 255, 0.82);
+    --surface-solid: #ffffff;
+    --surface-elevated: rgba(255, 255, 255, 0.96);
+    --surface-muted: rgba(15, 23, 42, 0.055);
+    --line: rgba(15, 23, 42, 0.1);
+    --line-strong: rgba(15, 23, 42, 0.18);
+    --text: #101828;
+    --text-soft: #475467;
+    --text-faint: #667085;
+    --accent: #2563eb;
+    --accent-strong: #7c3aed;
+    --accent-soft: rgba(37, 99, 235, 0.12);
+    --success: #16a34a;
+    --danger: #dc2626;
+    --warning: #f59e0b;
+    --shadow-sm: 0 8px 24px rgba(15, 23, 42, 0.08);
+    --shadow-md: 0 18px 52px rgba(15, 23, 42, 0.12);
+    --shadow-lg: 0 30px 90px rgba(15, 23, 42, 0.16);
+}

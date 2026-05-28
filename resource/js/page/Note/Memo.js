@@ -9,7 +9,7 @@ const Memo = new Dynamic.Fragment("main",
 ).registAction(() => {
     const temp = DataResource.Data.basic.memo;
     Dynamic.snipe("#dynamic_memo").reset(temp.map((memo, index) => HandlerX({
-        element: Dynamic.$("pre", {style: "width: 100%; max-height: 300px; white-space: pre-wrap; word-break: break-all; overflow-y: scroll", text: memo}),
+        element: Dynamic.$("pre", {class: "memo-item-body", text: memo}),
         onedit: e => {
             e.preventDefault();
             if (temp[index] == e.target[0].value) {

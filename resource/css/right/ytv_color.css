@@ -1,0 +1,4 @@
+/* Player theme hook: actual colors are inherited from /resource/css/right/color.css */
+.ytv-canvas {
+    color: var(--text);
+}
