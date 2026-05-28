@@ -32,7 +32,7 @@ const Navigation = new Dynamic.Fragment("setting",
         Dynamic.$("div", { class: "navigationGrid" }).add(navigator.map(item => Dynamic.$("button", {
             class: "navigationCard",
             type: "button",
-            onclick: () => Dynamic.FragMutation.mutate(item.page)
+            onclick: () => Dynamic.FragMutation.mutate(item.page, null, true)
         }).add(
             Dynamic.$("span", { class: "navigationCardIcon", style: `background-image: url(/resource/img/icon/${item.icon}.png)` }),
             Dynamic.$("span", { class: "navigationCardText" }).add(
