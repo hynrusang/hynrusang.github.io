@@ -1,5 +1,5 @@
 import { Dynamic } from "../init/module.js";
-import { pushSnackbar } from "../util/Tools.js";
+import { pushProgressSnackbar, pushSnackbar } from "../util/Tools.js";
 import DataResource from "../util/DataResource.js";
 
 // ==========================================
@@ -478,16 +478,16 @@ class UIManager {
                 e.preventDefault();
                 if (!this.#playerService || this.#isFetching) return;
                 this.#isFetching = true;
-                pushSnackbar({ message: "재생목록을 불러오는 중입니다.", type: "normal" })
+                const progressSnackbar = pushProgressSnackbar({ message: "재생목록 구조를 확인하는 중입니다." });
                 try {
                     const entries = await this.#apiService.fetchEntriesFromURL(url);
                     if (entries && entries.length > 0) {
-                        this.#playerService.loadNewPlaylist(entries);
-                        pushSnackbar({ message: `${entries.length}개의 영상을 로드했습니다.`, type: "normal" });
-                    } else pushSnackbar({ message: this.#apiService.lastErrorMessage || "재생 가능한 영상이 없거나 로드에 실패했습니다.", type: "error" });
+                        progressSnackbar.update(`영상 정보 로드 중 0 / ${entries.length}`);
+                        this.#playerService.loadNewPlaylist(entries, progressSnackbar);
+                    } else progressSnackbar.close(this.#apiService.lastErrorMessage || "재생 가능한 영상이 없거나 로드에 실패했습니다.", "error");
                 } catch (err) {
                     console.error(err);
-                    pushSnackbar({ message: "알 수 없는 오류가 발생했습니다.", type: "error" });
+                    progressSnackbar.close("알 수 없는 오류가 발생했습니다.", "error");
                 } finally {
                     this.#isFetching = false;
                 }
@@ -604,7 +604,7 @@ class PlayerService {
     /**
      * @description 새로운 외부 재생목록이 로드되었을 때 플레이어를 초기화합니다.
      */
-    loadNewPlaylist(entries) {
+    loadNewPlaylist(entries, progressSnackbar = null) {
         YConfig.entries = entries;
         YConfig.currentEntry = entries[0] || null;
         YConfig.lastIdx = 0;
@@ -617,7 +617,7 @@ class PlayerService {
 
         this.#uiManager.buildEntryList(YConfig.entries);
         this.#uiManager.updateNowPlaying(YConfig.currentEntry, 0, YConfig.entries.length);
-        this.#startMetadataHydration();
+        this.#startMetadataHydration(progressSnackbar);
         this.#loadPlaylistWindow(0, 0);
     }
     
@@ -736,14 +736,25 @@ class PlayerService {
      * @description YouTube Data API 없이 확보한 재생목록 항목의 제목/썸네일을 백그라운드에서 순차 보강합니다.
      * 재생 시작을 막지 않기 위해 await하지 않고, 모바일 브라우저에서 과도한 요청과 UI thrashing이 발생하지 않도록 동시성 3개와 소량의 지연을 둡니다.
      */
-    #startMetadataHydration() {
-        if (!this.#apiService || !YConfig.entries.some(entry => entry.title?.startsWith("YouTube 영상 "))) return;
+    #startMetadataHydration(progressSnackbar = null) {
+        const total = YConfig.entries.length;
+        const isPlaceholder = entry => entry?.title?.startsWith("YouTube 영상 ");
+        const pendingCount = YConfig.entries.filter(isPlaceholder).length;
+
+        if (!this.#apiService || !pendingCount) {
+            progressSnackbar?.close(total ? `${total}개 영상 로드 완료` : "재생 가능한 영상이 없습니다.", total ? "normal" : "error");
+            return;
+        }
 
         const token = ++this.#metadataHydrationToken;
         const start = Math.max(YConfig.lastIdx, 0);
-        const order = Array.from({ length: YConfig.entries.length }, (_, i) => (start + i) % YConfig.entries.length);
+        const order = Array.from({ length: total }, (_, i) => (start + i) % total).filter(i => isPlaceholder(YConfig.entries[i]));
+        const snackbar = progressSnackbar || pushProgressSnackbar({ message: `영상 정보 로드 중 ${total - pendingCount} / ${total}` });
         let cursor = 0;
-        let hydratedCount = 0;
+        let loadedCount = total - pendingCount;
+        let changedCount = 0;
+
+        snackbar.update(`영상 정보 로드 중 ${loadedCount} / ${total}`);
 
         Promise.all(Array.from({ length: Math.min(3, order.length) }, async () => {
             while (token === this.#metadataHydrationToken && cursor < order.length) {
@@ -751,19 +762,24 @@ class PlayerService {
                 const entry = await this.#apiService.hydrateEntryMetadata(YConfig.entries[index]);
 
                 if (token !== this.#metadataHydrationToken) return;
+                loadedCount++;
                 if (entry) {
+                    changedCount++;
                     this.#uiManager.updateEntryMetadata(index, entry);
                     if (index === YConfig.lastIdx) {
                         YConfig.currentEntry = entry;
                         this.#uiManager.updateNowPlaying(entry, index, YConfig.entries.length);
                     }
-                    if (++hydratedCount % 5 === 0) localStorage.setItem("YConfig", JSON.stringify(YConfig));
+                    if (changedCount % 5 === 0) localStorage.setItem("YConfig", JSON.stringify(YConfig));
                 }
+                snackbar.update(`영상 정보 로드 중 ${Math.min(loadedCount, total)} / ${total}`);
 
                 await new Promise(resolve => setTimeout(resolve, 60));
             }
         })).then(() => {
-            if (token === this.#metadataHydrationToken && hydratedCount) localStorage.setItem("YConfig", JSON.stringify(YConfig));
+            if (token !== this.#metadataHydrationToken) return;
+            if (changedCount) localStorage.setItem("YConfig", JSON.stringify(YConfig));
+            snackbar.close(`${total}개 영상 로드 완료`, "normal");
         });
     }
 

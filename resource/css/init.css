@@ -644,3 +644,305 @@ img {
         background-size: 18px 18px !important;
     }
 }
+
+/* =========================================================
+ * Release UX Patch
+ * - 링크/메모 편집 폼을 2줄 구조로 고정
+ * - 하단 메뉴 아이콘 가시성 개선
+ * - Player/Link/Memo 직접 라우터를 하나의 앱 메뉴로 통합
+ * ========================================================= */
+.screenX {
+    min-height: 0;
+}
+
+.screenX > div[id^="dynamic_"] {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto !important;
+    overflow-y: auto !important;
+}
+
+.screenX > form:not(.formBox) {
+    flex: 0 0 auto;
+    display: grid !important;
+    gap: 8px;
+    width: 100%;
+    margin: 0;
+    padding: 10px;
+    border-top: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface-solid) 88%, transparent);
+    backdrop-filter: blur(18px) saturate(1.18);
+}
+
+.link-create-form,
+.memo-create-form,
+.inlineEditForm {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.link-create-row,
+.inlineEditRow {
+    display: grid;
+    grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+    gap: 8px;
+    width: 100%;
+}
+
+.link-create-row input,
+.inlineEditRow input,
+.memo-create-input,
+.inlineEditTextarea {
+    min-height: 38px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.memo-create-input,
+.inlineEditTextarea {
+    min-height: 42px;
+    max-height: 112px;
+    line-height: 1.45;
+}
+
+.formApplyButton,
+.inlineEditSubmit {
+    width: 100%;
+    min-height: 38px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.handlerX {
+    align-items: center;
+    min-height: 42px;
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    gap: 8px;
+}
+
+.handlerContent {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.handlerActions {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 5px;
+}
+
+.handlerX .iconX {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    background-size: 20px 20px !important;
+}
+
+.handlerX:has(.inlineEditForm) {
+    align-items: flex-start;
+}
+
+.link-handler .link-item-anchor,
+#dynamic_link .link-item-anchor {
+    display: block;
+    overflow: hidden;
+    width: 100%;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 750;
+    line-height: 1.35;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.memo-item-body {
+    width: 100%;
+    max-height: 220px;
+    margin: 0;
+    overflow-y: auto;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.iconX {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background-size: 25px 25px !important;
+}
+
+footer .iconX,
+router .iconX {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background-size: 25px 25px !important;
+}
+
+#dynamic_navigation {
+    display: grid;
+    align-content: center;
+    gap: 16px;
+    padding: clamp(18px, 3vw, 34px);
+}
+
+.navigationHero {
+    display: grid;
+    gap: 8px;
+    text-align: center;
+}
+
+.navigationHero h1 {
+    margin: 0;
+    font-size: clamp(30px, 4.6vw, 52px);
+    line-height: 1;
+    letter-spacing: -0.06em;
+}
+
+.navigationHero p {
+    color: var(--text-soft);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.navigationGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    width: min(880px, 100%);
+    margin: 0 auto;
+}
+
+.navigationCard {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 96px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--surface-elevated) 88%, transparent);
+    color: var(--text);
+    text-align: left;
+    box-shadow: var(--shadow-sm);
+}
+
+.navigationCard:hover {
+    border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+    background: var(--accent-soft);
+    box-shadow: var(--shadow-md);
+}
+
+.navigationCardIcon {
+    flex: 0 0 auto;
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background-color: var(--surface-muted);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 28px 28px;
+}
+
+.navigationCardText {
+    display: grid;
+    min-width: 0;
+    gap: 5px;
+}
+
+.navigationCardText strong {
+    overflow: hidden;
+    font-size: 16px;
+    font-weight: 950;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.navigationCardText small {
+    color: var(--text-soft);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.navigationAccount {
+    width: min(880px, 100%);
+    margin: 0 auto;
+}
+
+.navigationAccountButton {
+    display: grid;
+    gap: 4px;
+    width: 100%;
+    min-height: 56px;
+    padding: 12px 16px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--surface-elevated) 92%, transparent), color-mix(in srgb, var(--surface-muted) 70%, transparent));
+    color: var(--text);
+    text-align: left;
+    box-shadow: var(--shadow-sm);
+}
+
+.navigationAccountButton strong {
+    font-size: 14px;
+    font-weight: 950;
+}
+
+.navigationAccountButton span {
+    color: var(--text-soft);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+@media screen and (max-width: 768px) {
+    .screenX > form:not(.formBox) {
+        padding: 8px;
+    }
+
+    .link-create-row,
+    .inlineEditRow {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    .iconX,
+    footer .iconX,
+    router .iconX {
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+        background-size: 24px 24px !important;
+    }
+
+    .handlerX .iconX {
+        width: 29px;
+        height: 29px;
+        background-size: 19px 19px !important;
+    }
+
+    .navigationGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .navigationCard {
+        min-height: 78px;
+        padding: 13px;
+        border-radius: 16px;
+    }
+
+    .navigationCardIcon {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        background-size: 25px 25px;
+    }
+}
