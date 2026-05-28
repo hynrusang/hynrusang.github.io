@@ -29,132 +29,302 @@ let YConfig = {
 
 /**
  * @class YouTubeAPIService
- * @description YouTube Data API v3를 활용하여 영상 정보를 긁어오고 유효성을 검사하는 백엔드 통신 담당 클래스입니다.
+ * @description YouTube Data API v3와 YouTube IFrame API fallback을 함께 사용하여 영상 정보를 가져오는 통신 담당 클래스입니다.
+ * 모바일 브라우저/PWA 환경에서는 Google API Key의 HTTP referrer 검증 또는 네트워크 정책 차이로 Data API 요청만 실패할 수 있으므로,
+ * 재생목록은 Data API 실패 시 API Key가 필요 없는 IFrame API 기반 목록 probing으로 한 번 더 복구합니다.
  */
 class YouTubeAPIService {
     // --- Public Methods ---
     /**
+     * @description 마지막 로드 실패 원인을 UI 레이어에서 사용자에게 보여주기 위한 읽기 전용 메시지입니다.
+     * 네트워크/API/파싱 실패가 모두 같은 빈 배열로만 전달되면 실제 원인 추적이 불가능하므로, 서비스 내부의 마지막 실패 사유를 보존합니다.
+     * @returns {string} - 마지막 API 또는 fallback 실패 메시지
+     */
+    get lastErrorMessage() {
+        return this.#lastErrorMessage;
+    }
+
+    /**
      * @description 사용자가 입력한 YouTube URL(단일 영상 또는 재생목록)을 분석하여 재생 가능한 영상 목록 데이터로 변환합니다.
+     * URL 객체 기반 파싱을 먼저 수행하고, 사용자가 잘라 붙인 불완전한 문자열까지 처리하기 위해 정규식 기반 fallback을 병행합니다.
      * @param {string} url - 사용자가 입력한 YouTube 영상 또는 재생목록 주소
      * @returns {Promise<Array<object>>} - 파싱 및 검증이 완료된 Entry 객체 배열
      */
     async fetchEntriesFromURL(url) {
-        // 정규식을 통해 재생목록 ID 또는 단일 영상 ID를 추출합니다
-        const playlistIdMatch = url.match(/[?&]list=([a-zA-Z0-9_-]+)/);
-        const videoIdMatch = url.match(/(?:[?&]v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        this.#lastErrorMessage = "";
 
-        try {
-            // 재생목록 주소인 경우 재생목록 페치 메서드 호출
-            if (playlistIdMatch) return await this.#fetchPlaylistItems(playlistIdMatch[1]);
-            // 단일 영상 주소인 경우 단일 영상 페치 메서드 호출
-            if (videoIdMatch) return await this.#fetchVideoItem(videoIdMatch[1]);
-            return [];
-        } catch (err) {
-            console.error("❌ API 호출 실패:" + err);
-            pushSnackbar({ message: "데이터를 가져오는 데 실패했습니다.", type: "error" });
-            return [];
-        }
+        const parsed = this.#parseYouTubeURL(url);
+        if (parsed.playlistId) return await this.#fetchPlaylistItems(parsed.playlistId);
+        if (parsed.videoId) return await this.#fetchVideoItem(parsed.videoId);
+
+        this.#lastErrorMessage = "YouTube URL에서 영상 ID 또는 재생목록 ID를 찾지 못했습니다.";
+        return [];
     }
 
     // --- Private Properties ---
     /**
      * @private
-     * @description YouTube Data API v3 호출 시 필요한 인증 키입니다.
+     * @description YouTube Data API v3 호출 시 필요한 인증 키입니다. 재생목록 로드 실패 시에는 이 키를 사용하지 않는 IFrame API fallback으로 복구합니다.
      * @type {string}
      */
     #apiKey = "AIzaSyAglJGn84cPu_YvRUdigYQFCBml-s6kcuo";
 
+    /**
+     * @private
+     * @description 최근 로드 작업에서 발생한 가장 구체적인 실패 사유입니다. 빈 배열 반환과 실제 장애를 구분하기 위해 별도로 보존합니다.
+     * @type {string}
+     */
+    #lastErrorMessage = "";
+
     // --- Private Methods ---
     /**
      * @private
-     * @description oEmbed 엔드포인트를 우회 호출하여 해당 영상 ID가 퍼가기 제한 없이 실제로 재생 가능한지 사전 검증합니다.
-     * @param {string} videoId - 유효성을 검사할 YouTube 영상 고유 ID
-     * @returns {Promise<boolean>} - 재생 가능 여부 (true/false)
+     * @description 다양한 YouTube 공유 URL 형식에서 재생목록 ID와 영상 ID를 추출합니다.
+     * 모바일 YouTube 앱은 youtu.be, shorts, embed, music.youtube.com 등 서로 다른 형태의 링크를 만들 수 있으므로 한 경로에 고정하지 않습니다.
+     * @param {string} source - 사용자가 입력한 원본 URL 또는 ID 문자열
+     * @returns {{playlistId: string, videoId: string}} - 추출된 재생목록 ID와 영상 ID
      */
-    async #validateVideo(videoId) {
+    #parseYouTubeURL(source) {
+        const value = String(source || "").trim();
+        let playlistId = "";
+        let videoId = "";
+
         try {
-            const response = await fetch(`https://www.youtube.com/oembed?url=http://www.youtube.com/watch?v=${videoId}&format=json`);
-            return response.ok;
-        } catch (error) {
-            console.error(`Video validation failed for ${videoId}:` + error);
-            return false;
-        }
+            const parsed = new URL(value.includes("://") ? value : `https://${value}`);
+            playlistId = parsed.searchParams.get("list") || "";
+            videoId = parsed.searchParams.get("v") || "";
+
+            if (!videoId) {
+                const pathParts = parsed.pathname.split("/").filter(Boolean);
+                if (["youtu.be", "www.youtu.be"].includes(parsed.hostname)) videoId = pathParts[0] || "";
+                else if (["shorts", "embed", "live"].includes(pathParts[0])) videoId = pathParts[1] || "";
+            }
+        } catch { }
+
+        playlistId ||= value.match(/[?&]list=([a-zA-Z0-9_-]+)/)?.[1] || value.match(/(?:^|\s)(PL|UU|LL|RD|OLAK5uy_)[a-zA-Z0-9_-]+/)?.[0]?.trim() || "";
+        videoId ||= value.match(/(?:[?&]v=|youtu\.be\/|\/shorts\/|\/embed\/|\/live\/)([a-zA-Z0-9_-]{11})/)?.[1] || (/^[a-zA-Z0-9_-]{11}$/.test(value) ? value : "");
+
+        return { playlistId, videoId };
     }
-    
+
     /**
      * @private
      * @description 재생목록 ID를 기반으로 내부의 모든 영상 항목을 순회하며 가져옵니다.
-     * 비공개 및 삭제된 동영상은 이 단계에서 자동으로 필터링됩니다.
+     * Data API가 모바일 referrer/PWA/브라우저 정책 차이로 실패해도 IFrame API fallback을 사용해 영상 ID 목록을 복구합니다.
      * @param {string} playlistId - YouTube 공식 재생목록 고유 ID
      * @returns {Promise<Array<object>>} - 검증이 완료된 Entry 객체 배열
      */
     async #fetchPlaylistItems(playlistId) {
-        let allEntries = [];
-        let pageToken = "";
         const MAX_RESULTS = 200;
-        
-        while (true) {
-            const apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${playlistId}&key=${this.#apiKey}&part=snippet&maxResults=50${pageToken ? `&pageToken=${pageToken}` : ""}&fields=items(snippet(title,thumbnails,resourceId(videoId))),nextPageToken`;
+
+        try {
+            const entries = await this.#fetchPlaylistItemsByDataAPI(playlistId, MAX_RESULTS);
+            if (entries.length) return entries;
+            this.#lastErrorMessage ||= "Data API에서 재생 가능한 영상을 찾지 못했습니다.";
+        } catch (err) {
+            this.#lastErrorMessage = `Data API 실패: ${err.message || err}`;
+            console.warn(this.#lastErrorMessage);
+        }
+
+        try {
+            const entries = await this.#fetchPlaylistItemsByIframeAPI(playlistId, MAX_RESULTS);
+            if (entries.length) {
+                this.#lastErrorMessage = "";
+                return entries;
+            }
+            this.#lastErrorMessage ||= "IFrame API fallback에서도 재생목록을 가져오지 못했습니다.";
+        } catch (err) {
+            this.#lastErrorMessage = `${this.#lastErrorMessage ? `${this.#lastErrorMessage} / ` : ""}IFrame API fallback 실패: ${err.message || err}`;
+            console.warn(this.#lastErrorMessage);
+        }
+
+        return [];
+    }
+
+    /**
+     * @private
+     * @description YouTube Data API v3 playlistItems 엔드포인트로 재생목록 상세 정보를 가져옵니다.
+     * URLSearchParams로 모든 쿼리를 인코딩하여 모바일 브라우저별 URL 파싱 차이를 제거합니다.
+     * @param {string} playlistId - YouTube 공식 재생목록 고유 ID
+     * @param {number} maxResults - 최대 수집 개수
+     * @returns {Promise<Array<object>>} - 제목/썸네일이 포함된 Entry 객체 배열
+     */
+    async #fetchPlaylistItemsByDataAPI(playlistId, maxResults) {
+        const allEntries = [];
+        let pageToken = "";
+
+        while (allEntries.length < maxResults) {
+            const apiUrl = new URL("https://www.googleapis.com/youtube/v3/playlistItems");
+            apiUrl.search = new URLSearchParams({
+                playlistId,
+                key: this.#apiKey,
+                part: "snippet",
+                maxResults: "50",
+                fields: "items(snippet(title,thumbnails,resourceId(videoId))),nextPageToken",
+                ...(pageToken ? { pageToken } : {})
+            }).toString();
+
+            const response = await fetch(apiUrl.toString());
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok || data.error) throw new Error(data.error?.message || `HTTP ${response.status}`);
+            if (!Array.isArray(data.items) || !data.items.length) break;
+
+            allEntries.push(...data.items
+                .filter(item => item.snippet?.resourceId?.videoId && item.snippet.title !== "Private video" && item.snippet.title !== "Deleted video")
+                .map(item => ({
+                    id: item.snippet.resourceId.videoId,
+                    title: item.snippet.title,
+                    img: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url || `https://i.ytimg.com/vi/${item.snippet.resourceId.videoId}/mqdefault.jpg`
+                }))
+            );
+
+            pageToken = data.nextPageToken || "";
+            if (!pageToken) break;
+        }
+
+        return allEntries.slice(0, maxResults);
+    }
+
+    /**
+     * @private
+     * @description 숨김 YouTube 플레이어에 재생목록을 cue하여 Data API Key 없이 영상 ID 목록을 추출합니다.
+     * 이 플레이어는 목록 ID probing 전용이며, 결과를 얻거나 타임아웃되면 즉시 destroy하여 iframe 누수와 모바일 메모리 누적을 방지합니다.
+     * @param {string} playlistId - YouTube 공식 재생목록 고유 ID
+     * @param {number} maxResults - 최대 수집 개수
+     * @returns {Promise<Array<object>>} - IFrame API에서 확보한 영상 ID 기반 Entry 객체 배열
+     */
+    #fetchPlaylistItemsByIframeAPI(playlistId, maxResults) {
+        return new Promise((resolve, reject) => {
+            if (!window.YT?.Player) {
+                reject(new Error("YouTube IFrame API가 아직 초기화되지 않았습니다."));
+                return;
+            }
+
+            const probeHost = document.body.appendChild(document.createElement("div"));
+            const probeId = `ytv-playlist-probe-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+            let probePlayer = null;
+            let settled = false;
+            let intervalId = 0;
+            let timeoutId = 0;
+            let lastProbeError = "";
+
+            probeHost.id = `${probeId}-host`;
+            probeHost.style.cssText = "position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;";
+            probeHost.appendChild(Object.assign(document.createElement("div"), { id: probeId }));
+
+            const cleanup = () => {
+                clearInterval(intervalId);
+                clearTimeout(timeoutId);
+                try { probePlayer?.destroy(); } catch { }
+                probeHost.remove();
+            };
+
+            const finish = entries => {
+                if (settled) return;
+                settled = true;
+                cleanup();
+                resolve(entries);
+            };
+
+            const fail = error => {
+                if (settled) return;
+                settled = true;
+                cleanup();
+                reject(error);
+            };
+
+            const collect = () => {
+                const ids = [...new Set((probePlayer?.getPlaylist?.() || []).filter(id => /^[a-zA-Z0-9_-]{11}$/.test(id)))].slice(0, maxResults);
+                if (ids.length) finish(ids.map((id, index) => ({
+                    id,
+                    title: `YouTube 영상 ${index + 1}`,
+                    img: `https://i.ytimg.com/vi/${id}/mqdefault.jpg`
+                })));
+            };
 
             try {
-                const res = await fetch(apiUrl);
-                const data = await res.json();
-                
-                // API 할당량 초과 및 잘못된 요청 에러 핸들링
-                if (data.error) {
-                    pushSnackbar({ message: `목록 로드 실패: ${data.error.message}`, type: "error" });
-                    break;
-                }
-                
-                if (!data.items) break;
-
-                // 비공개 영상 및 삭제된 영상 필터링 후 렌더링용 객체로 매핑
-                const fetchedEntries = data.items
-                    .filter(item => item.snippet?.resourceId?.videoId && item.snippet.title !== 'Private video' && item.snippet.title !== 'Deleted video')
-                    .map(item => ({
-                        id: item.snippet.resourceId.videoId,
-                        title: item.snippet.title,
-                        img: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url
-                    }));
-
-                allEntries.push(...fetchedEntries);
-                pageToken = data.nextPageToken;
-                
-                // 최대 개수에 도달하거나 다음 페이지가 없으면 루프 종료
-                if (allEntries.length >= MAX_RESULTS || !pageToken) break;
-
+                probePlayer = new YT.Player(probeId, {
+                    width: 1,
+                    height: 1,
+                    playerVars: {
+                        enablejsapi: 1,
+                        origin: window.location.origin,
+                        widget_referrer: window.location.origin,
+                        playsinline: 1,
+                        controls: 0,
+                        rel: 0,
+                        autoplay: 0,
+                        listType: "playlist",
+                        list: playlistId
+                    },
+                    events: {
+                        onReady: () => {
+                            probePlayer.cuePlaylist({ listType: "playlist", list: playlistId, index: 0 });
+                            setTimeout(collect, 250);
+                        },
+                        onStateChange: collect,
+                        onError: event => {
+                            lastProbeError = `YouTube IFrame API 오류 코드 ${event.data}`;
+                            collect();
+                        }
+                    }
+                });
             } catch (err) {
-                console.error("Network Error:" + err);
-                break;
+                fail(err);
+                return;
             }
-        }
-        
-        return allEntries;
+
+            intervalId = setInterval(collect, 250);
+            timeoutId = setTimeout(() => {
+                collect();
+                if (!settled) fail(new Error(lastProbeError || "재생목록 ID probing 시간이 초과되었습니다."));
+            }, 8000);
+        });
     }
-    
+
     /**
      * @private
      * @description 단일 영상 ID를 기반으로 상세 정보를 가져오고 재생 유효성을 최종 검사합니다.
+     * 단일 영상은 API Key 의존성을 줄이기 위해 oEmbed를 우선 사용하고, oEmbed가 실패한 경우에만 Data API로 보강합니다.
      * @param {string} videoId - YouTube 영상 고유 ID
      * @returns {Promise<Array<object>>} - 유효성이 확인된 단일 Entry 객체가 담긴 배열
      */
     async #fetchVideoItem(videoId) {
-        if (!await this.#validateVideo(videoId)) {
-            pushSnackbar({ message: "사용할 수 없는 동영상입니다.", type: "error" });
+        try {
+            const response = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}&format=json`);
+            if (response.ok) {
+                const data = await response.json();
+                return [{
+                    id: videoId,
+                    title: data.title || "YouTube 영상",
+                    img: data.thumbnail_url || `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`
+                }];
+            }
+        } catch (err) {
+            console.warn(`oEmbed lookup failed for ${videoId}: ${err}`);
+        }
+
+        try {
+            const apiUrl = new URL("https://www.googleapis.com/youtube/v3/videos");
+            apiUrl.search = new URLSearchParams({ part: "snippet", id: videoId, key: this.#apiKey }).toString();
+            const response = await fetch(apiUrl.toString());
+            const data = await response.json().catch(() => ({}));
+            const video = data.items?.[0];
+
+            if (!response.ok || data.error) throw new Error(data.error?.message || `HTTP ${response.status}`);
+            if (!video) throw new Error("영상 정보를 찾지 못했습니다.");
+
+            return [{
+                id: video.id,
+                title: video.snippet.title,
+                img: video.snippet.thumbnails?.medium?.url || video.snippet.thumbnails?.default?.url || `https://i.ytimg.com/vi/${video.id}/mqdefault.jpg`
+            }];
+        } catch (err) {
+            this.#lastErrorMessage = `단일 영상 로드 실패: ${err.message || err}`;
+            console.warn(this.#lastErrorMessage);
             return [];
         }
-        
-        const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${this.#apiKey}`);
-        const data = await res.json();
-        const video = data.items[0];
-
-        if (!video) return [];
-
-        return [{
-            id: video.id,
-            title: video.snippet.title,
-            img: video.snippet.thumbnails.medium?.url || video.snippet.thumbnails.default?.url
-        }];
     }
 }
 
@@ -329,7 +499,7 @@ class UIManager {
                     if (entries && entries.length > 0) {
                         this.#playerService.loadNewPlaylist(entries);
                         pushSnackbar({ message: "재생목록 로드 완료!", type: "normal" });
-                    } else pushSnackbar({ message: "재생 가능한 영상이 없거나 로드에 실패했습니다.", type: "error" });
+                    } else pushSnackbar({ message: this.#apiService.lastErrorMessage || "재생 가능한 영상이 없거나 로드에 실패했습니다.", type: "error" });
                 } catch (err) {
                     console.error(err);
                     pushSnackbar({ message: "알 수 없는 오류가 발생했습니다.", type: "error" });
@@ -632,6 +802,17 @@ class PlayerService {
         if (absIndex !== YConfig.lastIdx) {
             YConfig.lastIdx = absIndex;
             YConfig.currentEntry = YConfig.entries[absIndex] || null;
+            this.#uiManager.updateNowPlaying(YConfig.currentEntry, absIndex, YConfig.entries.length);
+            localStorage.setItem("YConfig", JSON.stringify(YConfig));
+        }
+
+        // IFrame API fallback으로 만든 항목은 Data API 제목을 알 수 없어 임시 제목을 갖습니다.
+        // 실제 재생이 시작된 뒤에는 현재 플레이어가 보유한 videoData에서 제목을 얻을 수 있으므로,
+        // 같은 영상 ID가 확인되는 경우에만 원본 entries 객체를 갱신하여 단일 영상 UI와 Media Session 제목을 즉시 보정합니다.
+        const videoData = this.#YTPlayer.getVideoData?.();
+        if (videoData?.title && YConfig.currentEntry?.id === videoData.video_id && YConfig.currentEntry.title.startsWith("YouTube 영상 ")) {
+            YConfig.currentEntry.title = videoData.title;
+            YConfig.entries[absIndex].title = videoData.title;
             this.#uiManager.updateNowPlaying(YConfig.currentEntry, absIndex, YConfig.entries.length);
             localStorage.setItem("YConfig", JSON.stringify(YConfig));
         }
