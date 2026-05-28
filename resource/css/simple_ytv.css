@@ -1,132 +1,561 @@
-/* Canvas 전체 프레임 */
+/* =========================================================
+ * Necronomicon YouTube Player Release UI
+ * - 1 iframe playback + 6 item sliding queue architecture 유지
+ * - 이 파일은 플레이어 전용 레이아웃/상호작용 스타일만 담당
+ * ========================================================= */
 
 .ytv-canvas {
-	display: flex;
-  	flex-direction: row;
-	overflow: hidden;
-	width: 100%;
-  	height: 100%;
-	font-family: arial, sans-serif;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 410px);
+    gap: 14px;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    color: var(--text);
 }
 
-.ytv-canvas ::-webkit-scrollbar-thumb{
-	background: rgba(255,255,255,0.1);
+.ytv-video {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background:
+        linear-gradient(145deg, rgba(0, 0, 0, 0.74), rgba(0, 0, 0, 0.38)),
+        radial-gradient(circle at 50% 25%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 52%);
+    box-shadow: var(--shadow-lg);
+    transform: translateZ(0);
 }
 
-/* 비디오 영역 */
-
-.ytv-video{
-	flex-grow: 1;
-	width: calc(100% - 350px);
-  	height: 100%;
+.ytv-video::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
-
-/* 리스트 영역 */
-
-.ytv-list {
-	width: 350px;
-  	overflow-y: auto;
-	transition: width 0.2s;
-}
-
-.ytv-list ul {
-  	margin: 0;
-  	padding: 0;
-  	list-style-type: none;
-}
-
-/* 헤더 영역 */
-
-.ytv-list-header a {
-	color: black;
-	background: rgba(255,255,255,0.05);
-	white-space: nowrap;
-	position: relative;
-	z-index: 10;
-}
-
-.ytv-list-header img {
-	float: left;
-	width: 30px;
-}
-
-.ytv-list-header a span{
-	display: flex;
-	align-items: center;
-	overflow: hidden;
-	padding-left: 10px;
-	line-height: 30px;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
-.playlist-title-label b {
-	overflow: hidden;
-	flex-grow: 1;
-	text-overflow: ellipsis;
-}
-
-/* 내부 요소 스타일 */
-
-.playlist-item a {
-	display: inline-block;
-	padding: 2px;
-	color: inherit;
-	background: none;
-	flex-grow: 1;
-}
-
-.playlist-item span {
-	display: flex;
-}
-
-/* 화살표 스타일 */
-
-.ytv-arrow-triangle {
-	margin-left: 5px;
-	
-	transform: rotate(0deg);
-	transform-origin: center;
-	transition: transform 0.2s;
-}
-
-.ytv-playlist-open .ytv-arrow-triangle {
-	transform: rotate(180deg);
-}
-
-/* Others */
 
 .ytv-panel-toggle-btn {
-	border: none;
+    position: absolute;
+    right: min(432px, calc(100vw - 72px));
+    top: 50%;
+    z-index: 20;
+    width: 42px;
+    height: 72px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--surface-solid) 70%, transparent);
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(18px);
+    transform: translateY(-50%);
 }
 
 .ytv-panel-toggle-btn > span {
-	display: inline-block;
-	transform-origin: center;
-	transition: transform 0.2s;
+    display: inline-block;
+    transform-origin: center;
+    transition: transform 0.2s ease;
 }
 
 .ytv-list-open > span {
-	transform: rotate(180deg);
+    transform: rotate(180deg);
 }
 
-/* 반응형 대응 */
+.ytv-list {
+    display: flex;
+    overflow: hidden;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--surface-solid) 78%, transparent);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(22px) saturate(1.18);
+    transition: width 0.18s ease, opacity 0.18s ease, transform 0.18s ease;
+}
+
+.ytv-canvas.ytv-list-collapsed {
+    grid-template-columns: minmax(0, 1fr) 0;
+}
+
+.ytv-canvas.ytv-list-collapsed .ytv-list {
+    width: 0;
+    opacity: 0;
+    transform: translateX(12px);
+    pointer-events: none;
+}
+
+.ytv-canvas.ytv-list-collapsed .ytv-panel-toggle-btn {
+    right: 16px;
+}
+
+.ytv-list-header {
+    flex: 0 0 auto;
+    padding: 12px;
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--surface-solid) 92%, transparent), color-mix(in srgb, var(--surface-solid) 68%, transparent));
+}
+
+.ytv-list-header a {
+    display: block;
+    overflow: hidden;
+    border-radius: 18px;
+    color: inherit;
+}
+
+.ytv-header-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 8px;
+    border: 1px solid transparent;
+    border-radius: 18px;
+    transition: background 0.16s ease, border-color 0.16s ease;
+}
+
+.ytv-header-card:hover {
+    border-color: var(--line);
+    background: var(--surface-muted);
+}
+
+.ytv-list-header img {
+    flex: 0 0 auto;
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    object-fit: cover;
+    box-shadow: var(--shadow-sm);
+}
+
+.playlist-title-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.ytv-header-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.ytv-header-eyebrow {
+    margin-bottom: 2px;
+    color: var(--text-faint);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.playlist-title-label b {
+    display: block;
+    overflow: hidden;
+    min-width: 0;
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.28;
+    font-weight: 900;
+    letter-spacing: -0.025em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ytv-arrow-triangle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-muted);
+    color: var(--text-soft);
+    font-size: 12px;
+    transform: rotate(0deg);
+    transform-origin: center;
+    transition: transform 0.18s ease;
+}
+
+.ytv-playlist-open .ytv-arrow-triangle {
+    transform: rotate(180deg);
+}
+
+.ytv-list-inner {
+    flex: 1 1 auto;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.ytv-list ul {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 12px;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.ytv-add-card {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: linear-gradient(145deg, var(--surface-muted), color-mix(in srgb, var(--surface-muted) 70%, transparent));
+}
+
+.ytv-add-card h3 {
+    color: var(--text);
+    font-size: 17px;
+    font-weight: 950;
+    letter-spacing: -0.035em;
+}
+
+.ytv-add-card p {
+    color: var(--text-faint);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.ytv-add-card input {
+    min-height: 42px;
+}
+
+#input-playlist-button {
+    min-height: 44px;
+}
+
+.playlist-title {
+    margin: 18px 4px 8px;
+    color: var(--text-faint);
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.playlist-title:first-of-type {
+    margin-top: 6px;
+}
+
+.playlist-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--surface-elevated) 82%, transparent);
+    transition: background 0.14s ease, border-color 0.14s ease, transform 0.14s ease;
+}
+
+.playlist-item:hover {
+    border-color: color-mix(in srgb, var(--accent) 48%, var(--line));
+    background: var(--accent-soft);
+    transform: translateY(-1px);
+}
+
+.playlist-item a {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    padding: 8px;
+    color: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.playlist-buttons {
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 6px;
+}
+
+.playlist-buttons .playerButton {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+.ytv-entry-toolbar {
+    position: sticky;
+    top: -12px;
+    z-index: 6;
+    display: grid;
+    gap: 10px;
+    margin: -12px -12px 10px;
+    padding: 12px;
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface-solid) 88%, transparent);
+    backdrop-filter: blur(18px) saturate(1.15);
+}
+
+.ytv-entry-toolbar-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.ytv-entry-toolbar-title {
+    min-width: 0;
+}
+
+.ytv-entry-toolbar-title strong {
+    display: block;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 950;
+    letter-spacing: -0.025em;
+}
+
+.ytv-entry-toolbar-title span {
+    display: block;
+    margin-top: 2px;
+    color: var(--text-faint);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.ytv-entry-controls {
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 6px;
+}
+
+.ytv-entry-search {
+    min-height: 42px;
+    padding-left: 38px;
+    background-image: linear-gradient(transparent, transparent), url("data:image/svg+xml,%3Csvg width='18' height='18' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10.5 18a7.5 7.5 0 1 1 5.303-12.803A7.5 7.5 0 0 1 10.5 18Zm0-2a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11Zm6.01.096 4.197 4.197-1.414 1.414-4.197-4.197 1.414-1.414Z' fill='%2395A0B8'/%3E%3C/svg%3E");
+    background-position: left 13px center;
+    background-repeat: no-repeat;
+    background-size: 18px;
+}
+
+.entry-status {
+    margin: 0 0 8px;
+    padding: 9px 12px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface-muted);
+    color: var(--text-soft);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.entry-item {
+    display: grid;
+    grid-template-columns: 42px 112px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    min-height: 84px;
+    margin-bottom: 8px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--surface-elevated) 78%, transparent);
+    cursor: pointer;
+    content-visibility: auto;
+    contain-intrinsic-size: 84px;
+    transition: background 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease, transform 0.14s ease;
+}
+
+.entry-item:hover {
+    border-color: color-mix(in srgb, var(--accent) 48%, var(--line));
+    background: var(--accent-soft);
+    transform: translateY(-1px);
+}
+
+.entry-item.active {
+    border-color: color-mix(in srgb, var(--accent) 68%, var(--line));
+    background: linear-gradient(135deg, var(--accent-soft), color-mix(in srgb, var(--accent-soft) 42%, transparent));
+    box-shadow: 0 12px 34px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.entry-item > b {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: var(--surface-muted);
+    color: var(--text-soft);
+    font-size: 13px;
+    font-weight: 950;
+}
+
+.entry-item.active > b {
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+    color: white;
+}
+
+.entry-item > img {
+    width: 112px;
+    aspect-ratio: 16 / 9;
+    height: auto;
+    border-radius: 12px;
+    object-fit: cover;
+    background: rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-sm);
+}
+
+.entry-item > span {
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.35;
+    word-break: break-word;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+
+.entry-item[style*="display: none"] {
+    content-visibility: visible;
+}
+
+@media (max-width: 980px) {
+    .ytv-canvas {
+        grid-template-columns: minmax(0, 1fr) minmax(310px, 360px);
+    }
+
+    .ytv-panel-toggle-btn {
+        right: min(382px, calc(100vw - 66px));
+    }
+}
 
 @media (max-width: 768px) {
-	.ytv-canvas, .ytv-relative {
-		flex-direction: column;
-	}
-	.ytv-video, .ytv-list {
-		width: 100%;
-		height: 100%;
-	}
-	.ytv-list {
-		transition: height 0.2s;
-	}
-	.ytv-panel-toggle-btn > span { 
-		transform: rotate(90deg);
-	}
-	.ytv-list-open > span {
-		transform: rotate(270deg);
-	}
+    .ytv-canvas {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(240px, 42dvh) minmax(0, 1fr);
+        gap: 0;
+        border-radius: 0;
+    }
+
+    .ytv-video {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+
+    .ytv-list {
+        border-right: none;
+        border-bottom: none;
+        border-left: none;
+        border-radius: 24px 24px 0 0;
+        transform: translateY(-10px);
+    }
+
+    .ytv-panel-toggle-btn {
+        top: calc(42dvh - 24px);
+        right: 16px;
+        width: 54px;
+        height: 42px;
+        transform: none;
+    }
+
+    .ytv-panel-toggle-btn > span {
+        transform: rotate(90deg);
+    }
+
+    .ytv-list-open > span {
+        transform: rotate(270deg);
+    }
+
+    .ytv-canvas.ytv-list-collapsed {
+        grid-template-rows: minmax(0, 1fr) 0;
+    }
+
+    .ytv-canvas.ytv-list-collapsed .ytv-list {
+        height: 0;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    .ytv-canvas.ytv-list-collapsed .ytv-panel-toggle-btn {
+        top: auto;
+        right: 16px;
+        bottom: 16px;
+    }
+
+    .ytv-list ul {
+        padding: 12px 10px calc(16px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .entry-item {
+        grid-template-columns: 34px 104px minmax(0, 1fr);
+        min-height: 78px;
+        padding: 9px;
+        gap: 10px;
+        border-radius: 16px;
+        contain-intrinsic-size: 78px;
+    }
+
+    .entry-item > b {
+        width: 34px;
+        height: 34px;
+        border-radius: 12px;
+        font-size: 12px;
+    }
+
+    .entry-item > img {
+        width: 104px;
+        border-radius: 10px;
+    }
+
+    .entry-item > span {
+        font-size: 13px;
+        -webkit-line-clamp: 2;
+    }
+
+    .ytv-entry-controls .playerButton {
+        width: 38px;
+        height: 38px;
+        border-radius: 13px;
+    }
+}
+
+@media (max-width: 420px) {
+    .entry-item {
+        grid-template-columns: 30px 96px minmax(0, 1fr);
+        gap: 8px;
+    }
+
+    .entry-item > img {
+        width: 96px;
+    }
+
+    .ytv-entry-toolbar-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .ytv-entry-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .ytv-entry-controls .playerButton {
+        flex: 1;
+    }
 }

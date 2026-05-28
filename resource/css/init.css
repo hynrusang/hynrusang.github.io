@@ -1,46 +1,184 @@
-/* 전반적 크기 조정 */
+/* =========================================================
+ * Necronomicon Release UI Foundation
+ * - 앱 전체 레이아웃, 공통 컴포넌트, 폼/카드/내비게이션 스타일
+ * - 색상은 theme css에서 CSS 변수로만 교체되도록 구성
+ * ========================================================= */
+
+:root {
+    --app-bg: #f4f6fb;
+    --app-bg-soft: #ffffff;
+    --surface: rgba(255, 255, 255, 0.88);
+    --surface-solid: #ffffff;
+    --surface-elevated: rgba(255, 255, 255, 0.96);
+    --surface-muted: rgba(15, 23, 42, 0.06);
+    --line: rgba(15, 23, 42, 0.1);
+    --line-strong: rgba(15, 23, 42, 0.18);
+    --text: #101828;
+    --text-soft: #475467;
+    --text-faint: #667085;
+    --accent: #4f8cff;
+    --accent-strong: #7c5cff;
+    --accent-soft: rgba(79, 140, 255, 0.14);
+    --success: #16a34a;
+    --danger: #dc2626;
+    --warning: #f59e0b;
+    --shadow-sm: 0 6px 18px rgba(15, 23, 42, 0.08);
+    --shadow-md: 0 14px 40px rgba(15, 23, 42, 0.12);
+    --shadow-lg: 0 24px 70px rgba(15, 23, 42, 0.18);
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --nav-height: 64px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
 
 * {
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
+
 *::-webkit-scrollbar {
-    width: 8px;
-    background: none;
+    width: 9px;
+    height: 9px;
 }
-html, body {
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: var(--line-strong);
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-clip: padding-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
     overscroll-behavior-y: contain;
 }
-
-/* 단락 */
-
-h1, h2, h3, h4, p {
-    text-align: center;
-    margin: 10px;
-}
-a {
-    display: block;
-    font-size: small;
-    text-decoration: unset;
-}
-textarea, input, button, a {
-    background: none;
-    border-radius: 10px;
-    padding: 10px;
-}
-
-/* 기본 레이아웃 */
 
 body {
-    position: absolute;
+    position: fixed;
+    inset: 0;
     display: flex;
     flex-direction: column;
-    width: 100vw;
-    height: 100vh;
     margin: 0;
     padding: 0;
-    overscroll-behavior-y: contain;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    transition: all 0.5s;
+    overflow: hidden;
+    color: var(--text);
+    background:
+        radial-gradient(circle at 12% 5%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 30%),
+        radial-gradient(circle at 85% 8%, color-mix(in srgb, var(--accent-strong) 18%, transparent), transparent 28%),
+        linear-gradient(135deg, var(--app-bg), var(--app-bg-soft));
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    text-rendering: geometricPrecision;
+    transition: background 0.25s ease, color 0.25s ease;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+        linear-gradient(color-mix(in srgb, var(--line) 55%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--line) 55%, transparent) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.45), transparent 72%);
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+    margin: 0;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select,
+a {
+    font: inherit;
+}
+
+button,
+[type="button"],
+[type="submit"] {
+    cursor: pointer;
+}
+
+button,
+input,
+textarea,
+select {
+    color: var(--text);
+}
+
+input,
+textarea,
+select {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-muted);
+    padding: 11px 13px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: color-mix(in srgb, var(--accent) 72%, var(--line));
+    box-shadow: 0 0 0 4px var(--accent-soft);
+    background: var(--surface-elevated);
+}
+
+textarea {
+    resize: vertical;
+    max-width: 100%;
+    min-height: 96px;
+    max-height: 340px;
+    line-height: 1.55;
+}
+
+button,
+input[type="button"],
+input[type="submit"] {
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+    color: white;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 24%, transparent);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease, background 0.15s ease;
+}
+
+button:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover {
+    transform: translateY(-1px);
+    filter: saturate(1.05);
+    box-shadow: 0 14px 28px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+button:active,
+input[type="button"]:active,
+input[type="submit"]:active {
+    transform: translateY(0) scale(0.98);
 }
 
 iframe {
@@ -50,12 +188,17 @@ iframe {
     border: none;
 }
 
-/* 내부 확장 요소 */
+/* =========================================================
+ * SPA Shell
+ * ========================================================= */
 
 fragmentbox {
+    position: relative;
+    display: block;
     width: 100%;
-    height: calc(100% - 40px);
-    overflow-y: scroll;
+    height: calc(100dvh - var(--nav-height) - var(--safe-bottom));
+    overflow: hidden;
+    padding: clamp(10px, 2vw, 18px);
 }
 
 fragment {
@@ -64,231 +207,304 @@ fragment {
     height: 100%;
 }
 
-snackbar {
-    position: absolute;
-    bottom: 40px;
-    color: white;
-    padding: 8px 30px;
-    z-index: -1;
-    opacity: 0;
-}
-
-/* 하단 영역 */
-
 footer {
+    position: relative;
+    z-index: 30;
     display: flex;
+    align-items: center;
     justify-content: space-between;
     width: 100%;
-    height: 40px;
-    padding: 0px 5%;
+    height: calc(var(--nav-height) + var(--safe-bottom));
+    padding: 8px max(14px, env(safe-area-inset-left)) calc(8px + var(--safe-bottom)) max(14px, env(safe-area-inset-right));
+    border-top: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface-solid) 84%, transparent);
+    box-shadow: 0 -12px 36px rgba(0, 0, 0, 0.16);
+    backdrop-filter: blur(22px) saturate(1.35);
 }
 
 footer > * {
     display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-/* 폼 요소 */
-
-textarea {
-    max-width: 100%;
-    min-height: 40px;
-    max-height: 320px;
-}
-
-select {
-    width: 100%;
-    height: 40px;
-    background: none;
-}
-
-button, [type=button], [type=submit] {
-    cursor: pointer;
-}
-
-/* 애니메이션 */
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-@keyframes fade-in {
-    0% { opacity: 0; transform: translateY(30px); }
-    100% { opacity: 1; transform: translateY(-10px); }
-}
-
-/* 로딩 아이콘 */
-
-#loading_icon {
-    animation: spin 2s linear infinite;
-    width: 50px;
-    height: 50px;
-    border: 8px solid #f3f3f3;
-    border-top: 8px solid #3498db;
-    border-radius: 50%;
-    margin-bottom: 20px;
-}
-#loading_text {
-    animation: fade-in 1s ease-out forwards;
-    position: relative;
-    font-size: 1.5em;
-    opacity: 0;
-}
-
-/* 내부 컴포넌트 스타일 */
-
-.formBox {
+router {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
 }
+
+snackbar {
+    position: fixed;
+    left: 50%;
+    bottom: calc(var(--nav-height) + var(--safe-bottom) + 14px);
+    z-index: -1;
+    width: min(calc(100vw - 28px), 520px);
+    min-height: 46px;
+    padding: 13px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    color: white;
+    font-size: 14px;
+    font-weight: 800;
+    text-align: center;
+    opacity: 0;
+    transform: translateX(-50%) translateY(12px);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(16px);
+}
+
+/* =========================================================
+ * Reusable Components
+ * ========================================================= */
 
 .screenX {
-    display: flex;
-    overflow-y: hidden;
-    flex-direction: column;
     position: relative;
-    width: 100%; 
+    display: flex;
+    overflow: hidden;
+    flex-direction: column;
+    width: min(1120px, 100%);
     height: 100%;
+    margin: 0 auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(22px) saturate(1.2);
+}
+
+.screenX > div[id^="dynamic_"] {
+    height: 100%;
+    overflow-y: auto;
+    padding: clamp(16px, 2.4vw, 28px);
+}
+
+.formBox,
+form {
+    display: flex;
+    gap: 10px;
+}
+
+.formBox {
+    flex-direction: column;
+    width: min(460px, 100%);
+    margin: 0 auto;
+    padding: clamp(18px, 3vw, 28px);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface-elevated);
+    box-shadow: var(--shadow-sm);
 }
 
 .inputX {
     display: flex;
     flex-direction: column;
-    margin: 5px;
+    gap: 7px;
+    width: 100%;
+    margin: 0;
+}
+
+.inputX label {
+    color: var(--text-soft);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
 }
 
 .iconX {
-    background-color: unset !important;
-    background-size: cover;
-    margin: 0px 5px;
-    width: 40px;
-    height: 40px;
-    border: none;
-    border-radius: 24px;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background-color: var(--surface-muted) !important;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 24px;
+    box-shadow: none;
+}
+
+.iconX:hover {
+    background-color: var(--accent-soft) !important;
+    border-color: color-mix(in srgb, var(--accent) 42%, var(--line));
 }
 
 .handlerX {
-    display: flex; 
-    margin: 10px;
-    border-radius: 20px;
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+    width: 100%;
+    margin: 0 0 12px 0;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: var(--surface-elevated);
+    box-shadow: var(--shadow-sm);
 }
 
-.handlerX > * {
-    background-color: initial !important;
+.handlerX > *:first-child {
+    flex: 1;
+    min-width: 0;
 }
 
-@media screen and (min-width: 1040px) {
-    .screenX {
-        width: 1040px;
-        left: calc(50% - 520px);
-    }
+.handlerX pre,
+.handlerX h4,
+.handlerX a {
+    width: 100%;
+    color: var(--text);
+    line-height: 1.55;
+    text-align: left;
+    word-break: break-word;
 }
 
-/* 플레이어 버튼 */
+.handlerX pre {
+    max-height: 320px;
+    overflow-y: auto;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+/* =========================================================
+ * Page-level Polish
+ * ========================================================= */
+
+#dynamic_navigation {
+    display: grid;
+    align-content: center;
+    gap: 14px;
+}
+
+#dynamic_navigation h1,
+.screenX h1 {
+    margin-bottom: 10px;
+    font-size: clamp(30px, 5vw, 54px);
+    line-height: 1;
+    letter-spacing: -0.055em;
+    text-align: center;
+}
+
+#dynamic_navigation .inputX,
+.screenX > .inputX {
+    width: min(420px, 100%);
+    margin: 0 auto;
+}
+
+#dynamic_link,
+#dynamic_memo {
+    display: flex;
+    flex-direction: column;
+}
+
+#dynamic_link > form,
+#dynamic_memo > form {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    margin: calc(clamp(16px, 2.4vw, 28px) * -1) calc(clamp(16px, 2.4vw, 28px) * -1) 18px;
+    padding: clamp(14px, 2vw, 20px);
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface-solid) 90%, transparent);
+    backdrop-filter: blur(18px);
+}
+
+/* =========================================================
+ * Player Shared Controls
+ * ========================================================= */
 
 .playerButton {
-    margin: 5px;
-    font-size: 16px;
-    border: none;
-    border-radius: 12px;
-    color: white;
-    transition: background-color 0.2s ease;
-}
-
-/* 내부 플레이리스트 컴포넌트 스타일 */
-
-.playlist-title {
-    font-weight: bold;
-    font-size: 1rem;
-    margin: 12px 0 4px 0;
-    border-bottom: 1px solid #ccc;
-    padding-bottom: 4px;
-}
-
-.playlist-item {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    margin-left: 10px;
-    margin-bottom: 4px;
-    padding: 4px 6px;
-    border-radius: 8px;
-    background-color: rgba(255, 255, 255, 0.05);
-    transition: background 0.2s;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface-muted);
+    color: var(--text);
+    box-shadow: none;
+    font-size: 18px;
 }
 
-.playlist-name {
-    flex: 1;
-    margin-right: 8px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.playerButton:hover {
+    background: var(--accent-soft);
+    border-color: color-mix(in srgb, var(--accent) 50%, var(--line));
+    box-shadow: none;
 }
 
-.playlist-buttons > button {
-    margin-left: 5px;
-    padding: 4px 8px;
-    font-size: 12px;
-    border-radius: 6px;
+/* =========================================================
+ * Animations / Loading
+ * ========================================================= */
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-.playlist-item {
-    cursor: pointer;
-    transition: background 0.2s;
+@keyframes fade-in {
+    0% { opacity: 0; transform: translateY(12px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 
-/* 엔트리 스타일 */
-
-.entry-item {
-    display: flex;
-    align-items: flex-start;
-    padding: 8px 12px;
-    gap: 10px;
-    border-bottom: 1px solid #444;
-    cursor: pointer;
-    transition: background 0.2s;
-    height: auto;
-    min-height: 60px;
+#loading_icon {
+    width: 54px;
+    height: 54px;
+    margin-bottom: 20px;
+    border: 6px solid var(--surface-muted);
+    border-top: 6px solid var(--accent);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
 }
 
-.entry-item.active {
-    background: rgba(255, 255, 255, 0.1);
-    font-weight: bold;
-    border-left: 3px solid #2196f3;
+#loading_text {
+    position: relative;
+    color: var(--text-soft);
+    font-size: clamp(20px, 4vw, 30px);
+    opacity: 0;
+    animation: fade-in 0.45s ease-out forwards;
 }
 
-.entry-item > * {
-    height: 56.25px;
-}
+@media screen and (max-width: 768px) {
+    :root {
+        --nav-height: 62px;
+    }
 
-.entry-item > b {
-    display: flex;
-    align-items: center;
-    width: 2em;
-    text-align: center;
-    flex-shrink: 0;
-    font-weight: bold;
-    font-size: 14px;
-}
+    fragmentbox {
+        padding: 0;
+    }
 
-.entry-item > img {
-    width: 100px;
-    object-fit: cover;
-    border-radius: 4px;
-    flex-shrink: 0;
-    margin-top: 4px;
-}
+    .screenX {
+        width: 100%;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
 
-.entry-item > span {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
+    .screenX > div[id^="dynamic_"] {
+        padding: 16px;
+    }
 
-    overflow: hidden;
-    text-overflow: ellipsis;
-    word-break: break-word;
+    footer {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
 
-    font-size: 13px;
-    line-height: 1.3;
-    flex-grow: 1;
-    height: calc(1.3em * 3);
+    .iconX {
+        width: 44px;
+        height: 44px;
+        border-radius: 15px;
+    }
+
+    .handlerX {
+        gap: 8px;
+        padding: 12px;
+    }
+
+    #dynamic_link > form,
+    #dynamic_memo > form {
+        margin: -16px -16px 14px;
+        padding: 14px;
+    }
 }

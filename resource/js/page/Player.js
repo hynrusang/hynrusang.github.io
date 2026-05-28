@@ -266,14 +266,15 @@ class YouTubeAPIService {
 
 /**
  * @class UIManager
- * @description 사용자 인터페이스 요소 생성 및 클릭 이벤트 등 프론트엔드 상호작용 관련 로직을 독점적으로 처리합니다.
+ * @description 플레이어 화면, 재생목록 관리 패널, 현재 대기열 목록의 DOM 생성과 상호작용을 담당합니다.
+ * 플레이어 코어 로직과 UI 조작을 분리하여 재생 안정성에 영향을 주지 않고 레이아웃/UX를 개선할 수 있도록 구성합니다.
  */
 class UIManager {
     // --- Public Properties ---
     TitleLabel = Dynamic.$("b");
     PlayLists = Dynamic.$("ul");
     EntryLists = Dynamic.$("ul", { style: "display: none;" });
-    EntryState = Dynamic.$("li", { class: "entry-status", style: "padding: 4px 8px; font-weight: bold; color: #999;" });
+    EntryState = Dynamic.$("li", { class: "entry-status" });
     ListHeader = Dynamic.$("div", { class: "ytv-list-header ytv-has-playlists" });
     listItemsContainer = Dynamic.$("div", { class: "ytv-list-inner" });
     PanelVisible = true;
@@ -288,14 +289,23 @@ class UIManager {
     }
 
     /**
-     * @description 플레이어 우측 및 하단의 커스텀 UI 골격을 최초 1회 초기화합니다.
+     * @description 플레이어 패널의 기본 골격을 초기화합니다.
+     * 헤더는 현재 재생 제목과 목록/라이브러리 전환 토글을 동시에 담당합니다.
      */
     initializeBaseLayout() {
         this.ListHeader.reset(
             Dynamic.$("a", { href: "#", onclick: e => this.#togglePlaylistView(e) }).add(
-                Dynamic.$("img", { src: "https://yt3.ggpht.com/2eI1TjX447QZFDe6R32K0V2mjbVMKT5mIfQR-wK5bAsxttS_7qzUDS1ojoSKeSP0NuWd6sl7qQ=s88-c-k-c0x00ffffff-no-rj" }),
-                Dynamic.$("span", { class: "playlist-title-label" }).add(
-                    this.TitleLabel,
+                Dynamic.$("div", { class: "ytv-header-card" }).add(
+                    Dynamic.$("img", {
+                        src: "https://yt3.ggpht.com/2eI1TjX447QZFDe6R32K0V2mjbVMKT5mIfQR-wK5bAsxttS_7qzUDS1ojoSKeSP0NuWd6sl7qQ=s88-c-k-c0x00ffffff-no-rj",
+                        loading: "lazy",
+                        decoding: "async",
+                        referrerpolicy: "no-referrer"
+                    }),
+                    Dynamic.$("div", { class: "ytv-header-text" }).add(
+                        Dynamic.$("div", { class: "ytv-header-eyebrow", text: "NOW PLAYING" }),
+                        Dynamic.$("span", { class: "playlist-title-label" }).add(this.TitleLabel)
+                    ),
                     Dynamic.$("div", { class: "ytv-arrow-triangle", text: "▼" })
                 )
             )
@@ -307,36 +317,35 @@ class UIManager {
     }
 
     /**
-     * @description 우측 재생목록 패널의 열림 닫힘 상태를 제어합니다.
+     * @description 재생목록 패널을 접거나 펼칩니다.
+     * 직접 width/height를 계속 덮어쓰지 않고 루트 클래스만 교체하여 CSS transition과 반응형 처리를 한 곳에서 관리합니다.
      */
     togglePanel(e) {
         this.PanelVisible = !this.PanelVisible;
-        const list = document.querySelector('.ytv-list');
-        list.style.width = this.PanelVisible ? "" : "0";
-        list.style.height = this.PanelVisible ? "" : "0";
-        e.target.classList.toggle("ytv-list-open", this.PanelVisible);
+        document.getElementById("dynamic_player")?.classList.toggle("ytv-list-collapsed", !this.PanelVisible);
+        e.currentTarget.classList.toggle("ytv-list-open", this.PanelVisible);
     }
 
     /**
-     * @description 현재 재생 중인 영상 정보를 UI에 반영합니다.
+     * @description 현재 재생 중인 영상 정보를 헤더, 상태바, active row에 반영합니다.
+     * active row는 사용자가 목록을 보고 있을 때만 주변으로 자연스럽게 이동되도록 nearest 스크롤을 사용합니다.
      */
     updateNowPlaying(entry, index, total) {
         if (!entry) return;
         this.TitleLabel.set({ text: entry.title });
         this.EntryState.set({ text: `${index + 1} / ${total}` });
 
-        const activeNode = this.EntryLists.node.querySelector(".active");
-        if (activeNode) activeNode.classList.remove("active");
-        
+        this.EntryLists.node.querySelector(".active")?.classList.remove("active");
         const items = this.EntryLists.node.querySelectorAll(".entry-item");
         if (items[index]) {
             items[index].classList.add("active");
+            if (this.EntryLists.node.style.display !== "none") items[index].scrollIntoView({ block: "nearest" });
         }
     }
 
     /**
-     * @description 지연 메타데이터 보강 또는 실제 재생 시작 시 확인된 제목/썸네일을 기존 목록 DOM에 즉시 반영합니다.
-     * 전체 재생목록을 다시 렌더링하면 스크롤 위치와 active 상태가 흔들리므로, 해당 인덱스의 텍스트와 이미지만 직접 갱신합니다.
+     * @description oEmbed 또는 실제 플레이어 상태에서 확인된 제목/썸네일을 기존 row에 부분 반영합니다.
+     * 전체 목록 재생성을 피해서 모바일 스크롤 위치와 active 상태 흔들림을 막습니다.
      */
     updateEntryMetadata(index, entry) {
         const item = this.EntryLists.node.querySelectorAll(".entry-item")[index];
@@ -350,45 +359,32 @@ class UIManager {
     }
 
     /**
-     * @description 로컬 저장소에 저장된 대분류 재생목록 UI를 생성합니다.
+     * @description 저장된 라이브러리 목록과 새 URL 추가 폼을 렌더링합니다.
      */
     buildPlaylistList() {
-        const playlistMap = DataResource.Data.basic.playlist;
-        this.PlayLists.reset();
+        const playlistMap = DataResource.Data.basic.playlist || {};
+        const titles = Object.keys(playlistMap).sort();
+        this.PlayLists.reset(this.#createAddPlaylistCard());
 
-        // 재생목록 추가를 위한 입력란 및 버튼 생성
-        this.PlayLists.add(
-            Dynamic.$("li").add(Dynamic.$("input", { id: "input-main-title", style: "width: 100%; margin-bottom: 8px;", placeholder: "큰 타이틀" })),
-            Dynamic.$("li").add(Dynamic.$("input", { id: "input-playlist-url", style: "width: 100%; margin-bottom: 8px;", placeholder: "YouTube URL" })),
-            Dynamic.$("li").add(Dynamic.$("button", { text: "➕ 추가", id: "input-playlist-button", onclick: () => this.#addPlaylist() }))
-        );
-
-        // 저장된 플레이리스트 데이터를 순회하며 DOM 요소 렌더링
-        if (playlistMap) {
-            Object.keys(playlistMap).sort().forEach(title => {
-                this.PlayLists.add(Dynamic.$("li", { class: "playlist-title", text: title }));
-                Object.entries(playlistMap[title]).sort().forEach(([name, url]) => this.PlayLists.add(this.#createPlaylistItem(title, name, url)) );
-            });
+        if (!titles.length) {
+            this.PlayLists.add(
+                Dynamic.$("li", { class: "entry-status", text: "저장된 YouTube 목록이 없습니다. 위 입력란에 URL을 추가해 주세요." })
+            );
+            return;
         }
+
+        titles.forEach(title => {
+            this.PlayLists.add(Dynamic.$("li", { class: "playlist-title", text: title }));
+            Object.entries(playlistMap[title]).sort().forEach(([name, url]) => this.PlayLists.add(this.#createPlaylistItem(title, name, url)));
+        });
     }
 
     /**
-     * @description 현재 대기열에 올라온 개별 영상 목록을 하단 UI로 생성합니다.
+     * @description 현재 대기열을 렌더링합니다.
+     * 검색 입력은 DOM 재생성 없이 row 표시만 토글하므로 100~200개 목록에서도 상호작용 비용이 작습니다.
      */
     buildEntryList(entries) {
-        this.EntryLists.reset();
-
-        // 셔플 및 필터링 제어 버튼 추가
-        if (entries.length > 1) {
-            this.EntryLists.add(
-                this.#createControlButton("🔄", "새로고침", () => Dynamic.FragMutation.refresh()),
-                this.#createControlButton("🔀", "재생목록 섞기", () => this.#playerService?.shuffleEntries()),
-                this.#createControlButton("↩️", "역순으로 재배치", () => this.#playerService?.reverseEntries()),
-                this.#createControlButton("🎯", "재생할 영상 선택", () => this.#playerService?.filterEntries())
-            );
-        }
-
-        this.EntryLists.add(this.EntryState);
+        this.EntryLists.reset(this.#createEntryToolbar(entries.length), this.EntryState);
         entries.forEach((entry, i) => {
             this.EntryLists.add(
                 Dynamic.$("li", { class: "entry-item", onclick: () => this.#playerService?.playVideoAt(i) }).add(
@@ -416,6 +412,45 @@ class UIManager {
         this.PlayLists.set({ style: showEntries ? "display: none" : "" });
         this.EntryLists.set({ style: showEntries ? "" : "display: none" });
     }
+
+    #createAddPlaylistCard() {
+        return Dynamic.$("li", { class: "ytv-add-card" }).add(
+            Dynamic.$("h3", { text: "YouTube 목록 추가" }),
+            Dynamic.$("p", { text: "영상 URL, 재생목록 URL, 모바일 공유 링크를 그대로 붙여넣을 수 있습니다." }),
+            Dynamic.$("input", { id: "input-main-title", placeholder: "분류 이름 · 예: 기본, 작업, 음악" }),
+            Dynamic.$("input", { id: "input-playlist-url", placeholder: "YouTube URL" }),
+            Dynamic.$("button", { text: "추가", id: "input-playlist-button", onclick: () => this.#addPlaylist() })
+        );
+    }
+
+    #createEntryToolbar(total) {
+        return Dynamic.$("li", { class: "ytv-entry-toolbar" }).add(
+            Dynamic.$("div", { class: "ytv-entry-toolbar-row" }).add(
+                Dynamic.$("div", { class: "ytv-entry-toolbar-title" }).add(
+                    Dynamic.$("strong", { text: "재생 대기열" }),
+                    Dynamic.$("span", { text: `${total}개의 영상 · 6개 윈도우 재생` })
+                ),
+                Dynamic.$("div", { class: "ytv-entry-controls" }).add(
+                    this.#createControlButton("⟳", "새로고침", () => Dynamic.FragMutation.refresh()),
+                    this.#createControlButton("⇄", "재생목록 섞기", () => this.#playerService?.shuffleEntries()),
+                    this.#createControlButton("↩", "역순으로 재배치", () => this.#playerService?.reverseEntries()),
+                    this.#createControlButton("🎯", "재생할 영상 선택", () => this.#playerService?.filterEntries())
+                )
+            ),
+            Dynamic.$("input", {
+                class: "ytv-entry-search",
+                placeholder: "목록에서 제목 또는 번호 검색",
+                oninput: e => this.#filterEntryList(e.target.value)
+            })
+        );
+    }
+
+    #filterEntryList(query) {
+        const keyword = query.trim().toLowerCase();
+        this.EntryLists.node.querySelectorAll(".entry-item").forEach((item, index) => {
+            item.style.display = !keyword || `${index + 1} ${item.innerText}`.toLowerCase().includes(keyword) ? "" : "none";
+        });
+    }
     
     #addPlaylist() {
         const titleInput = document.getElementById("input-main-title");
@@ -424,7 +459,7 @@ class UIManager {
         const url = urlInput.value.trim();
 
         if (!title || !url) {
-            pushSnackbar({ message: "모든 입력란을 채워주세요.", type: "error" });
+            pushSnackbar({ message: "분류 이름과 YouTube URL을 모두 입력해 주세요.", type: "error" });
             return;
         }
 
@@ -439,16 +474,16 @@ class UIManager {
 
     #createPlaylistItem(title, name, url) {
         return Dynamic.$("li", { class: "playlist-item" }).add(
-            Dynamic.$("a", { href: url, text: name, onclick: async e => {
+            Dynamic.$("a", { href: url, title: name, text: name, onclick: async e => {
                 e.preventDefault();
                 if (!this.#playerService || this.#isFetching) return;
                 this.#isFetching = true;
-                pushSnackbar({ message: `'${name}' 목록을 불러오는 중...`, type: "normal" })
+                pushSnackbar({ message: "재생목록을 불러오는 중입니다.", type: "normal" })
                 try {
                     const entries = await this.#apiService.fetchEntriesFromURL(url);
                     if (entries && entries.length > 0) {
                         this.#playerService.loadNewPlaylist(entries);
-                        pushSnackbar({ message: "재생목록 로드 완료!", type: "normal" });
+                        pushSnackbar({ message: `${entries.length}개의 영상을 로드했습니다.`, type: "normal" });
                     } else pushSnackbar({ message: this.#apiService.lastErrorMessage || "재생 가능한 영상이 없거나 로드에 실패했습니다.", type: "error" });
                 } catch (err) {
                     console.error(err);
@@ -458,8 +493,8 @@ class UIManager {
                 }
             }}),
             Dynamic.$("span", { class: "playlist-buttons" }).add(
-                Dynamic.$("button", { class: "playerButton", text: "✏️", onclick: e => this.#editPlaylistName(e, title, name) }),
-                Dynamic.$("button", { class: "playerButton", text: "❌", onclick: e => this.#deletePlaylist(e, title, name) })
+                Dynamic.$("button", { class: "playerButton", text: "✎", title: "이름 변경", onclick: e => this.#editPlaylistName(e, title, name) }),
+                Dynamic.$("button", { class: "playerButton", text: "×", title: "삭제", onclick: e => this.#deletePlaylist(e, title, name) })
             )
         );
     }
@@ -492,7 +527,7 @@ class UIManager {
     }
     
     #createControlButton(icon, title, onClick) {
-        return Dynamic.$("button", { class: "playerButton", text: icon, title, onclick: onClick });
+        return Dynamic.$("button", { class: "playerButton", type: "button", text: icon, title, onclick: onClick });
     }
 }
 

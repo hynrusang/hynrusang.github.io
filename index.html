@@ -3,24 +3,25 @@
 <head>
     <title>Necronomicon</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <meta name="theme-color" content="#ffffff">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#090b12">
+    <meta name="color-scheme" content="dark light">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <link rel="icon" href="/favicon.ico">
     <link rel="manifest" href="/manifest.json">
+    <link rel="preload" href="/lib/Rose.js" as="script" crossorigin="anonymous">
     <link type="text/css" rel="stylesheet" href="/resource/css/init.css">
-    <link type="text/css" rel="stylesheet" href="/resource/css/simple_ytv.css"/>
-
+    <link type="text/css" rel="stylesheet" href="/resource/css/simple_ytv.css">
     <link type="text/css" class="theme" rel="stylesheet" href="/resource/css/dark/color.css">
-    <link type="text/css" class="theme" rel="stylesheet" href="/resource/css/dark/ytv.css"/>
+    <link type="text/css" class="theme" rel="stylesheet" href="/resource/css/dark/ytv_color.css">
 </head>
 <body>
     <snackbar></snackbar>
     <fragmentbox></fragmentbox>
     <footer>
         <div>
-            <input style="background-image: url(/resource/img/icon/navigator.png);" id="navigator_icon" class="iconX" type="button">
-            <input style="background-image: url(/resource/img/icon/dark.png);" id="theme_icon" class="iconX" type="button">
+            <input style="background-image: url(/resource/img/icon/navigator.png);" id="navigator_icon" class="iconX" type="button" title="페이지 이동">
+            <input style="background-image: url(/resource/img/icon/dark.png);" id="theme_icon" class="iconX" type="button" title="테마 변경">
         </div>
         <router></router>
     </footer>
