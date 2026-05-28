@@ -6,19 +6,22 @@ import Player from "../Player.js";
 
 const navigator = [{
     label: "YouTube Player",
-    description: "재생목록과 단일 영상을 6개 윈도우 재생 구조로 실행합니다.",
+    description: "재생목록과 단일 영상을 8개 윈도우 재생 구조로 실행합니다.",
     icon: "player",
-    page: Player
+    page: Player,
+    forceRefresh: false
 }, {
     label: "링크 라이브러리",
     description: "자주 쓰는 외부 링크를 한 줄 카드로 정리합니다.",
     icon: "link",
-    page: Link
+    page: Link,
+    forceRefresh: true
 }, {
     label: "메모 보관함",
     description: "짧은 텍스트와 작업 메모를 빠르게 저장합니다.",
     icon: "memo",
-    page: Memo
+    page: Memo,
+    forceRefresh: true
 }]
 
 const Navigation = new Dynamic.Fragment("setting", 
@@ -32,7 +35,7 @@ const Navigation = new Dynamic.Fragment("setting",
         Dynamic.$("div", { class: "navigationGrid" }).add(navigator.map(item => Dynamic.$("button", {
             class: "navigationCard",
             type: "button",
-            onclick: () => Dynamic.FragMutation.mutate(item.page, null, true)
+            onclick: () => Dynamic.FragMutation.mutate(item.page, null, item.forceRefresh)
         }).add(
             Dynamic.$("span", { class: "navigationCardIcon", style: `background-image: url(/resource/img/icon/${item.icon}.png)` }),
             Dynamic.$("span", { class: "navigationCardText" }).add(

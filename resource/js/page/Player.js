@@ -545,11 +545,21 @@ class PlayerService {
         // 따라서 백그라운드 상태에서는 재생 중인 YouTube iframe의 내부 playlist queue를 건드리지 않고,
         // 화면이 다시 보일 때만 보류된 윈도우 재구성을 수행하여 큐 내부 자동 재생을 보존합니다.
         document.addEventListener("visibilitychange", () => {
-            if (!document.hidden && this.#pendingWindowReloadIndex >= 0) {
+            if (document.hidden) return;
+
+            // 백그라운드 동안 보류했던 queue 재구성은 화면이 다시 보일 때만 수행합니다.
+            // hidden 상태에서 loadPlaylist()를 호출하면 모바일 브라우저가 새 자동재생 시도로 판단할 수 있으므로,
+            // 실제 백그라운드 구간에서는 iframe 내부 queue가 이미 가진 다음 영상 처리만 사용합니다.
+            if (this.#pendingWindowReloadIndex >= 0) {
                 const index = this.#pendingWindowReloadIndex;
                 this.#pendingWindowReloadIndex = -1;
                 this.#loadPlaylistWindow(index, this.#YTPlayer?.getCurrentTime?.() || 0);
             }
+
+            // 일부 모바일 WebView/브라우저는 복귀 직후 iframe이 검은 화면 또는 CUED/ENDED 상태로 남는 경우가 있습니다.
+            // 사용자가 이미 재생을 시작한 세션에서만 짧게 상태를 읽고 복구하므로, 최초 자동재생 정책을 우회하지 않습니다.
+            clearTimeout(this.#visibleRecoveryTimer);
+            this.#visibleRecoveryTimer = setTimeout(() => this.#recoverVisiblePlayback(), 180);
         });
     }
 
@@ -579,12 +589,20 @@ class PlayerService {
 
         this.#YTPlayer = new YT.Player("ytv-player", {
             playerVars: {
+                // YouTube IFrame 내부 playlist queue가 모바일 백그라운드 상태에서도 가능한 한 자체적으로 다음 영상을 처리하도록
+                // 플레이어 생성 시점에 모바일/임베드 친화 옵션을 명시합니다. 여기서 중요한 점은 사이트 JS가 백그라운드에서
+                // 억지로 playVideo()/loadPlaylist()를 반복 호출하지 않고, 사용자가 시작한 iframe 재생 세션을 YouTube 내부 queue에 맡기는 것입니다.
                 enablejsapi: 1,
                 origin: window.location.origin,
                 widget_referrer: window.location.origin,
                 playsinline: 1,
-                rel: 0,
-                autoplay: 1
+                autoplay: 1,
+                controls: 1,
+                disablekb: 0,
+                fs: 1,
+                iv_load_policy: 3,
+                modestbranding: 1,
+                rel: 0
             },
             events: {
                 onReady: () => this.#onPlayerReady(),
@@ -744,6 +762,7 @@ class PlayerService {
     #pendingWindowReloadIndex = -1;
     #autoAdvanceTimer = null;
     #playResumeTimer = null;
+    #visibleRecoveryTimer = null;
     #autoAdvanceEnabled = false;
 
     /**
@@ -784,6 +803,7 @@ class PlayerService {
                     if (index === YConfig.lastIdx) {
                         YConfig.currentEntry = entry;
                         this.#uiManager.updateNowPlaying(entry, index, YConfig.entries.length);
+                        this.#syncMediaSession();
                     }
                     if (changedCount % 5 === 0) localStorage.setItem("YConfig", JSON.stringify(YConfig));
                 }
@@ -817,6 +837,7 @@ class PlayerService {
         localStorage.setItem("YConfig", JSON.stringify(YConfig));
 
         this.#uiManager.updateNowPlaying(YConfig.currentEntry, absIndex, YConfig.entries.length);
+        this.#syncMediaSession(this.#autoAdvanceEnabled ? "playing" : null);
 
         this.#windowReloadLock = true;
         this.#YTPlayer.loadPlaylist(ids, localIndex, startSeconds);
@@ -859,14 +880,14 @@ class PlayerService {
     }
 
     #advanceAfterEnded() {
-        // IFrame 내부 playlist가 정상적으로 다음 영상으로 넘어가지 못한 경우를 위한 보정입니다.
-        // local queue 안에 다음 영상이 남아 있으면 nextVideo()로 내부 queue를 그대로 사용하고,
-        // queue 끝이면 전체 entries 기준 다음 absIndex가 포함된 새 8개 chunk를 만들어 이어서 재생합니다.
-        if (!this.#autoAdvanceEnabled || !this.#YTPlayer || YConfig.entries.length < 2) return;
+        // IFrame 내부 playlist가 정상적으로 다음 영상으로 넘어가지 못한 경우를 위한 포그라운드 보정입니다.
+        // 백그라운드에서는 사이트 JS가 다음 영상을 억지로 밀어 넣지 않고, YouTube iframe 내부 queue의 기본 동작을 우선합니다.
+        // 화면이 다시 보이는 시점에는 #recoverVisiblePlayback()에서 검은 화면/ENDED/CUED 잔류 상태를 복구합니다.
+        if (document.hidden || !this.#autoAdvanceEnabled || !this.#YTPlayer || YConfig.entries.length < 2) return;
 
         clearTimeout(this.#autoAdvanceTimer);
         this.#autoAdvanceTimer = setTimeout(() => {
-            if (!this.#YTPlayer || !this.#autoAdvanceEnabled || YConfig.entries.length < 2) return;
+            if (document.hidden || !this.#YTPlayer || !this.#autoAdvanceEnabled || YConfig.entries.length < 2) return;
 
             const localIndex = this.#YTPlayer.getPlaylistIndex?.() ?? -1;
             if (localIndex >= 0 && localIndex < this.#windowAbsIndices.length - 1) {
@@ -879,21 +900,76 @@ class PlayerService {
         }, 80);
     }
 
+    #recoverVisiblePlayback() {
+        // 모바일에서 앱 복귀 직후 iframe이 검은 화면으로 남는 대부분의 케이스는 실제 player state가 ENDED/CUED/UNSTARTED에
+        // 고정된 상태입니다. 이미 사용자가 재생을 시작했던 세션에서만 최소한의 복구 명령을 수행하여, 브라우저 autoplay 정책과
+        // 충돌하지 않으면서 UI가 죽은 것처럼 보이는 상태를 줄입니다.
+        if (document.hidden || !this.#YTPlayer || !this.#autoAdvanceEnabled) return;
+
+        const state = this.#YTPlayer.getPlayerState?.();
+        if (state === YT.PlayerState.PLAYING || state === YT.PlayerState.BUFFERING) return;
+        if (state === YT.PlayerState.ENDED) {
+            this.#advanceAfterEnded();
+            return;
+        }
+
+        this.#resumePlaybackAfterQueueMutation();
+    }
+
+    #syncMediaSession(playbackState = null) {
+        // Media Session은 백그라운드 재생 권한을 우회하는 장치가 아니라, OS 알림/잠금화면이 현재 iframe 재생 세션을
+        // 더 정확히 추적하도록 도와주는 보조 레이어입니다. 제목/썸네일이 oEmbed로 늦게 보강되어도 이 메서드 한 곳에서
+        // 현재 entry 기준으로 다시 반영합니다.
+        if (!("mediaSession" in navigator)) return;
+
+        if (playbackState) navigator.mediaSession.playbackState = playbackState;
+        if (!YConfig.currentEntry || !("MediaMetadata" in window)) return;
+
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: YConfig.currentEntry.title || "Unknown Title",
+            artist: "YouTube Player",
+            album: "Necronomicon",
+            artwork: [{
+                src: YConfig.currentEntry.img || `https://i.ytimg.com/vi/${YConfig.currentEntry.id}/mqdefault.jpg`,
+                sizes: "320x180",
+                type: "image/jpeg"
+            }]
+        });
+    }
+
     #onPlayerReady() {
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.setActionHandler('nexttrack', () => {
-                if (YConfig.entries.length > 0) {
-                    const nextIndex = (YConfig.lastIdx + 1) % YConfig.entries.length;
-                    this.playVideoAt(nextIndex);
-                }
+        if ("mediaSession" in navigator) {
+            const setMediaHandler = (action, handler) => {
+                try { navigator.mediaSession.setActionHandler(action, handler); } catch { }
+            };
+
+            setMediaHandler("play", () => {
+                this.#autoAdvanceEnabled = true;
+                this.#YTPlayer?.playVideo?.();
+                this.#syncMediaSession("playing");
             });
 
-            navigator.mediaSession.setActionHandler('previoustrack', () => {
-                if (YConfig.entries.length > 0) {
-                    const prevIndex = (YConfig.lastIdx - 1 + YConfig.entries.length) % YConfig.entries.length;
-                    this.playVideoAt(prevIndex);
-                }
+            setMediaHandler("pause", () => {
+                this.#YTPlayer?.pauseVideo?.();
+                this.#syncMediaSession("paused");
             });
+
+            setMediaHandler("stop", () => {
+                this.#autoAdvanceEnabled = false;
+                this.#YTPlayer?.stopVideo?.();
+                this.#syncMediaSession("none");
+            });
+
+            setMediaHandler("nexttrack", () => {
+                if (YConfig.entries.length > 0) this.playVideoAt((YConfig.lastIdx + 1) % YConfig.entries.length);
+            });
+
+            setMediaHandler("previoustrack", () => {
+                if (YConfig.entries.length > 0) this.playVideoAt((YConfig.lastIdx - 1 + YConfig.entries.length) % YConfig.entries.length);
+            });
+
+            setMediaHandler("seekbackward", details => this.#YTPlayer?.seekTo?.(Math.max((this.#YTPlayer?.getCurrentTime?.() || 0) - (details.seekOffset || 10), 0), true));
+            setMediaHandler("seekforward", details => this.#YTPlayer?.seekTo?.((this.#YTPlayer?.getCurrentTime?.() || 0) + (details.seekOffset || 10), true));
         }
 
         this.loadPlaylist();
@@ -910,7 +986,7 @@ class PlayerService {
         }
 
         if (event.data === YT.PlayerState.PAUSED) {
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+            this.#syncMediaSession("paused");
             return;
         }
 
@@ -940,17 +1016,11 @@ class PlayerService {
             YConfig.entries[absIndex].title = videoData.title;
             this.#uiManager.updateEntryMetadata(absIndex, YConfig.entries[absIndex]);
             this.#uiManager.updateNowPlaying(YConfig.currentEntry, absIndex, YConfig.entries.length);
+            this.#syncMediaSession("playing");
             localStorage.setItem("YConfig", JSON.stringify(YConfig));
         }
 
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.playbackState = 'playing';
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: YConfig.currentEntry?.title || "Unknown Title",
-                artist: "YouTube Player",
-                artwork: [{ src: YConfig.currentEntry?.img || "", sizes: "320x180", type: "image/jpeg" }]
-            });
-        }
+        this.#syncMediaSession("playing");
 
         // 윈도우 끝 곡 시점에 현재 곡 시점으로 윈도우를 앞으로 밀어준다.
         // 이렇게 해야 전체 200곡을 한 번에 안 올리면서도 내부 playlist 자동전환을 계속 활용할 수 있다.
@@ -983,8 +1053,10 @@ class PlayerService {
             const safeIndex = YConfig.lastIdx >= 0 ? YConfig.lastIdx : 0;
             const nextIndex = (safeIndex + 1) % YConfig.entries.length;
             
-            // 에러 발생 시에도 메모리 확보를 위해 안전하게 플레이어를 파괴하고 다음 곡으로 넘깁니다
-            setTimeout(() => this.playVideoAt(nextIndex), 100);
+            // 백그라운드에서는 새 queue 로드를 강제하지 않고, 복귀 시 다음 안전 지점으로 재구성합니다.
+            // 포그라운드에서는 재생 불가 영상에 머무르지 않도록 짧게 다음 곡으로 이동합니다.
+            if (document.hidden) this.#pendingWindowReloadIndex = nextIndex;
+            else setTimeout(() => this.playVideoAt(nextIndex), 100);
         } else pushSnackbar({ message: "재생할 수 있는 영상이 없습니다.", type: "error" });
     }
 }
