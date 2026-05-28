@@ -29,9 +29,9 @@ let YConfig = {
 
 /**
  * @class YouTubeAPIService
- * @description YouTube Data API v3와 YouTube IFrame API fallback을 함께 사용하여 영상 정보를 가져오는 통신 담당 클래스입니다.
- * 모바일 브라우저/PWA 환경에서는 Google API Key의 HTTP referrer 검증 또는 네트워크 정책 차이로 Data API 요청만 실패할 수 있으므로,
- * 재생목록은 Data API 실패 시 API Key가 필요 없는 IFrame API 기반 목록 probing으로 한 번 더 복구합니다.
+ * @description YouTube IFrame API와 YouTube oEmbed 엔드포인트만 사용하여 재생 가능한 영상 ID 및 공개 메타데이터를 가져오는 통신 담당 클래스입니다.
+ * YouTube Data API v3는 클라이언트 API Key, HTTP referrer 판정, 모바일 브라우저/PWA 환경 차이에 영향을 받을 수 있으므로 이 구현에서는 사용하지 않습니다.
+ * 재생목록의 전체 영상 ID는 숨김 IFrame 플레이어의 playlist queue를 통해 확보하고, 제목/썸네일은 oEmbed를 낮은 동시성으로 지연 보강합니다.
  */
 class YouTubeAPIService {
     // --- Public Methods ---
@@ -61,14 +61,31 @@ class YouTubeAPIService {
         return [];
     }
 
-    // --- Private Properties ---
     /**
-     * @private
-     * @description YouTube Data API v3 호출 시 필요한 인증 키입니다. 재생목록 로드 실패 시에는 이 키를 사용하지 않는 IFrame API fallback으로 복구합니다.
-     * @type {string}
+     * @description 이미 확보된 영상 ID에 대해 제목과 썸네일을 지연 보강합니다.
+     * 재생목록 probing 단계에서는 IFrame API가 ID 배열만 반환하므로, UI를 먼저 열고 이후 oEmbed로 각 항목의 공개 메타데이터를 낮은 동시성으로 채웁니다.
+     * @param {object} entry - id/title/img를 포함하는 현재 Entry 객체. 성공 시 동일 객체를 직접 갱신합니다.
+     * @returns {Promise<object|null>} - 갱신된 Entry 객체 또는 실패 시 null
      */
-    #apiKey = "AIzaSyAglJGn84cPu_YvRUdigYQFCBml-s6kcuo";
+    async hydrateEntryMetadata(entry) {
+        if (!entry?.id || !entry.title?.startsWith("YouTube 영상 ")) return null;
 
+        try {
+            const response = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(`https://www.youtube.com/watch?v=${entry.id}`)}&format=json`);
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok || !data.title) throw new Error(data.error || `HTTP ${response.status}`);
+
+            entry.title = data.title;
+            entry.img = data.thumbnail_url || entry.img || `https://i.ytimg.com/vi/${entry.id}/mqdefault.jpg`;
+            return entry;
+        } catch (err) {
+            console.warn(`oEmbed metadata lookup failed for ${entry.id}: ${err.message || err}`);
+            return null;
+        }
+    }
+
+    // --- Private Properties ---
     /**
      * @private
      * @description 최근 로드 작업에서 발생한 가장 구체적인 실패 사유입니다. 빈 배열 반환과 실제 장애를 구분하기 위해 별도로 보존합니다.
@@ -109,8 +126,8 @@ class YouTubeAPIService {
 
     /**
      * @private
-     * @description 재생목록 ID를 기반으로 내부의 모든 영상 항목을 순회하며 가져옵니다.
-     * Data API가 모바일 referrer/PWA/브라우저 정책 차이로 실패해도 IFrame API fallback을 사용해 영상 ID 목록을 복구합니다.
+     * @description 재생목록 ID를 기반으로 IFrame API가 제공하는 현재 재생목록 ID 배열을 가져옵니다.
+     * 제목/썸네일은 이 단계에서 알 수 없으므로, 로드 이후 oEmbed 지연 보강 루틴에서 채웁니다.
      * @param {string} playlistId - YouTube 공식 재생목록 고유 ID
      * @returns {Promise<Array<object>>} - 검증이 완료된 Entry 객체 배열
      */
@@ -118,23 +135,12 @@ class YouTubeAPIService {
         const MAX_RESULTS = 200;
 
         try {
-            const entries = await this.#fetchPlaylistItemsByDataAPI(playlistId, MAX_RESULTS);
-            if (entries.length) return entries;
-            this.#lastErrorMessage ||= "Data API에서 재생 가능한 영상을 찾지 못했습니다.";
-        } catch (err) {
-            this.#lastErrorMessage = `Data API 실패: ${err.message || err}`;
-            console.warn(this.#lastErrorMessage);
-        }
-
-        try {
             const entries = await this.#fetchPlaylistItemsByIframeAPI(playlistId, MAX_RESULTS);
-            if (entries.length) {
-                this.#lastErrorMessage = "";
-                return entries;
-            }
-            this.#lastErrorMessage ||= "IFrame API fallback에서도 재생목록을 가져오지 못했습니다.";
+            if (entries.length) return entries;
+
+            this.#lastErrorMessage = "IFrame API에서 재생목록 ID 배열을 가져오지 못했습니다.";
         } catch (err) {
-            this.#lastErrorMessage = `${this.#lastErrorMessage ? `${this.#lastErrorMessage} / ` : ""}IFrame API fallback 실패: ${err.message || err}`;
+            this.#lastErrorMessage = `IFrame API 재생목록 로드 실패: ${err.message || err}`;
             console.warn(this.#lastErrorMessage);
         }
 
@@ -143,52 +149,7 @@ class YouTubeAPIService {
 
     /**
      * @private
-     * @description YouTube Data API v3 playlistItems 엔드포인트로 재생목록 상세 정보를 가져옵니다.
-     * URLSearchParams로 모든 쿼리를 인코딩하여 모바일 브라우저별 URL 파싱 차이를 제거합니다.
-     * @param {string} playlistId - YouTube 공식 재생목록 고유 ID
-     * @param {number} maxResults - 최대 수집 개수
-     * @returns {Promise<Array<object>>} - 제목/썸네일이 포함된 Entry 객체 배열
-     */
-    async #fetchPlaylistItemsByDataAPI(playlistId, maxResults) {
-        const allEntries = [];
-        let pageToken = "";
-
-        while (allEntries.length < maxResults) {
-            const apiUrl = new URL("https://www.googleapis.com/youtube/v3/playlistItems");
-            apiUrl.search = new URLSearchParams({
-                playlistId,
-                key: this.#apiKey,
-                part: "snippet",
-                maxResults: "50",
-                fields: "items(snippet(title,thumbnails,resourceId(videoId))),nextPageToken",
-                ...(pageToken ? { pageToken } : {})
-            }).toString();
-
-            const response = await fetch(apiUrl.toString());
-            const data = await response.json().catch(() => ({}));
-
-            if (!response.ok || data.error) throw new Error(data.error?.message || `HTTP ${response.status}`);
-            if (!Array.isArray(data.items) || !data.items.length) break;
-
-            allEntries.push(...data.items
-                .filter(item => item.snippet?.resourceId?.videoId && item.snippet.title !== "Private video" && item.snippet.title !== "Deleted video")
-                .map(item => ({
-                    id: item.snippet.resourceId.videoId,
-                    title: item.snippet.title,
-                    img: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url || `https://i.ytimg.com/vi/${item.snippet.resourceId.videoId}/mqdefault.jpg`
-                }))
-            );
-
-            pageToken = data.nextPageToken || "";
-            if (!pageToken) break;
-        }
-
-        return allEntries.slice(0, maxResults);
-    }
-
-    /**
-     * @private
-     * @description 숨김 YouTube 플레이어에 재생목록을 cue하여 Data API Key 없이 영상 ID 목록을 추출합니다.
+     * @description 숨김 YouTube 플레이어에 재생목록을 cue하여 YouTube Data API Key 없이 영상 ID 목록을 추출합니다.
      * 이 플레이어는 목록 ID probing 전용이며, 결과를 얻거나 타임아웃되면 즉시 destroy하여 iframe 누수와 모바일 메모리 누적을 방지합니다.
      * @param {string} playlistId - YouTube 공식 재생목록 고유 ID
      * @param {number} maxResults - 최대 수집 개수
@@ -285,46 +246,20 @@ class YouTubeAPIService {
 
     /**
      * @private
-     * @description 단일 영상 ID를 기반으로 상세 정보를 가져오고 재생 유효성을 최종 검사합니다.
-     * 단일 영상은 API Key 의존성을 줄이기 위해 oEmbed를 우선 사용하고, oEmbed가 실패한 경우에만 Data API로 보강합니다.
+     * @description 단일 영상 ID를 기반으로 Entry 객체를 만들고 oEmbed로 공개 제목/썸네일을 보강합니다.
+     * oEmbed가 실패하더라도 재생 자체는 IFrame 플레이어가 최종 판단하므로 placeholder Entry를 반환합니다.
      * @param {string} videoId - YouTube 영상 고유 ID
      * @returns {Promise<Array<object>>} - 유효성이 확인된 단일 Entry 객체가 담긴 배열
      */
     async #fetchVideoItem(videoId) {
-        try {
-            const response = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}&format=json`);
-            if (response.ok) {
-                const data = await response.json();
-                return [{
-                    id: videoId,
-                    title: data.title || "YouTube 영상",
-                    img: data.thumbnail_url || `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`
-                }];
-            }
-        } catch (err) {
-            console.warn(`oEmbed lookup failed for ${videoId}: ${err}`);
-        }
+        const entry = {
+            id: videoId,
+            title: "YouTube 영상 1",
+            img: `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`
+        };
 
-        try {
-            const apiUrl = new URL("https://www.googleapis.com/youtube/v3/videos");
-            apiUrl.search = new URLSearchParams({ part: "snippet", id: videoId, key: this.#apiKey }).toString();
-            const response = await fetch(apiUrl.toString());
-            const data = await response.json().catch(() => ({}));
-            const video = data.items?.[0];
-
-            if (!response.ok || data.error) throw new Error(data.error?.message || `HTTP ${response.status}`);
-            if (!video) throw new Error("영상 정보를 찾지 못했습니다.");
-
-            return [{
-                id: video.id,
-                title: video.snippet.title,
-                img: video.snippet.thumbnails?.medium?.url || video.snippet.thumbnails?.default?.url || `https://i.ytimg.com/vi/${video.id}/mqdefault.jpg`
-            }];
-        } catch (err) {
-            this.#lastErrorMessage = `단일 영상 로드 실패: ${err.message || err}`;
-            console.warn(this.#lastErrorMessage);
-            return [];
-        }
+        await this.hydrateEntryMetadata(entry);
+        return [entry];
     }
 }
 
@@ -397,6 +332,21 @@ class UIManager {
         if (items[index]) {
             items[index].classList.add("active");
         }
+    }
+
+    /**
+     * @description 지연 메타데이터 보강 또는 실제 재생 시작 시 확인된 제목/썸네일을 기존 목록 DOM에 즉시 반영합니다.
+     * 전체 재생목록을 다시 렌더링하면 스크롤 위치와 active 상태가 흔들리므로, 해당 인덱스의 텍스트와 이미지만 직접 갱신합니다.
+     */
+    updateEntryMetadata(index, entry) {
+        const item = this.EntryLists.node.querySelectorAll(".entry-item")[index];
+        if (!item || !entry) return;
+
+        const image = item.querySelector("img");
+        const title = item.querySelector("span");
+
+        if (image && entry.img && image.src !== entry.img) image.src = entry.img;
+        if (title && entry.title) title.textContent = entry.title;
     }
 
     /**
@@ -552,8 +502,9 @@ class UIManager {
  * 백그라운드 재생과 메모리 최적화를 위해 슬라이딩 윈도우(Sliding Window) 기법을 사용합니다.
  */
 class PlayerService {
-    constructor(uiManager) {
+    constructor(uiManager, apiService) {
         this.#uiManager = uiManager;
+        this.#apiService = apiService;
     }
 
     refreshAll() {
@@ -611,6 +562,7 @@ class PlayerService {
 
         this.#uiManager.buildEntryList(YConfig.entries);
         this.#uiManager.updateNowPlaying(YConfig.currentEntry, absIndex, YConfig.entries.length);
+        this.#startMetadataHydration();
         this.#loadPlaylistWindow(absIndex, 0);
     }
     
@@ -630,6 +582,7 @@ class PlayerService {
 
         this.#uiManager.buildEntryList(YConfig.entries);
         this.#uiManager.updateNowPlaying(YConfig.currentEntry, 0, YConfig.entries.length);
+        this.#startMetadataHydration();
         this.#loadPlaylistWindow(0, 0);
     }
     
@@ -656,6 +609,7 @@ class PlayerService {
         localStorage.setItem("YConfig", JSON.stringify(YConfig));
         this.#uiManager.buildEntryList(YConfig.entries);
         this.#uiManager.updateNowPlaying(YConfig.currentEntry, 0, YConfig.entries.length);
+        this.#startMetadataHydration();
         this.#loadPlaylistWindow(0, 0);
 
         pushSnackbar({ message: "재생목록을 섞었습니다.", type: "normal" });
@@ -673,6 +627,7 @@ class PlayerService {
         localStorage.setItem("YConfig", JSON.stringify(YConfig));
         this.#uiManager.buildEntryList(YConfig.entries);
         this.#uiManager.updateNowPlaying(YConfig.currentEntry, YConfig.lastIdx, YConfig.entries.length);
+        this.#startMetadataHydration();
         this.#loadPlaylistWindow(YConfig.lastIdx, 0);
 
         pushSnackbar({ message: "재생목록을 역순으로 재배치했습니다.", type: "normal" });
@@ -724,6 +679,7 @@ class PlayerService {
         localStorage.setItem("YConfig", JSON.stringify(YConfig));
         this.#uiManager.buildEntryList(YConfig.entries);
         this.#uiManager.updateNowPlaying(YConfig.currentEntry, 0, YConfig.entries.length);
+        this.#startMetadataHydration();
         this.#loadPlaylistWindow(0, 0);
 
         pushSnackbar({ message: `선택한 ${parsed.length}개의 영상으로 반복 재생합니다.`, type: "normal" });
@@ -731,12 +687,50 @@ class PlayerService {
 
     #YTPlayer = null;
     #uiManager;
+    #apiService;
+    #metadataHydrationToken = 0;
 
     // 전체 큐 대신 작은 윈도우만 플레이어에 탑재
     #windowSize = 6;
     #windowAbsIndices = [];
     #windowReloadLock = false;
     #windowReloadTimer = null;
+
+    /**
+     * @private
+     * @description YouTube Data API 없이 확보한 재생목록 항목의 제목/썸네일을 백그라운드에서 순차 보강합니다.
+     * 재생 시작을 막지 않기 위해 await하지 않고, 모바일 브라우저에서 과도한 요청과 UI thrashing이 발생하지 않도록 동시성 3개와 소량의 지연을 둡니다.
+     */
+    #startMetadataHydration() {
+        if (!this.#apiService || !YConfig.entries.some(entry => entry.title?.startsWith("YouTube 영상 "))) return;
+
+        const token = ++this.#metadataHydrationToken;
+        const start = Math.max(YConfig.lastIdx, 0);
+        const order = Array.from({ length: YConfig.entries.length }, (_, i) => (start + i) % YConfig.entries.length);
+        let cursor = 0;
+        let hydratedCount = 0;
+
+        Promise.all(Array.from({ length: Math.min(3, order.length) }, async () => {
+            while (token === this.#metadataHydrationToken && cursor < order.length) {
+                const index = order[cursor++];
+                const entry = await this.#apiService.hydrateEntryMetadata(YConfig.entries[index]);
+
+                if (token !== this.#metadataHydrationToken) return;
+                if (entry) {
+                    this.#uiManager.updateEntryMetadata(index, entry);
+                    if (index === YConfig.lastIdx) {
+                        YConfig.currentEntry = entry;
+                        this.#uiManager.updateNowPlaying(entry, index, YConfig.entries.length);
+                    }
+                    if (++hydratedCount % 5 === 0) localStorage.setItem("YConfig", JSON.stringify(YConfig));
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 60));
+            }
+        })).then(() => {
+            if (token === this.#metadataHydrationToken && hydratedCount) localStorage.setItem("YConfig", JSON.stringify(YConfig));
+        });
+    }
 
     #loadPlaylistWindow(absIndex, startSeconds = 0) {
         if (!this.#YTPlayer || typeof this.#YTPlayer.loadPlaylist !== "function") return;
@@ -806,13 +800,14 @@ class PlayerService {
             localStorage.setItem("YConfig", JSON.stringify(YConfig));
         }
 
-        // IFrame API fallback으로 만든 항목은 Data API 제목을 알 수 없어 임시 제목을 갖습니다.
-        // 실제 재생이 시작된 뒤에는 현재 플레이어가 보유한 videoData에서 제목을 얻을 수 있으므로,
-        // 같은 영상 ID가 확인되는 경우에만 원본 entries 객체를 갱신하여 단일 영상 UI와 Media Session 제목을 즉시 보정합니다.
+        // IFrame API로 만든 항목은 최초에는 영상 ID만 확실하며 제목은 임시값일 수 있습니다.
+        // oEmbed 보강보다 실제 재생이 먼저 시작된 경우 현재 플레이어의 videoData에서 제목을 얻을 수 있으므로,
+        // 같은 영상 ID가 확인되는 경우에만 원본 entries 객체와 목록 DOM을 즉시 보정합니다.
         const videoData = this.#YTPlayer.getVideoData?.();
         if (videoData?.title && YConfig.currentEntry?.id === videoData.video_id && YConfig.currentEntry.title.startsWith("YouTube 영상 ")) {
             YConfig.currentEntry.title = videoData.title;
             YConfig.entries[absIndex].title = videoData.title;
+            this.#uiManager.updateEntryMetadata(absIndex, YConfig.entries[absIndex]);
             this.#uiManager.updateNowPlaying(YConfig.currentEntry, absIndex, YConfig.entries.length);
             localStorage.setItem("YConfig", JSON.stringify(YConfig));
         }
@@ -887,7 +882,7 @@ const Player = new Dynamic.Fragment("player",
     if (!activePlayerService) {
         const apiService = new YouTubeAPIService();
         const uiManager = new UIManager(apiService);
-        activePlayerService = new PlayerService(uiManager);
+        activePlayerService = new PlayerService(uiManager, apiService);
         uiManager.setPlayerService(activePlayerService);
     }
     
