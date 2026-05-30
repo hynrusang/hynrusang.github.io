@@ -77,7 +77,7 @@ class YouTubeAPIService {
             if (!response.ok || !data.title) throw new Error(data.error || `HTTP ${response.status}`);
 
             entry.title = data.title;
-            entry.img = data.thumbnail_url || entry.img || `https://i.ytimg.com/vi/${entry.id}/mqdefault.jpg`;
+            entry.img ||= `https://i.ytimg.com/vi/${entry.id}/mqdefault.jpg`;
             return entry;
         } catch (err) {
             console.warn(`oEmbed metadata lookup failed for ${entry.id}: ${err.message || err}`);
