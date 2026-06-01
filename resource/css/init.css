@@ -998,19 +998,21 @@ router .iconX {
 }
 
 /* =========================================================
- * ScreenX IFrame Full-Bleed Mode
- * - screenX 내부에 iframe 위젯이 들어오는 페이지는 fragmentbox의 기본 여백/카드 장식을 제거합니다.
- * - fragmentbox 자체가 이미 footer 높이를 제외한 영역이므로, iframe은 footer를 침범하지 않고 남은 화면을 꽉 채웁니다.
- * - 일반 Link/Memo/Userinfo 화면에는 iframe이 없으므로 기존 카드형 screenX 레이아웃이 그대로 유지됩니다.
+ * ScreenX IFrame Only Full-Bleed Mode
+ * - screenX 안에 iframe 위젯이 들어오면, 같은 screenX에 붙은 입력 form/보조 UI는 숨깁니다.
+ * - screenX 자체는 footer 위의 fragmentbox 영역을 그대로 차지하고, iframe만 그 내부를 여백 없이 채웁니다.
+ * - iframe을 직접 감싼 dynamic_* 컨테이너도 absolute full-bleed로 고정해서 하단 form 높이만큼 손해 보는 문제를 제거합니다.
  * ========================================================= */
 fragmentbox:has(.screenX iframe) {
-    padding: 0;
+    padding: 0 !important;
 }
 
 fragmentbox:has(.screenX iframe) .screenX {
+    position: relative;
     width: 100%;
     max-width: none;
     height: 100%;
+    min-height: 0;
     margin: 0;
     border: none;
     border-radius: 0;
@@ -1019,25 +1021,40 @@ fragmentbox:has(.screenX iframe) .screenX {
     backdrop-filter: none;
 }
 
-fragmentbox:has(.screenX iframe) .screenX > div[id^="dynamic_"] {
-    flex: 1 1 auto;
-    min-height: 0;
+fragmentbox:has(.screenX iframe) .screenX > :not(iframe):not(:has(iframe)) {
+    display: none !important;
+}
+
+fragmentbox:has(.screenX iframe) .screenX > :has(iframe),
+fragmentbox:has(.screenX iframe) .screenX > div[id^="dynamic_"]:has(iframe) {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    width: 100% !important;
     height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
     padding: 0 !important;
     overflow: hidden !important;
+    border: 0 !important;
+    background: transparent !important;
+}
+
+fragmentbox:has(.screenX iframe) .screenX > :has(iframe) > :not(iframe):not(:has(iframe)),
+fragmentbox:has(.screenX iframe) .screenX > div[id^="dynamic_"]:has(iframe) > :not(iframe):not(:has(iframe)) {
+    display: none !important;
 }
 
 fragmentbox:has(.screenX iframe) .screenX iframe {
-    display: block;
-    flex: 1 1 auto;
-    width: 100%;
-    height: 100%;
-    min-width: 0;
-    min-height: 0;
-    margin: 0;
-    border: 0;
-}
-
-fragmentbox:has(.screenX iframe) .screenX > iframe {
-    height: 100%;
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
 }
