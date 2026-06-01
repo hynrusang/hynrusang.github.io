@@ -999,62 +999,77 @@ router .iconX {
 
 /* =========================================================
  * ScreenX IFrame Only Full-Bleed Mode
- * - screenX 안에 iframe 위젯이 들어오면, 같은 screenX에 붙은 입력 form/보조 UI는 숨깁니다.
- * - screenX 자체는 footer 위의 fragmentbox 영역을 그대로 차지하고, iframe만 그 내부를 여백 없이 채웁니다.
- * - iframe을 직접 감싼 dynamic_* 컨테이너도 absolute full-bleed로 고정해서 하단 form 높이만큼 손해 보는 문제를 제거합니다.
+ * - screenX 안에 iframe 위젯이 들어오면 해당 화면을 iframe 전용 화면으로 취급합니다.
+ * - 하단 form/보조 UI를 억지로 display:none !important로 누르지 않고,
+ *   iframe host를 절대 배치 레이어로 올려 normal-flow 레이아웃에서 분리합니다.
+ * - inline style이 붙은 form이 있어도 iframe 면적 계산에 관여하지 않으므로,
+ *   footer를 제외한 fragmentbox 영역을 iframe이 여백 없이 채웁니다.
  * ========================================================= */
 fragmentbox:has(.screenX iframe) {
-    padding: 0 !important;
+    padding: 0;
 }
 
 fragmentbox:has(.screenX iframe) .screenX {
     position: relative;
+    display: block;
     width: 100%;
     max-width: none;
     height: 100%;
     min-height: 0;
     margin: 0;
+    overflow: hidden;
     border: none;
     border-radius: 0;
-    background: transparent;
+    background: var(--background);
     box-shadow: none;
     backdrop-filter: none;
 }
 
-fragmentbox:has(.screenX iframe) .screenX > :not(iframe):not(:has(iframe)) {
-    display: none !important;
+fragmentbox:has(.screenX iframe) .screenX > iframe,
+fragmentbox:has(.screenX iframe) .screenX > div[id^="dynamic_"]:has(iframe),
+fragmentbox:has(.screenX iframe) .screenX > :has(iframe) {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    background: var(--background);
 }
 
-fragmentbox:has(.screenX iframe) .screenX > :has(iframe),
-fragmentbox:has(.screenX iframe) .screenX > div[id^="dynamic_"]:has(iframe) {
-    position: absolute !important;
-    inset: 0 !important;
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    border: 0 !important;
-    background: transparent !important;
-}
-
-fragmentbox:has(.screenX iframe) .screenX > :has(iframe) > :not(iframe):not(:has(iframe)),
-fragmentbox:has(.screenX iframe) .screenX > div[id^="dynamic_"]:has(iframe) > :not(iframe):not(:has(iframe)) {
-    display: none !important;
+fragmentbox:has(.screenX iframe) .screenX > div[id^="dynamic_"]:has(iframe) > :not(iframe):not(:has(iframe)),
+fragmentbox:has(.screenX iframe) .screenX > :has(iframe) > :not(iframe):not(:has(iframe)) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
 }
 
 fragmentbox:has(.screenX iframe) .screenX iframe {
-    position: absolute !important;
-    inset: 0 !important;
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--background);
+}
+
+fragmentbox:has(.screenX iframe) .screenX > :not(iframe):not(:has(iframe)) {
+    pointer-events: none;
+    visibility: hidden;
 }
