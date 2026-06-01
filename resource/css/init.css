@@ -996,3 +996,48 @@ router .iconX {
 .handlerContent:has(.memo-item-body) {
     overflow: visible;
 }
+
+/* =========================================================
+ * ScreenX IFrame Full-Bleed Mode
+ * - screenX 내부에 iframe 위젯이 들어오는 페이지는 fragmentbox의 기본 여백/카드 장식을 제거합니다.
+ * - fragmentbox 자체가 이미 footer 높이를 제외한 영역이므로, iframe은 footer를 침범하지 않고 남은 화면을 꽉 채웁니다.
+ * - 일반 Link/Memo/Userinfo 화면에는 iframe이 없으므로 기존 카드형 screenX 레이아웃이 그대로 유지됩니다.
+ * ========================================================= */
+fragmentbox:has(.screenX iframe) {
+    padding: 0;
+}
+
+fragmentbox:has(.screenX iframe) .screenX {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+fragmentbox:has(.screenX iframe) .screenX > div[id^="dynamic_"] {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100% !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+fragmentbox:has(.screenX iframe) .screenX iframe {
+    display: block;
+    flex: 1 1 auto;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    border: 0;
+}
+
+fragmentbox:has(.screenX iframe) .screenX > iframe {
+    height: 100%;
+}
