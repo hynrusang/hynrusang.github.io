@@ -1005,11 +1005,11 @@ router .iconX {
  * - inline style이 붙은 form이 있어도 iframe 면적 계산에 관여하지 않으므로,
  *   footer를 제외한 fragmentbox 영역을 iframe이 여백 없이 채웁니다.
  * ========================================================= */
-fragmentbox:has(.screenX iframe) {
+fragmentbox:has(.screenX:has(iframe)) {
     padding: 0;
 }
 
-fragmentbox:has(.screenX iframe) .screenX {
+.screenX:has(iframe) {
     position: relative;
     display: block;
     width: 100%;
@@ -1025,9 +1025,9 @@ fragmentbox:has(.screenX iframe) .screenX {
     backdrop-filter: none;
 }
 
-fragmentbox:has(.screenX iframe) .screenX > iframe,
-fragmentbox:has(.screenX iframe) .screenX > div[id^="dynamic_"]:has(iframe),
-fragmentbox:has(.screenX iframe) .screenX > :has(iframe) {
+.screenX:has(iframe) > iframe,
+.screenX:has(iframe) > div[id^="dynamic_"]:has(iframe),
+.screenX:has(iframe) > :has(iframe) {
     position: absolute;
     inset: 0;
     z-index: 2;
@@ -1043,8 +1043,8 @@ fragmentbox:has(.screenX iframe) .screenX > :has(iframe) {
     background: var(--background);
 }
 
-fragmentbox:has(.screenX iframe) .screenX > div[id^="dynamic_"]:has(iframe) > :not(iframe):not(:has(iframe)),
-fragmentbox:has(.screenX iframe) .screenX > :has(iframe) > :not(iframe):not(:has(iframe)) {
+.screenX:has(iframe) > div[id^="dynamic_"]:has(iframe) > :not(iframe):not(:has(iframe)),
+.screenX:has(iframe) > :has(iframe) > :not(iframe):not(:has(iframe)) {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -1055,7 +1055,7 @@ fragmentbox:has(.screenX iframe) .screenX > :has(iframe) > :not(iframe):not(:has
     pointer-events: none;
 }
 
-fragmentbox:has(.screenX iframe) .screenX iframe {
+.screenX:has(iframe) iframe {
     position: absolute;
     inset: 0;
     display: block;
@@ -1069,7 +1069,7 @@ fragmentbox:has(.screenX iframe) .screenX iframe {
     background: var(--background);
 }
 
-fragmentbox:has(.screenX iframe) .screenX > :not(iframe):not(:has(iframe)) {
+.screenX:has(iframe) > :not(iframe):not(:has(iframe)) {
     pointer-events: none;
     visibility: hidden;
 }

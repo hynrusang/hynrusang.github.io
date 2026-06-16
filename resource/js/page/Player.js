@@ -541,15 +541,11 @@ class PlayerService {
         this.#uiManager = uiManager;
         this.#apiService = apiService;
 
-        // 모바일 브라우저는 화면이 꺼지거나 앱이 백그라운드로 내려가면 외부 JS의 즉시 재생 명령을 제한할 수 있습니다.
-        // 따라서 백그라운드 상태에서는 재생 중인 YouTube iframe의 내부 playlist queue를 건드리지 않고,
-        // 화면이 다시 보일 때만 보류된 윈도우 재구성을 수행하여 큐 내부 자동 재생을 보존합니다.
+        // visibility 복귀 시에는 백그라운드에서 처리하지 못한 에러/예외성 pending reload만 정리합니다.
+        // 정상적인 chunk boundary reload는 document.hidden 상태에서도 동일하게 수행합니다.
         document.addEventListener("visibilitychange", () => {
             if (document.hidden) return;
 
-            // 백그라운드 동안 보류했던 queue 재구성은 화면이 다시 보일 때만 수행합니다.
-            // hidden 상태에서 loadPlaylist()를 호출하면 모바일 브라우저가 새 자동재생 시도로 판단할 수 있으므로,
-            // 실제 백그라운드 구간에서는 iframe 내부 queue가 이미 가진 다음 영상 처리만 사용합니다.
             if (this.#pendingWindowReloadIndex >= 0) {
                 const index = this.#pendingWindowReloadIndex;
                 this.#pendingWindowReloadIndex = -1;
@@ -590,8 +586,8 @@ class PlayerService {
         this.#YTPlayer = new YT.Player("ytv-player", {
             playerVars: {
                 // YouTube IFrame 내부 playlist queue가 모바일 백그라운드 상태에서도 가능한 한 자체적으로 다음 영상을 처리하도록
-                // 플레이어 생성 시점에 모바일/임베드 친화 옵션을 명시합니다. 여기서 중요한 점은 사이트 JS가 백그라운드에서
-                // 억지로 playVideo()/loadPlaylist()를 반복 호출하지 않고, 사용자가 시작한 iframe 재생 세션을 YouTube 내부 queue에 맡기는 것입니다.
+                // 플레이어 생성 시점에 모바일/임베드 친화 옵션을 명시합니다. chunk boundary에서는 사이트 JS가 같은 기준으로 queue를 재구성하고,
+                // 그 외 일반적인 다음 영상 전환은 사용자가 시작한 iframe 재생 세션을 YouTube 내부 queue에 맡깁니다.
                 enablejsapi: 1,
                 origin: window.location.origin,
                 widget_referrer: window.location.origin,
@@ -758,6 +754,7 @@ class PlayerService {
     #windowSize = 8;
     #windowAbsIndices = [];
     #windowReloadLock = false;
+    #windowReloadLockUntil = 0;
     #windowReloadTimer = null;
     #pendingWindowReloadIndex = -1;
     #autoAdvanceTimer = null;
@@ -840,6 +837,7 @@ class PlayerService {
         this.#syncMediaSession(this.#autoAdvanceEnabled ? "playing" : null);
 
         this.#windowReloadLock = true;
+        this.#windowReloadLockUntil = Date.now() + 400;
         this.#YTPlayer.loadPlaylist(ids, localIndex, startSeconds);
         this.#YTPlayer.setLoop(true);
 
@@ -850,22 +848,26 @@ class PlayerService {
         clearTimeout(this.#windowReloadTimer);
         this.#windowReloadTimer = setTimeout(() => {
             this.#windowReloadLock = false;
+            this.#windowReloadLockUntil = 0;
         }, 400);
     }
 
+    #isWindowReloadLocked() {
+        if (!this.#windowReloadLock) return false;
+        if (Date.now() < this.#windowReloadLockUntil) return true;
+
+        clearTimeout(this.#windowReloadTimer);
+        this.#windowReloadLock = false;
+        this.#windowReloadLockUntil = 0;
+        return false;
+    }
 
     #reloadPlaylistWindowForBoundary(absIndex) {
-        // 핵심 복구 지점입니다.
-        // 화면이 꺼져 있거나 브라우저가 백그라운드 상태인 동안 loadPlaylist()를 호출하면,
-        // 모바일 브라우저가 "사용자 제스처 없는 새 재생 요청"으로 판단해 현재 YouTube queue의 자동 재생을 끊을 수 있습니다.
-        // 백그라운드에서는 이미 iframe 내부에 들어가 있는 8개 queue가 스스로 넘어가도록 그대로 두고,
-        // 포그라운드로 돌아왔을 때만 현재 영상 기준으로 새 chunk를 다시 탑재합니다.
-        if (document.hidden) {
-            this.#pendingWindowReloadIndex = absIndex;
-            return;
-        }
-
-        this.#loadPlaylistWindow(absIndex, this.#YTPlayer.getCurrentTime?.() || 0);
+        // boundary에 도달하면 foreground/background 여부와 관계없이 같은 기준으로 chunk를 재구성합니다.
+        // 이전 영상 1개를 포함하는 기존 window 구성과 YouTube 내부 loop 동작은 유지하되,
+        // 백그라운드에서 reload를 보류해서 queue가 낡은 window 끝에서 첫 슬롯으로 감기는 문제를 막습니다.
+        this.#pendingWindowReloadIndex = -1;
+        this.#loadPlaylistWindow(absIndex, this.#YTPlayer?.getCurrentTime?.() || 0);
     }
 
     #resumePlaybackAfterQueueMutation() {
@@ -880,14 +882,14 @@ class PlayerService {
     }
 
     #advanceAfterEnded() {
-        // IFrame 내부 playlist가 정상적으로 다음 영상으로 넘어가지 못한 경우를 위한 포그라운드 보정입니다.
-        // 백그라운드에서는 사이트 JS가 다음 영상을 억지로 밀어 넣지 않고, YouTube iframe 내부 queue의 기본 동작을 우선합니다.
-        // 화면이 다시 보이는 시점에는 #recoverVisiblePlayback()에서 검은 화면/ENDED/CUED 잔류 상태를 복구합니다.
-        if (document.hidden || !this.#autoAdvanceEnabled || !this.#YTPlayer || YConfig.entries.length < 2) return;
+        // IFrame 내부 playlist가 정상적으로 다음 영상으로 넘어가지 못한 경우를 위한 보정입니다.
+        // boundary reload와 마찬가지로 foreground/background 여부에 따라 보정 경로가 갈라지지 않게 유지합니다.
+        // 화면이 다시 보이는 시점에는 #recoverVisiblePlayback()에서 검은 화면/ENDED/CUED 잔류 상태도 추가 복구합니다.
+        if (!this.#autoAdvanceEnabled || !this.#YTPlayer || YConfig.entries.length < 2) return;
 
         clearTimeout(this.#autoAdvanceTimer);
         this.#autoAdvanceTimer = setTimeout(() => {
-            if (document.hidden || !this.#YTPlayer || !this.#autoAdvanceEnabled || YConfig.entries.length < 2) return;
+            if (!this.#YTPlayer || !this.#autoAdvanceEnabled || YConfig.entries.length < 2) return;
 
             const localIndex = this.#YTPlayer.getPlaylistIndex?.() ?? -1;
             if (localIndex >= 0 && localIndex < this.#windowAbsIndices.length - 1) {
@@ -1027,7 +1029,7 @@ class PlayerService {
         if (
             YConfig.entries.length > this.#windowSize &&
             (localIndex === 0 || localIndex >= this.#windowAbsIndices.length - 2) &&
-            !this.#windowReloadLock
+            !this.#isWindowReloadLocked()
         ) {
             this.#reloadPlaylistWindowForBoundary(absIndex);
         }
