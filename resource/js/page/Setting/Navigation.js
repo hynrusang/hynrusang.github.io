@@ -6,7 +6,7 @@ import Player from "../Player.js";
 
 const navigator = [{
     label: "YouTube Player",
-    description: "재생목록과 단일 영상을 8개 윈도우 재생 구조로 실행합니다.",
+    description: "재생목록과 단일 영상을 재생합니다.",
     icon: "player",
     page: Player,
     forceRefresh: false
