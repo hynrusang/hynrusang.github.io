@@ -2,76 +2,72 @@ import { Dynamic } from "../init/module.js";
 import DataResource from "../util/DataResource.js";
 import { ButtonX, InputX } from "./XBox.js";
 
-const LoginForm = Dynamic.$("form", {class: "formBox", onsubmit: e => {
-    e.preventDefault();
-    DataResource.Auth.authenticate(e.target[0].value, e.target[1].value);
+// ==========================================
+// 1. Authentication form
+// ==========================================
+
+const LoginForm = Dynamic.$("form", { class: "formBox", onsubmit: event => {
+    event.preventDefault();
+    DataResource.Auth.authenticate(event.target[0].value, event.target[1].value);
 }}).add(
-    InputX({label: "email", placeholder: "Enter your Email.", oninput: e => {
-        const preValue = e.target.preValue ??  "";
-        if (preValue.includes("@") && preValue.indexOf("@") == preValue.length - 1) {
-            switch (e.data) {
+    InputX({ label: "email", placeholder: "Enter your Email.", oninput: event => {
+        const preValue = event.target.preValue ?? "";
+        if (preValue.includes("@") && preValue.indexOf("@") === preValue.length - 1) {
+            switch (event.data) {
                 case "g":
-                    e.target.value += "mail.com";
+                    event.target.value += "mail.com";
                     break;
                 case "n":
-                    e.target.value += "aver.com";
+                    event.target.value += "aver.com";
                     break;
                 case "d":
-                    e.target.value += "aum.net";
+                    event.target.value += "aum.net";
                     break;
             }
         }
-        e.target.preValue = e.target.value;
-    }}),
-    InputX({label: "password", type:"password", placeholder: "Enter your Password."}),
-    ButtonX({label: "login / register", type: "submit", value: "로그인 / 회원가입"}),
-    ButtonX({label: "find password", type: "button", value: "비밀번호 초기화", onclick: () => DataResource.Auth.changePassword(Dynamic.scan("form")[0].value)})
-)
-const MemoForm = Dynamic.$("form", {class: "memo-create-form", onsubmit: e => {
-    e.preventDefault();
-    const memo = e.target[0];
-    const temp = DataResource.Data.basic.memo;
-    if (!memo.value.trim()) return;
-    temp.unshift(memo.value);
-    if (DataResource.Data.updateData("memo", temp)) DataResource.Data.synchronize();
-    Dynamic.FragMutation.refresh();
-    memo.value = ""
-}}).add(
-    Dynamic.$("textarea", {required: null, class: "memo-create-input", placeholder: "메모 내용"}),
-    Dynamic.$("button", {type: "submit", class: "formApplyButton", text: "작성"})
-)
-const LinkForm = Dynamic.$("form", {class: "link-create-form", onsubmit: e => {
-    e.preventDefault();
-    const [title, url] = [e.target[0], e.target[1]]
-    const temp = DataResource.Data.basic.link;
-    if (!title.value.trim() || !url.value.trim()) return;
-    temp[title.value.trim()] = url.value.trim();
-    if (DataResource.Data.updateData("link", temp)) DataResource.Data.synchronize();
-    Dynamic.FragMutation.refresh();
-    title.value = "";
-    url.value = "";
-}}).add(
-    Dynamic.$("div", {class: "link-create-row"}).add(
-        Dynamic.$("input", {required: "", placeholder: "링크 타이틀 · 예: 구글"}),
-        Dynamic.$("input", {required: "", placeholder: "링크 주소 · 예: https://www.google.com/"})
-    ),
-    Dynamic.$("button", {type: "submit", class: "formApplyButton", text: "링크 주소 반영"})
-)
-const PlaylistForm = Dynamic.$("form", {style: "display: flex; width: 100%; height: 150px", onsubmit: e => {
-    e.preventDefault();
-    const [title, url] = [e.target[0], e.target[1]];
-    const temp = DataResource.Data.basic.playlist
-    if (!temp[title.value]) temp[title.value] = {};
-    temp[title.value][url.value] = url.value;
-    if (DataResource.Data.updateData("playlist", temp)) DataResource.Data.synchronize();
-    Dynamic.FragMutation.refresh();
-    url.value = "";
-}}).add(
-    Dynamic.$("div", {style: "display: flex; flex-direction: column; width: 100%;"}).add(
-        InputX({label: "큰 타이틀", value: "기본"}),
-        InputX({label: "영상 / 재생목록 주소", placeholder: "ex) https://www.youtube.com/watch?v=2S-2sGr5rLA&list=PLQzehMJO2R3UKOevs0VypnMS9iD8rwKhx"})
-    ),
-    ButtonX({type: "submit", value: "작성"})
-)
+        event.target.preValue = event.target.value;
+    } }),
+    InputX({ label: "password", type: "password", placeholder: "Enter your Password." }),
+    ButtonX({ label: "login / register", type: "submit", value: "로그인 / 회원가입" }),
+    ButtonX({ label: "find password", type: "button", value: "비밀번호 초기화", onclick: () => DataResource.Auth.changePassword(Dynamic.scan("form")[0].value) })
+);
 
-export { LoginForm, MemoForm, LinkForm, PlaylistForm }
+// ==========================================
+// 2. Legacy playlist form
+// ==========================================
+
+/**
+ * @description Player 내부 목록 편집기와 별도로 남아 있는 공용 재생목록 입력 폼입니다.
+ * 저장 대상 객체를 먼저 복사하므로 Firestore 저장 실패 시 현재 LiveData가 중간 상태로 남지 않습니다.
+ */
+const PlaylistForm = Dynamic.$("form", { class: "playlist-create-form", autocomplete: "off", onsubmit: async event => {
+    event.preventDefault();
+
+    // 1. 입력값을 읽고 저장 가능한 최소 조건을 확인합니다.
+    const [categoryInput, nameInput, urlInput] = event.currentTarget.elements;
+    const category = categoryInput.value.trim();
+    const name = nameInput.value.trim();
+    const url = urlInput.value.trim();
+    if (!category || !name || !url) return;
+
+    // 2. 기존 객체를 직접 변경하지 않고 다음 저장본을 구성합니다.
+    const currentPlaylist = DataResource.Data.basic.playlist || {};
+    const nextPlaylistMap = {
+        ...currentPlaylist,
+        [category]: { ...(currentPlaylist[category] || {}) }
+    };
+    if (nextPlaylistMap[category][name]) return;
+    nextPlaylistMap[category][name] = url;
+
+    // 3. 서버 저장이 확정된 경우에만 입력란을 비웁니다.
+    if (!await DataResource.Data.commitBasicData("playlist", nextPlaylistMap)) return;
+    nameInput.value = "";
+    urlInput.value = "";
+}}).add(
+    InputX({ label: "분류", value: "기본", autocomplete: "off" }),
+    InputX({ label: "표시 이름", placeholder: "예: 출근길 음악", autocomplete: "off" }),
+    InputX({ label: "영상 / 재생목록 주소", placeholder: "https://www.youtube.com/watch?v=...", autocomplete: "off" }),
+    ButtonX({ type: "submit", value: "목록 저장" })
+);
+
+export { LoginForm, PlaylistForm };

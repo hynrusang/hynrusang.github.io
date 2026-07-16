@@ -510,75 +510,13 @@ form {
 }
 
 /* =========================================================
- * Release Compact Density Pass
- * - 2026-05: desktop/mobile 공통으로 커 보이던 앱 셸, 하단 내비게이션, 공용 버튼 밀도를 낮춤
- * - 플레이어 전용 세부 크기는 simple_ytv.css에서 별도 보정
- * ========================================================= */
-:root {
-    --nav-height: 56px;
-    --radius-md: 14px;
-    --radius-lg: 20px;
-}
-
-fragmentbox {
-    padding: clamp(8px, 1.2vw, 12px);
-}
-
-footer {
-    padding: 7px max(12px, env(safe-area-inset-left)) calc(7px + var(--safe-bottom)) max(12px, env(safe-area-inset-right));
-}
-
-footer > *,
-router {
-    gap: 6px;
-}
-
-.iconX {
-    width: 40px;
-    height: 40px;
-    border-radius: 13px;
-    background-size: 22px;
-}
-
-.playerButton {
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
-    font-size: 16px;
-}
-
-@media screen and (max-width: 768px) {
-    :root {
-        --nav-height: 54px;
-    }
-
-    footer {
-        padding-left: 8px;
-        padding-right: 8px;
-    }
-
-    .iconX {
-        width: 38px;
-        height: 38px;
-        border-radius: 12px;
-        background-size: 20px;
-    }
-
-    .playerButton {
-        width: 34px;
-        height: 34px;
-        border-radius: 11px;
-        font-size: 15px;
-    }
-}
-
-/* =========================================================
- * Release Density Hotfix
- * - 하단 내비게이션과 링크 카드의 과한 높이/반복 배경 문제를 추가 보정
- * - 아이콘은 반드시 단일 중앙 이미지로만 표시되도록 강제
+ * Compact application shell
+ * - 최종 크기 정책을 한 곳에서 정의해 뒤쪽 hotfix 연쇄를 만들지 않습니다.
  * ========================================================= */
 :root {
     --nav-height: 50px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
 }
 
 fragmentbox {
@@ -589,17 +527,29 @@ footer {
     padding: 6px max(10px, env(safe-area-inset-left)) calc(6px + var(--safe-bottom)) max(10px, env(safe-area-inset-right));
 }
 
+footer > *,
+router {
+    gap: 6px;
+}
+
 .iconX {
-    width: 34px;
-    height: 34px;
+    width: 38px;
+    height: 38px;
     min-height: 0;
     padding: 0;
-    border-radius: 11px;
+    border-radius: 12px;
     background-color: var(--surface-muted) !important;
     background-repeat: no-repeat !important;
     background-position: center !important;
-    background-size: 19px 19px !important;
+    background-size: 25px 25px !important;
     box-shadow: none !important;
+}
+
+.playerButton {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    font-size: 16px;
 }
 
 img {
@@ -607,49 +557,10 @@ img {
     max-width: 100%;
 }
 
-.link-item-anchor {
-    display: block;
-    overflow: hidden;
-    width: 100%;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-#dynamic_link .handlerX {
-    flex-direction: row !important;
-    align-items: center;
-    min-height: 50px;
-    margin-bottom: 8px;
-    padding: 10px 12px;
-}
-
-#dynamic_link .handlerX > div:first-child {
-    min-width: 0;
-}
-
-@media screen and (max-width: 768px) {
-    :root {
-        --nav-height: 46px;
-    }
-
-    footer {
-        padding-left: 7px;
-        padding-right: 7px;
-    }
-
-    .iconX {
-        width: 32px;
-        height: 32px;
-        border-radius: 10px;
-        background-size: 18px 18px !important;
-    }
-}
-
 /* =========================================================
- * Release UX Patch
- * - 링크/메모 편집 폼을 2줄 구조로 고정
- * - 하단 메뉴 아이콘 가시성 개선
- * - Player/Link/Memo 직접 라우터를 하나의 앱 메뉴로 통합
+ * Independent Link and Memo pages
+ * - 목록 하나와 하단 입력 폼 하나만 스크롤 경계를 소유합니다.
+ * - 카드 내부에는 별도의 스크롤 영역을 만들지 않습니다.
  * ========================================================= */
 .screenX {
     min-height: 0;
@@ -658,13 +569,13 @@ img {
 .screenX > div[id^="dynamic_"] {
     flex: 1 1 auto;
     min-height: 0;
-    height: auto !important;
-    overflow-y: auto !important;
+    height: auto;
+    overflow-y: auto;
 }
 
 .screenX > form:not(.formBox) {
     flex: 0 0 auto;
-    display: grid !important;
+    display: grid;
     gap: 8px;
     width: 100%;
     margin: 0;
@@ -674,25 +585,26 @@ img {
     backdrop-filter: blur(18px) saturate(1.18);
 }
 
+#dynamic_link,
+#dynamic_memo {
+    display: block;
+}
+
 .link-create-form,
 .memo-create-form,
 .inlineEditForm {
-    display: grid !important;
     grid-template-columns: 1fr;
-    gap: 8px;
 }
 
-.link-create-row,
-.inlineEditRow {
+.link-create-row {
     display: grid;
     grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
     gap: 8px;
-    width: 100%;
 }
 
 .link-create-row input,
-.inlineEditRow input,
 .memo-create-input,
+.inlineEditField input,
 .inlineEditTextarea {
     min-height: 38px;
     padding: 8px 10px;
@@ -700,20 +612,14 @@ img {
     font-size: 13px;
 }
 
-.memo-create-input,
-.inlineEditTextarea {
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 100%;
-    min-height: 42px;
+.memo-create-input {
     max-height: 132px;
-    overflow: auto;
+    overflow-y: auto;
     line-height: 1.45;
-    resize: vertical;
-    overscroll-behavior: contain;
 }
 
 .formApplyButton,
+.inlineEditCancel,
 .inlineEditSubmit {
     width: 100%;
     min-height: 38px;
@@ -722,25 +628,29 @@ img {
 }
 
 .handlerX {
-    align-items: center;
-    min-height: 42px;
-    margin-bottom: 8px;
-    padding: 8px 10px;
+    display: flex;
+    align-items: flex-start;
+    flex: 0 0 auto;
     gap: 8px;
-    overflow: hidden;
+    width: 100%;
+    min-height: 42px;
+    height: auto;
+    margin: 0 0 8px;
+    padding: 8px 10px;
+    overflow: visible;
 }
 
 .handlerContent {
     flex: 1 1 auto;
     min-width: 0;
     max-width: 100%;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .handlerActions {
     display: inline-flex;
+    align-items: flex-start;
     flex: 0 0 auto;
-    align-items: center;
     gap: 5px;
 }
 
@@ -751,62 +661,83 @@ img {
     background-size: 20px 20px !important;
 }
 
-.handlerX:has(.inlineEditForm) {
-    align-items: flex-start;
-}
-
-.memo-inline-editor {
-    min-width: 0;
-    max-width: 100%;
-    overflow: hidden;
-}
-
-.link-handler .link-item-anchor,
-#dynamic_link .link-item-anchor {
+.link-item-anchor {
     display: block;
     overflow: hidden;
     width: 100%;
+    padding: 4px 2px;
     color: var(--text);
     font-size: 14px;
     font-weight: 750;
-    line-height: 1.35;
+    line-height: 1.45;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
 
-.memo-item-body {
-    box-sizing: border-box;
-    contain: paint;
+.link-inline-editor,
+.memo-inline-editor {
+    display: grid;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    overflow: visible;
+}
+
+.inlineEditField {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+}
+
+.inlineEditField > span {
+    color: var(--text-soft);
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.inlineEditField > input {
+    width: 100%;
+    min-width: 0;
+}
+
+.inlineEditActions {
+    display: grid;
+    grid-template-columns: minmax(90px, 0.35fr) minmax(140px, 0.65fr);
+    gap: 8px;
+    width: 100%;
+}
+
+.handlerX pre.memo-item-body {
     display: block;
     width: 100%;
     max-width: 100%;
-    max-height: 220px;
+    max-height: none;
     margin: 0;
-    overflow: auto;
+    padding: 2px 4px 4px 0;
+    overflow: visible;
     color: var(--text);
+    font-family: inherit;
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.68;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
-    word-break: break-word;
-    overscroll-behavior: contain;
+    word-break: normal;
+    text-overflow: clip;
 }
 
-.iconX {
-    width: 38px;
-    height: 38px;
-    border-radius: 12px;
-    background-size: 25px 25px !important;
+.inlineEditTextarea {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    max-height: none;
+    overflow-y: hidden;
+    line-height: 1.55;
+    resize: vertical;
 }
 
-footer .iconX,
-router .iconX {
-    width: 38px;
-    height: 38px;
-    border-radius: 12px;
-    background-size: 25px 25px !important;
-}
-
+/* =========================================================
+ * Navigation cards
+ * ========================================================= */
 #dynamic_navigation {
     display: grid;
     align-content: center;
@@ -925,14 +856,13 @@ router .iconX {
 }
 
 @media screen and (max-width: 768px) {
-    .screenX > form:not(.formBox) {
-        padding: 8px;
+    :root {
+        --nav-height: 46px;
     }
 
-    .link-create-row,
-    .inlineEditRow {
-        grid-template-columns: 1fr;
-        gap: 6px;
+    footer {
+        padding-left: 7px;
+        padding-right: 7px;
     }
 
     .iconX,
@@ -944,10 +874,30 @@ router .iconX {
         background-size: 24px 24px !important;
     }
 
+    .playerButton {
+        width: 34px;
+        height: 34px;
+        border-radius: 11px;
+        font-size: 15px;
+    }
+
+    .screenX > form:not(.formBox) {
+        padding: 8px;
+    }
+
+    .link-create-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
     .handlerX .iconX {
         width: 29px;
         height: 29px;
         background-size: 19px 19px !important;
+    }
+
+    .inlineEditActions {
+        grid-template-columns: 1fr 1fr;
     }
 
     .navigationGrid {
@@ -966,35 +916,6 @@ router .iconX {
         border-radius: 12px;
         background-size: 25px 25px;
     }
-}
-
-/* =========================================================
- * Memo/Snackbar Stability Hotfix
- * - pre 요소의 paint containment와 빡빡한 줄 높이가 긴 문장/토큰 경계에서 글리프를 잘라내는 문제를 제거
- * - 긴 URL/base64/연속 문자열은 가로 스크롤 대신 안전하게 줄바꿈
- * ========================================================= */
-.memo-item-body,
-.handlerX pre.memo-item-body {
-    contain: none !important;
-    display: block;
-    width: 100%;
-    max-width: 100%;
-    max-height: 240px;
-    padding: 2px 4px 4px 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    font-family: inherit;
-    font-size: 14px;
-    line-height: 1.68;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    word-break: break-all;
-    line-break: anywhere;
-    text-overflow: clip;
-}
-
-.handlerContent:has(.memo-item-body) {
-    overflow: visible;
 }
 
 /* =========================================================
