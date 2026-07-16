@@ -1,5 +1,5 @@
 import { Dynamic } from "../../init/module.js";
-import { HandlerX, ScreenX } from "../../component/XBox.js";
+import { NoAutocompleteX, HandlerX, ScreenX } from "../../component/XBox.js";
 import DataResource from "../../util/DataResource.js";
 import { pushSnackbar } from "../../util/Tools.js";
 
@@ -22,7 +22,7 @@ const renderMemoList = () => {
             event.preventDefault();
 
             // 1. 편집값을 검사하되 현재 배열은 직접 변경하지 않습니다.
-            const nextValue = event.currentTarget.elements.memoValue.value;
+            const nextValue = event.currentTarget.querySelector('[data-field="memoValue"]').value;
             if (memo === nextValue) {
                 pushSnackbar({ message: "수정된 메모가 기존과 동일합니다.", type: "error" });
                 return;
@@ -63,7 +63,7 @@ const MemoForm = Dynamic.$("form", {
         event.preventDefault();
 
         // 1. 입력값을 읽고 빈 메모 저장을 차단합니다.
-        const memoInput = event.currentTarget.elements.memoContent;
+        const memoInput = event.currentTarget.querySelector('[data-field="memoContent"]');
         const value = memoInput.value.trim();
         if (!value) return;
 
@@ -76,16 +76,11 @@ const MemoForm = Dynamic.$("form", {
     }
 }).add(
     Dynamic.$("textarea", {
-        name: "memoContent",
+        ...NoAutocompleteX,
+        "data-field": "memoContent",
         required: "",
         class: "memo-create-input",
-        placeholder: "메모 내용",
-        autocomplete: "new-password",
-        autocapitalize: "off",
-        spellcheck: "false",
-        "aria-autocomplete": "none",
-        "data-lpignore": "true",
-        "data-1p-ignore": "true"
+        placeholder: "메모 내용"
     }),
     Dynamic.$("button", { type: "submit", class: "formApplyButton", text: "작성" })
 );

@@ -1,7 +1,26 @@
 import { Dynamic } from "../init/module.js";
 
 // ==========================================
-// 1. Reusable content handlers
+// 1. Text input policy
+// ==========================================
+
+/**
+ * @description 브라우저와 비밀번호 관리 확장 프로그램이 과거 입력값을 제안하지 않도록
+ * 모든 사용자 입력 필드에 동일하게 적용하는 속성입니다.
+ * name 속성은 Chrome의 저장값 매칭에 사용될 수 있으므로 각 화면은 data-field로 값을 찾습니다.
+ */
+const NoAutocompleteX = Object.freeze({
+    autocomplete: "off",
+    autocapitalize: "off",
+    spellcheck: "false",
+    "aria-autocomplete": "none",
+    "data-lpignore": "true",
+    "data-1p-ignore": "true",
+    "data-form-type": "other"
+});
+
+// ==========================================
+// 2. Reusable content handlers
 // ==========================================
 
 const HandlerContainerX = (...handler) => Dynamic.$("div", { style: "flex-direction: column", class: "handlerX" }).add(...handler);
@@ -30,15 +49,10 @@ const HandlerX = ({ element, onedit, ondelete, editFrom = "innerText" }) => {
     const showEditor = () => {
         isEditing = true;
         const editorTextarea = Dynamic.$("textarea", {
-            name: "memoValue",
+            ...NoAutocompleteX,
+            "data-field": "memoValue",
             required: "",
             class: "inlineEditTextarea",
-            autocomplete: "new-password",
-            autocapitalize: "off",
-            spellcheck: "false",
-            "aria-autocomplete": "none",
-            "data-lpignore": "true",
-            "data-1p-ignore": "true",
             oninput: event => resizeEditor(event.currentTarget)
         });
         const editor = Dynamic.$("form", {
@@ -72,22 +86,23 @@ const HandlerX = ({ element, onedit, ondelete, editFrom = "innerText" }) => {
 };
 
 // ==========================================
-// 2. Basic layout controls
+// 3. Basic layout controls
 // ==========================================
 
 const ScreenX = screenId => Dynamic.$("div", { class: "screenX" }).add(
     Dynamic.$("div", { id: screenId })
 );
 
-const InputX = ({ label, value, placeholder, type = "text", oninput, autocomplete }) => Dynamic.$("div", { class: "inputX" }).add(
+const InputX = ({ label, field, value, placeholder, type = "text", oninput }) => Dynamic.$("div", { class: "inputX" }).add(
     Dynamic.$("label", { text: label }),
     Dynamic.$("input", {
+        ...NoAutocompleteX,
+        "data-field": field,
         required: "",
         type,
         value,
         placeholder,
-        oninput,
-        autocomplete
+        oninput
     })
 );
 
@@ -107,4 +122,4 @@ const IconX = ({ icon, onclick, title = "" }) => Dynamic.$("input", {
     "aria-label": title || icon
 });
 
-export { HandlerContainerX, HandlerX, ScreenX, InputX, ButtonX, IconX };
+export { NoAutocompleteX, HandlerContainerX, HandlerX, ScreenX, InputX, ButtonX, IconX };

@@ -1,5 +1,5 @@
 import { Dynamic } from "../../init/module.js";
-import { ScreenX, IconX } from "../../component/XBox.js";
+import { NoAutocompleteX, ScreenX, IconX } from "../../component/XBox.js";
 import DataResource from "../../util/DataResource.js";
 import { pushSnackbar } from "../../util/Tools.js";
 
@@ -11,18 +11,13 @@ import { pushSnackbar } from "../../util/Tools.js";
  * @description Chrome과 비밀번호 관리 확장 프로그램의 자동완성 제안이 편집 UI를 덮지 않도록
  * 링크 페이지의 텍스트 입력에 동일한 비자동완성 정책을 적용합니다.
  */
-const createLinkInput = ({ name, value = "", placeholder, label }) => Dynamic.$("input", {
-    name,
+const createLinkInput = ({ field, value = "", placeholder, label }) => Dynamic.$("input", {
+    ...NoAutocompleteX,
+    "data-field": field,
     value,
     placeholder,
     required: "",
-    autocomplete: "new-password",
-    autocapitalize: "off",
-    spellcheck: "false",
-    "aria-label": label,
-    "aria-autocomplete": "none",
-    "data-lpignore": "true",
-    "data-1p-ignore": "true"
+    "aria-label": label
 });
 
 // ==========================================
@@ -77,8 +72,8 @@ const createLinkItem = (key, url, linkMap) => {
                 event.preventDefault();
 
                 // 1. 편집값을 검증하되 현재 LiveData는 아직 변경하지 않습니다.
-                const nextKey = event.currentTarget.elements.linkName.value.trim();
-                const nextUrl = event.currentTarget.elements.linkUrl.value.trim();
+                const nextKey = event.currentTarget.querySelector('[data-field="linkName"]').value.trim();
+                const nextUrl = event.currentTarget.querySelector('[data-field="linkUrl"]').value.trim();
                 if (!nextKey || !nextUrl) {
                     pushSnackbar({ message: "링크 이름과 주소를 모두 입력해 주세요.", type: "error" });
                     return;
@@ -104,11 +99,11 @@ const createLinkItem = (key, url, linkMap) => {
         }).add(
             Dynamic.$("label", { class: "inlineEditField" }).add(
                 Dynamic.$("span", { text: "링크 이름" }),
-                createLinkInput({ name: "linkName", value: key, placeholder: "예: 구글", label: "링크 이름" })
+                createLinkInput({ field: "linkName", value: key, placeholder: "예: 구글", label: "링크 이름" })
             ),
             Dynamic.$("label", { class: "inlineEditField" }).add(
                 Dynamic.$("span", { text: "링크 주소" }),
-                createLinkInput({ name: "linkUrl", value: url, placeholder: "https://example.com/", label: "링크 주소" })
+                createLinkInput({ field: "linkUrl", value: url, placeholder: "https://example.com/", label: "링크 주소" })
             ),
             Dynamic.$("div", { class: "inlineEditActions" }).add(
                 Dynamic.$("button", { type: "button", class: "inlineEditCancel", text: "취소", onclick: showLink }),
@@ -117,7 +112,7 @@ const createLinkItem = (key, url, linkMap) => {
         );
 
         frame.reset(form);
-        requestAnimationFrame(() => form.node.elements.linkName.focus());
+        requestAnimationFrame(() => form.node.querySelector('[data-field="linkName"]').focus());
     };
 
     showLink();
@@ -155,8 +150,8 @@ const LinkForm = Dynamic.$("form", {
         event.preventDefault();
 
         // 1. 입력값과 중복 이름을 확인합니다.
-        const titleInput = event.currentTarget.elements.linkTitle;
-        const urlInput = event.currentTarget.elements.linkAddress;
+        const titleInput = event.currentTarget.querySelector('[data-field="linkTitle"]');
+        const urlInput = event.currentTarget.querySelector('[data-field="linkAddress"]');
         const title = titleInput.value.trim();
         const url = urlInput.value.trim();
         const currentLinkMap = DataResource.Data.basic.link || {};
@@ -176,8 +171,8 @@ const LinkForm = Dynamic.$("form", {
     }
 }).add(
     Dynamic.$("div", { class: "link-create-row" }).add(
-        createLinkInput({ name: "linkTitle", placeholder: "링크 타이틀 · 예: 구글", label: "링크 타이틀" }),
-        createLinkInput({ name: "linkAddress", placeholder: "링크 주소 · 예: https://www.google.com/", label: "링크 주소" })
+        createLinkInput({ field: "linkTitle", placeholder: "링크 타이틀 · 예: 구글", label: "링크 타이틀" }),
+        createLinkInput({ field: "linkAddress", placeholder: "링크 주소 · 예: https://www.google.com/", label: "링크 주소" })
     ),
     Dynamic.$("button", { type: "submit", class: "formApplyButton", text: "링크 주소 반영" })
 );

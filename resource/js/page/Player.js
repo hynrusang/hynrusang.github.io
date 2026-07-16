@@ -1,4 +1,5 @@
 import { Dynamic } from "../init/module.js";
+import { NoAutocompleteX } from "../component/XBox.js";
 import { pushProgressSnackbar, pushSnackbar } from "../util/Tools.js";
 import DataResource from "../util/DataResource.js";
 
@@ -585,9 +586,9 @@ class UIManager {
                 text: "분류는 목록을 묶는 폴더 이름이고, 표시 이름은 저장 목록에 실제로 보일 제목입니다. 단일 영상·재생목록·모바일 공유 URL을 지원합니다."
             }),
             Dynamic.$("form", { class: "ytv-add-form", autocomplete: "off", onsubmit: event => this.#addPlaylist(event) }).add(
-                this.#createLabeledInput("분류", "input-main-title", "예: 기본, 작업, 음악", "기본"),
-                this.#createLabeledInput("표시 이름", "input-playlist-name", "예: 출근길 음악, 강의 모음"),
-                this.#createLabeledInput("YouTube 주소", "input-playlist-url", "https://www.youtube.com/watch?v=...", "", "url"),
+                this.#createLabeledInput("분류", "category", "예: 기본, 작업, 음악", "기본"),
+                this.#createLabeledInput("표시 이름", "name", "예: 출근길 음악, 강의 모음"),
+                this.#createLabeledInput("YouTube 주소", "url", "https://www.youtube.com/watch?v=...", "", "url"),
                 Dynamic.$("button", { text: "목록 저장", id: "input-playlist-button", type: "submit" })
             )
         );
@@ -597,21 +598,16 @@ class UIManager {
      * @private
      * @description Player 목록 폼용 label/input을 만들며 브라우저 자동완성 제안은 비활성화합니다.
      */
-    #createLabeledInput(label, id, placeholder, value = "", type = "text") {
+    #createLabeledInput(label, field, placeholder, value = "", type = "text") {
         return Dynamic.$("label", { class: "ytv-form-field" }).add(
             Dynamic.$("span", { text: label }),
             Dynamic.$("input", {
-                id,
+                ...NoAutocompleteX,
+                "data-field": field,
                 type,
                 placeholder,
                 value,
-                required: "",
-                autocomplete: "new-password",
-                autocapitalize: "off",
-                spellcheck: "false",
-                "aria-autocomplete": "none",
-                "data-lpignore": "true",
-                "data-1p-ignore": "true"
+                required: ""
             })
         );
     }
@@ -632,10 +628,9 @@ class UIManager {
                 )
             ),
             Dynamic.$("input", {
+                ...NoAutocompleteX,
                 class: "ytv-entry-search",
                 placeholder: "목록에서 제목 또는 번호 검색",
-                autocomplete: "off",
-                spellcheck: "false",
                 oninput: event => this.#filterEntryList(event.target.value)
             })
         );
@@ -657,9 +652,9 @@ class UIManager {
     async #addPlaylist(event) {
         event.preventDefault();
         const form = event.currentTarget;
-        const category = form.querySelector("#input-main-title").value.trim();
-        const name = form.querySelector("#input-playlist-name").value.trim();
-        const url = form.querySelector("#input-playlist-url").value.trim();
+        const category = form.querySelector('[data-field="category"]').value.trim();
+        const name = form.querySelector('[data-field="name"]').value.trim();
+        const url = form.querySelector('[data-field="url"]').value.trim();
 
         if (!category || !name || !url) {
             pushSnackbar({ message: "분류, 표시 이름, YouTube 주소를 모두 입력해 주세요.", type: "error" });
@@ -683,8 +678,8 @@ class UIManager {
 
         this.buildPlaylistList();
         this.showLibrary();
-        form.querySelector("#input-playlist-name").value = "";
-        form.querySelector("#input-playlist-url").value = "";
+        form.querySelector('[data-field="name"]').value = "";
+        form.querySelector('[data-field="url"]').value = "";
     }
 
     /**
@@ -771,9 +766,9 @@ class UIManager {
             autocomplete: "off",
             onsubmit: event => this.#savePlaylistEdit(event, oldCategory, oldName)
         }).add(
-            Dynamic.$("input", { name: "category", value: oldCategory, required: "", autocomplete: "new-password", autocapitalize: "off", spellcheck: "false", "aria-label": "분류", "aria-autocomplete": "none", "data-lpignore": "true", "data-1p-ignore": "true" }),
-            Dynamic.$("input", { name: "name", value: oldName, required: "", autocomplete: "new-password", autocapitalize: "off", spellcheck: "false", "aria-label": "표시 이름", "aria-autocomplete": "none", "data-lpignore": "true", "data-1p-ignore": "true" }),
-            Dynamic.$("input", { name: "url", value: oldURL, required: "", type: "url", autocomplete: "new-password", autocapitalize: "off", spellcheck: "false", "aria-label": "YouTube 주소", "aria-autocomplete": "none", "data-lpignore": "true", "data-1p-ignore": "true" }),
+            Dynamic.$("input", { ...NoAutocompleteX, "data-field": "category", value: oldCategory, required: "", "aria-label": "분류" }),
+            Dynamic.$("input", { ...NoAutocompleteX, "data-field": "name", value: oldName, required: "", "aria-label": "표시 이름" }),
+            Dynamic.$("input", { ...NoAutocompleteX, "data-field": "url", value: oldURL, required: "", type: "url", "aria-label": "YouTube 주소" }),
             Dynamic.$("div", { class: "playlist-edit-actions" }).add(
                 Dynamic.$("button", { type: "submit", text: "저장" }),
                 Dynamic.$("button", { type: "button", text: "취소", onclick: () => this.buildPlaylistList() })
@@ -781,7 +776,7 @@ class UIManager {
         );
 
         row.reset(form);
-        requestAnimationFrame(() => form.node.querySelector('[name="name"]')?.focus());
+        requestAnimationFrame(() => form.node.querySelector('[data-field="name"]')?.focus());
     }
 
     /**
@@ -791,9 +786,9 @@ class UIManager {
     async #savePlaylistEdit(event, oldCategory, oldName) {
         event.preventDefault();
         const form = event.currentTarget;
-        const newCategory = form.elements.category.value.trim();
-        const newName = form.elements.name.value.trim();
-        const newURL = form.elements.url.value.trim();
+        const newCategory = form.querySelector('[data-field="category"]').value.trim();
+        const newName = form.querySelector('[data-field="name"]').value.trim();
+        const newURL = form.querySelector('[data-field="url"]').value.trim();
 
         if (!newCategory || !newName || !newURL) {
             pushSnackbar({ message: "분류, 표시 이름, YouTube 주소를 모두 입력해 주세요.", type: "error" });
