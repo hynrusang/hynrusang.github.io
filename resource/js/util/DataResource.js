@@ -188,6 +188,10 @@ export default class DataResource {
 
             try {
                 await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).set(this.#basic.toObject());
+
+                // 서버 저장이 확정된 뒤에만 해당 데이터 화면에 부분 갱신을 요청합니다.
+                // Fragment 전체 refresh를 사용하지 않으므로 다른 탭과 Player iframe은 유지됩니다.
+                window.dispatchEvent(new CustomEvent("basic-data-committed", { detail: { key } }));
                 pushSnackbar({ message: "데이터가 성공적으로 저장되었습니다.", type: "normal" });
                 return true;
             } catch (error) {
@@ -286,7 +290,9 @@ export default class DataResource {
 
             Dynamic.scan("#navigator_icon").onclick = () => Dynamic.FragMutation.mutate(Navigation);
             Dynamic.scan("fragment[rid=rander]").remove();
-            Dynamic.FragMutation.setRouter("main", MainRouter);
+            // Player, Link, Memo는 서로 다른 Fragment로 유지하지만 동일한 하단 라우터를 공유합니다.
+            // 화면을 전환해도 숨겨진 Fragment DOM이 보존되어 재생과 편집 상태가 초기화되지 않습니다.
+            ["main", "player", "link", "memo"].forEach(rid => Dynamic.FragMutation.setRouter(rid, MainRouter));
             authProgress.update("화면 구성을 복원하는 중입니다.");
 
             const savedPlayerInstance = localStorage.getItem("YConfig");

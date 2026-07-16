@@ -2,18 +2,38 @@ import { Dynamic } from "../init/module.js";
 import { pushProgressSnackbar, pushSnackbar } from "../util/Tools.js";
 import DataResource from "../util/DataResource.js";
 
+// ==========================================
+// 1. Player state and persistence
+// ==========================================
+
+/**
+ * @description 저장된 재생 상태가 없거나 손상되었을 때 사용하는 최소 재생 항목입니다.
+ * YouTube ID, 제목, 썸네일의 구조를 실제 대기열 항목과 동일하게 유지합니다.
+ */
 const DEFAULT_ENTRY = {
     id: "C0DPdy98e4c",
     img: "https://i.ytimg.com/vi/C0DPdy98e4c/mqdefault.jpg",
     title: "TEST VIDEO"
 };
 
+/**
+ * @description YouTube iframe에 전달되는 현재 대기열과 재생 위치를 보존하는 전역 상태입니다.
+ * @property {Array<object>} entries - iframe playlist 순서와 동일한 영상 목록
+ * @property {number} lastIdx - 마지막으로 정상 재생이 확인된 인덱스
+ * @property {object|null} currentEntry - 현재 재생 중인 영상 정보
+ */
 let YConfig = {
     entries: [DEFAULT_ENTRY],
     lastIdx: 0,
     currentEntry: DEFAULT_ENTRY
 };
 
+/**
+ * @description 외부 저장소나 YouTube API에서 들어온 항목을 플레이어가 사용할 수 있는 형태로 정규화합니다.
+ * 잘못된 11자리 영상 ID는 대기열에 포함하지 않습니다.
+ * @param {object} entry
+ * @returns {{id: string, title: string, img: string}|null}
+ */
 const normalizeEntry = entry => {
     const id = String(entry?.id || "").trim();
     if (!/^[a-zA-Z0-9_-]{11}$/.test(id)) return null;
@@ -25,6 +45,12 @@ const normalizeEntry = entry => {
     };
 };
 
+/**
+ * @description localStorage에서 복원한 재생 상태의 인덱스와 현재 항목을 실제 대기열 기준으로 다시 맞춥니다.
+ * 저장 데이터가 일부 손상되어도 전체 Player 초기화가 중단되지 않게 합니다.
+ * @param {object} source
+ * @returns {{entries: Array<object>, lastIdx: number, currentEntry: object|null}}
+ */
 const normalizeYConfig = source => {
     const entries = Array.isArray(source?.entries) ? source.entries.map(normalizeEntry).filter(Boolean) : [];
     const safeEntries = entries.length ? entries : [normalizeEntry(DEFAULT_ENTRY)];
@@ -43,23 +69,51 @@ const normalizeYConfig = source => {
     };
 };
 
+/** @description 현재 재생 상태를 localStorage에 저장합니다. */
 const persistYConfig = () => localStorage.setItem("YConfig", JSON.stringify(YConfig));
+/**
+ * @description Firestore 저장 전 편집본을 만들기 위한 깊은 복사입니다.
+ * 원본 LiveData 객체를 직접 변경하지 않아 저장 실패 시 rollback 기준을 보존합니다.
+ */
 const cloneData = value => typeof structuredClone === "function"
     ? structuredClone(value)
     : JSON.parse(JSON.stringify(value));
 
+// ==========================================
+// 2. YouTube URL and metadata service
+// ==========================================
+
+/**
+ * @class YouTubeAPIService
+ * @description YouTube URL을 단일 영상 또는 재생목록으로 해석하고,
+ * IFrame API와 oEmbed만 사용해 영상 ID·제목·썸네일을 확보합니다.
+ */
 class YouTubeAPIService {
     #lastErrorMessage = "";
 
+    /**
+     * @description 가장 최근 URL/재생목록 조회 실패 원인을 UI에 전달합니다.
+     * @returns {string}
+     */
     get lastErrorMessage() {
         return this.#lastErrorMessage;
     }
 
+    /**
+     * @description 입력 문자열에서 지원 가능한 YouTube 영상 또는 재생목록 ID가 추출되는지 검사합니다.
+     * @param {string} source
+     * @returns {boolean}
+     */
     isSupportedURL(source) {
         const parsed = this.#parseYouTubeURL(source);
         return Boolean(parsed.playlistId || parsed.videoId);
     }
 
+    /**
+     * @description YouTube URL을 분석해 Player 대기열 항목 배열로 변환합니다.
+     * @param {string} url
+     * @returns {Promise<Array<object>>}
+     */
     async fetchEntriesFromURL(url) {
         this.#lastErrorMessage = "";
 
@@ -71,6 +125,11 @@ class YouTubeAPIService {
         return [];
     }
 
+    /**
+     * @description IFrame probing 단계에서 ID만 확보한 항목에 oEmbed 제목과 썸네일을 지연 보강합니다.
+     * @param {object} entry
+     * @returns {Promise<object|null>}
+     */
     async hydrateEntryMetadata(entry) {
         if (!entry?.id || !entry.title?.startsWith("YouTube 영상")) return null;
 
@@ -89,6 +148,13 @@ class YouTubeAPIService {
         }
     }
 
+    /**
+     * @private
+     * @description youtube.com, youtu.be, shorts, live, embed와 원시 ID 형식을 하나의 파서에서 처리합니다.
+     * YouTube가 아닌 호스트의 임의 쿼리 문자열은 영상 주소로 오인하지 않습니다.
+     * @param {string} source
+     * @returns {{playlistId: string, videoId: string}}
+     */
     #parseYouTubeURL(source) {
         const value = String(source || "").trim();
         let playlistId = "";
@@ -124,6 +190,12 @@ class YouTubeAPIService {
         return { playlistId, videoId };
     }
 
+    /**
+     * @private
+     * @description 숨김 iframe을 통해 공식 재생목록의 영상 ID 순서를 가져옵니다.
+     * @param {string} playlistId
+     * @returns {Promise<Array<object>>}
+     */
     async #fetchPlaylistItems(playlistId) {
         const maxResults = 200;
 
@@ -139,6 +211,14 @@ class YouTubeAPIService {
         return [];
     }
 
+    /**
+     * @private
+     * @description 임시 YouTube Player에 playlist를 cue한 뒤 getPlaylist() 결과를 수집합니다.
+     * 완료·실패·timeout 어느 경로에서도 임시 iframe과 timer를 정리합니다.
+     * @param {string} playlistId
+     * @param {number} maxResults
+     * @returns {Promise<Array<object>>}
+     */
     #fetchPlaylistItemsByIframeAPI(playlistId, maxResults) {
         return new Promise((resolve, reject) => {
             if (!window.YT?.Player) {
@@ -232,6 +312,12 @@ class YouTubeAPIService {
         });
     }
 
+    /**
+     * @private
+     * @description 단일 영상 ID를 한 항목짜리 대기열로 만들고 가능한 경우 제목을 보강합니다.
+     * @param {string} videoId
+     * @returns {Promise<Array<object>>}
+     */
     async #fetchVideoItem(videoId) {
         const entry = {
             id: videoId,
@@ -244,6 +330,15 @@ class YouTubeAPIService {
     }
 }
 
+// ==========================================
+// 3. Player panel UI
+// ==========================================
+
+/**
+ * @class UIManager
+ * @description 저장된 목록 화면과 현재 재생 대기열 화면을 그립니다.
+ * UI 갱신은 iframe 재생 상태를 직접 변경하지 않으며 PlayerService의 명시적 operation만 호출합니다.
+ */
 class UIManager {
     TitleLabel = Dynamic.$("b");
     PlayLists = Dynamic.$("ul");
@@ -259,14 +354,23 @@ class UIManager {
     #isFetching = false;
     #entryErrors = new Map();
 
+    /** @param {YouTubeAPIService} apiService */
     constructor(apiService) {
         this.#apiService = apiService;
     }
 
+    /**
+     * @description 목록 클릭과 재배치 명령을 실행할 PlayerService를 연결합니다.
+     * @param {PlayerService} playerService
+     */
     setPlayerService(playerService) {
         this.#playerService = playerService;
     }
 
+    /**
+     * @description Player Fragment가 표시될 때 패널 DOM만 연결합니다.
+     * 이미 생성된 iframe과 대기열은 파괴하거나 재생성하지 않습니다.
+     */
     mount() {
         this.ListHeader.reset(
             Dynamic.$("a", { href: "#", onclick: event => this.#togglePlaylistView(event) }).add(
@@ -293,22 +397,28 @@ class UIManager {
         this.updateNowPlaying(YConfig.currentEntry, YConfig.lastIdx, YConfig.entries.length);
     }
 
+    /** @description 우측 목록 패널의 접힘 상태만 변경합니다. */
     togglePanel(event) {
         this.PanelVisible = !this.PanelVisible;
         document.getElementById("dynamic_player")?.classList.toggle("ytv-list-collapsed", !this.PanelVisible);
         event.currentTarget.classList.toggle("ytv-list-open", this.PanelVisible);
     }
 
+    /** @description 저장된 YouTube 목록 화면을 표시합니다. */
     showLibrary() {
         this.#viewMode = "library";
         this.#applyViewMode();
     }
 
+    /** @description 현재 iframe 대기열 화면을 표시합니다. */
     showQueue() {
         this.#viewMode = "queue";
         this.#applyViewMode();
     }
 
+    /**
+     * @description 재생 중 제목, 순번, 활성 행 표시를 현재 iframe 인덱스에 맞춥니다.
+     */
     updateNowPlaying(entry, index, total) {
         if (!entry) {
             this.TitleLabel.set({ text: "재생 대기열 없음" });
@@ -327,6 +437,7 @@ class UIManager {
         }
     }
 
+    /** @description 비동기로 확보된 제목과 썸네일만 해당 대기열 행에 반영합니다. */
     updateEntryMetadata(index, entry) {
         const item = this.EntryLists.node.querySelector(`.entry-item[data-index="${index}"]`);
         if (!item || !entry) return;
@@ -337,6 +448,7 @@ class UIManager {
         if (title && entry.title) title.textContent = entry.title;
     }
 
+    /** @description iframe에서 오류가 발생한 항목에 실패 상태를 표시합니다. */
     markEntryUnavailable(index, message) {
         this.#entryErrors.set(index, message);
         const item = this.EntryLists.node.querySelector(`.entry-item[data-index="${index}"]`);
@@ -350,6 +462,7 @@ class UIManager {
         }
     }
 
+    /** @description 정상 재생이 확인된 항목의 이전 오류 표시를 제거합니다. */
     clearEntryError(index) {
         this.#entryErrors.delete(index);
         const item = this.EntryLists.node.querySelector(`.entry-item[data-index="${index}"]`);
@@ -363,6 +476,7 @@ class UIManager {
         }
     }
 
+    /** @description 새 대기열을 적용할 때 기존 오류 표시를 모두 초기화합니다. */
     clearAllEntryErrors() {
         this.#entryErrors.clear();
         this.EntryLists.node.querySelectorAll(".entry-item").forEach(item => item.classList.remove("entry-unavailable"));
@@ -372,6 +486,10 @@ class UIManager {
         });
     }
 
+    /**
+     * @description Firestore에 저장된 분류/표시 이름/URL 구조를 라이브러리 목록으로 다시 그립니다.
+     * 현재 iframe과 재생 대기열은 변경하지 않습니다.
+     */
     buildPlaylistList() {
         const previousScroll = this.PlayLists.node.scrollTop;
         const playlistMap = DataResource.Data.basic.playlist || {};
@@ -396,6 +514,11 @@ class UIManager {
         requestAnimationFrame(() => { this.PlayLists.node.scrollTop = previousScroll; });
     }
 
+    /**
+     * @description 현재 YConfig 순서로 대기열 행을 그립니다.
+     * @param {Array<object>} entries
+     * @param {{preserveScroll?: boolean, switchView?: boolean}} options
+     */
     buildEntryList(entries, { preserveScroll = true, switchView = false } = {}) {
         const previousScroll = preserveScroll ? this.EntryLists.node.scrollTop : 0;
         this.EntryLists.reset(this.#createEntryToolbar(entries.length), this.EntryState);
@@ -433,6 +556,7 @@ class UIManager {
         });
     }
 
+    /** @private @description 라이브러리/대기열 중 선택된 한 화면만 표시합니다. */
     #applyViewMode() {
         const showQueue = this.#viewMode === "queue";
         this.ListHeader.node.classList.toggle("ytv-playlist-open", showQueue);
@@ -440,19 +564,24 @@ class UIManager {
         this.EntryLists.set({ style: showQueue ? "" : "display: none" });
     }
 
+    /** @private @description 상단 NOW PLAYING 카드를 눌렀을 때 두 목록 화면을 전환합니다. */
     #togglePlaylistView(event) {
         event.preventDefault();
         if (this.#viewMode === "queue") this.showLibrary();
         else this.showQueue();
     }
 
+    /**
+     * @private
+     * @description 분류, 표시 이름, YouTube 주소를 명시적으로 입력하는 목록 추가 카드를 만듭니다.
+     */
     #createAddPlaylistCard() {
         return Dynamic.$("li", { class: "ytv-add-card" }).add(
             Dynamic.$("h3", { text: "YouTube 목록 추가" }),
             Dynamic.$("p", {
                 text: "분류는 목록을 묶는 폴더 이름이고, 표시 이름은 저장 목록에 실제로 보일 제목입니다. 단일 영상·재생목록·모바일 공유 URL을 지원합니다."
             }),
-            Dynamic.$("form", { class: "ytv-add-form", onsubmit: event => this.#addPlaylist(event) }).add(
+            Dynamic.$("form", { class: "ytv-add-form", autocomplete: "off", onsubmit: event => this.#addPlaylist(event) }).add(
                 this.#createLabeledInput("분류", "input-main-title", "예: 기본, 작업, 음악", "기본"),
                 this.#createLabeledInput("표시 이름", "input-playlist-name", "예: 출근길 음악, 강의 모음"),
                 this.#createLabeledInput("YouTube 주소", "input-playlist-url", "https://www.youtube.com/watch?v=...", "", "url"),
@@ -461,13 +590,18 @@ class UIManager {
         );
     }
 
+    /**
+     * @private
+     * @description Player 목록 폼용 label/input을 만들며 브라우저 자동완성 제안은 비활성화합니다.
+     */
     #createLabeledInput(label, id, placeholder, value = "", type = "text") {
         return Dynamic.$("label", { class: "ytv-form-field" }).add(
             Dynamic.$("span", { text: label }),
-            Dynamic.$("input", { id, type, placeholder, value, required: "" })
+            Dynamic.$("input", { id, type, placeholder, value, required: "", autocomplete: "off", spellcheck: "false" })
         );
     }
 
+    /** @private @description 대기열 검색과 명시적 재배치 명령을 제공하는 도구 모음을 만듭니다. */
     #createEntryToolbar(total) {
         return Dynamic.$("li", { class: "ytv-entry-toolbar" }).add(
             Dynamic.$("div", { class: "ytv-entry-toolbar-row" }).add(
@@ -485,11 +619,14 @@ class UIManager {
             Dynamic.$("input", {
                 class: "ytv-entry-search",
                 placeholder: "목록에서 제목 또는 번호 검색",
+                autocomplete: "off",
+                spellcheck: "false",
                 oninput: event => this.#filterEntryList(event.target.value)
             })
         );
     }
 
+    /** @private @description iframe 대기열은 바꾸지 않고 화면에 보이는 행만 검색어로 필터링합니다. */
     #filterEntryList(query) {
         const keyword = query.trim().toLowerCase();
         this.EntryLists.node.querySelectorAll(".entry-item").forEach((item, index) => {
@@ -497,6 +634,11 @@ class UIManager {
         });
     }
 
+    /**
+     * @private
+     * @description 새 저장 목록을 검증하고 Firestore commit 성공 후 라이브러리 UI만 갱신합니다.
+     * 현재 재생 중인 iframe과 탭 상태는 변경하지 않습니다.
+     */
     async #addPlaylist(event) {
         event.preventDefault();
         const form = event.currentTarget;
@@ -530,6 +672,7 @@ class UIManager {
         form.querySelector("#input-playlist-url").value = "";
     }
 
+    /** @private @description 저장 목록 한 행과 열기·수정·삭제 동작을 만듭니다. */
     #createPlaylistItem(category, name, url) {
         const row = Dynamic.$("li", { class: "playlist-item" });
         row.add(
@@ -565,6 +708,10 @@ class UIManager {
         return row;
     }
 
+    /**
+     * @private
+     * @description 사용자가 저장 목록을 명시적으로 선택했을 때만 URL을 해석해 새 iframe 대기열로 적용합니다.
+     */
     async #openPlaylist(url) {
         if (!this.#playerService || this.#isFetching) return;
 
@@ -587,14 +734,19 @@ class UIManager {
         }
     }
 
+    /**
+     * @private
+     * @description prompt 대신 행 내부 편집 폼을 열어 분류·표시 이름·주소를 모두 수정할 수 있게 합니다.
+     */
     #openPlaylistEditor(row, oldCategory, oldName, oldURL) {
         const form = Dynamic.$("form", {
             class: "playlist-edit-form",
+            autocomplete: "off",
             onsubmit: event => this.#savePlaylistEdit(event, oldCategory, oldName)
         }).add(
-            Dynamic.$("input", { name: "category", value: oldCategory, required: "", "aria-label": "분류" }),
-            Dynamic.$("input", { name: "name", value: oldName, required: "", "aria-label": "표시 이름" }),
-            Dynamic.$("input", { name: "url", value: oldURL, required: "", type: "url", "aria-label": "YouTube 주소" }),
+            Dynamic.$("input", { name: "category", value: oldCategory, required: "", autocomplete: "off", spellcheck: "false", "aria-label": "분류" }),
+            Dynamic.$("input", { name: "name", value: oldName, required: "", autocomplete: "off", spellcheck: "false", "aria-label": "표시 이름" }),
+            Dynamic.$("input", { name: "url", value: oldURL, required: "", type: "url", autocomplete: "off", spellcheck: "false", "aria-label": "YouTube 주소" }),
             Dynamic.$("div", { class: "playlist-edit-actions" }).add(
                 Dynamic.$("button", { type: "submit", text: "저장" }),
                 Dynamic.$("button", { type: "button", text: "취소", onclick: () => this.buildPlaylistList() })
@@ -605,6 +757,10 @@ class UIManager {
         requestAnimationFrame(() => form.node.querySelector('[name="name"]')?.focus());
     }
 
+    /**
+     * @private
+     * @description 편집본을 별도 객체로 저장하고 성공한 경우에만 라이브러리 목록을 갱신합니다.
+     */
     async #savePlaylistEdit(event, oldCategory, oldName) {
         event.preventDefault();
         const form = event.currentTarget;
@@ -647,6 +803,7 @@ class UIManager {
         this.showLibrary();
     }
 
+    /** @private @description 확인 후 저장 목록 한 항목만 삭제하며 Player 대기열은 유지합니다. */
     async #deletePlaylist(event, category, name) {
         event.stopPropagation();
         if (!confirm(`'${name}' 목록을 삭제하시겠습니까?`)) return;
@@ -664,11 +821,22 @@ class UIManager {
         this.showLibrary();
     }
 
+    /** @private @description 대기열 도구 모음의 공용 버튼을 만듭니다. */
     #createControlButton(icon, title, onClick) {
         return Dynamic.$("button", { class: "playerButton", type: "button", text: icon, title, onclick: onClick });
     }
 }
 
+// ==========================================
+// 4. YouTube iframe ownership and playback
+// ==========================================
+
+/**
+ * @class PlayerService
+ * @description YouTube Player 인스턴스와 YConfig 대기열을 소유합니다.
+ * 일반적인 영상 종료 후 다음 재생은 iframe playlist에 맡기고,
+ * 앱은 사용자가 목록을 교체·재배치한 경우와 오류 복구 시에만 명시적으로 iframe API를 호출합니다.
+ */
 class PlayerService {
     #YTPlayer = null;
     #uiManager;
@@ -682,11 +850,18 @@ class PlayerService {
     #errorRecoveryTimer = 0;
     #failedIndicesInPass = new Set();
 
+    /**
+     * @param {UIManager} uiManager
+     * @param {YouTubeAPIService} apiService
+     */
     constructor(uiManager, apiService) {
         this.#uiManager = uiManager;
         this.#apiService = apiService;
     }
 
+    /**
+     * @description Fragment가 표시될 때 UI를 다시 연결하고 Player가 없을 때만 iframe을 생성합니다.
+     */
     mount() {
         this.#uiManager.mount();
         this.#uiManager.buildPlaylistList();
@@ -695,6 +870,10 @@ class PlayerService {
         this.#ensurePlayer();
     }
 
+    /**
+     * @description 사용자가 선택한 새 목록을 정규화해 YConfig와 iframe playlist에 적용합니다.
+     * @param {Array<object>} entries
+     */
     loadNewPlaylist(entries, progressSnackbar = null) {
         const normalizedEntries = entries.map(normalizeEntry).filter(Boolean);
         if (!normalizedEntries.length) {
@@ -713,6 +892,7 @@ class PlayerService {
         this.#requestQueueLoad(0, 0);
     }
 
+    /** @description 사용자가 대기열 행을 직접 선택했을 때 iframe의 해당 인덱스를 재생합니다. */
     playVideoAt(index) {
         if (index < 0 || index >= YConfig.entries.length) return;
         if (!this.#YTPlayer || typeof this.#YTPlayer.playVideoAt !== "function") return;
@@ -722,12 +902,16 @@ class PlayerService {
         this.#YTPlayer.playVideoAt(index);
     }
 
+    /** @description iframe을 다시 만들지 않고 현재 대기열 표시와 제목 보강만 다시 수행합니다. */
     refreshQueueView() {
         this.#uiManager.buildEntryList(YConfig.entries, { preserveScroll: true });
         this.#startMetadataHydration();
         pushSnackbar({ message: "재생을 유지한 채 대기열 표시를 새로고침했습니다.", type: "normal" });
     }
 
+    /**
+     * @description 현재 영상과 재생 시간을 보존한 채 나머지 대기열 순서만 섞어 iframe에 다시 적용합니다.
+     */
     shuffleEntries() {
         const current = YConfig.currentEntry;
         const currentSeconds = Number(this.#YTPlayer?.getCurrentTime?.() || 0);
@@ -750,6 +934,7 @@ class PlayerService {
         pushSnackbar({ message: "현재 영상은 유지하고 이후 대기열을 섞었습니다.", type: "normal" });
     }
 
+    /** @description 현재 영상과 재생 시간을 보존한 채 전체 대기열 순서를 반전합니다. */
     reverseEntries() {
         const currentId = YConfig.currentEntry?.id;
         const currentSeconds = Number(this.#YTPlayer?.getCurrentTime?.() || 0);
@@ -766,6 +951,10 @@ class PlayerService {
         pushSnackbar({ message: "현재 영상 위치를 유지하고 대기열 순서를 뒤집었습니다.", type: "normal" });
     }
 
+    /**
+     * @description 사용자가 입력한 번호/범위로 새 대기열을 구성합니다.
+     * 검색 표시 필터와 달리 이 operation은 iframe playlist 자체를 변경합니다.
+     */
     filterEntries() {
         const input = prompt(
             "재생할 영상 번호를 입력해 주세요 (띄어쓰기로 구분)\n\n" +
@@ -818,6 +1007,10 @@ class PlayerService {
         pushSnackbar({ message: `선택한 ${filteredEntries.length}개의 영상으로 대기열을 구성했습니다.`, type: "normal" });
     }
 
+    /**
+     * @private
+     * @description 기존 iframe 인스턴스가 유효하면 재사용하고, 실제 DOM host가 없을 때만 새 Player를 생성합니다.
+     */
     #ensurePlayer() {
         clearTimeout(this.#playerInitTimer);
 
@@ -869,6 +1062,7 @@ class PlayerService {
         });
     }
 
+    /** @private @description iframe 준비 전 목록 변경 요청을 한 건으로 보관하거나 즉시 적용합니다. */
     #requestQueueLoad(index, startSeconds) {
         this.#pendingQueueLoad = { index, startSeconds };
         if (!this.#playerReady) {
@@ -881,6 +1075,11 @@ class PlayerService {
         this.#loadFullPlaylist(pending.index, pending.startSeconds);
     }
 
+    /**
+     * @private
+     * @description 현재 YConfig ID 순서를 한 번의 loadPlaylist 호출로 iframe에 전달합니다.
+     * 이후 정상 종료에 따른 다음 영상 선택은 YouTube iframe이 수행합니다.
+     */
     #loadFullPlaylist(index, startSeconds = 0) {
         if (!this.#YTPlayer || typeof this.#YTPlayer.loadPlaylist !== "function") return;
         if (!YConfig.entries.length) return;
@@ -894,6 +1093,10 @@ class PlayerService {
         this.#YTPlayer.setLoop(true);
     }
 
+    /**
+     * @private
+     * @description placeholder 제목만 낮은 동시성으로 보강하고 중간 결과를 localStorage에 저장합니다.
+     */
     #startMetadataHydration(progressSnackbar = null) {
         const total = YConfig.entries.length;
         const isPlaceholder = entry => entry?.title?.startsWith("YouTube 영상");
@@ -938,6 +1141,7 @@ class PlayerService {
         });
     }
 
+    /** @private @description iframe 인덱스를 YConfig와 NOW PLAYING UI에 동기화합니다. */
     #updateCurrentEntry(index, persist) {
         if (index < 0 || index >= YConfig.entries.length) return;
 
@@ -947,6 +1151,7 @@ class PlayerService {
         if (persist) persistYConfig();
     }
 
+    /** @private @description iframe이 알고 있는 실제 제목으로 placeholder 항목을 보정합니다. */
     #syncCurrentTitleFromPlayer(index) {
         const videoData = this.#YTPlayer?.getVideoData?.();
         if (!videoData?.title || !videoData?.video_id) return;
@@ -960,6 +1165,7 @@ class PlayerService {
         persistYConfig();
     }
 
+    /** @private @description OS 미디어 세션의 재생 상태와 현재 영상 메타데이터를 갱신합니다. */
     #updateMediaSession(state) {
         if (!("mediaSession" in navigator)) return;
 
@@ -971,6 +1177,10 @@ class PlayerService {
         });
     }
 
+    /**
+     * @private
+     * @description iframe 준비 완료 후 보류 중인 목록 변경을 적용하고 미디어 키 동작을 연결합니다.
+     */
     #onPlayerReady() {
         this.#playerReady = true;
 
@@ -992,6 +1202,10 @@ class PlayerService {
         }
     }
 
+    /**
+     * @private
+     * @description PLAYING 상태에서만 현재 인덱스를 확정하고 오류 복구 잠금을 해제합니다.
+     */
     #onPlayerStateChange(event) {
         if (event.data === YT.PlayerState.PLAYING) {
             const index = this.#YTPlayer.getPlaylistIndex();
@@ -1017,6 +1231,11 @@ class PlayerService {
         }
     }
 
+    /**
+     * @private
+     * @description 동일 영상의 중복 오류 이벤트를 한 번으로 합치고 nextVideo()를 한 번만 요청합니다.
+     * 정상 재생이 확인되기 전에는 같은 오류를 다시 처리하지 않아 정상 영상까지 연쇄 스킵되는 현상을 막습니다.
+     */
     #onPlayerError(event) {
         const errorCode = event.data;
         const errorMessage = {
@@ -1075,12 +1294,14 @@ class PlayerService {
         }, 180);
     }
 
+    /** @private @description 현재 오류 복구 timer와 중복 처리 잠금을 해제합니다. */
     #clearErrorRecovery() {
         clearTimeout(this.#errorRecoveryTimer);
         this.#errorRecoveryTimer = 0;
         this.#errorRecovery = null;
     }
 
+    /** @private @description 새 대기열 적용 시 오류 통계와 UI 표시를 모두 초기화합니다. */
     #resetPlaybackErrors() {
         this.#clearErrorRecovery();
         this.#failedIndicesInPass.clear();
@@ -1088,12 +1309,24 @@ class PlayerService {
     }
 }
 
+// ==========================================
+// 5. Fragment bootstrap
+// ==========================================
+
+/** @type {PlayerService|null} Player Fragment가 숨겨져도 유지되는 단일 서비스 인스턴스입니다. */
 let activePlayerService = null;
 
+/**
+ * @description 로그인 복원 단계에서 저장된 재생 상태를 검증한 뒤 YConfig에 반영합니다.
+ */
 const restoreYConfig = savedPlayerInstance => {
     YConfig = normalizeYConfig(savedPlayerInstance);
 };
 
+/**
+ * @description 다른 main 화면과 분리된 player Fragment입니다.
+ * 페이지 전환 시 DOM은 숨겨질 뿐 제거되지 않아 iframe 재생 상태가 유지됩니다.
+ */
 const Player = new Dynamic.Fragment("player",
     Dynamic.$("div", { id: "dynamic_player", class: "ytv-canvas ytv-full" }).add(
         Dynamic.$("div", { id: "ytv-player", class: "ytv-video" }),
