@@ -14,7 +14,7 @@ const createLinkItem = (key, url, temp) => {
         title: url,
         target: "_blank"
     }));
-    const renderEditor = () => frame.reset(Dynamic.$("form", { class: "inlineEditForm link-inline-editor", onsubmit: e => {
+    const renderEditor = () => frame.reset(Dynamic.$("form", { class: "inlineEditForm link-inline-editor", onsubmit: async e => {
         e.preventDefault();
         const nextKey = e.target[0].value.trim();
         const nextUrl = e.target[1].value.trim();
@@ -32,11 +32,10 @@ const createLinkItem = (key, url, temp) => {
             return;
         }
 
-        if (nextKey !== key) delete temp[key];
-        temp[nextKey] = nextUrl;
-        DataResource.Data.updateData("link", temp);
-        DataResource.Data.synchronize();
-        Dynamic.FragMutation.refresh();
+        const nextLink = { ...temp };
+        if (nextKey !== key) delete nextLink[key];
+        nextLink[nextKey] = nextUrl;
+        if (await DataResource.Data.commitBasicData("link", nextLink)) Dynamic.FragMutation.refresh();
     }}).add(
         Dynamic.$("div", { class: "inlineEditRow" }).add(
             Dynamic.$("input", { required: "", value: key, placeholder: "링크 타이틀" }),
@@ -53,12 +52,12 @@ const createLinkItem = (key, url, temp) => {
                 isEditing = !isEditing;
                 isEditing ? renderEditor() : renderStatic();
             }}),
-            IconX({ icon: "delete", onclick: () => {
+            IconX({ icon: "delete", onclick: async () => {
                 if (!confirm("정말로 해당 링크를 삭제하시겠습니까?")) return;
-                delete temp[key];
-                DataResource.Data.updateData("link", temp);
-                DataResource.Data.synchronize();
-                Dynamic.FragMutation.refresh();
+
+                const nextLink = { ...temp };
+                delete nextLink[key];
+                if (await DataResource.Data.commitBasicData("link", nextLink)) Dynamic.FragMutation.refresh();
             }})
         )
     );

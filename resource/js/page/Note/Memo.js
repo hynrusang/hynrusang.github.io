@@ -10,24 +10,24 @@ const Memo = new Dynamic.Fragment("main",
     const temp = DataResource.Data.basic.memo;
     Dynamic.snipe("#dynamic_memo").reset(temp.map((memo, index) => HandlerX({
         element: Dynamic.$("pre", {class: "memo-item-body", text: memo}),
-        onedit: e => {
+        onedit: async e => {
             e.preventDefault();
-            if (temp[index] == e.target[0].value) {
+            const nextValue = e.target[0].value;
+            if (temp[index] == nextValue) {
                 pushSnackbar({message: "수정된 메모가 기존과 동일합니다.", type: "error"});
                 return;
             }
-            temp[index] = e.target[0].value;
-            DataResource.Data.updateData("memo", temp);
-            DataResource.Data.synchronize();
-            Dynamic.FragMutation.refresh();
+
+            const nextMemo = [...temp];
+            nextMemo[index] = nextValue;
+            if (await DataResource.Data.commitBasicData("memo", nextMemo)) Dynamic.FragMutation.refresh();
         },
-        ondelete: () => {
-            if (confirm("정말로 해당 메모를 삭제하시겠습니까?")) {
-                temp.splice(index, 1);
-                DataResource.Data.updateData("memo", temp);
-                DataResource.Data.synchronize();
-                Dynamic.FragMutation.refresh();
-            }
+        ondelete: async () => {
+            if (!confirm("정말로 해당 메모를 삭제하시겠습니까?")) return;
+
+            const nextMemo = [...temp];
+            nextMemo.splice(index, 1);
+            if (await DataResource.Data.commitBasicData("memo", nextMemo)) Dynamic.FragMutation.refresh();
         }
     })));
 })
