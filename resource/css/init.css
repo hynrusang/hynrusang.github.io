@@ -649,7 +649,7 @@ img {
  * Release UX Patch
  * - 링크/메모 편집 폼을 2줄 구조로 고정
  * - 하단 메뉴 아이콘 가시성 개선
- * - Player/Link/Memo의 공용 하단 라우터와 독립 Fragment 레이아웃을 지원
+ * - Player/Link/Memo 직접 라우터를 하나의 앱 메뉴로 통합
  * ========================================================= */
 .screenX {
     min-height: 0;
@@ -727,14 +727,14 @@ img {
     margin-bottom: 8px;
     padding: 8px 10px;
     gap: 8px;
-    overflow: visible;
+    overflow: hidden;
 }
 
 .handlerContent {
     flex: 1 1 auto;
     min-width: 0;
     max-width: 100%;
-    overflow: visible;
+    overflow: hidden;
 }
 
 .handlerActions {
@@ -753,56 +753,12 @@ img {
 
 .handlerX:has(.inlineEditForm) {
     align-items: flex-start;
-    min-height: auto;
-    overflow: visible;
 }
 
-.memo-inline-editor,
-.link-inline-editor {
-    width: 100%;
+.memo-inline-editor {
     min-width: 0;
     max-width: 100%;
-    overflow: visible;
-}
-
-.link-inline-editor .inlineEditRow {
-    grid-template-columns: 1fr;
-}
-
-.inlineEditField {
-    display: grid;
-    gap: 5px;
-    min-width: 0;
-}
-
-.inlineEditField > span {
-    color: var(--text-soft);
-    font-size: 11px;
-    font-weight: 800;
-}
-
-.inlineEditField > input {
-    width: 100%;
-    min-width: 0;
-}
-
-.inlineEditActions {
-    display: grid;
-    grid-template-columns: minmax(90px, 0.35fr) minmax(140px, 0.65fr);
-    gap: 8px;
-    width: 100%;
-}
-
-.inlineEditCancel,
-.inlineEditSubmit {
-    width: 100%;
-    min-height: 38px;
-}
-
-.memo-handler,
-.link-handler:has(.link-inline-editor) {
-    align-items: flex-start;
-    overflow: visible;
+    overflow: hidden;
 }
 
 .link-handler .link-item-anchor,
@@ -824,9 +780,9 @@ img {
     display: block;
     width: 100%;
     max-width: 100%;
-    max-height: none;
+    max-height: 220px;
     margin: 0;
-    overflow: visible;
+    overflow: auto;
     color: var(--text);
     font-size: 14px;
     line-height: 1.5;
@@ -1013,9 +969,9 @@ router .iconX {
 }
 
 /* =========================================================
- * Note content layout
- * - 메모 카드 내부에 별도 스크롤 영역을 만들지 않고 목록 페이지의 단일 스크롤을 사용
- * - 긴 URL/base64/연속 문자열은 카드 폭 안에서 줄바꿈하되 글리프를 잘라내지 않음
+ * Memo/Snackbar Stability Hotfix
+ * - pre 요소의 paint containment와 빡빡한 줄 높이가 긴 문장/토큰 경계에서 글리프를 잘라내는 문제를 제거
+ * - 긴 URL/base64/연속 문자열은 가로 스크롤 대신 안전하게 줄바꿈
  * ========================================================= */
 .memo-item-body,
 .handlerX pre.memo-item-body {
@@ -1023,27 +979,22 @@ router .iconX {
     display: block;
     width: 100%;
     max-width: 100%;
-    max-height: none;
-    margin: 0;
+    max-height: 240px;
     padding: 2px 4px 4px 0;
-    overflow: visible;
+    overflow-x: hidden;
+    overflow-y: auto;
     font-family: inherit;
     font-size: 14px;
     line-height: 1.68;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
-    word-break: normal;
-    line-break: auto;
+    word-break: break-all;
+    line-break: anywhere;
     text-overflow: clip;
 }
 
-.handlerContent:has(.memo-item-body),
-.handlerContent:has(.inlineEditForm) {
+.handlerContent:has(.memo-item-body) {
     overflow: visible;
-}
-
-.inlineEditTextarea {
-    max-height: 60vh;
 }
 
 /* =========================================================

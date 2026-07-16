@@ -167,55 +167,12 @@ export default class DataResource {
         }
 
         /**
-         * @description 기본 데이터 한 항목을 메모리와 Firestore에 하나의 저장 작업으로 반영합니다.
-         * 서버 저장이 실패하면 해당 항목만 이전 값으로 되돌립니다.
-         * @type {(key: string, value: any) => Promise<boolean>}
-         */
-        static commitBasicData = async (key, value) => {
-            let previous;
-            let changed;
-
-            try {
-                previous = this.#basic.value(key);
-                changed = this.updateData(key, value);
-            } catch (error) {
-                console.error(error);
-                pushSnackbar({ message: "저장할 데이터 형식이 올바르지 않습니다.", type: "error" });
-                return false;
-            }
-
-            if (!changed) return true;
-
-            try {
-                await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).set(this.#basic.toObject());
-
-                // 서버 저장이 확정된 뒤에만 해당 데이터 화면에 부분 갱신을 요청합니다.
-                // Fragment 전체 refresh를 사용하지 않으므로 다른 탭과 Player iframe은 유지됩니다.
-                window.dispatchEvent(new CustomEvent("basic-data-committed", { detail: { key } }));
-                pushSnackbar({ message: "데이터가 성공적으로 저장되었습니다.", type: "normal" });
-                return true;
-            } catch (error) {
-                this.updateData(key, previous);
-                console.error(error);
-                pushSnackbar({ message: "서버 저장에 실패하여 변경 내용을 되돌렸습니다.", type: "error" });
-                return false;
-            }
-        }
-
-        /**
-         * @description 현재 기본 데이터 전체를 Firestore에 저장합니다.
-         * @type {() => Promise<boolean>}
+         * @description 사용자의 데이터를 서버에 업데이트하는 함수.
+         * @type {() => Promise<void>}
          */
         static synchronize = async () => {
-            try {
-                await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).set(this.#basic.toObject());
-                pushSnackbar({ message: "데이터가 성공적으로 저장되었습니다.", type: "normal" });
-                return true;
-            } catch (error) {
-                console.error(error);
-                pushSnackbar({ message: "데이터를 서버에 저장하지 못했습니다.", type: "error" });
-                return false;
-            }
+            await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).set(this.#basic.toObject());
+            pushSnackbar({message: "데이터가 성공적으로 저장되었습니다.", type: "normal"});
         }
     }
 
@@ -290,21 +247,13 @@ export default class DataResource {
 
             Dynamic.scan("#navigator_icon").onclick = () => Dynamic.FragMutation.mutate(Navigation);
             Dynamic.scan("fragment[rid=rander]").remove();
-            // Player, Link, Memo는 서로 다른 Fragment로 유지하지만 동일한 하단 라우터를 공유합니다.
-            // 화면을 전환해도 숨겨진 Fragment DOM이 보존되어 재생과 편집 상태가 초기화되지 않습니다.
-            ["main", "player", "link", "memo"].forEach(rid => Dynamic.FragMutation.setRouter(rid, MainRouter));
+            Dynamic.FragMutation.setRouter("main", MainRouter);
             authProgress.update("화면 구성을 복원하는 중입니다.");
 
             const savedPlayerInstance = localStorage.getItem("YConfig");
             if (savedPlayerInstance) {
-                try {
-                    restoreYConfig(JSON.parse(savedPlayerInstance));
-                    Dynamic.FragMutation.mutate(Player);
-                } catch (error) {
-                    console.warn("Invalid saved player state", error);
-                    localStorage.removeItem("YConfig");
-                    Dynamic.FragMutation.mutate(Navigation);
-                }
+                restoreYConfig(JSON.parse(savedPlayerInstance));
+                Dynamic.FragMutation.mutate(Player);
             } else Dynamic.FragMutation.mutate(Navigation);
             authProgress.close("로그인 동기화 완료", "normal");
         })

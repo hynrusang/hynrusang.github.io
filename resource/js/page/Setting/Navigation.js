@@ -4,36 +4,27 @@ import Link from "../Note/Link.js";
 import Memo from "../Note/Memo.js";
 import Player from "../Player.js";
 
-// ==========================================
-// 1. Application navigation entries
-// ==========================================
-
-/**
- * @description 메인 기능 화면의 메뉴 정의입니다.
- * 화면을 다시 열 때 기존 Fragment를 강제로 재생성하지 않아 플레이어와 편집 상태를 보존합니다.
- */
 const navigator = [{
     label: "YouTube Player",
     description: "재생목록과 단일 영상을 재생합니다.",
     icon: "player",
-    page: Player
+    page: Player,
+    forceRefresh: false
 }, {
     label: "링크 라이브러리",
     description: "자주 쓰는 외부 링크를 한 줄 카드로 정리합니다.",
     icon: "link",
-    page: Link
+    page: Link,
+    forceRefresh: true
 }, {
     label: "메모 보관함",
     description: "짧은 텍스트와 작업 메모를 빠르게 저장합니다.",
     icon: "memo",
-    page: Memo
-}];
+    page: Memo,
+    forceRefresh: true
+}]
 
-// ==========================================
-// 2. Navigation page
-// ==========================================
-
-const Navigation = new Dynamic.Fragment("setting",
+const Navigation = new Dynamic.Fragment("setting", 
     Dynamic.$("div", { id: "dynamic_navigation", class: "screenX" })
 ).registAction(() => {
     Dynamic.snipe("#dynamic_navigation").reset(
@@ -44,7 +35,7 @@ const Navigation = new Dynamic.Fragment("setting",
         Dynamic.$("div", { class: "navigationGrid" }).add(navigator.map(item => Dynamic.$("button", {
             class: "navigationCard",
             type: "button",
-            onclick: () => Dynamic.FragMutation.mutate(item.page)
+            onclick: () => Dynamic.FragMutation.mutate(item.page, null, item.forceRefresh)
         }).add(
             Dynamic.$("span", { class: "navigationCardIcon", style: `background-image: url(/resource/img/icon/${item.icon}.png)` }),
             Dynamic.$("span", { class: "navigationCardText" }).add(
@@ -59,6 +50,6 @@ const Navigation = new Dynamic.Fragment("setting",
             )
         )
     );
-}).registAnimation("fade", 500);
+}).registAnimation("fade", 500)
 
 export default Navigation;
