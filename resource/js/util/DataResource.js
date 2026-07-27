@@ -1,7 +1,7 @@
 import { Dynamic, LiveData } from "../init/module.js";
 import { MainRouter } from "../page/Router.js";
 import { pushProgressSnackbar, pushSnackbar } from "./Tools.js";
-import Player, { restoreYConfig } from "../page/Player.js";
+import { restoreYConfig } from "../page/Player.js";
 import Navigation from "../page/Setting/Navigation.js";
 import Working from "../page/Prepare/Working.js";
 
@@ -339,13 +339,14 @@ export default class DataResource {
             if (savedPlayerInstance) {
                 try {
                     restoreYConfig(JSON.parse(savedPlayerInstance));
-                    Dynamic.FragMutation.mutate(Player);
                 } catch (error) {
                     console.warn("Invalid saved player state", error);
                     localStorage.removeItem("YConfig");
-                    Dynamic.FragMutation.mutate(Navigation);
                 }
-            } else Dynamic.FragMutation.mutate(Navigation);
+            }
+
+            // 저장된 재생 상태는 복원하되, 최초 진입 화면은 항상 전체 메뉴로 유지합니다.
+            Dynamic.FragMutation.mutate(Navigation);
             authProgress.close("로그인 동기화 완료", "normal");
         })
     }
