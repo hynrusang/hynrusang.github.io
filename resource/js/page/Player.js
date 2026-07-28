@@ -33,27 +33,24 @@ let YConfig = {
  * @description 외부 저장소나 YouTube API에서 들어온 항목을 플레이어가 사용할 수 있는 형태로 정규화합니다.
  * 잘못된 11자리 영상 ID는 대기열에 포함하지 않습니다.
  * @param {object} entry
- * @returns {{id: string, title: string, img: string, playlistId: string, playlistIndex: number}|null}
+ * @returns {{id: string, title: string, img: string, playlistId: string}|null}
  */
 const normalizeEntry = entry => {
     const id = String(entry?.id || "").trim();
     if (!/^[a-zA-Z0-9_-]{11}$/.test(id)) return null;
 
     const playlistId = String(entry?.playlistId || "").trim();
-    const playlistIndex = Number(entry?.playlistIndex);
-
     return {
         id,
         title: String(entry?.title || "YouTube 영상").trim() || "YouTube 영상",
         img: String(entry?.img || `https://i.ytimg.com/vi/${id}/mqdefault.jpg`).trim(),
-        playlistId: /^[a-zA-Z0-9_-]+$/.test(playlistId) ? playlistId : "",
-        playlistIndex: Number.isInteger(playlistIndex) && playlistIndex > 0 ? playlistIndex : 0
+        playlistId: /^[a-zA-Z0-9_-]+$/.test(playlistId) ? playlistId : ""
     };
 };
 
 /**
  * @description 대기열 항목을 원본 YouTube 영상 주소로 변환합니다.
- * 재생목록에서 가져온 항목은 list와 원래 index를 함께 유지합니다.
+ * 재생목록에서 가져온 항목은 영상 ID와 재생목록 ID만 유지합니다.
  * @param {object} entry
  * @returns {string}
  */
@@ -63,7 +60,6 @@ const buildEntryURL = entry => {
 
     if (entry.playlistId) {
         url.searchParams.set("list", entry.playlistId);
-        if (entry.playlistIndex > 0) url.searchParams.set("index", entry.playlistIndex);
     }
 
     return url.toString();
@@ -293,8 +289,7 @@ class YouTubeAPIService {
                     id,
                     title: `YouTube 영상 ${index + 1}`,
                     img: `https://i.ytimg.com/vi/${id}/mqdefault.jpg`,
-                    playlistId,
-                    playlistIndex: index + 1
+                    playlistId
                 })));
             };
 
