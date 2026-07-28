@@ -1239,21 +1239,22 @@
 
 /* =========================================================
  * Native YouTube links for queue entries
- * - 일반 좌클릭은 내부 재생, 우클릭·중간 클릭·modifier 클릭은 원본 링크 사용
+ * - 각 행의 실제 본문 전체를 anchor로 구성
+ * - 일반 좌클릭만 내부 재생으로 전환하고 나머지는 브라우저 기본 링크 동작 사용
  * - 재생목록 항목은 video ID와 원본 playlist ID/index를 함께 전달
  * ========================================================= */
-.entry-item {
-    position: relative;
+.entry-row {
+    margin: 0;
+    padding: 0;
 }
 
 .entry-open-link {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    display: block;
-    border-radius: inherit;
     color: inherit;
     text-decoration: none;
+}
+
+.entry-open-link:visited {
+    color: inherit;
 }
 
 .entry-open-link:focus-visible {

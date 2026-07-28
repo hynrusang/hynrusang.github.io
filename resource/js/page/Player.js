@@ -560,9 +560,21 @@ class UIManager {
         entries.forEach((entry, index) => {
             const errorMessage = this.#entryErrors.get(index) || "";
             const entryURL = buildEntryURL(entry);
-            const item = Dynamic.$("li", {
-                class: `entry-item${errorMessage ? " entry-unavailable" : ""}`,
-                "data-index": index
+            const link = Dynamic.$("a", {
+                class: `entry-item entry-open-link${errorMessage ? " entry-unavailable" : ""}`,
+                "data-index": index,
+                href: entryURL,
+                title: `${entry.title}\n${entryURL}`,
+                rel: "noopener noreferrer",
+                "aria-label": `${entry.title} YouTube에서 열기`,
+                onclick: event => {
+                    // modifier 클릭은 anchor의 기본 새 탭·새 창 동작을 그대로 사용합니다.
+                    if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) return;
+
+                    // 일반 좌클릭만 현재 iframe 대기열의 해당 영상 재생으로 전환합니다.
+                    event.preventDefault();
+                    this.#playerService?.playVideoAt(index);
+                }
             }).add(
                 Dynamic.$("b", { text: index + 1 }),
                 Dynamic.$("img", {
@@ -578,24 +590,10 @@ class UIManager {
                         text: errorMessage,
                         hidden: errorMessage ? undefined : true
                     })
-                ),
-                Dynamic.$("a", {
-                    class: "entry-open-link",
-                    href: entryURL,
-                    title: `${entry.title}\n${entryURL}`,
-                    rel: "noopener noreferrer",
-                    "aria-label": `${entry.title} YouTube에서 열기`,
-                    onclick: event => {
-                        // 보조 클릭과 modifier 클릭은 원본 YouTube 링크로 처리합니다.
-                        if (event.button !== 0 || event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) return;
-
-                        // 일반 좌클릭만 현재 iframe 대기열의 해당 영상 재생으로 전환합니다.
-                        event.preventDefault();
-                        this.#playerService?.playVideoAt(index);
-                    }
-                })
+                )
             );
-            this.EntryLists.add(item);
+
+            this.EntryLists.add(Dynamic.$("li", { class: "entry-row" }).add(link));
         });
 
         if (switchView) this.showQueue();
