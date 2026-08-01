@@ -444,7 +444,7 @@
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
     .ytv-canvas {
         grid-template-columns: 1fr;
         grid-template-rows: minmax(240px, 42dvh) minmax(0, 1fr);
@@ -748,7 +748,7 @@
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
     .ytv-canvas {
         grid-template-columns: 1fr;
         grid-template-rows: minmax(0, 1fr) minmax(220px, 42dvh);
@@ -974,7 +974,7 @@
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
     .ytv-canvas {
         --ytv-mobile-video-height: min(56.25vw, 216px);
         grid-template-columns: 1fr;
@@ -1225,7 +1225,7 @@
     color: #ef4444;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
     .ytv-add-card p {
         display: block;
         font-size: 10px;
@@ -1263,10 +1263,71 @@
 }
 
 /* =========================================================
- * Desktop-mode mobile queue toolbar overflow fix
- * - 모바일 브라우저의 "데스크톱 사이트"는 넓은 layout viewport를 사용하므로
- *   viewport media query만으로는 좁은 우측 패널을 감지할 수 없습니다.
- * - title track은 반드시 축소 가능하게 하고, controls track은 고유 폭을 보존합니다.
+ * Touch-only mobile composition
+ * - 모바일 브라우저가 "데스크톱 사이트"용 넓은 layout viewport를 사용해도
+ *   UA/화면 크기 감지 없이 입력 장치 특성만으로 모바일 구성을 재사용합니다.
+ * - html/body 크기를 물리 화면 값으로 덮어쓰지 않습니다. 그 방식은 브라우저의
+ *   layout viewport를 바꾸지 못하고 축소, 여백, fixed 요소 오프셋을 유발합니다.
+ * ========================================================= */
+@media (hover: none) and (pointer: coarse) and (min-width: 769px) {
+    .ytv-canvas {
+        --ytv-mobile-video-height: min(56.25vw, 54dvh);
+    }
+
+    .ytv-list-header img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .playlist-title-label b {
+        font-size: 14px;
+    }
+
+    .ytv-entry-toolbar-title strong {
+        font-size: 15px;
+    }
+
+    .ytv-entry-toolbar-title span {
+        font-size: 12px;
+    }
+
+    .ytv-entry-controls .playerButton {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+    }
+
+    .entry-item {
+        grid-template-columns: 38px 112px minmax(0, 1fr);
+        gap: 10px;
+        min-height: 72px;
+        padding: 8px;
+        contain-intrinsic-size: 72px;
+    }
+
+    .entry-item > b {
+        width: 38px;
+        height: 38px;
+        font-size: 12px;
+    }
+
+    .entry-item > img {
+        width: 112px;
+        max-width: 112px;
+    }
+
+    .entry-item > span,
+    .entry-title {
+        font-size: 14px;
+        line-height: 1.3;
+    }
+}
+
+/* =========================================================
+ * Queue toolbar width contract
+ * - title track만 축소되고 controls track은 고유 폭을 보존합니다.
+ * - 좁은 데스크톱 패널과 touch-only 모바일 구성 모두에서 마지막 버튼이
+ *   패널 밖으로 밀려나지 않게 합니다.
  * ========================================================= */
 .ytv-entry-toolbar-row {
     display: grid;
@@ -1285,3 +1346,17 @@
     max-width: 100%;
     justify-self: end;
 }
+
+@media (max-width: 420px) {
+    .ytv-entry-toolbar-row {
+        grid-template-columns: 1fr;
+        align-items: start;
+    }
+
+    .ytv-entry-controls {
+        width: 100%;
+        justify-self: stretch;
+        justify-content: space-between;
+    }
+}
+

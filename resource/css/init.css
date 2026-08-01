@@ -466,7 +466,7 @@ form {
     animation: fade-in 0.45s ease-out forwards;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 768px), screen and (hover: none) and (pointer: coarse) {
     :root {
         --nav-height: 62px;
     }
@@ -855,7 +855,7 @@ img {
     font-weight: 700;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 768px), screen and (hover: none) and (pointer: coarse) {
     :root {
         --nav-height: 46px;
     }
@@ -994,3 +994,28 @@ fragmentbox:has(.screenX:has(iframe)) {
     pointer-events: none;
     visibility: hidden;
 }
+
+/* =========================================================
+ * Touch-only shell sizing
+ * - 데스크톱 사이트 요청 여부나 UA를 추적하지 않고 모바일 입력 환경에서만
+ *   기존 모바일 shell 규칙을 사용합니다.
+ * ========================================================= */
+@media (hover: none) and (pointer: coarse) and (min-width: 769px) {
+    :root {
+        --nav-height: 50px;
+    }
+
+    footer .iconX,
+    router .iconX {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background-size: 26px 26px !important;
+    }
+
+    .playerButton {
+        min-width: 40px;
+        min-height: 40px;
+    }
+}
+
