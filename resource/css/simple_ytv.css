@@ -1261,3 +1261,27 @@
     outline: 2px solid var(--accent);
     outline-offset: -3px;
 }
+
+/* =========================================================
+ * Desktop-mode mobile queue toolbar overflow fix
+ * - 모바일 브라우저의 "데스크톱 사이트"는 넓은 layout viewport를 사용하므로
+ *   viewport media query만으로는 좁은 우측 패널을 감지할 수 없습니다.
+ * - title track은 반드시 축소 가능하게 하고, controls track은 고유 폭을 보존합니다.
+ * ========================================================= */
+.ytv-entry-toolbar-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    justify-content: initial;
+}
+
+.ytv-entry-toolbar-title {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.ytv-entry-controls {
+    min-width: 0;
+    max-width: 100%;
+    justify-self: end;
+}
