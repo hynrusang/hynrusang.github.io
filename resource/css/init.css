@@ -28,8 +28,19 @@
     --radius-sm: 10px;
     --radius-md: 16px;
     --radius-lg: 24px;
-    --nav-height: 64px;
+    --nav-height: 3.125rem;
     --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+    /* Shared shell sizing. 1rem is enlarged only for touch + wide viewport. */
+    --footer-pad-block: 0.375rem;
+    --footer-pad-inline: 0.625rem;
+    --footer-gap: 0.375rem;
+    --shell-icon-size: 2.375rem;
+    --shell-icon-radius: 0.75rem;
+    --shell-icon-glyph-size: 1.5625rem;
+    --player-control-size: 2.25rem;
+    --player-control-radius: 0.75rem;
+    --player-control-font-size: 1rem;
 }
 
 * {
@@ -51,6 +62,10 @@
     border: 2px solid transparent;
     border-radius: 999px;
     background-clip: padding-box;
+}
+
+html {
+    font-size: 16px;
 }
 
 html,
@@ -215,7 +230,7 @@ footer {
     justify-content: space-between;
     width: 100%;
     height: calc(var(--nav-height) + var(--safe-bottom));
-    padding: 8px max(14px, env(safe-area-inset-left)) calc(8px + var(--safe-bottom)) max(14px, env(safe-area-inset-right));
+    padding: var(--footer-pad-block) max(var(--footer-pad-inline), env(safe-area-inset-left)) calc(var(--footer-pad-block) + var(--safe-bottom)) max(var(--footer-pad-inline), env(safe-area-inset-right));
     border-top: 1px solid var(--line);
     background: color-mix(in srgb, var(--surface-solid) 84%, transparent);
     box-shadow: 0 -12px 36px rgba(0, 0, 0, 0.16);
@@ -225,14 +240,14 @@ footer {
 footer > * {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--footer-gap);
 }
 
 router {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 8px;
+    gap: var(--footer-gap);
 }
 
 snackbar {
@@ -514,7 +529,7 @@ form {
  * - 최종 크기 정책을 한 곳에서 정의해 뒤쪽 hotfix 연쇄를 만들지 않습니다.
  * ========================================================= */
 :root {
-    --nav-height: 50px;
+    --nav-height: 3.125rem;
     --radius-md: 14px;
     --radius-lg: 20px;
 }
@@ -524,32 +539,32 @@ fragmentbox {
 }
 
 footer {
-    padding: 6px max(10px, env(safe-area-inset-left)) calc(6px + var(--safe-bottom)) max(10px, env(safe-area-inset-right));
+    padding: var(--footer-pad-block) max(var(--footer-pad-inline), env(safe-area-inset-left)) calc(var(--footer-pad-block) + var(--safe-bottom)) max(var(--footer-pad-inline), env(safe-area-inset-right));
 }
 
 footer > *,
 router {
-    gap: 6px;
+    gap: var(--footer-gap);
 }
 
 .iconX {
-    width: 38px;
-    height: 38px;
+    width: var(--shell-icon-size);
+    height: var(--shell-icon-size);
     min-height: 0;
     padding: 0;
-    border-radius: 12px;
+    border-radius: var(--shell-icon-radius);
     background-color: var(--surface-muted) !important;
     background-repeat: no-repeat !important;
     background-position: center !important;
-    background-size: 25px 25px !important;
+    background-size: var(--shell-icon-glyph-size) var(--shell-icon-glyph-size) !important;
     box-shadow: none !important;
 }
 
 .playerButton {
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
-    font-size: 16px;
+    width: var(--player-control-size);
+    height: var(--player-control-size);
+    border-radius: var(--player-control-radius);
+    font-size: var(--player-control-font-size);
 }
 
 img {
@@ -857,28 +872,14 @@ img {
 
 @media screen and (max-width: 768px), screen and (hover: none) and (pointer: coarse) {
     :root {
-        --nav-height: 46px;
-    }
-
-    footer {
-        padding-left: 7px;
-        padding-right: 7px;
-    }
-
-    .iconX,
-    footer .iconX,
-    router .iconX {
-        width: 36px;
-        height: 36px;
-        border-radius: 11px;
-        background-size: 24px 24px !important;
-    }
-
-    .playerButton {
-        width: 34px;
-        height: 34px;
-        border-radius: 11px;
-        font-size: 15px;
+        --nav-height: 3rem;
+        --footer-pad-inline: 0.4375rem;
+        --shell-icon-size: 2.25rem;
+        --shell-icon-radius: 0.6875rem;
+        --shell-icon-glyph-size: 1.5rem;
+        --player-control-size: 2.125rem;
+        --player-control-radius: 0.6875rem;
+        --player-control-font-size: 0.9375rem;
     }
 
     .screenX > form:not(.formBox) {
@@ -996,26 +997,19 @@ fragmentbox:has(.screenX:has(iframe)) {
 }
 
 /* =========================================================
- * Touch-only shell sizing
- * - 데스크톱 사이트 요청 여부나 UA를 추적하지 않고 모바일 입력 환경에서만
- *   기존 모바일 shell 규칙을 사용합니다.
+ * Touch desktop visual scale
+ * - 데스크톱 사이트 모드는 layout viewport만 넓히고 화면에 다시 축소합니다.
+ * - html/body 폭을 덮어쓰지 않고, 공통 rem 토큰의 기준만 키워 footer, icon,
+ *   player control과 플레이어 텍스트가 같은 비율로 보정되게 합니다.
  * ========================================================= */
-@media (hover: none) and (pointer: coarse) and (min-width: 769px) {
-    :root {
-        --nav-height: 50px;
-    }
-
-    footer .iconX,
-    router .iconX {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        background-size: 26px 26px !important;
-    }
-
-    .playerButton {
-        min-width: 40px;
-        min-height: 40px;
+@media (hover: none) and (pointer: coarse) and (min-width: 769px) and (orientation: portrait) {
+    html {
+        font-size: clamp(34px, 3.7vw, 38px);
     }
 }
 
+@media (hover: none) and (pointer: coarse) and (min-width: 769px) and (orientation: landscape) {
+    html {
+        font-size: clamp(18px, 2.1vw, 22px);
+    }
+}
