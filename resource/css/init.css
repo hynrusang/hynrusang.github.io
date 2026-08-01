@@ -820,6 +820,81 @@ img {
     font-weight: 700;
 }
 
+.navigationTabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    width: min(420px, 100%);
+    margin: 0 auto;
+    padding: 5px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface-muted);
+}
+
+.navigationTab {
+    min-height: 42px;
+    padding: 8px 14px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-soft);
+    font-weight: 900;
+    box-shadow: none;
+}
+
+.navigationTab:hover {
+    transform: none;
+    background: color-mix(in srgb, var(--surface-elevated) 78%, transparent);
+    color: var(--text);
+    box-shadow: none;
+}
+
+.navigationTab.is-active {
+    border-color: color-mix(in srgb, var(--accent) 42%, var(--line));
+    background: var(--surface-elevated);
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+}
+
+.navigationMainContent,
+.navigationPrivateContent {
+    display: grid;
+    gap: var(--navigation-page-gap);
+    width: 100%;
+}
+
+.navigationPrivateContent {
+    align-content: start;
+}
+
+.navigationSection {
+    display: grid;
+    gap: 10px;
+    width: 100%;
+}
+
+.navigationSectionHeader {
+    display: grid;
+    gap: 3px;
+    width: min(880px, 100%);
+    margin: 0 auto;
+}
+
+.navigationSectionHeader h2 {
+    color: var(--text);
+    font-size: 17px;
+    font-weight: 950;
+    letter-spacing: -0.03em;
+}
+
+.navigationSectionHeader p {
+    color: var(--text-soft);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
 @media screen and (max-width: 768px), screen and (hover: none) and (pointer: coarse) {
     :root {
         --nav-height: 3rem;
@@ -870,6 +945,14 @@ img {
 
     .navigationGrid {
         grid-template-columns: 1fr;
+    }
+
+    .navigationTabs {
+        width: 100%;
+    }
+
+    .navigationSectionHeader {
+        width: 100%;
     }
 }
 
@@ -1079,6 +1162,35 @@ fragmentbox:has(.screenX:has(iframe)) {
 
     .navigationGrid {
         width: min(900px, 100%);
+    }
+
+    .navigationTabs {
+        width: min(560px, 100%);
+        gap: 9px;
+        padding: 8px;
+        border-radius: 20px;
+    }
+
+    .navigationTab {
+        min-height: 58px;
+        border-radius: 15px;
+        font-size: 20px;
+    }
+
+    .navigationSection {
+        gap: 14px;
+    }
+
+    .navigationSectionHeader {
+        width: min(900px, 100%);
+    }
+
+    .navigationSectionHeader h2 {
+        font-size: 24px;
+    }
+
+    .navigationSectionHeader p {
+        font-size: 17px;
     }
 }
 
