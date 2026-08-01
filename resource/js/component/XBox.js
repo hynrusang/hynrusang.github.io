@@ -23,8 +23,6 @@ const NoAutocompleteX = Object.freeze({
 // 2. Reusable content handlers
 // ==========================================
 
-const HandlerContainerX = (...handler) => Dynamic.$("div", { style: "flex-direction: column", class: "handlerX" }).add(...handler);
-
 /**
  * @description 읽기 요소와 textarea 편집 화면을 전환하는 공용 콘텐츠 핸들러입니다.
  * textarea와 읽기 본문은 카드 내부에서 잘리지 않고 실제 콘텐츠 높이만큼 확장됩니다.
@@ -122,4 +120,4 @@ const IconX = ({ icon, onclick, title = "" }) => Dynamic.$("input", {
     "aria-label": title || icon
 });
 
-export { NoAutocompleteX, HandlerContainerX, HandlerX, ScreenX, InputX, ButtonX, IconX };
+export { NoAutocompleteX, HandlerX, ScreenX, InputX, ButtonX, IconX };

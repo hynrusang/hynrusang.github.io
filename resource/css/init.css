@@ -26,11 +26,10 @@
     --shadow-md: 0 14px 40px rgba(15, 23, 42, 0.12);
     --shadow-lg: 0 24px 70px rgba(15, 23, 42, 0.18);
     --radius-sm: 10px;
-    --radius-md: 16px;
-    --radius-lg: 24px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
     --nav-height: 3.125rem;
     --safe-bottom: env(safe-area-inset-bottom, 0px);
-
     /* Shared shell sizing. Touch-desktop changes these tokens without changing root font size. */
     --footer-pad-block: 0.375rem;
     --footer-pad-inline: 0.625rem;
@@ -41,9 +40,8 @@
     --player-control-size: 2.25rem;
     --player-control-radius: 0.75rem;
     --player-control-font-size: 1rem;
-
     /* Shared component density. Normal desktop/mobile use these base values;
-       touch-desktop overrides only the tokens, not the whole root font size. */
+           touch-desktop overrides only the tokens, not the whole root font size. */
     --body-font-size: 16px;
     --control-min-height: 44px;
     --control-pad-block: 11px;
@@ -55,7 +53,6 @@
     --form-gap: 10px;
     --form-padding: clamp(18px, 3vw, 28px);
     --form-label-size: 13px;
-
     --content-card-gap: 8px;
     --content-card-pad-block: 8px;
     --content-card-pad-inline: 10px;
@@ -66,7 +63,6 @@
     --content-action-glyph: 20px;
     --content-title-size: 14px;
     --content-body-size: 14px;
-
     --navigation-page-gap: 16px;
     --navigation-page-padding: clamp(18px, 3vw, 34px);
     --navigation-hero-gap: 8px;
@@ -132,8 +128,7 @@ body {
     padding: 0;
     overflow: hidden;
     color: var(--text);
-    background:
-        radial-gradient(circle at 12% 5%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 30%),
+    background: radial-gradient(circle at 12% 5%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 30%),
         radial-gradient(circle at 85% 8%, color-mix(in srgb, var(--accent-strong) 18%, transparent), transparent 28%),
         linear-gradient(135deg, var(--app-bg), var(--app-bg-soft));
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
@@ -148,8 +143,7 @@ body::before {
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background-image:
-        linear-gradient(color-mix(in srgb, var(--line) 55%, transparent) 1px, transparent 1px),
+    background-image: linear-gradient(color-mix(in srgb, var(--line) 55%, transparent) 1px, transparent 1px),
         linear-gradient(90deg, color-mix(in srgb, var(--line) 55%, transparent) 1px, transparent 1px);
     background-size: 44px 44px;
     mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.45), transparent 72%);
@@ -263,7 +257,7 @@ fragmentbox {
     width: 100%;
     height: calc(100dvh - var(--nav-height) - var(--safe-bottom));
     overflow: hidden;
-    padding: clamp(10px, 2vw, 18px);
+    padding: clamp(6px, 0.9vw, 10px);
 }
 
 fragment {
@@ -337,12 +331,15 @@ snackbar {
     background: var(--surface);
     box-shadow: var(--shadow-md);
     backdrop-filter: blur(22px) saturate(1.2);
+    min-height: 0;
 }
 
 .screenX > div[id^="dynamic_"] {
-    height: 100%;
+    height: auto;
     overflow-y: auto;
     padding: var(--screen-content-padding);
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .formBox,
@@ -378,16 +375,17 @@ form {
 }
 
 .iconX {
-    width: 46px;
-    height: 46px;
+    width: var(--shell-icon-size);
+    height: var(--shell-icon-size);
     padding: 0;
     border: 1px solid var(--line);
-    border-radius: 16px;
+    border-radius: var(--shell-icon-radius);
     background-color: var(--surface-muted) !important;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: 24px;
-    box-shadow: none;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: var(--shell-icon-glyph-size) var(--shell-icon-glyph-size) !important;
+    box-shadow: none !important;
+    min-height: 0;
 }
 
 .iconX:hover {
@@ -397,15 +395,19 @@ form {
 
 .handlerX {
     display: flex;
-    align-items: stretch;
-    gap: 12px;
+    align-items: flex-start;
+    gap: var(--content-card-gap);
     width: 100%;
-    margin: 0 0 12px 0;
-    padding: 14px;
+    margin: 0 0 var(--content-card-margin);
+    padding: var(--content-card-pad-block) var(--content-card-pad-inline);
     border: 1px solid var(--line);
     border-radius: var(--radius-md);
     background: var(--surface-elevated);
     box-shadow: var(--shadow-sm);
+    flex: 0 0 auto;
+    min-height: 42px;
+    height: auto;
+    overflow: visible;
 }
 
 .handlerX > *:first-child {
@@ -437,7 +439,8 @@ form {
 #dynamic_navigation {
     display: grid;
     align-content: center;
-    gap: 14px;
+    gap: var(--navigation-page-gap);
+    padding: var(--navigation-page-padding);
 }
 
 #dynamic_navigation h1,
@@ -449,6 +452,24 @@ form {
     text-align: center;
 }
 
+.centeredScreen {
+    justify-content: center;
+    align-items: center;
+    padding: clamp(18px, 4vw, 42px);
+}
+
+.screenIntro {
+    margin: 10px 0 22px;
+    color: var(--text-soft);
+    text-align: center;
+}
+
+.accountActions {
+    display: grid;
+    gap: 10px;
+    width: min(420px, 100%);
+}
+
 #dynamic_navigation .inputX,
 .screenX > .inputX {
     width: min(420px, 100%);
@@ -457,20 +478,7 @@ form {
 
 #dynamic_link,
 #dynamic_memo {
-    display: flex;
-    flex-direction: column;
-}
-
-#dynamic_link > form,
-#dynamic_memo > form {
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    margin: calc(clamp(16px, 2.4vw, 28px) * -1) calc(clamp(16px, 2.4vw, 28px) * -1) 18px;
-    padding: clamp(14px, 2vw, 20px);
-    border-bottom: 1px solid var(--line);
-    background: color-mix(in srgb, var(--surface-solid) 90%, transparent);
-    backdrop-filter: blur(18px);
+    display: block;
 }
 
 /* =========================================================
@@ -481,16 +489,16 @@ form {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 42px;
-    height: 42px;
+    width: var(--player-control-size);
+    height: var(--player-control-size);
     margin: 0;
     padding: 0;
     border: 1px solid var(--line);
-    border-radius: 14px;
+    border-radius: var(--player-control-radius);
     background: var(--surface-muted);
     color: var(--text);
     box-shadow: none;
-    font-size: 18px;
+    font-size: var(--player-control-font-size);
 }
 
 .playerButton:hover {
@@ -504,13 +512,25 @@ form {
  * ========================================================= */
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes fade-in {
-    0% { opacity: 0; transform: translateY(12px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 #loading_icon {
@@ -531,92 +551,6 @@ form {
     animation: fade-in 0.45s ease-out forwards;
 }
 
-@media screen and (max-width: 768px), screen and (hover: none) and (pointer: coarse) {
-    :root {
-        --nav-height: 62px;
-    }
-
-    fragmentbox {
-        padding: 0;
-    }
-
-    .screenX {
-        width: 100%;
-        border-radius: 0;
-        border-left: none;
-        border-right: none;
-    }
-
-    .screenX > div[id^="dynamic_"] {
-        padding: 16px;
-    }
-
-    footer {
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-
-    .iconX {
-        width: 44px;
-        height: 44px;
-        border-radius: 15px;
-    }
-
-    .handlerX {
-        gap: 8px;
-        padding: 12px;
-    }
-
-    #dynamic_link > form,
-    #dynamic_memo > form {
-        margin: -16px -16px 14px;
-        padding: 14px;
-    }
-}
-
-/* =========================================================
- * Compact application shell
- * - 최종 크기 정책을 한 곳에서 정의해 뒤쪽 hotfix 연쇄를 만들지 않습니다.
- * ========================================================= */
-:root {
-    --nav-height: 3.125rem;
-    --radius-md: 14px;
-    --radius-lg: 20px;
-}
-
-fragmentbox {
-    padding: clamp(6px, 0.9vw, 10px);
-}
-
-footer {
-    padding: var(--footer-pad-block) max(var(--footer-pad-inline), env(safe-area-inset-left)) calc(var(--footer-pad-block) + var(--safe-bottom)) max(var(--footer-pad-inline), env(safe-area-inset-right));
-}
-
-footer > *,
-router {
-    gap: var(--footer-gap);
-}
-
-.iconX {
-    width: var(--shell-icon-size);
-    height: var(--shell-icon-size);
-    min-height: 0;
-    padding: 0;
-    border-radius: var(--shell-icon-radius);
-    background-color: var(--surface-muted) !important;
-    background-repeat: no-repeat !important;
-    background-position: center !important;
-    background-size: var(--shell-icon-glyph-size) var(--shell-icon-glyph-size) !important;
-    box-shadow: none !important;
-}
-
-.playerButton {
-    width: var(--player-control-size);
-    height: var(--player-control-size);
-    border-radius: var(--player-control-radius);
-    font-size: var(--player-control-font-size);
-}
-
 img {
     display: block;
     max-width: 100%;
@@ -627,16 +561,6 @@ img {
  * - 목록 하나와 하단 입력 폼 하나만 스크롤 경계를 소유합니다.
  * - 카드 내부에는 별도의 스크롤 영역을 만들지 않습니다.
  * ========================================================= */
-.screenX {
-    min-height: 0;
-}
-
-.screenX > div[id^="dynamic_"] {
-    flex: 1 1 auto;
-    min-height: 0;
-    height: auto;
-    overflow-y: auto;
-}
 
 .screenX > form:not(.formBox) {
     flex: 0 0 auto;
@@ -648,11 +572,6 @@ img {
     border-top: 1px solid var(--line);
     background: color-mix(in srgb, var(--surface-solid) 88%, transparent);
     backdrop-filter: blur(18px) saturate(1.18);
-}
-
-#dynamic_link,
-#dynamic_memo {
-    display: block;
 }
 
 .link-create-form,
@@ -690,19 +609,6 @@ img {
     min-height: 38px;
     border-radius: 10px;
     font-size: 13px;
-}
-
-.handlerX {
-    display: flex;
-    align-items: flex-start;
-    flex: 0 0 auto;
-    gap: var(--content-card-gap);
-    width: 100%;
-    min-height: 42px;
-    height: auto;
-    margin: 0 0 var(--content-card-margin);
-    padding: var(--content-card-pad-block) var(--content-card-pad-inline);
-    overflow: visible;
 }
 
 .handlerContent {
@@ -803,12 +709,6 @@ img {
 /* =========================================================
  * Navigation cards
  * ========================================================= */
-#dynamic_navigation {
-    display: grid;
-    align-content: center;
-    gap: var(--navigation-page-gap);
-    padding: var(--navigation-page-padding);
-}
 
 .navigationHero {
     display: grid;
@@ -930,13 +830,23 @@ img {
         --player-control-size: 2.125rem;
         --player-control-radius: 0.6875rem;
         --player-control-font-size: 0.9375rem;
-
         --navigation-card-height: 78px;
         --navigation-card-padding: 13px;
         --navigation-card-radius: 16px;
         --navigation-icon-size: 38px;
         --navigation-icon-radius: 12px;
         --navigation-icon-glyph: 25px;
+    }
+
+    .screenX {
+        width: 100%;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+
+    .screenX > div[id^="dynamic_"] {
+        padding: 16px;
     }
 
     .screenX > form:not(.formBox) {
@@ -961,7 +871,6 @@ img {
     .navigationGrid {
         grid-template-columns: 1fr;
     }
-
 }
 
 /* =========================================================
@@ -972,6 +881,7 @@ img {
  * - inline style이 붙은 form이 있어도 iframe 면적 계산에 관여하지 않으므로,
  *   footer를 제외한 fragmentbox 영역을 iframe이 여백 없이 채웁니다.
  * ========================================================= */
+
 fragmentbox:has(.screenX:has(iframe)) {
     padding: 0;
 }
@@ -1048,6 +958,7 @@ fragmentbox:has(.screenX:has(iframe)) {
  *   발생하던 과대 텍스트, 납작한 radius, 사라진 간격을 함께 방지합니다.
  * - 일반 모바일과 일반 데스크톱 규칙은 변경하지 않습니다.
  * ========================================================= */
+
 @media (hover: none) and (pointer: coarse) and (min-width: 769px) {
     :root {
         --body-font-size: 22px;
@@ -1055,7 +966,6 @@ fragmentbox:has(.screenX:has(iframe)) {
         --radius-md: 24px;
         --radius-lg: 32px;
         --screen-radius: 30px;
-
         --nav-height: 96px;
         --footer-pad-block: 12px;
         --footer-pad-inline: 16px;
@@ -1066,7 +976,6 @@ fragmentbox:has(.screenX:has(iframe)) {
         --player-control-size: 64px;
         --player-control-radius: 18px;
         --player-control-font-size: 28px;
-
         --control-min-height: 66px;
         --control-pad-block: 15px;
         --control-pad-inline: 18px;
@@ -1076,7 +985,6 @@ fragmentbox:has(.screenX:has(iframe)) {
         --form-gap: 16px;
         --form-padding: 30px;
         --form-label-size: 18px;
-
         --content-card-gap: 14px;
         --content-card-pad-block: 14px;
         --content-card-pad-inline: 16px;
@@ -1087,7 +995,6 @@ fragmentbox:has(.screenX:has(iframe)) {
         --content-action-glyph: 30px;
         --content-title-size: 22px;
         --content-body-size: 20px;
-
         --navigation-page-gap: 24px;
         --navigation-page-padding: 32px;
         --navigation-hero-gap: 12px;
@@ -1119,14 +1026,6 @@ fragmentbox:has(.screenX:has(iframe)) {
     .screenX:not(:has(iframe)) {
         border: 1px solid var(--line);
         border-radius: var(--screen-radius);
-    }
-
-    .screenX > div[id^="dynamic_"] {
-        padding: var(--screen-content-padding);
-    }
-
-    .formBox {
-        border-radius: var(--radius-lg);
     }
 
     .screenX:has(> .formBox) > h1 {
@@ -1176,13 +1075,6 @@ fragmentbox:has(.screenX:has(iframe)) {
 
     .handlerActions {
         gap: 8px;
-    }
-
-    .handlerX .iconX {
-        width: var(--content-action-size);
-        height: var(--content-action-size);
-        border-radius: var(--content-action-radius);
-        background-size: var(--content-action-glyph) var(--content-action-glyph) !important;
     }
 
     .navigationGrid {
