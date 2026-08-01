@@ -31,7 +31,7 @@
     --nav-height: 3.125rem;
     --safe-bottom: env(safe-area-inset-bottom, 0px);
 
-    /* Shared shell sizing. 1rem is enlarged only for touch + wide viewport. */
+    /* Shared shell sizing. Touch-desktop changes these tokens without changing root font size. */
     --footer-pad-block: 0.375rem;
     --footer-pad-inline: 0.625rem;
     --footer-gap: 0.375rem;
@@ -41,6 +41,54 @@
     --player-control-size: 2.25rem;
     --player-control-radius: 0.75rem;
     --player-control-font-size: 1rem;
+
+    /* Shared component density. Normal desktop/mobile use these base values;
+       touch-desktop overrides only the tokens, not the whole root font size. */
+    --body-font-size: 16px;
+    --control-min-height: 44px;
+    --control-pad-block: 11px;
+    --control-pad-inline: 13px;
+    --control-font-size: 16px;
+    --screen-radius: var(--radius-lg);
+    --screen-content-padding: clamp(16px, 2.4vw, 28px);
+    --form-width: 460px;
+    --form-gap: 10px;
+    --form-padding: clamp(18px, 3vw, 28px);
+    --form-label-size: 13px;
+
+    --content-card-gap: 8px;
+    --content-card-pad-block: 8px;
+    --content-card-pad-inline: 10px;
+    --content-card-radius: 14px;
+    --content-card-margin: 8px;
+    --content-action-size: 30px;
+    --content-action-radius: 10px;
+    --content-action-glyph: 20px;
+    --content-title-size: 14px;
+    --content-body-size: 14px;
+
+    --navigation-page-gap: 16px;
+    --navigation-page-padding: clamp(18px, 3vw, 34px);
+    --navigation-hero-gap: 8px;
+    --navigation-hero-title-size: clamp(30px, 4.6vw, 52px);
+    --navigation-hero-body-size: 14px;
+    --navigation-grid-gap: 10px;
+    --navigation-card-gap: 12px;
+    --navigation-card-height: 96px;
+    --navigation-card-padding: 16px;
+    --navigation-card-radius: 18px;
+    --navigation-icon-size: 42px;
+    --navigation-icon-radius: 14px;
+    --navigation-icon-glyph: 28px;
+    --navigation-text-gap: 5px;
+    --navigation-title-size: 16px;
+    --navigation-body-size: 12px;
+    --navigation-account-height: 56px;
+    --navigation-account-pad-block: 12px;
+    --navigation-account-pad-inline: 16px;
+    --navigation-account-radius: 16px;
+    --navigation-account-title-size: 14px;
+    --navigation-account-body-size: 12px;
 }
 
 * {
@@ -89,6 +137,7 @@ body {
         radial-gradient(circle at 85% 8%, color-mix(in srgb, var(--accent-strong) 18%, transparent), transparent 28%),
         linear-gradient(135deg, var(--app-bg), var(--app-bg-soft));
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    font-size: var(--body-font-size);
     text-rendering: geometricPrecision;
     transition: background 0.25s ease, color 0.25s ease;
 }
@@ -144,11 +193,12 @@ input,
 textarea,
 select {
     width: 100%;
-    min-height: 44px;
+    min-height: var(--control-min-height);
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
     background: var(--surface-muted);
-    padding: 11px 13px;
+    padding: var(--control-pad-block) var(--control-pad-inline);
+    font-size: var(--control-font-size);
     outline: none;
     transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
@@ -283,7 +333,7 @@ snackbar {
     height: 100%;
     margin: 0 auto;
     border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
+    border-radius: var(--screen-radius);
     background: var(--surface);
     box-shadow: var(--shadow-md);
     backdrop-filter: blur(22px) saturate(1.2);
@@ -292,20 +342,20 @@ snackbar {
 .screenX > div[id^="dynamic_"] {
     height: 100%;
     overflow-y: auto;
-    padding: clamp(16px, 2.4vw, 28px);
+    padding: var(--screen-content-padding);
 }
 
 .formBox,
 form {
     display: flex;
-    gap: 10px;
+    gap: var(--form-gap);
 }
 
 .formBox {
     flex-direction: column;
-    width: min(460px, 100%);
+    width: min(var(--form-width), 100%);
     margin: 0 auto;
-    padding: clamp(18px, 3vw, 28px);
+    padding: var(--form-padding);
     border: 1px solid var(--line);
     border-radius: var(--radius-lg);
     background: var(--surface-elevated);
@@ -322,7 +372,7 @@ form {
 
 .inputX label {
     color: var(--text-soft);
-    font-size: 13px;
+    font-size: var(--form-label-size);
     font-weight: 800;
     letter-spacing: -0.01em;
 }
@@ -646,12 +696,12 @@ img {
     display: flex;
     align-items: flex-start;
     flex: 0 0 auto;
-    gap: 8px;
+    gap: var(--content-card-gap);
     width: 100%;
     min-height: 42px;
     height: auto;
-    margin: 0 0 8px;
-    padding: 8px 10px;
+    margin: 0 0 var(--content-card-margin);
+    padding: var(--content-card-pad-block) var(--content-card-pad-inline);
     overflow: visible;
 }
 
@@ -670,10 +720,10 @@ img {
 }
 
 .handlerX .iconX {
-    width: 30px;
-    height: 30px;
-    border-radius: 10px;
-    background-size: 20px 20px !important;
+    width: var(--content-action-size);
+    height: var(--content-action-size);
+    border-radius: var(--content-action-radius);
+    background-size: var(--content-action-glyph) var(--content-action-glyph) !important;
 }
 
 .link-item-anchor {
@@ -682,7 +732,7 @@ img {
     width: 100%;
     padding: 4px 2px;
     color: var(--text);
-    font-size: 14px;
+    font-size: var(--content-title-size);
     font-weight: 750;
     line-height: 1.45;
     white-space: nowrap;
@@ -732,7 +782,7 @@ img {
     overflow: visible;
     color: var(--text);
     font-family: inherit;
-    font-size: 14px;
+    font-size: var(--content-body-size);
     line-height: 1.68;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
@@ -756,33 +806,33 @@ img {
 #dynamic_navigation {
     display: grid;
     align-content: center;
-    gap: 16px;
-    padding: clamp(18px, 3vw, 34px);
+    gap: var(--navigation-page-gap);
+    padding: var(--navigation-page-padding);
 }
 
 .navigationHero {
     display: grid;
-    gap: 8px;
+    gap: var(--navigation-hero-gap);
     text-align: center;
 }
 
 .navigationHero h1 {
     margin: 0;
-    font-size: clamp(30px, 4.6vw, 52px);
+    font-size: var(--navigation-hero-title-size);
     line-height: 1;
     letter-spacing: -0.06em;
 }
 
 .navigationHero p {
     color: var(--text-soft);
-    font-size: 14px;
+    font-size: var(--navigation-hero-body-size);
     font-weight: 700;
 }
 
 .navigationGrid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
+    gap: var(--navigation-grid-gap);
     width: min(880px, 100%);
     margin: 0 auto;
 }
@@ -790,11 +840,11 @@ img {
 .navigationCard {
     display: flex;
     align-items: center;
-    gap: 12px;
-    min-height: 96px;
-    padding: 16px;
+    gap: var(--navigation-card-gap);
+    min-height: var(--navigation-card-height);
+    padding: var(--navigation-card-padding);
     border: 1px solid var(--line);
-    border-radius: 18px;
+    border-radius: var(--navigation-card-radius);
     background: color-mix(in srgb, var(--surface-elevated) 88%, transparent);
     color: var(--text);
     text-align: left;
@@ -809,24 +859,24 @@ img {
 
 .navigationCardIcon {
     flex: 0 0 auto;
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
+    width: var(--navigation-icon-size);
+    height: var(--navigation-icon-size);
+    border-radius: var(--navigation-icon-radius);
     background-color: var(--surface-muted);
     background-position: center;
     background-repeat: no-repeat;
-    background-size: 28px 28px;
+    background-size: var(--navigation-icon-glyph) var(--navigation-icon-glyph);
 }
 
 .navigationCardText {
     display: grid;
     min-width: 0;
-    gap: 5px;
+    gap: var(--navigation-text-gap);
 }
 
 .navigationCardText strong {
     overflow: hidden;
-    font-size: 16px;
+    font-size: var(--navigation-title-size);
     font-weight: 950;
     letter-spacing: -0.03em;
     white-space: nowrap;
@@ -835,7 +885,7 @@ img {
 
 .navigationCardText small {
     color: var(--text-soft);
-    font-size: 12px;
+    font-size: var(--navigation-body-size);
     font-weight: 700;
     line-height: 1.35;
 }
@@ -849,10 +899,10 @@ img {
     display: grid;
     gap: 4px;
     width: 100%;
-    min-height: 56px;
-    padding: 12px 16px;
+    min-height: var(--navigation-account-height);
+    padding: var(--navigation-account-pad-block) var(--navigation-account-pad-inline);
     border: 1px solid var(--line);
-    border-radius: 16px;
+    border-radius: var(--navigation-account-radius);
     background: linear-gradient(135deg, color-mix(in srgb, var(--surface-elevated) 92%, transparent), color-mix(in srgb, var(--surface-muted) 70%, transparent));
     color: var(--text);
     text-align: left;
@@ -860,13 +910,13 @@ img {
 }
 
 .navigationAccountButton strong {
-    font-size: 14px;
+    font-size: var(--navigation-account-title-size);
     font-weight: 950;
 }
 
 .navigationAccountButton span {
     color: var(--text-soft);
-    font-size: 12px;
+    font-size: var(--navigation-account-body-size);
     font-weight: 700;
 }
 
@@ -880,6 +930,13 @@ img {
         --player-control-size: 2.125rem;
         --player-control-radius: 0.6875rem;
         --player-control-font-size: 0.9375rem;
+
+        --navigation-card-height: 78px;
+        --navigation-card-padding: 13px;
+        --navigation-card-radius: 16px;
+        --navigation-icon-size: 38px;
+        --navigation-icon-radius: 12px;
+        --navigation-icon-glyph: 25px;
     }
 
     .screenX > form:not(.formBox) {
@@ -905,18 +962,6 @@ img {
         grid-template-columns: 1fr;
     }
 
-    .navigationCard {
-        min-height: 78px;
-        padding: 13px;
-        border-radius: 16px;
-    }
-
-    .navigationCardIcon {
-        width: 38px;
-        height: 38px;
-        border-radius: 12px;
-        background-size: 25px 25px;
-    }
 }
 
 /* =========================================================
@@ -997,19 +1042,170 @@ fragmentbox:has(.screenX:has(iframe)) {
 }
 
 /* =========================================================
- * Touch desktop visual scale
- * - 데스크톱 사이트 모드는 layout viewport만 넓히고 화면에 다시 축소합니다.
- * - html/body 폭을 덮어쓰지 않고, 공통 rem 토큰의 기준만 키워 footer, icon,
- *   player control과 플레이어 텍스트가 같은 비율로 보정되게 합니다.
+ * Touch desktop adaptive density
+ * - 브라우저의 980px 전후 layout viewport는 그대로 둡니다.
+ * - root font-size를 확대하지 않고 공통 크기 토큰만 교체해 px/rem 혼용에서
+ *   발생하던 과대 텍스트, 납작한 radius, 사라진 간격을 함께 방지합니다.
+ * - 일반 모바일과 일반 데스크톱 규칙은 변경하지 않습니다.
  * ========================================================= */
-@media (hover: none) and (pointer: coarse) and (min-width: 769px) and (orientation: portrait) {
-    html {
-        font-size: clamp(34px, 3.7vw, 38px);
+@media (hover: none) and (pointer: coarse) and (min-width: 769px) {
+    :root {
+        --body-font-size: 22px;
+        --radius-sm: 18px;
+        --radius-md: 24px;
+        --radius-lg: 32px;
+        --screen-radius: 30px;
+
+        --nav-height: 96px;
+        --footer-pad-block: 12px;
+        --footer-pad-inline: 16px;
+        --footer-gap: 10px;
+        --shell-icon-size: 72px;
+        --shell-icon-radius: 20px;
+        --shell-icon-glyph-size: 48px;
+        --player-control-size: 64px;
+        --player-control-radius: 18px;
+        --player-control-font-size: 28px;
+
+        --control-min-height: 66px;
+        --control-pad-block: 15px;
+        --control-pad-inline: 18px;
+        --control-font-size: 24px;
+        --screen-content-padding: 28px;
+        --form-width: 540px;
+        --form-gap: 16px;
+        --form-padding: 30px;
+        --form-label-size: 18px;
+
+        --content-card-gap: 14px;
+        --content-card-pad-block: 14px;
+        --content-card-pad-inline: 16px;
+        --content-card-radius: 22px;
+        --content-card-margin: 12px;
+        --content-action-size: 48px;
+        --content-action-radius: 15px;
+        --content-action-glyph: 30px;
+        --content-title-size: 22px;
+        --content-body-size: 20px;
+
+        --navigation-page-gap: 24px;
+        --navigation-page-padding: 32px;
+        --navigation-hero-gap: 12px;
+        --navigation-hero-title-size: 48px;
+        --navigation-hero-body-size: 20px;
+        --navigation-grid-gap: 18px;
+        --navigation-card-gap: 18px;
+        --navigation-card-height: 118px;
+        --navigation-card-padding: 22px;
+        --navigation-card-radius: 26px;
+        --navigation-icon-size: 58px;
+        --navigation-icon-radius: 19px;
+        --navigation-icon-glyph: 38px;
+        --navigation-text-gap: 7px;
+        --navigation-title-size: 24px;
+        --navigation-body-size: 18px;
+        --navigation-account-height: 82px;
+        --navigation-account-pad-block: 16px;
+        --navigation-account-pad-inline: 22px;
+        --navigation-account-radius: 24px;
+        --navigation-account-title-size: 22px;
+        --navigation-account-body-size: 17px;
+    }
+
+    fragmentbox {
+        padding: 12px;
+    }
+
+    .screenX:not(:has(iframe)) {
+        border: 1px solid var(--line);
+        border-radius: var(--screen-radius);
+    }
+
+    .screenX > div[id^="dynamic_"] {
+        padding: var(--screen-content-padding);
+    }
+
+    .formBox {
+        border-radius: var(--radius-lg);
+    }
+
+    .screenX:has(> .formBox) > h1 {
+        margin-bottom: 0;
+        font-size: 50px;
+    }
+
+    .screenX:has(> .formBox) > p {
+        margin: 16px 0 28px !important;
+        font-size: 21px;
+        line-height: 1.45;
+    }
+
+    .formBox button,
+    .formBox input[type="button"],
+    .formBox input[type="submit"] {
+        min-height: 66px;
+        font-size: 24px;
+    }
+
+    .screenX > form:not(.formBox) {
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .link-create-row {
+        gap: 12px;
+    }
+
+    .link-create-row input,
+    .memo-create-input,
+    .inlineEditField input,
+    .inlineEditTextarea,
+    .formApplyButton,
+    .inlineEditCancel,
+    .inlineEditSubmit {
+        min-height: 58px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        font-size: 20px;
+    }
+
+    .handlerX {
+        min-height: 72px;
+        border-radius: var(--content-card-radius);
+    }
+
+    .handlerActions {
+        gap: 8px;
+    }
+
+    .handlerX .iconX {
+        width: var(--content-action-size);
+        height: var(--content-action-size);
+        border-radius: var(--content-action-radius);
+        background-size: var(--content-action-glyph) var(--content-action-glyph) !important;
+    }
+
+    .navigationGrid {
+        width: min(900px, 100%);
     }
 }
 
 @media (hover: none) and (pointer: coarse) and (min-width: 769px) and (orientation: landscape) {
-    html {
-        font-size: clamp(18px, 2.1vw, 22px);
+    :root {
+        --body-font-size: 18px;
+        --nav-height: 72px;
+        --shell-icon-size: 52px;
+        --shell-icon-radius: 15px;
+        --shell-icon-glyph-size: 34px;
+        --player-control-size: 50px;
+        --player-control-radius: 14px;
+        --player-control-font-size: 22px;
+        --navigation-hero-title-size: 40px;
+        --navigation-title-size: 20px;
+        --navigation-body-size: 15px;
+        --navigation-card-height: 96px;
+        --navigation-card-padding: 18px;
+        --navigation-icon-size: 48px;
+        --navigation-icon-glyph: 31px;
     }
 }

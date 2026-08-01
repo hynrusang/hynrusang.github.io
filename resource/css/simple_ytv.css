@@ -5,8 +5,8 @@
  * ========================================================= */
 
 :root {
-    /* Shared player sizing. Desktop and normal mobile keep 16px rem;
-       touch + wide viewport scales the same tokens from init.css. */
+    /* Shared player sizing. Desktop/mobile use the base values;
+       touch-desktop replaces the same tokens with explicit balanced sizes. */
     --ytv-header-image-size: 2.5rem;
     --ytv-header-title-size: 0.875rem;
     --ytv-header-eyebrow-size: 0.625rem;
@@ -1283,3 +1283,205 @@
     }
 }
 
+
+/* =========================================================
+ * Touch desktop player density
+ * - normal mobile/desktop branches keep their current values.
+ * - only the coarse-pointer wide viewport receives a coherent size, spacing,
+ *   radius and typography set; root font-size remains 16px.
+ * ========================================================= */
+@media (hover: none) and (pointer: coarse) and (min-width: 769px) {
+    :root {
+        --ytv-header-image-size: 64px;
+        --ytv-header-title-size: 24px;
+        --ytv-header-eyebrow-size: 16px;
+        --ytv-arrow-size: 52px;
+        --ytv-toolbar-title-size: 24px;
+        --ytv-toolbar-meta-size: 18px;
+        --ytv-toolbar-control-size: 62px;
+        --ytv-entry-index-size: 52px;
+        --ytv-entry-index-font-size: 20px;
+        --ytv-entry-thumb-width: 144px;
+        --ytv-entry-row-min-height: 106px;
+        --ytv-entry-gap: 14px;
+        --ytv-entry-padding: 10px;
+        --ytv-entry-title-size: 22px;
+        --ytv-entry-line-height: 1.28;
+        --ytv-status-font-size: 20px;
+        --ytv-list-title-size: 22px;
+        --ytv-list-meta-size: 17px;
+        --ytv-heading-size: 24px;
+        --ytv-body-size: 21px;
+        --ytv-small-size: 17px;
+        --ytv-small-control-size: 46px;
+        --ytv-panel-toggle-width: 64px;
+        --ytv-panel-toggle-height: 50px;
+    }
+
+    .ytv-list {
+        border-radius: 30px 30px 0 0;
+    }
+
+    .ytv-list-header {
+        padding: 12px 14px;
+    }
+
+    .ytv-list-header a,
+    .ytv-header-card {
+        border-radius: 20px;
+    }
+
+    .ytv-header-card {
+        gap: 12px;
+        padding: 8px;
+    }
+
+    .ytv-list-header img {
+        border-radius: 18px;
+    }
+
+    .ytv-header-eyebrow {
+        margin-bottom: 3px;
+    }
+
+    .ytv-arrow-triangle {
+        border-radius: 16px;
+    }
+
+    .ytv-list ul {
+        padding: 12px 12px calc(18px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .ytv-entry-toolbar {
+        top: -12px;
+        gap: 12px;
+        margin: -12px -12px 12px;
+        padding: 12px;
+    }
+
+    .ytv-entry-toolbar-row {
+        gap: 14px;
+    }
+
+    .ytv-entry-controls {
+        display: grid;
+        grid-template-columns: repeat(4, var(--ytv-toolbar-control-size));
+        gap: 8px;
+    }
+
+    .ytv-entry-controls .playerButton {
+        min-width: 0;
+        overflow: hidden;
+        border-radius: 18px;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        font-size: 27px;
+        line-height: 1;
+    }
+
+    .ytv-entry-search {
+        min-height: 60px;
+        padding-left: 52px;
+        border-radius: 18px;
+        background-position: left 16px center;
+        background-size: 24px;
+    }
+
+    .entry-status {
+        margin-bottom: 9px;
+        padding: 11px 14px;
+        border-radius: 18px;
+    }
+
+    .entry-item {
+        margin-bottom: 9px;
+        border-radius: 22px;
+        contain-intrinsic-size: var(--ytv-entry-row-min-height);
+    }
+
+    .entry-item > b {
+        border-radius: 15px;
+    }
+
+    .entry-item > img {
+        border-radius: 15px;
+    }
+
+    .ytv-add-card {
+        gap: 12px;
+        margin-bottom: 14px;
+        padding: 16px;
+        border-radius: 24px;
+    }
+
+    .ytv-add-card p {
+        font-size: var(--ytv-small-size);
+        line-height: 1.4;
+    }
+
+    .ytv-add-card input {
+        min-height: 58px;
+        padding: 12px 14px;
+        border-radius: 16px;
+    }
+
+    #input-playlist-button {
+        min-height: 60px;
+        border-radius: 16px;
+        font-size: 22px;
+    }
+
+    .playlist-title {
+        margin: 18px 5px 9px;
+    }
+
+    .playlist-item {
+        gap: 10px;
+        min-height: 68px;
+        margin-bottom: 9px;
+        padding: 10px 12px;
+        border-radius: 20px;
+    }
+
+    .playlist-open-link,
+    .playlist-item a {
+        padding: 8px;
+    }
+
+    .playlist-buttons {
+        gap: 7px;
+    }
+
+    .playlist-buttons .playerButton {
+        border-radius: 14px;
+    }
+
+    .ytv-panel-toggle-btn {
+        right: 16px;
+        border-radius: 999px;
+        font-size: 22px;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) and (min-width: 769px) and (orientation: landscape) {
+    :root {
+        --ytv-header-image-size: 48px;
+        --ytv-header-title-size: 19px;
+        --ytv-header-eyebrow-size: 13px;
+        --ytv-arrow-size: 40px;
+        --ytv-toolbar-title-size: 20px;
+        --ytv-toolbar-meta-size: 15px;
+        --ytv-toolbar-control-size: 48px;
+        --ytv-entry-index-size: 42px;
+        --ytv-entry-index-font-size: 16px;
+        --ytv-entry-thumb-width: 116px;
+        --ytv-entry-row-min-height: 86px;
+        --ytv-entry-title-size: 18px;
+        --ytv-status-font-size: 16px;
+        --ytv-list-title-size: 18px;
+        --ytv-list-meta-size: 14px;
+        --ytv-heading-size: 20px;
+        --ytv-body-size: 17px;
+        --ytv-small-size: 14px;
+        --ytv-small-control-size: 38px;
+    }
+}

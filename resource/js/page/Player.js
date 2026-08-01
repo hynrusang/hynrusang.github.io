@@ -662,7 +662,7 @@ class UIManager {
                     this.#createControlButton("⟳", "목록 표시와 제목만 새로고침", () => this.#playerService?.refreshQueueView()),
                     this.#createControlButton("⇄", "재생목록 섞기", () => this.#playerService?.shuffleEntries()),
                     this.#createControlButton("↩", "역순으로 재배치", () => this.#playerService?.reverseEntries()),
-                    this.#createControlButton("🎯", "재생할 영상 선택", () => this.#playerService?.filterEntries())
+                    this.#createControlButton("◎", "재생할 영상 선택", () => this.#playerService?.filterEntries())
                 )
             ),
             Dynamic.$("input", {
