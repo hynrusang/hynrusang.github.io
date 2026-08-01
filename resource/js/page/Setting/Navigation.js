@@ -1,50 +1,41 @@
 import { Dynamic } from "../../init/module.js";
+import { resolveIconUrl } from "../../component/XBox.js";
+import { MAIN_PAGES } from "../PageCatalog.js";
 import Userinfo from "./Userinfo.js";
-import Link from "../Note/Link.js";
-import Memo from "../Note/Memo.js";
-import Player from "../Player.js";
 
-// ==========================================
-// 1. Navigation entries
-// ==========================================
+const PRIVATE_SECTIONS = Object.freeze({
+    surface: Object.freeze({
+        title: "개인 확장",
+        description: "개인 설정과 특수 페이지를 관리합니다."
+    }),
+    center: Object.freeze({
+        title: "공용 데이터 관리",
+        description: "권한이 있는 공용 저장 데이터와 관리자 도구를 관리합니다."
+    })
+});
 
-const mainNavigation = [{
-    label: "YouTube Player",
-    description: "재생목록과 단일 영상을 재생합니다.",
-    icon: "player",
-    page: Player
-}, {
-    label: "링크 라이브러리",
-    description: "자주 쓰는 외부 링크를 한 줄 카드로 정리합니다.",
-    icon: "link",
-    page: Link
-}, {
-    label: "메모 보관함",
-    description: "짧은 텍스트와 작업 메모를 빠르게 저장합니다.",
-    icon: "memo",
-    page: Memo
-}];
-
-const privateNavigation = {
-    surface: [],
-    center: []
-};
+const privateNavigation = Object.fromEntries(
+    Object.keys(PRIVATE_SECTIONS).map(group => [group, []])
+);
 
 let activeTab = "main";
 
-const iconUrl = icon => icon?.includes("http")
-    ? `https://www.google.com/s2/favicons?domain=${icon}`
-    : `/resource/img/icon/${icon || "database"}.png`;
-
 /**
- * @description 확장 모듈의 개인/관리 화면을 메인 Navigation의 Private 탭에 등록합니다.
- * 같은 group과 id로 다시 등록하면 중복 추가하지 않고 기존 항목을 교체합니다.
+ * 확장 모듈의 개인/관리 화면을 Navigation의 Private 탭에 등록합니다.
+ * 동일한 group과 id가 다시 등록되면 기존 항목을 교체합니다.
  */
-const registerPrivateNavigation = ({ group = "surface", id, label, description, icon = "database", page }) => {
-    if (!privateNavigation[group] || !label || !page) return false;
+const registerPrivateNavigation = ({
+    group = "surface",
+    id,
+    label,
+    description,
+    icon = "database",
+    page
+}) => {
+    const entries = privateNavigation[group];
+    if (!entries || !label || !page) return false;
 
     const entryId = id || label;
-    const entries = privateNavigation[group];
     const nextEntry = { id: entryId, label, description, icon, page };
     const previousIndex = entries.findIndex(entry => entry.id === entryId);
 
@@ -61,7 +52,7 @@ const createNavigationCard = item => Dynamic.$("button", {
 }).add(
     Dynamic.$("span", {
         class: "navigationCardIcon",
-        style: `background-image: url(${iconUrl(item.icon)})`
+        style: `background-image: url(${resolveIconUrl(item.icon)})`
     }),
     Dynamic.$("span", { class: "navigationCardText" }).add(
         Dynamic.$("strong", { text: item.label }),
@@ -72,59 +63,60 @@ const createNavigationCard = item => Dynamic.$("button", {
 const createNavigationGrid = entries => Dynamic.$("div", { class: "navigationGrid" })
     .add(entries.map(createNavigationCard));
 
-const createPrivateSection = ({ title, description, entries }) => {
-    if (entries.length === 0) return null;
+const createMainContent = () => Dynamic.$("div", { class: "navigationMainContent" }).add(
+    createNavigationGrid(MAIN_PAGES),
+    Dynamic.$("div", { class: "navigationAccount" }).add(
+        Dynamic.$("button", {
+            class: "navigationAccountButton",
+            type: "button",
+            onclick: () => Dynamic.FragMutation.mutate(Userinfo)
+        }).add(
+            Dynamic.$("strong", { text: "계정 설정" }),
+            Dynamic.$("span", { text: "로그아웃, 비밀번호 변경, 계정 삭제" })
+        )
+    )
+);
 
-    return Dynamic.$("section", { class: "navigationSection" }).add(
-        Dynamic.$("div", { class: "navigationSectionHeader" }).add(
-            Dynamic.$("h2", { text: title }),
-            Dynamic.$("p", { text: description })
-        ),
-        createNavigationGrid(entries)
-    );
-};
+const createPrivateContent = () => Dynamic.$("div", { class: "navigationPrivateContent" }).add(
+    Object.entries(PRIVATE_SECTIONS).flatMap(([group, section]) => {
+        const entries = privateNavigation[group];
+        if (entries.length === 0) return [];
 
-const selectTab = tab => {
-    if (activeTab === tab) return;
-    activeTab = tab;
-    Dynamic.FragMutation.refresh();
-};
+        return Dynamic.$("section", { class: "navigationSection" }).add(
+            Dynamic.$("div", { class: "navigationSectionHeader" }).add(
+                Dynamic.$("h2", { text: section.title }),
+                Dynamic.$("p", { text: section.description })
+            ),
+            createNavigationGrid(entries)
+        );
+    })
+);
 
-// ==========================================
-// 2. Unified navigation page
-// ==========================================
+const hasPrivateEntries = () => Object.values(privateNavigation)
+    .some(entries => entries.length > 0);
 
-const Navigation = new Dynamic.Fragment("setting",
+const Navigation = new Dynamic.Fragment(
+    "setting",
     Dynamic.$("div", { id: "dynamic_navigation", class: "screenX" })
 ).registAction(() => {
-    const hasPrivateNavigation = privateNavigation.surface.length > 0 || privateNavigation.center.length > 0;
-    if (!hasPrivateNavigation) activeTab = "main";
+    const privateAvailable = hasPrivateEntries();
+    if (!privateAvailable) activeTab = "main";
 
-    const privateSections = [{
-        title: "개인 확장",
-        description: "개인 설정과 특수 페이지를 관리합니다.",
-        entries: privateNavigation.surface
-    }, {
-        title: "공용 데이터 관리",
-        description: "권한이 있는 공용 저장 데이터와 관리자 도구를 관리합니다.",
-        entries: privateNavigation.center
-    }].map(createPrivateSection).filter(Boolean);
+    const contentHost = Dynamic.$("div", { class: "navigationContentHost" });
+    const tabButtons = {};
 
-    const content = activeTab === "private"
-        ? Dynamic.$("div", { class: "navigationPrivateContent" }).add(privateSections)
-        : Dynamic.$("div", { class: "navigationMainContent" }).add(
-            createNavigationGrid(mainNavigation),
-            Dynamic.$("div", { class: "navigationAccount" }).add(
-                Dynamic.$("button", {
-                    class: "navigationAccountButton",
-                    type: "button",
-                    onclick: () => Dynamic.FragMutation.mutate(Userinfo)
-                }).add(
-                    Dynamic.$("strong", { text: "계정 설정" }),
-                    Dynamic.$("span", { text: "로그아웃, 비밀번호 변경, 계정 삭제" })
-                )
-            )
-        );
+    const renderTab = tab => {
+        if (tab === "private" && !privateAvailable) tab = "main";
+        activeTab = tab;
+
+        Object.entries(tabButtons).forEach(([name, button]) => {
+            const selected = name === activeTab;
+            button.node.classList.toggle("is-active", selected);
+            button.node.setAttribute("aria-selected", selected ? "true" : "false");
+        });
+
+        contentHost.reset(activeTab === "private" ? createPrivateContent() : createMainContent());
+    };
 
     const pageContent = [
         Dynamic.$("div", { class: "navigationHero" }).add(
@@ -133,29 +125,34 @@ const Navigation = new Dynamic.Fragment("setting",
         )
     ];
 
-    if (hasPrivateNavigation) pageContent.push(
-        Dynamic.$("div", { class: "navigationTabs", role: "tablist", "aria-label": "메뉴 분류" }).add(
-            Dynamic.$("button", {
-                class: `navigationTab${activeTab === "main" ? " is-active" : ""}`,
-                type: "button",
-                role: "tab",
-                "aria-selected": activeTab === "main" ? "true" : "false",
-                onclick: () => selectTab("main"),
-                text: "메인"
-            }),
-            Dynamic.$("button", {
-                class: `navigationTab${activeTab === "private" ? " is-active" : ""}`,
-                type: "button",
-                role: "tab",
-                "aria-selected": activeTab === "private" ? "true" : "false",
-                onclick: () => selectTab("private"),
-                text: "Private"
-            })
-        )
-    );
+    if (privateAvailable) {
+        tabButtons.main = Dynamic.$("button", {
+            class: "navigationTab",
+            type: "button",
+            role: "tab",
+            onclick: () => renderTab("main"),
+            text: "메인"
+        });
+        tabButtons.private = Dynamic.$("button", {
+            class: "navigationTab",
+            type: "button",
+            role: "tab",
+            onclick: () => renderTab("private"),
+            text: "Private"
+        });
 
-    pageContent.push(content);
+        pageContent.push(
+            Dynamic.$("div", {
+                class: "navigationTabs",
+                role: "tablist",
+                "aria-label": "메뉴 분류"
+            }).add(tabButtons.main, tabButtons.private)
+        );
+    }
+
+    pageContent.push(contentHost);
     Dynamic.snipe("#dynamic_navigation").reset(pageContent);
+    renderTab(activeTab);
 }).registAnimation("fade", 500);
 
 export { registerPrivateNavigation };

@@ -857,6 +857,7 @@ img {
     box-shadow: var(--shadow-sm);
 }
 
+.navigationContentHost,
 .navigationMainContent,
 .navigationPrivateContent {
     display: grid;

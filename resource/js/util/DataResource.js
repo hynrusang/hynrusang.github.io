@@ -3,6 +3,7 @@ import { MainRouter } from "../page/Router.js";
 import { pushProgressSnackbar, pushSnackbar } from "./Tools.js";
 import { restoreYConfig } from "../page/Player.js";
 import Navigation from "../page/Setting/Navigation.js";
+import { MAIN_ROUTER_RIDS } from "../page/PageCatalog.js";
 import Working from "../page/Prepare/Working.js";
 
 export default class DataResource {
@@ -332,7 +333,7 @@ export default class DataResource {
             Dynamic.scan("fragment[rid=rander]").remove();
             // Player, Link, Memo는 서로 다른 Fragment로 유지하지만 동일한 하단 라우터를 공유합니다.
             // 화면을 전환해도 숨겨진 Fragment DOM이 보존되어 재생과 편집 상태가 초기화되지 않습니다.
-            ["main", "player", "link", "memo", "setting"].forEach(rid => Dynamic.FragMutation.setRouter(rid, MainRouter));
+            MAIN_ROUTER_RIDS.forEach(rid => Dynamic.FragMutation.setRouter(rid, MainRouter));
             authProgress.update("화면 구성을 복원하는 중입니다.");
 
             const savedPlayerInstance = localStorage.getItem("YConfig");

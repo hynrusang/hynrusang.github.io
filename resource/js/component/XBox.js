@@ -9,6 +9,10 @@ import { Dynamic } from "../init/module.js";
  * 모든 사용자 입력 필드에 동일하게 적용하는 속성입니다.
  * name 속성은 Chrome의 저장값 매칭에 사용될 수 있으므로 각 화면은 data-field로 값을 찾습니다.
  */
+const resolveIconUrl = icon => icon?.includes("http")
+    ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(icon)}`
+    : `/resource/img/icon/${icon || "database"}.png`;
+
 const NoAutocompleteX = Object.freeze({
     autocomplete: "off",
     autocapitalize: "off",
@@ -77,8 +81,23 @@ const HandlerX = ({ element, onedit, ondelete, editFrom = "innerText" }) => {
     return Dynamic.$("div", { class: "handlerX memo-handler" }).add(
         frame,
         Dynamic.$("div", { class: "handlerActions" }).add(
-            IconX({ icon: "edit", title: "수정", onclick: () => isEditing ? showContent() : showEditor() }),
-            IconX({ icon: "delete", title: "삭제", onclick: ondelete })
+            IconX({
+                icon: "edit",
+                title: "수정",
+                onclick: event => {
+                    event.stopPropagation();
+                    if (isEditing) showContent();
+                    else showEditor();
+                }
+            }),
+            IconX({
+                icon: "delete",
+                title: "삭제",
+                onclick: event => {
+                    event.stopPropagation();
+                    ondelete?.(event);
+                }
+            })
         )
     );
 };
@@ -113,11 +132,11 @@ const ButtonX = ({ value, type = "button", onclick }) => Dynamic.$("div", { clas
  */
 const IconX = ({ icon, onclick, title = "" }) => Dynamic.$("input", {
     type: "button",
-    style: `background-image: url(${icon.includes("http") ? `https://www.google.com/s2/favicons?domain=${icon})` : `/resource/img/icon/${icon}.png)`}`,
+    style: `background-image: url(${resolveIconUrl(icon)})`,
     class: "iconX",
     onclick,
     title,
     "aria-label": title || icon
 });
 
-export { NoAutocompleteX, HandlerX, ScreenX, InputX, ButtonX, IconX };
+export { resolveIconUrl, NoAutocompleteX, HandlerX, ScreenX, InputX, ButtonX, IconX };
