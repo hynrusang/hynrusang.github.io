@@ -63,7 +63,12 @@ const createNavigationCard = item => Dynamic.$("button", {
 const createNavigationGrid = entries => Dynamic.$("div", { class: "navigationGrid" })
     .add(entries.map(createNavigationCard));
 
-const createMainContent = () => Dynamic.$("div", { class: "navigationMainContent" }).add(
+const createMainContent = () => Dynamic.$("div", {
+    id: "navigation_main_panel",
+    class: "navigationMainContent",
+    role: "tabpanel",
+    "aria-labelledby": "navigation_tab_main"
+}).add(
     createNavigationGrid(MAIN_PAGES),
     Dynamic.$("div", { class: "navigationAccount" }).add(
         Dynamic.$("button", {
@@ -77,7 +82,12 @@ const createMainContent = () => Dynamic.$("div", { class: "navigationMainContent
     )
 );
 
-const createPrivateContent = () => Dynamic.$("div", { class: "navigationPrivateContent" }).add(
+const createPrivateContent = () => Dynamic.$("div", {
+    id: "navigation_private_panel",
+    class: "navigationPrivateContent",
+    role: "tabpanel",
+    "aria-labelledby": "navigation_tab_private"
+}).add(
     Object.entries(PRIVATE_SECTIONS).flatMap(([group, section]) => {
         const entries = privateNavigation[group];
         if (entries.length === 0) return [];
@@ -103,19 +113,34 @@ const Navigation = new Dynamic.Fragment(
     if (!privateAvailable) activeTab = "main";
 
     const contentHost = Dynamic.$("div", { class: "navigationContentHost" });
+    const panels = {
+        main: createMainContent()
+    };
     const tabButtons = {};
+    let renderedTab = null;
+
+    if (privateAvailable) panels.private = createPrivateContent();
+    contentHost.add(Object.values(panels));
 
     const renderTab = tab => {
         if (tab === "private" && !privateAvailable) tab = "main";
+        if (renderedTab === tab) return;
+
         activeTab = tab;
+        renderedTab = tab;
 
         Object.entries(tabButtons).forEach(([name, button]) => {
             const selected = name === activeTab;
             button.node.classList.toggle("is-active", selected);
             button.node.setAttribute("aria-selected", selected ? "true" : "false");
+            button.node.setAttribute("tabindex", selected ? "0" : "-1");
         });
 
-        contentHost.reset(activeTab === "private" ? createPrivateContent() : createMainContent());
+        Object.entries(panels).forEach(([name, panel]) => {
+            const selected = name === activeTab;
+            panel.node.hidden = !selected;
+            panel.node.setAttribute("aria-hidden", selected ? "false" : "true");
+        });
     };
 
     const pageContent = [
@@ -127,16 +152,20 @@ const Navigation = new Dynamic.Fragment(
 
     if (privateAvailable) {
         tabButtons.main = Dynamic.$("button", {
+            id: "navigation_tab_main",
             class: "navigationTab",
             type: "button",
             role: "tab",
+            "aria-controls": "navigation_main_panel",
             onclick: () => renderTab("main"),
             text: "메인"
         });
         tabButtons.private = Dynamic.$("button", {
+            id: "navigation_tab_private",
             class: "navigationTab",
             type: "button",
             role: "tab",
+            "aria-controls": "navigation_private_panel",
             onclick: () => renderTab("private"),
             text: "Private"
         });

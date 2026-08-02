@@ -171,6 +171,13 @@ a {
 }
 
 button,
+input[type="button"],
+input[type="submit"],
+a {
+    touch-action: manipulation;
+}
+
+button,
 [type="button"],
 [type="submit"] {
     cursor: pointer;
@@ -338,6 +345,8 @@ snackbar {
     height: auto;
     overflow-y: auto;
     padding: var(--screen-content-padding);
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     flex: 1 1 auto;
     min-height: 0;
 }
@@ -865,6 +874,14 @@ img {
     width: 100%;
 }
 
+.navigationContentHost {
+    contain: layout paint;
+}
+
+.navigationContentHost > [hidden] {
+    display: none;
+}
+
 .navigationPrivateContent {
     align-content: start;
 }
@@ -894,6 +911,26 @@ img {
     font-size: 12px;
     font-weight: 700;
     line-height: 1.4;
+}
+
+@media (hover: none) and (pointer: coarse) {
+    /* Touch devices repaint a full-screen blur whenever tab/card state changes.
+     * Use an opaque surface instead; layout and functionality stay unchanged. */
+    .screenX:not(:has(iframe)) {
+        background: var(--surface-solid);
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+
+    footer {
+        background: color-mix(in srgb, var(--surface-solid) 96%, var(--app-bg));
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+
+    .navigationTab {
+        transition: none;
+    }
 }
 
 @media screen and (max-width: 768px), screen and (hover: none) and (pointer: coarse) {
