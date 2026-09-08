@@ -147,24 +147,65 @@ class YouTubeAPIService {
 
     /**
      * @description 저장 목록 카드에 표시할 대표 이미지를 반환합니다.
-     * 단일 영상은 URL의 video ID만으로 즉시 썸네일 주소를 만들고,
-     * 재생목록은 기존 IFrame API probe에서 첫 번째 video ID만 얻어 같은 방식으로 구성합니다.
-     * 별도의 YouTube Data API key는 사용하지 않습니다.
+     * 재생목록 URL은 YouTube의 공개 oEmbed 응답에서 대표 썸네일을 먼저 얻습니다.
+     * oEmbed가 실패할 때만 기존 IFrame API probe로 첫 번째 video ID를 확인합니다.
+     * URL에 list가 있으면 항상 재생목록을 우선하며, 그 조회가 실패해도 watch의 video ID로 대체하지 않습니다.
+     * list가 없는 단일 영상 URL만 video ID로 즉시 썸네일 주소를 구성합니다.
+     * YouTube Data API key는 사용하지 않습니다.
      * @param {string} url
      * @returns {Promise<string>}
      */
     async fetchPreviewThumbnail(url) {
         const parsed = this.#parseYouTubeURL(url);
+
+        if (parsed.playlistId) {
+            const playlistURL = `https://www.youtube.com/playlist?list=${encodeURIComponent(parsed.playlistId)}`;
+            const oEmbedThumbnail = await this.#fetchOEmbedThumbnail(playlistURL);
+            if (oEmbedThumbnail) return oEmbedThumbnail;
+
+            try {
+                await this.#waitForIframeAPI();
+                const [firstEntry] = await this.#fetchPlaylistItemsByIframeAPI(parsed.playlistId, 1);
+                if (firstEntry?.img) return firstEntry.img;
+            } catch (error) {
+                console.warn(`playlist preview iframe fallback failed for ${parsed.playlistId}: ${error.message || error}`);
+            }
+
+            return "";
+        }
+
         if (parsed.videoId) return `https://i.ytimg.com/vi/${parsed.videoId}/mqdefault.jpg`;
-        if (!parsed.playlistId) return "";
+        return "";
+    }
+
+    /**
+     * @private
+     * @description YouTube oEmbed에서 video/playlist 대표 썸네일 URL을 가져옵니다.
+     * 브라우저에서 오래 대기하지 않도록 짧은 timeout을 두며 실패는 상위 fallback에 맡깁니다.
+     * @param {string} targetURL
+     * @returns {Promise<string>}
+     */
+    async #fetchOEmbedThumbnail(targetURL) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
 
         try {
-            await this.#waitForIframeAPI();
-            const [firstEntry] = await this.#fetchPlaylistItemsByIframeAPI(parsed.playlistId, 1);
-            return firstEntry?.img || "";
+            const endpoint = `https://www.youtube.com/oembed?url=${encodeURIComponent(targetURL)}&format=json`;
+            const response = await fetch(endpoint, { signal: controller.signal });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            const data = await response.json().catch(() => ({}));
+            const thumbnailURL = String(data?.thumbnail_url || "").trim();
+            if (!thumbnailURL) throw new Error("oEmbed 응답에 thumbnail_url이 없습니다.");
+
+            return thumbnailURL.replace(/^http:\/\//i, "https://");
         } catch (error) {
-            console.warn(`playlist preview lookup failed for ${parsed.playlistId}: ${error.message || error}`);
+            if (error?.name !== "AbortError") {
+                console.warn(`YouTube oEmbed thumbnail lookup failed: ${error.message || error}`);
+            }
             return "";
+        } finally {
+            clearTimeout(timeoutId);
         }
     }
 
