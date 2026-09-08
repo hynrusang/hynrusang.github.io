@@ -147,9 +147,8 @@ class YouTubeAPIService {
 
     /**
      * @description 저장 목록 카드에 표시할 대표 이미지를 반환합니다.
-     * 재생목록 URL은 YouTube의 공개 oEmbed 응답에서 대표 썸네일을 먼저 얻습니다.
-     * oEmbed가 실패할 때만 기존 IFrame API probe로 첫 번째 video ID를 확인합니다.
-     * URL에 list가 있으면 항상 재생목록을 우선하며, 그 조회가 실패해도 watch의 video ID로 대체하지 않습니다.
+     * URL에 list가 있으면 항상 재생목록을 우선하고, 대표 썸네일은 oEmbed만 조회합니다.
+     * oEmbed 조회가 실패하면 추가 IFrame probe나 watch 영상 fallback 없이 빈 썸네일로 종료합니다.
      * list가 없는 단일 영상 URL만 video ID로 즉시 썸네일 주소를 구성합니다.
      * YouTube Data API key는 사용하지 않습니다.
      * @param {string} url
@@ -160,18 +159,7 @@ class YouTubeAPIService {
 
         if (parsed.playlistId) {
             const playlistURL = `https://www.youtube.com/playlist?list=${encodeURIComponent(parsed.playlistId)}`;
-            const oEmbedThumbnail = await this.#fetchOEmbedThumbnail(playlistURL);
-            if (oEmbedThumbnail) return oEmbedThumbnail;
-
-            try {
-                await this.#waitForIframeAPI();
-                const [firstEntry] = await this.#fetchPlaylistItemsByIframeAPI(parsed.playlistId, 1);
-                if (firstEntry?.img) return firstEntry.img;
-            } catch (error) {
-                console.warn(`playlist preview iframe fallback failed for ${parsed.playlistId}: ${error.message || error}`);
-            }
-
-            return "";
+            return await this.#fetchOEmbedThumbnail(playlistURL);
         }
 
         if (parsed.videoId) return `https://i.ytimg.com/vi/${parsed.videoId}/mqdefault.jpg`;
@@ -181,7 +169,7 @@ class YouTubeAPIService {
     /**
      * @private
      * @description YouTube oEmbed에서 video/playlist 대표 썸네일 URL을 가져옵니다.
-     * 브라우저에서 오래 대기하지 않도록 짧은 timeout을 두며 실패는 상위 fallback에 맡깁니다.
+     * 브라우저에서 오래 대기하지 않도록 짧은 timeout을 두며 실패하면 빈 문자열을 반환합니다.
      * @param {string} targetURL
      * @returns {Promise<string>}
      */
