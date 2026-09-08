@@ -146,6 +146,50 @@ class YouTubeAPIService {
     }
 
     /**
+     * @description 저장 목록 카드에 표시할 대표 이미지를 반환합니다.
+     * 단일 영상은 URL의 video ID만으로 즉시 썸네일 주소를 만들고,
+     * 재생목록은 기존 IFrame API probe에서 첫 번째 video ID만 얻어 같은 방식으로 구성합니다.
+     * 별도의 YouTube Data API key는 사용하지 않습니다.
+     * @param {string} url
+     * @returns {Promise<string>}
+     */
+    async fetchPreviewThumbnail(url) {
+        const parsed = this.#parseYouTubeURL(url);
+        if (parsed.videoId) return `https://i.ytimg.com/vi/${parsed.videoId}/mqdefault.jpg`;
+        if (!parsed.playlistId) return "";
+
+        try {
+            await this.#waitForIframeAPI();
+            const [firstEntry] = await this.#fetchPlaylistItemsByIframeAPI(parsed.playlistId, 1);
+            return firstEntry?.img || "";
+        } catch (error) {
+            console.warn(`playlist preview lookup failed for ${parsed.playlistId}: ${error.message || error}`);
+            return "";
+        }
+    }
+
+    /** @private @description 비동기로 로드되는 YouTube IFrame API가 준비될 때까지 짧게 대기합니다. */
+    #waitForIframeAPI(timeoutMs = 8000) {
+        if (window.YT?.Player) return Promise.resolve();
+
+        return new Promise((resolve, reject) => {
+            const startedAt = Date.now();
+            const timer = setInterval(() => {
+                if (window.YT?.Player) {
+                    clearInterval(timer);
+                    resolve();
+                    return;
+                }
+
+                if (Date.now() - startedAt >= timeoutMs) {
+                    clearInterval(timer);
+                    reject(new Error("YouTube IFrame API 준비 시간이 초과되었습니다."));
+                }
+            }, 100);
+        });
+    }
+
+    /**
      * @description IFrame probing 단계에서 ID만 확보한 항목에 oEmbed 제목과 썸네일을 지연 보강합니다.
      * @param {object} entry
      * @returns {Promise<object|null>}
@@ -377,6 +421,7 @@ class UIManager {
     #viewMode = YConfig.entries.length ? "queue" : "library";
     #isFetching = false;
     #entryErrors = new Map();
+    #playlistThumbnailCache = new Map();
 
     /** @param {YouTubeAPIService} apiService */
     constructor(apiService) {
@@ -727,6 +772,15 @@ class UIManager {
      */
     #createPlaylistItem(category, name, url) {
         const row = Dynamic.$("li", { class: "playlist-item" });
+        const thumbnail = Dynamic.$("img", {
+            class: "playlist-thumbnail is-loading",
+            src: "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
+            alt: "",
+            loading: "lazy",
+            decoding: "async",
+            referrerpolicy: "no-referrer"
+        });
+
         row.add(
             Dynamic.$("a", {
                 class: "playlist-open-link",
@@ -742,8 +796,11 @@ class UIManager {
                     this.#openPlaylist(url);
                 }
             }).add(
-                Dynamic.$("strong", { text: name }),
-                Dynamic.$("small", { text: url })
+                thumbnail,
+                Dynamic.$("span", { class: "playlist-open-copy" }).add(
+                    Dynamic.$("strong", { text: name }),
+                    Dynamic.$("small", { text: url })
+                )
             ),
             Dynamic.$("span", { class: "playlist-buttons" }).add(
                 Dynamic.$("button", {
@@ -765,7 +822,35 @@ class UIManager {
                 })
             )
         );
+
+        this.#loadPlaylistThumbnail(url, thumbnail);
         return row;
+    }
+
+    /**
+     * @private
+     * @description 저장 목록의 대표 이미지를 URL 단위로 캐시하고 현재 행의 img에 반영합니다.
+     * 같은 URL로 목록을 다시 그릴 때 YouTube probe를 반복하지 않습니다.
+     */
+    async #loadPlaylistThumbnail(url, thumbnail) {
+        let previewRequest = this.#playlistThumbnailCache.get(url);
+        if (!previewRequest) {
+            previewRequest = this.#apiService.fetchPreviewThumbnail(url);
+            this.#playlistThumbnailCache.set(url, previewRequest);
+        }
+
+        const src = await previewRequest;
+        if (!thumbnail?.node?.isConnected) return;
+
+        if (src) {
+            thumbnail.set({ src });
+            thumbnail.node.classList.remove("is-loading");
+            return;
+        }
+
+        this.#playlistThumbnailCache.delete(url);
+        thumbnail.node.classList.remove("is-loading");
+        thumbnail.node.classList.add("is-unavailable");
     }
 
     /**

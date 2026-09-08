@@ -25,6 +25,7 @@
     --ytv-status-font-size: 0.75rem;
     --ytv-list-title-size: 0.8125rem;
     --ytv-list-meta-size: 0.625rem;
+    --ytv-playlist-thumb-width: 3.625rem;
     --ytv-heading-size: 0.9375rem;
     --ytv-body-size: 0.8125rem;
     --ytv-small-size: 0.6875rem;
@@ -293,7 +294,7 @@
     border-radius: 13px;
     background: color-mix(in srgb, var(--surface-elevated) 82%, transparent);
     transition: background 0.14s ease, border-color 0.14s ease, transform 0.14s ease;
-    min-height: 40px;
+    min-height: 48px;
 }
 
 .playlist-item:hover {
@@ -715,16 +716,41 @@
 }
 
 .playlist-open-link {
-    display: grid;
+    display: flex;
+    align-items: center;
     flex: 1;
-    gap: 3px;
+    gap: 8px;
     min-width: 0;
-    padding: 6px;
+    padding: 4px;
     border: 0;
     background: transparent;
     color: inherit;
     text-align: left;
     box-shadow: none;
+}
+
+.playlist-thumbnail {
+    display: block;
+    flex: 0 0 var(--ytv-playlist-thumb-width);
+    width: var(--ytv-playlist-thumb-width);
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    object-fit: cover;
+    background: linear-gradient(135deg, var(--surface-muted), color-mix(in srgb, var(--surface-muted) 65%, transparent));
+    box-shadow: var(--shadow-sm);
+}
+
+.playlist-thumbnail.is-loading,
+.playlist-thumbnail.is-unavailable {
+    opacity: 0.45;
+}
+
+.playlist-open-copy {
+    display: grid;
+    flex: 1 1 auto;
+    gap: 3px;
+    min-width: 0;
 }
 
 .playlist-open-link:hover,
@@ -887,6 +913,7 @@
         --ytv-status-font-size: 20px;
         --ytv-list-title-size: 22px;
         --ytv-list-meta-size: 17px;
+        --ytv-playlist-thumb-width: 96px;
         --ytv-heading-size: 24px;
         --ytv-body-size: 21px;
         --ytv-small-size: 17px;
@@ -1056,6 +1083,7 @@
         --ytv-status-font-size: 16px;
         --ytv-list-title-size: 18px;
         --ytv-list-meta-size: 14px;
+        --ytv-playlist-thumb-width: 76px;
         --ytv-heading-size: 20px;
         --ytv-body-size: 17px;
         --ytv-small-size: 14px;
