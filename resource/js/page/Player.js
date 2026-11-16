@@ -1026,7 +1026,8 @@ class PlayerService {
     #metadataHydrationToken = 0;
     #errorRecovery = null;
     #errorRecoveryTimer = 0;
-    #failedIndicesInPass = new Set();
+    #playerGeneration = 0;
+    #playbackRevision = 0;
 
     /**
      * @param {UIManager} uiManager
@@ -1072,12 +1073,38 @@ class PlayerService {
 
     /** @description 사용자가 대기열 행을 직접 선택했을 때 iframe의 해당 인덱스를 재생합니다. */
     playVideoAt(index) {
-        if (index < 0 || index >= YConfig.entries.length) return;
-        if (!this.#YTPlayer || typeof this.#YTPlayer.playVideoAt !== "function") return;
+        if (!Number.isInteger(index) || index < 0 || index >= YConfig.entries.length) return;
 
+        // A manual selection cancels all previous error recovery, including delayed callbacks.
+        this.#playbackRevision++;
         this.#clearErrorRecovery();
+        this.#uiManager.clearEntryError(index);
+
+        // A newly created or detached iframe must load a queue before accepting an index.
+        let iframeConnected = false;
+        try { iframeConnected = Boolean(this.#YTPlayer?.getIframe?.()?.isConnected); } catch { }
+        if (!this.#playerReady || !iframeConnected || typeof this.#YTPlayer?.playVideoAt !== "function") {
+            this.#requestQueueLoad(index, 0);
+            return;
+        }
+
+        // If YouTube has lost the queue, reload it only on the explicit user selection.
+        const expectedIds = YConfig.entries.map(entry => entry.id);
+        let actualIds = null;
+        try { actualIds = this.#YTPlayer.getPlaylist?.(); } catch { }
+        if (!Array.isArray(actualIds) || actualIds.length !== expectedIds.length ||
+            actualIds.some((id, i) => id !== expectedIds[i])) {
+            this.#requestQueueLoad(index, 0);
+            return;
+        }
+
         this.#updateCurrentEntry(index, true);
-        this.#YTPlayer.playVideoAt(index);
+        try {
+            this.#YTPlayer.playVideoAt(index);
+        } catch (error) {
+            console.warn("YouTube playVideoAt failed", error);
+            this.#requestQueueLoad(index, 0);
+        }
     }
 
     /** @description iframe을 다시 만들지 않고 현재 대기열 표시와 제목 보강만 다시 수행합니다. */
@@ -1201,10 +1228,15 @@ class PlayerService {
             return;
         }
 
+        // Old iframe events and delayed recovery must never affect the replacement instance.
+        const generation = ++this.#playerGeneration;
+        this.#playbackRevision++;
+        this.#clearErrorRecovery();
+        this.#playerReady = false;
+        this.#loadedQueueSignature = "";
         if (this.#YTPlayer) {
             try { this.#YTPlayer.destroy(); } catch { }
             this.#YTPlayer = null;
-            this.#playerReady = false;
         }
 
         let playerContainer = document.getElementById("ytv-player");
@@ -1233,17 +1265,28 @@ class PlayerService {
                 autoplay: 1
             },
             events: {
-                onReady: () => this.#onPlayerReady(),
-                onStateChange: event => this.#onPlayerStateChange(event),
-                onError: event => this.#onPlayerError(event)
+                onReady: () => {
+                    if (generation === this.#playerGeneration) this.#onPlayerReady();
+                },
+                onStateChange: event => {
+                    if (generation === this.#playerGeneration) this.#onPlayerStateChange(event);
+                },
+                onError: event => {
+                    if (generation === this.#playerGeneration) this.#onPlayerError(event);
+                }
             }
         });
     }
 
     /** @private @description iframe 준비 전 목록 변경 요청을 한 건으로 보관하거나 즉시 적용합니다. */
     #requestQueueLoad(index, startSeconds) {
+        this.#playbackRevision++;
+        this.#clearErrorRecovery();
         this.#pendingQueueLoad = { index, startSeconds };
-        if (!this.#playerReady) {
+
+        let iframeConnected = false;
+        try { iframeConnected = Boolean(this.#YTPlayer?.getIframe?.()?.isConnected); } catch { }
+        if (!this.#playerReady || !iframeConnected) {
             this.#ensurePlayer();
             return;
         }
@@ -1262,13 +1305,22 @@ class PlayerService {
         if (!this.#YTPlayer || typeof this.#YTPlayer.loadPlaylist !== "function") return;
         if (!YConfig.entries.length) return;
 
+        // A queue replacement is an explicit operation, never an error-handling side effect.
+        this.#playbackRevision++;
+        this.#clearErrorRecovery();
         const ids = YConfig.entries.map(entry => entry.id);
         const safeIndex = Math.max(0, Math.min(index, ids.length - 1));
 
         this.#updateCurrentEntry(safeIndex, true);
-        this.#loadedQueueSignature = ids.join(",");
-        this.#YTPlayer.loadPlaylist(ids, safeIndex, Math.max(0, startSeconds));
-        this.#YTPlayer.setLoop(true);
+        try {
+            this.#YTPlayer.loadPlaylist(ids, safeIndex, Math.max(0, startSeconds));
+            this.#YTPlayer.setLoop(true);
+            this.#loadedQueueSignature = ids.join(",");
+        } catch (error) {
+            this.#loadedQueueSignature = "";
+            console.warn("YouTube loadPlaylist failed", error);
+            pushSnackbar({ message: "YouTube 재생목록을 로드하지 못했습니다. 다시 선택해 주세요.", type: "error" });
+        }
     }
 
     /**
@@ -1276,6 +1328,8 @@ class PlayerService {
      * @description placeholder 제목만 낮은 동시성으로 보강하고 중간 결과를 localStorage에 저장합니다.
      */
     #startMetadataHydration(progressSnackbar = null) {
+        // Also cancel an older hydration operation when the new queue has no placeholders.
+        const token = ++this.#metadataHydrationToken;
         const total = YConfig.entries.length;
         const isPlaceholder = entry => entry?.title?.startsWith("YouTube 영상");
         const pendingCount = YConfig.entries.filter(isPlaceholder).length;
@@ -1285,7 +1339,6 @@ class PlayerService {
             return;
         }
 
-        const token = ++this.#metadataHydrationToken;
         const start = Math.max(YConfig.lastIdx, 0);
         const order = Array.from({ length: total }, (_, index) => (start + index) % total)
             .filter(index => isPlaceholder(YConfig.entries[index]));
@@ -1390,7 +1443,6 @@ class PlayerService {
             if (index < 0 || index >= YConfig.entries.length) return;
 
             this.#clearErrorRecovery();
-            this.#failedIndicesInPass.clear();
             this.#uiManager.clearEntryError(index);
             const shouldPersist = index !== YConfig.lastIdx;
             this.#updateCurrentEntry(index, shouldPersist);
@@ -1415,58 +1467,84 @@ class PlayerService {
      * 정상 재생이 확인되기 전에는 같은 오류를 다시 처리하지 않아 정상 영상까지 연쇄 스킵되는 현상을 막습니다.
      */
     #onPlayerError(event) {
-        const errorCode = event.data;
+        const errorCode = Number(event.data);
         const errorMessage = {
             2: "잘못된 영상 주소",
             5: "HTML5 재생 오류",
             100: "삭제·비공개 영상",
             101: "외부 재생 차단",
-            150: "외부 재생 차단"
+            150: "외부 재생 차단",
+            153: "재생 요청 식별 오류"
         }[errorCode] || "알 수 없는 재생 오류";
-        const index = this.#YTPlayer?.getPlaylistIndex?.();
-        const safeIndex = Number.isInteger(index) && index >= 0 && index < YConfig.entries.length ? index : YConfig.lastIdx;
-        const videoId = YConfig.entries[safeIndex]?.id || "";
 
-        if (this.#errorRecovery?.index === safeIndex && this.#errorRecovery?.videoId === videoId) return;
+        // One recovery operation remains locked until PLAYING or an explicit user action.
+        // In particular, another onError during nextVideo() must not cause a skip cascade.
+        if (this.#errorRecovery) return;
 
-        this.#failedIndicesInPass.add(safeIndex);
-        this.#uiManager.markEntryUnavailable(safeIndex, errorMessage);
-        pushSnackbar({ message: `${safeIndex + 1}번 영상을 재생할 수 없습니다. YouTube가 다음 영상으로 이동합니다.`, type: "error", duration: 2600 });
-
-        if (YConfig.entries.length <= 1 || this.#failedIndicesInPass.size >= YConfig.entries.length) {
-            this.#clearErrorRecovery();
-            this.#YTPlayer?.stopVideo?.();
-            pushSnackbar({ message: "대기열에서 재생 가능한 영상을 찾지 못했습니다.", type: "error", duration: 3200 });
+        // Player/browser failures do not prove that the selected video is unavailable.
+        // Skipping on 5 or 153 can wrongly discard healthy videos from the queue.
+        if (![2, 100, 101, 150].includes(errorCode)) {
+            this.#errorRecovery = { kind: "player", code: errorCode };
+            pushSnackbar({
+                message: `YouTube 플레이어 오류 (${errorCode}: ${errorMessage}). 자동으로 영상을 건너뛰지 않습니다.`,
+                type: "error", duration: 3600
+            });
             return;
         }
 
-        this.#errorRecovery = { index: safeIndex, videoId };
-        clearTimeout(this.#errorRecoveryTimer);
-        this.#errorRecoveryTimer = setTimeout(() => {
-            if (!this.#errorRecovery || this.#errorRecovery.index !== safeIndex || this.#errorRecovery.videoId !== videoId) return;
+        const index = this.#YTPlayer?.getPlaylistIndex?.();
+        if (!Number.isInteger(index) || index < 0 || index >= YConfig.entries.length) return;
+        const entry = YConfig.entries[index];
+        if (!entry) return;
 
+        // YouTube may advance its index before delivering the previous video's error.
+        // Never attribute such a stale event to the newly selected, healthy video.
+        const currentId = this.#YTPlayer?.getVideoData?.()?.video_id || "";
+        if (currentId && currentId !== entry.id) return;
+        if (this.#loadedQueueSignature !== YConfig.entries.map(item => item.id).join(",")) return;
+        const iframeQueue = this.#YTPlayer?.getPlaylist?.();
+        if (Array.isArray(iframeQueue) && iframeQueue.length && iframeQueue[index] !== entry.id) return;
+
+        const recovery = {
+            kind: "video", index, videoId: entry.id,
+            generation: this.#playerGeneration, revision: this.#playbackRevision
+        };
+        this.#errorRecovery = recovery;
+        this.#uiManager.markEntryUnavailable(index, errorMessage);
+        pushSnackbar({
+            message: `${index + 1}번 영상 재생 오류 (${errorCode}: ${errorMessage}). 다음 영상으로 이동을 요청합니다.`,
+            type: "error", duration: 2600
+        });
+
+        if (YConfig.entries.length <= 1 || typeof this.#YTPlayer?.nextVideo !== "function") {
+            pushSnackbar({ message: "자동 이동할 영상이 없습니다. 다른 목록을 선택해 주세요.", type: "error" });
+            return;
+        }
+
+        this.#errorRecoveryTimer = setTimeout(() => {
+            if (this.#errorRecovery !== recovery || this.#playbackRevision !== recovery.revision ||
+                this.#playerGeneration !== recovery.generation) return;
+            if (this.#YTPlayer?.getPlaylistIndex?.() !== recovery.index) return;
+            const liveId = this.#YTPlayer?.getVideoData?.()?.video_id || "";
+            if (liveId && liveId !== recovery.videoId) return;
+
+            // A single native YouTube nextVideo() request is the entire automatic recovery.
+            // Do not unlock or retry until a genuine PLAYING event confirms success.
             try {
-                this.#YTPlayer?.nextVideo?.();
+                this.#YTPlayer.nextVideo();
             } catch (error) {
                 console.warn("YouTube nextVideo failed", error);
-                this.#clearErrorRecovery();
+                pushSnackbar({ message: "다음 영상 이동에 실패했습니다. 목록에서 직접 선택해 주세요.", type: "error" });
                 return;
             }
 
             this.#errorRecoveryTimer = setTimeout(() => {
-                if (!this.#errorRecovery || this.#errorRecovery.index !== safeIndex || this.#errorRecovery.videoId !== videoId) return;
-
-                const currentIndex = this.#YTPlayer?.getPlaylistIndex?.();
-                if (currentIndex !== safeIndex) {
-                    this.#clearErrorRecovery();
-                    return;
-                }
-
-                this.#clearErrorRecovery();
+                if (this.#errorRecovery !== recovery || this.#playbackRevision !== recovery.revision ||
+                    this.#playerGeneration !== recovery.generation) return;
+                if (this.#YTPlayer?.getPlayerState?.() === YT.PlayerState.PLAYING) return;
                 pushSnackbar({
-                    message: "YouTube가 다음 영상으로 이동하지 못했습니다. 대기열에서 다른 영상을 선택해 주세요.",
-                    type: "error",
-                    duration: 3200
+                    message: "다음 영상이 아직 재생되지 않았습니다. 목록에서 직접 선택할 수 있습니다.",
+                    type: "error", duration: 3200
                 });
             }, 2200);
         }, 180);
@@ -1482,7 +1560,6 @@ class PlayerService {
     /** @private @description 새 대기열 적용 시 오류 통계와 UI 표시를 모두 초기화합니다. */
     #resetPlaybackErrors() {
         this.#clearErrorRecovery();
-        this.#failedIndicesInPass.clear();
         this.#uiManager.clearAllEntryErrors();
     }
 }
