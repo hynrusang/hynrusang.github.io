@@ -1,3 +1,12 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+import {
+    getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+    sendEmailVerification, sendPasswordResetEmail, signOut, deleteUser as deleteFirebaseUser
+} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
+import {
+    getFirestore, doc, getDoc, getDocFromServer, setDoc, deleteDoc
+} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+
 import { Dynamic, LiveData } from "../init/module.js";
 import { MainRouter } from "../page/Router.js";
 import { pushProgressSnackbar, pushSnackbar } from "./Tools.js";
@@ -8,6 +17,8 @@ import Working from "../page/Prepare/Working.js";
 
 export default class DataResource {
     static #initialIdentity = false;
+    static #auth;
+    static #db;
     static #authenticatedSessionOpen = false;
     static #selector;
     static #icon;
@@ -27,6 +38,7 @@ export default class DataResource {
         const errorMessages = {
             "auth/invalid-email": "잘못된 이메일 형식입니다.",
             "auth/admin-restricted-operation": "죄송합니다. 회원가입이 거부되었습니다.",
+            "auth/invalid-credential": "이메일 또는 비밀번호가 올바르지 않습니다.",
             "auth/wrong-password": "비밀번호가 잘못되었습니다. 기억이 안나신다면 비밀번호 초기화를 시도해주세요.",
             "auth/user-not-found": "해당 계정은 존재하지 않습니다.",
             "auth/too-many-requests": "너무 짧은 시간동안 동일한 유형의 요청을 보냈습니다. 잠시 후 시도해주세요.",
@@ -52,7 +64,7 @@ export default class DataResource {
             localStorage.setItem("timestamp", new Date().toISOString());
 
             try {
-                await firebase.auth().signInWithEmailAndPassword(email, password);
+                await signInWithEmailAndPassword(DataResource.#auth, email, password);
                 progressSnackbar.close("로그인 완료. 사용자 데이터를 불러옵니다.", "normal");
             } catch (e) {
                 // 2. 인증에 실패한 시도는 유효한 로그인 세션이 아니므로 선기록한 시각을 제거합니다.
@@ -63,9 +75,9 @@ export default class DataResource {
                     if (confirm("해당 계정은 존재하지 않습니다.\n해당 계정으로 새롭게 회원가입을 시도할까요?")) {
                         const registerProgress = pushProgressSnackbar({ message: "회원가입을 시도하는 중입니다." });
                         try {
-                            const { user } = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                            const { user } = await createUserWithEmailAndPassword(DataResource.#auth, email, password);
                             registerProgress.update("회원가입 인증 메일을 발송하는 중입니다.");
-                            await user.sendEmailVerification();
+                            await sendEmailVerification(user);
                             registerProgress.close("인증용 메일을 보냈습니다.", "normal");
                         } catch (err) {
                             registerProgress.close("회원가입 처리에 실패했습니다.", "error");
@@ -88,9 +100,9 @@ export default class DataResource {
             
             pushSnackbar({message: "잠시만 기다려 주십시오. 정보가 곧 삭제됩니다.", type: "normal"});
             try {
-                await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).delete();
+                await deleteDoc(doc(DataResource.#db, "user", DataResource.#auth.currentUser.uid));
                 pushSnackbar({message: "사용자의 데이터를 모두 삭제하는데 성공하였습니다.", type: "normal"});
-                await firebase.auth().currentUser.delete();
+                await deleteFirebaseUser(DataResource.#auth.currentUser);
 
                 // 계정 삭제가 완료되면 서버 데이터와 별개로 브라우저의 사용자 상태도 남기지 않습니다.
                 DataResource.#clearLocalSession();
@@ -103,9 +115,12 @@ export default class DataResource {
          * @type {(email: String) => Promise<void>}
          */
         static changePassword = async email => {
+            // 계정 설정에서는 현재 사용자 이메일을 사용하고, 로그인 폼에서는 입력된 이메일을 사용합니다.
+            email ??= DataResource.#auth.currentUser?.email;
+            if (!email) return;
             pushSnackbar({message: "이메일 주소로 비밀번호 초기화 메일을 보내고 있습니다.", type: "normal"});
             try {
-                await firebase.auth().sendPasswordResetEmail(email);
+                await sendPasswordResetEmail(DataResource.#auth, email);
                 pushSnackbar({message: "이메일 주소로 초기화 메일을 보냈습니다.", type: "normal"})
             } catch (e) { DataResource.#firebaseAuthHandler(e); }
         }
@@ -116,7 +131,7 @@ export default class DataResource {
          */
         static logout = async () => {
             try {
-                await firebase.auth().signOut();
+                await signOut(DataResource.#auth);
 
                 // 인증 observer도 같은 정리를 수행하지만, 명시적 로그아웃 operation에서도 로컬 폐기를 보장합니다.
                 DataResource.#clearLocalSession();
@@ -213,7 +228,7 @@ export default class DataResource {
 
             // 3. Firestore 저장에 성공한 경우에만 메모리 변경을 확정합니다.
             try {
-                await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).set(this.#basic.toObject());
+                await setDoc(doc(DataResource.#db, "user", DataResource.#auth.currentUser.uid), this.#basic.toObject());
                 pushSnackbar({ message: "데이터가 성공적으로 저장되었습니다.", type: "normal" });
                 return true;
             } catch (error) {
@@ -231,7 +246,7 @@ export default class DataResource {
          */
         static synchronize = async () => {
             try {
-                await firebase.firestore().collection("user").doc(firebase.auth().currentUser.uid).set(this.#basic.toObject());
+                await setDoc(doc(DataResource.#db, "user", DataResource.#auth.currentUser.uid), this.#basic.toObject());
                 pushSnackbar({ message: "데이터가 성공적으로 저장되었습니다.", type: "normal" });
                 return true;
             } catch (error) {
@@ -260,7 +275,7 @@ export default class DataResource {
         this.#icon.onclick = () => this.Data.theme++;
         this.Data.theme = localStorage.theme;
 
-        firebase.initializeApp({
+        const app = initializeApp({
             apiKey: "AIzaSyAglJGn84cPu_YvRUdigYQFCBml-s6kcuo",
             authDomain: "necronomicon-7ba57.firebaseapp.com",
             projectId: "necronomicon-7ba57",
@@ -270,7 +285,11 @@ export default class DataResource {
             measurementId: "G-QL8R6QQHGF"
         });
 
-        firebase.auth().onAuthStateChanged(async user => {
+        // Auth와 Firestore는 DataResource가 소유하며 다른 화면에는 기존 공개 operation만 제공합니다.
+        this.#auth = getAuth(app);
+        this.#db = getFirestore(app);
+
+        onAuthStateChanged(this.#auth, async user => {
             if (!user) {
                 const shouldReload = this.#authenticatedSessionOpen;
                 this.#authenticatedSessionOpen = false;
@@ -287,7 +306,7 @@ export default class DataResource {
             if (!user.emailVerified) {
                 pushSnackbar({ message: "이메일 인증이 완료되지 않아 로그아웃합니다.", type: "error" });
                 this.#clearLocalSession();
-                return firebase.auth().signOut();
+                return signOut(this.#auth);
             }
 
             this.#authenticatedSessionOpen = true;
@@ -299,7 +318,7 @@ export default class DataResource {
             if (isExpired) {
                 authProgress.close("로그인 유지 시간이 만료되었습니다.", "error");
                 this.#clearLocalSession();
-                await firebase.auth().signOut();
+                await signOut(this.#auth);
                 return;
             }
             
@@ -312,9 +331,9 @@ export default class DataResource {
                 // Firestore의 기본 get()은 오프라인에서 캐시를 반환할 수 있으므로 사용자 문서는 서버에서 읽습니다.
                 [basic, securitySurface, securityCenter] = await Promise.race([
                     Promise.all([
-                        firebase.firestore().collection("user").doc(user.uid).get({ source: "server" }),
-                        firebase.firestore().collection("dat").doc("surface").get().catch(e => null),
-                        firebase.firestore().collection("dat").doc("center").get().catch(e => null)
+                        getDocFromServer(doc(this.#db, "user", user.uid)),
+                        getDoc(doc(this.#db, "dat", "surface")).catch(e => null),
+                        getDoc(doc(this.#db, "dat", "center")).catch(e => null)
                     ]),
                     new Promise((_, reject) => {
                         loadTimeout = setTimeout(() => {
@@ -326,7 +345,7 @@ export default class DataResource {
                 ]);
             } catch (error) {
                 // 2. 이전 계정의 늦은 실패가 새로 로그인한 계정까지 로그아웃시키지 않도록 검사합니다.
-                if (firebase.auth().currentUser?.uid !== user.uid) return;
+                if (this.#auth.currentUser?.uid !== user.uid) return;
 
                 // 3. 서버 연결이 끊기거나 제한 시간 내에 데이터를 읽지 못하면 사용자 세션을 종료합니다.
                 // 로그아웃은 Firestore 응답이 아닌 Firebase Auth의 브라우저 인증 상태를 변경합니다.
@@ -338,7 +357,7 @@ export default class DataResource {
                 await this.Auth.logout();
 
                 // Auth 자체의 로그아웃이 실패하더라도 이전 사용자의 로컬 데이터는 남기지 않습니다.
-                if (firebase.auth().currentUser) {
+                if (this.#auth.currentUser) {
                     this.#clearLocalSession();
                     Dynamic.FragMutation.mutate(Working, "로그아웃에 실패했습니다. 페이지를 닫고 다시 접속해 주세요.");
                 }
@@ -348,7 +367,7 @@ export default class DataResource {
             }
 
             // 4. 읽는 도중 인증 계정이 바뀌었다면 이전 계정의 데이터를 화면에 적용하지 않습니다.
-            if (firebase.auth().currentUser?.uid !== user.uid) return;
+            if (this.#auth.currentUser?.uid !== user.uid) return;
             const basicData = basic.data() ?? this.Data.basic;
 
             Dynamic.FragMutation.mutate(Working, "데이터들을 동기화하는 중...");
@@ -369,7 +388,7 @@ export default class DataResource {
             }
 
             // 외부 모듈을 가져오는 동안에도 로그아웃될 수 있으므로 최종 화면 변경 전에 다시 확인합니다.
-            if (firebase.auth().currentUser?.uid !== user.uid) return;
+            if (this.#auth.currentUser?.uid !== user.uid) return;
             Dynamic.scan("#navigator_icon").onclick = () => Dynamic.FragMutation.mutate(Navigation);
             Dynamic.scan("fragment[rid=rander]").remove();
             // Player, Link, Memo는 서로 다른 Fragment로 유지하지만 동일한 하단 라우터를 공유합니다.
