@@ -305,11 +305,50 @@ export default class DataResource {
             
             authProgress.update("사용자 데이터를 불러오는 중입니다.");
             Dynamic.FragMutation.mutate(Working, "데이터들을 불러오는 중...");
-            const [basic, securitySurface, securityCenter] = await Promise.all([
-                firebase.firestore().collection("user").doc(user.uid).get(),
-                firebase.firestore().collection("dat").doc("surface").get().catch(e => null),
-                firebase.firestore().collection("dat").doc("center").get().catch(e => null)
-            ]);
+            let loadTimeout;
+            let basic, securitySurface, securityCenter;
+            try {
+                // 1. 캐시가 남아 있어도 서버에 연결되지 않는 세션을 정상 로그인으로 처리하지 않습니다.
+                // Firestore의 기본 get()은 오프라인에서 캐시를 반환할 수 있으므로 사용자 문서는 서버에서 읽습니다.
+                [basic, securitySurface, securityCenter] = await Promise.race([
+                    Promise.all([
+                        firebase.firestore().collection("user").doc(user.uid).get({ source: "server" }),
+                        firebase.firestore().collection("dat").doc("surface").get().catch(e => null),
+                        firebase.firestore().collection("dat").doc("center").get().catch(e => null)
+                    ]),
+                    new Promise((_, reject) => {
+                        loadTimeout = setTimeout(() => {
+                            const error = new Error("Firestore 초기 데이터 로드 응답 시간 초과");
+                            error.code = "deadline-exceeded";
+                            reject(error);
+                        }, 20000);
+                    })
+                ]);
+            } catch (error) {
+                // 2. 이전 계정의 늦은 실패가 새로 로그인한 계정까지 로그아웃시키지 않도록 검사합니다.
+                if (firebase.auth().currentUser?.uid !== user.uid) return;
+
+                // 3. 서버 연결이 끊기거나 제한 시간 내에 데이터를 읽지 못하면 사용자 세션을 종료합니다.
+                // 로그아웃은 Firestore 응답이 아닌 Firebase Auth의 브라우저 인증 상태를 변경합니다.
+                console.error("Firestore 사용자 데이터 로드 실패:", error);
+                const disconnected = error.code === "unavailable" || error.code === "deadline-exceeded";
+                authProgress.close(disconnected
+                    ? "Firebase 서버가 응답하지 않아 로그아웃합니다."
+                    : "사용자 데이터를 불러오지 못하여 로그아웃합니다.", "error");
+                await this.Auth.logout();
+
+                // Auth 자체의 로그아웃이 실패하더라도 이전 사용자의 로컬 데이터는 남기지 않습니다.
+                if (firebase.auth().currentUser) {
+                    this.#clearLocalSession();
+                    Dynamic.FragMutation.mutate(Working, "로그아웃에 실패했습니다. 페이지를 닫고 다시 접속해 주세요.");
+                }
+                return;
+            } finally {
+                clearTimeout(loadTimeout);
+            }
+
+            // 4. 읽는 도중 인증 계정이 바뀌었다면 이전 계정의 데이터를 화면에 적용하지 않습니다.
+            if (firebase.auth().currentUser?.uid !== user.uid) return;
             const basicData = basic.data() ?? this.Data.basic;
 
             Dynamic.FragMutation.mutate(Working, "데이터들을 동기화하는 중...");
@@ -329,6 +368,8 @@ export default class DataResource {
                 } catch { }
             }
 
+            // 외부 모듈을 가져오는 동안에도 로그아웃될 수 있으므로 최종 화면 변경 전에 다시 확인합니다.
+            if (firebase.auth().currentUser?.uid !== user.uid) return;
             Dynamic.scan("#navigator_icon").onclick = () => Dynamic.FragMutation.mutate(Navigation);
             Dynamic.scan("fragment[rid=rander]").remove();
             // Player, Link, Memo는 서로 다른 Fragment로 유지하지만 동일한 하단 라우터를 공유합니다.
