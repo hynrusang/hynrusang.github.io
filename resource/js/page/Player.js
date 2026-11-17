@@ -1028,6 +1028,9 @@ class PlayerService {
     #errorRecoveryTimer = 0;
     #playerGeneration = 0;
     #playbackRevision = 0;
+    // iframe 상태 이벤트와 영상 종료 예정 시점의 단발 확인만 사용합니다.
+    #repeatObservation = null;
+    #repeatDeadlineTimer = 0;
 
     /**
      * @param {UIManager} uiManager
@@ -1078,6 +1081,8 @@ class PlayerService {
         // A manual selection cancels all previous error recovery, including delayed callbacks.
         this.#playbackRevision++;
         this.#clearErrorRecovery();
+        this.#cancelRepeatDeadline();
+        this.#repeatObservation = null;
         this.#uiManager.clearEntryError(index);
 
         // A newly created or detached iframe must load a queue before accepting an index.
@@ -1232,6 +1237,8 @@ class PlayerService {
         const generation = ++this.#playerGeneration;
         this.#playbackRevision++;
         this.#clearErrorRecovery();
+        this.#cancelRepeatDeadline();
+        this.#repeatObservation = null;
         this.#playerReady = false;
         this.#loadedQueueSignature = "";
         if (this.#YTPlayer) {
@@ -1273,6 +1280,18 @@ class PlayerService {
                 },
                 onError: event => {
                     if (generation === this.#playerGeneration) this.#onPlayerError(event);
+                },
+                onPlaybackRateChange: () => {
+                    const observation = this.#repeatObservation;
+                    if (generation !== this.#playerGeneration || !observation ||
+                        observation.playingSince === null) return;
+
+                    // 재생 속도가 바뀐 구간은 기존 속도로 정산한 뒤 새 속도로 누적합니다.
+                    const now = performance.now();
+                    observation.playedSeconds += Math.max(0, now - observation.playingSince) / 1000 * observation.rate;
+                    observation.playingSince = now;
+                    observation.rate = Number(this.#YTPlayer?.getPlaybackRate?.()) || 1;
+                    this.#scheduleRepeatDeadline(observation, this.#YTPlayer?.getCurrentTime?.(), observation.rate);
                 }
             }
         });
@@ -1282,6 +1301,8 @@ class PlayerService {
     #requestQueueLoad(index, startSeconds) {
         this.#playbackRevision++;
         this.#clearErrorRecovery();
+        this.#cancelRepeatDeadline();
+        this.#repeatObservation = null;
         this.#pendingQueueLoad = { index, startSeconds };
 
         let iframeConnected = false;
@@ -1308,6 +1329,8 @@ class PlayerService {
         // A queue replacement is an explicit operation, never an error-handling side effect.
         this.#playbackRevision++;
         this.#clearErrorRecovery();
+        this.#cancelRepeatDeadline();
+        this.#repeatObservation = null;
         const ids = YConfig.entries.map(entry => entry.id);
         const safeIndex = Math.max(0, Math.min(index, ids.length - 1));
 
@@ -1438,6 +1461,10 @@ class PlayerService {
      * @description PLAYING 상태에서만 현재 인덱스를 확정하고 오류 복구 잠금을 해제합니다.
      */
     #onPlayerStateChange(event) {
+        // Shorts가 같은 항목을 다시 시작하는 경우에만 iframe의 nextVideo()를 호출합니다.
+        // 종료/전환이 정상인 경우에는 YouTube의 재생목록 자동 전환을 그대로 둡니다.
+        if (this.#recoverRepeatedVideo(event.data)) return;
+
         if (event.data === YT.PlayerState.PLAYING) {
             const index = this.#YTPlayer.getPlaylistIndex();
             if (index < 0 || index >= YConfig.entries.length) return;
@@ -1463,6 +1490,186 @@ class PlayerService {
 
     /**
      * @private
+     * @description Shorts 등의 동일 영상 반복이 상태 전환으로 관찰될 때만 다음 영상 이동을 요청합니다.
+     * 상태 이벤트에서는 재시작 징후를 관찰하고, PLAYING에서는 종료 단발 예약을 갱신합니다.
+     * YouTube가 상태 이벤트 없이 Shorts를 반복하면 예약된 종료 시각에만 확인합니다.
+     *
+     * @param {number} state YouTube PlayerState
+     * @returns {boolean} 복구용 nextVideo() 호출을 시도했으면 true
+     */
+    #recoverRepeatedVideo(state) {
+        // 재생을 멈춘 구간은 예상 종료 시각을 무효화합니다.
+        if (state !== YT.PlayerState.PLAYING) this.#cancelRepeatDeadline();
+        const index = this.#YTPlayer?.getPlaylistIndex?.();
+        const entry = YConfig.entries[index];
+        if (YConfig.entries.length < 2 || !entry ||
+            !this.#playerReady || !this.#loadedQueueSignature) {
+            this.#cancelRepeatDeadline();
+            this.#repeatObservation = null;
+            return false;
+        }
+
+        const actualId = this.#YTPlayer?.getVideoData?.()?.video_id;
+        if (actualId && actualId !== entry.id) {
+            this.#cancelRepeatDeadline();
+            this.#repeatObservation = null;
+            return false;
+        }
+
+        const now = performance.now();
+        const seconds = Number(this.#YTPlayer?.getCurrentTime?.());
+        const duration = Number(this.#YTPlayer?.getDuration?.());
+        const rate = Number(this.#YTPlayer?.getPlaybackRate?.()) || 1;
+        let observation = this.#repeatObservation;
+
+        if (!observation || observation.index !== index || observation.videoId !== entry.id ||
+            observation.generation !== this.#playerGeneration ||
+            observation.revision !== this.#playbackRevision) {
+            this.#cancelRepeatDeadline();
+            observation = {
+                index, videoId: entry.id, generation: this.#playerGeneration,
+                revision: this.#playbackRevision, duration: 0, firstSeconds: 0,
+                playedSeconds: 0, playingSince: null, rate: 1,
+                hasPlayed: false, repeatCandidate: false, skipRequested: false
+            };
+            this.#repeatObservation = observation;
+        }
+
+        // 1. 재생 중이었던 구간만 누적합니다. 일시정지·버퍼링 시간은 제외합니다.
+        if (observation.playingSince !== null) {
+            observation.playedSeconds += Math.max(0, now - observation.playingSince) / 1000 * observation.rate;
+            observation.playingSince = null;
+        }
+        if (Number.isFinite(duration) && duration > 0) observation.duration = duration;
+
+        // 2. YouTube는 각 재생목록 항목마다 ENDED를 보내지 않을 수 있습니다.
+        // 일부 Shorts 재시작은 BUFFERING으로 보일 수 있어, 뒤따르는 PLAYING까지 확인합니다.
+        // 정상적인 다음 항목 전환이라면 이후 PLAYING에서 ID 또는 인덱스가 달라집니다.
+        if (state === YT.PlayerState.UNSTARTED || state === YT.PlayerState.ENDED ||
+            state === YT.PlayerState.BUFFERING) {
+            const nearEnd = observation.duration > 0 &&
+                ((Number.isFinite(seconds) && seconds >= observation.duration - 1.5) ||
+                 observation.firstSeconds + observation.playedSeconds >=
+                    observation.duration - Math.max(1.5, observation.duration * 0.05));
+            if (observation.hasPlayed && nearEnd && !observation.skipRequested) {
+                observation.repeatCandidate = true;
+            }
+            return false;
+        }
+
+        if (state !== YT.PlayerState.PLAYING) return false;
+
+        // 3. 원래 항목이 다시 PLAYING(초반 시간)으로 돌아온 경우에만 복구합니다.
+        // 목록 변경·수동 선택은 observation을 폐기하므로 과거 이벤트가 개입하지 않습니다.
+        const replayedFromStart = Number.isFinite(seconds) && seconds >= 0 &&
+            seconds <= Math.min(2.5, observation.duration / 3);
+        if (observation.repeatCandidate && replayedFromStart && !observation.skipRequested &&
+            !this.#errorRecovery && typeof this.#YTPlayer?.nextVideo === "function") {
+            observation.skipRequested = true;
+            observation.repeatCandidate = false;
+            this.#cancelRepeatDeadline();
+            try {
+                this.#YTPlayer.nextVideo();
+                return true;
+            } catch (error) {
+                console.warn("YouTube repeat recovery failed", error);
+                pushSnackbar({ message: "반복 영상의 다음 항목 이동에 실패했습니다. 목록에서 직접 선택해 주세요.", type: "error" });
+            }
+        }
+
+        // 4. 복구 요청 뒤에는 같은 항목에서 다시 요청하지 않습니다.
+        // iframe이 전환에 실패하더라도 사용자는 목록에서 새 영상을 직접 선택할 수 있습니다.
+        observation.repeatCandidate = false;
+        if (!observation.hasPlayed && Number.isFinite(seconds)) {
+            observation.firstSeconds = Math.max(0, seconds);
+        }
+        observation.hasPlayed = true;
+        observation.playingSince = now;
+        observation.rate = rate > 0 ? rate : 1;
+        this.#scheduleRepeatDeadline(observation, seconds, observation.rate);
+        return false;
+    }
+
+    /** @private @description 재생이 중단되거나 영상·목록이 변경되면 남아 있는 종료 예약을 취소합니다. */
+    #cancelRepeatDeadline() {
+        clearTimeout(this.#repeatDeadlineTimer);
+        this.#repeatDeadlineTimer = 0;
+    }
+
+    /**
+     * @private
+     * @description 현재 영상의 남은 재생 시간을 기준으로 종료 시점에만 한 번 확인합니다.
+     * 정상적인 다음 영상 전환은 YouTube에 맡기고 동일 영상의 재시작이 확인된 경우에만 개입합니다.
+     * @param {object} observation 현재 iframe·대기열 위치에 속한 재생 관찰 상태
+     * @param {number} currentSeconds YouTube iframe이 보고하는 재생 위치(초)
+     * @param {number} rate 실제 재생 속도
+     */
+    #scheduleRepeatDeadline(observation, currentSeconds, rate) {
+        this.#cancelRepeatDeadline();
+        const duration = observation.duration;
+        const seconds = Number(currentSeconds);
+        if (observation.skipRequested || this.#errorRecovery || YConfig.entries.length < 2 ||
+            !Number.isFinite(seconds) || seconds < 0 || !Number.isFinite(rate) || rate <= 0) return;
+
+        // getDuration()은 메타데이터가 준비되기 전 0일 수 있어 한 번만 다시 확인합니다.
+        // 이 확인까지 실패하면 타이머를 반복하지 않고 이후 iframe 상태 이벤트에 맡깁니다.
+        if (!Number.isFinite(duration) || duration <= 0) {
+            this.#repeatDeadlineTimer = setTimeout(() => {
+                this.#repeatDeadlineTimer = 0;
+                if (this.#repeatObservation !== observation || observation.skipRequested ||
+                    observation.generation !== this.#playerGeneration ||
+                    observation.revision !== this.#playbackRevision || this.#errorRecovery ||
+                    this.#YTPlayer?.getPlaylistIndex?.() !== observation.index ||
+                    this.#YTPlayer?.getVideoData?.()?.video_id !== observation.videoId ||
+                    this.#YTPlayer?.getPlayerState?.() !== YT.PlayerState.PLAYING) return;
+
+                const updatedDuration = Number(this.#YTPlayer?.getDuration?.());
+                if (!Number.isFinite(updatedDuration) || updatedDuration <= 0) return;
+                observation.duration = updatedDuration;
+                this.#scheduleRepeatDeadline(observation, this.#YTPlayer?.getCurrentTime?.(),
+                    Number(this.#YTPlayer?.getPlaybackRate?.()) || 1);
+            }, 400);
+            return;
+        }
+        if (seconds >= duration) return;
+
+        // 1. 원래 종료 시점보다 조금 뒤에 확인해 Shorts의 자동 반복 시작과 구분합니다.
+        // 1회 예약 외에 주기적 poll이나 반복 타이머는 생성하지 않습니다.
+        const graceSeconds = Math.min(0.75, duration / 5);
+        const delayMs = Math.min(2147483647, Math.ceil((duration - seconds + graceSeconds) / rate * 1000));
+        this.#repeatDeadlineTimer = setTimeout(() => {
+            this.#repeatDeadlineTimer = 0;
+
+            // 2. 수동 선택·새 목록·새 iframe의 이전 예약은 현재 재생에 개입하지 못합니다.
+            if (this.#repeatObservation !== observation || observation.skipRequested ||
+                observation.generation !== this.#playerGeneration ||
+                observation.revision !== this.#playbackRevision || this.#errorRecovery ||
+                this.#loadedQueueSignature !== YConfig.entries.map(entry => entry.id).join(",") ||
+                this.#YTPlayer?.getPlaylistIndex?.() !== observation.index ||
+                this.#YTPlayer?.getVideoData?.()?.video_id !== observation.videoId ||
+                this.#YTPlayer?.getPlayerState?.() !== YT.PlayerState.PLAYING) return;
+
+            // 3. 같은 영상이 시작 부분으로 돌아왔을 때만 Shorts 반복으로 간주합니다.
+            // 일시정지·버퍼링·정상 전환·종료 지연은 자동 skip 대상이 아닙니다.
+            const position = Number(this.#YTPlayer?.getCurrentTime?.());
+            const liveDuration = Number(this.#YTPlayer?.getDuration?.());
+            if (!Number.isFinite(position) || position <= 0 || !Number.isFinite(liveDuration) ||
+                liveDuration <= 0 || position > Math.min(2.5, liveDuration / 3) ||
+                typeof this.#YTPlayer?.nextVideo !== "function") return;
+
+            observation.skipRequested = true;
+            observation.repeatCandidate = false;
+            try {
+                this.#YTPlayer.nextVideo();
+            } catch (error) {
+                console.warn("YouTube silent repeat recovery failed", error);
+                pushSnackbar({ message: "반복 영상의 다음 항목 이동에 실패했습니다. 목록에서 직접 선택해 주세요.", type: "error" });
+            }
+        }, delayMs);
+    }
+
+    /**
+     * @private
      * @description 동일 영상의 중복 오류 이벤트를 한 번으로 합치고 nextVideo()를 한 번만 요청합니다.
      * 정상 재생이 확인되기 전에는 같은 오류를 다시 처리하지 않아 정상 영상까지 연쇄 스킵되는 현상을 막습니다.
      */
@@ -1480,6 +1687,7 @@ class PlayerService {
         // One recovery operation remains locked until PLAYING or an explicit user action.
         // In particular, another onError during nextVideo() must not cause a skip cascade.
         if (this.#errorRecovery) return;
+        this.#cancelRepeatDeadline();
 
         // Player/browser failures do not prove that the selected video is unavailable.
         // Skipping on 5 or 153 can wrongly discard healthy videos from the queue.
@@ -1560,6 +1768,8 @@ class PlayerService {
     /** @private @description 새 대기열 적용 시 오류 통계와 UI 표시를 모두 초기화합니다. */
     #resetPlaybackErrors() {
         this.#clearErrorRecovery();
+        this.#cancelRepeatDeadline();
+        this.#repeatObservation = null;
         this.#uiManager.clearAllEntryErrors();
     }
 }
