@@ -1,11 +1,8 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
 import {
-    getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-    sendEmailVerification, sendPasswordResetEmail, signOut, deleteUser as deleteFirebaseUser
-} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
-import {
-    getFirestore, doc, getDoc, getDocFromServer, setDoc, deleteDoc
-} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+    auth, db, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+    sendEmailVerification, sendPasswordResetEmail, signOut, deleteFirebaseUser,
+    doc, getDoc, getDocFromServer, setDoc, deleteDoc
+} from "./Firebase.js";
 
 import { Dynamic, LiveData } from "../init/module.js";
 import { MainRouter } from "../page/Router.js";
@@ -275,19 +272,9 @@ export default class DataResource {
         this.#icon.onclick = () => this.Data.theme++;
         this.Data.theme = localStorage.theme;
 
-        const app = initializeApp({
-            apiKey: "AIzaSyAglJGn84cPu_YvRUdigYQFCBml-s6kcuo",
-            authDomain: "necronomicon-7ba57.firebaseapp.com",
-            projectId: "necronomicon-7ba57",
-            storageBucket: "necronomicon-7ba57.appspot.com",
-            messagingSenderId: "582853710136",
-            appId: "1:582853710136:web:c237b2926e7736c707f1cd",
-            measurementId: "G-QL8R6QQHGF"
-        });
-
-        // Auth와 Firestore는 DataResource가 소유하며 다른 화면에는 기존 공개 operation만 제공합니다.
-        this.#auth = getAuth(app);
-        this.#db = getFirestore(app);
+        // Auth와 Firestore는 공통 Firebase 모듈의 동일한 인스턴스를 사용합니다.
+        this.#auth = auth;
+        this.#db = db;
 
         onAuthStateChanged(this.#auth, async user => {
             if (!user) {
